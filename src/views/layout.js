@@ -53,7 +53,6 @@ function nav(ctx) {
   const items = [
     ['/', 'Trang chủ'],
     ['/du-an', 'Dự án'],
-    ['/nhap-hang-ngay', 'Nhập hằng ngày'],
     ['/doanh-thu', 'Doanh thu'],
     ['/chi-phi', 'Chi phí'],
     ['/bao-cao', 'Báo cáo'],

@@ -3,7 +3,7 @@
 > Tệp này ghi lại tình trạng dự án sau mỗi phiên, để phiên sau (dev / revi) nắm nhanh. Mục mới nhất ở trên cùng.
 
 ## Tình trạng hiện tại
-- **Phiên bản:** V5.05.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
+- **Phiên bản:** V6.05.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
 - **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
   → địa chỉ https://quanlytaichinh-production.up.railway.app (đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
 - **Kho dữ liệu:** PostgreSQL trên Railway (đã Online).
@@ -21,10 +21,9 @@
 | Chạy tạm khi chưa có kho dữ liệu | Thanh vàng cảnh báo |
 | Bản thử | Dải đỏ "HỆ THỐNG THỬ NGHIỆM" |
 | Dự án (`/du-an`) | Mã*, Tên*, Chủ đầu tư, Địa điểm, Nhóm, Giá trị HĐ, Ngày khởi công/hoàn thành, Trạng thái*, Ghi chú |
-| Doanh thu (`/doanh-thu`) | Số CT*, Dự án*, Ngày*, Nội dung*, Hình thức, Số tiền*, Ghi chú |
-| Chi phí (`/chi-phi`) | Số CT*, Dự án*, Ngày*, Nội dung*, Loại chi phí, Nhà cung cấp, Số tiền*, Ghi chú |
-| Báo cáo (`/bao-cao`) | DT, CP, LN, Tỷ suất LN, % Thu/HĐ theo dự án; lọc trạng thái, khoảng ngày |
-| Nhập hằng ngày (`/nhap-hang-ngay`) | Theo từng Dự án; mỗi dòng: Ngày* (dd/mm/yyyy), Số CT, Nội dung*, ĐVT, Số lượng*, Đơn giá*, Thành tiền (= SL × ĐG, tự tính), Ghi chú; sửa trực tiếp trên bảng, Enter để lưu, gợi ý nội dung (tự điền ĐVT + đơn giá gần nhất), dòng tổng, xuất Excel |
+| Doanh thu (`/doanh-thu`) | Số CT* (tự đề xuất DT-0001), Dự án*, Ngày*, Số hóa đơn, Nội dung*, Hình thức, Tiền chưa VAT*, Tiền VAT (nhập tay), Tổng sau VAT (tự tính), Ghi chú |
+| Chi phí (`/chi-phi`) | Số phiếu chi* (tự đề xuất CP-0001), Dự án*, Ngày*, **Khoản mục*** (3 nhóm, 12 khoản), Nội dung*, Nhà cung cấp, Số hóa đơn, Tiền chưa VAT*, Tiền VAT, Tổng sau VAT, Ghi chú |
+| Báo cáo (`/bao-cao`) | Theo dự án, tiền chưa VAT: DT, (1) CP trực tiếp, Lãi gộp, (2) CP gián tiếp, (3) CP tài chính, Lợi nhuận, tỷ suất, % Thu/HĐ; bảng chi phí theo khoản mục |
 | Chung cho danh mục | Mã không trùng (không phân biệt hoa/thường), tìm không dấu, sắp xếp tự nhiên (DA-2 < DA-10), lọc, phân trang 50, xuất Excel (.xlsx), ghi người tạo / người cập nhật cuối |
 
 Vai trò hiện có: **Quản trị**, **Người dùng**.
@@ -34,9 +33,25 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 - Logo (file PNG), có cần thêm vai trò khác (VD: Chỉ xem, Kế toán, Duyệt) không.
 - Danh sách ô chính thức cho Dự án / Doanh thu / Chi phí (hiện là bộ ô mặc định – sửa ở `src/entities.js`).
 - Quyền: hiện mọi người xem/thêm/sửa, chỉ Quản trị xóa – có cần giới hạn thêm?
-- Nhập hằng ngày: tên nghiệp vụ, danh sách ô, quy tắc ràng buộc chính thức; có cộng vào Chi phí / Báo cáo không (hiện: CHƯA cộng).
+
+## Khoản mục chi phí (mã lưu trong kho – KHÔNG đổi mã đã dùng)
+| Nhóm | Mã – Khoản mục |
+|---|---|
+| 1. Trực tiếp | TT01 Vật tư chính · TT02 Vật tư phụ · TT03 Máy móc thiết bị · TT04 Nhân công (thợ trực tiếp) · TT05 Thầu phụ |
+| 2. Gián tiếp | GT01 Tiện ích phục vụ thi công · GT02 Lương (BCH, gián tiếp) · GT03 Thưởng · GT04 Ngoại giao |
+| 3. Tài chính | TC01 Chi phí tài chính · TC02 Lãi vay ngân hàng (chỉ phần lãi) · TC03 Đóng phạt chủ đầu tư |
 
 ## Nhật ký
+### V6.05.11.2026 — Chi phí 3 nhóm, VAT, bỏ tab Nhập hằng ngày
+- Quyết định của người dùng: lãi vay chỉ nhập phần lãi (có lời nhắc); 3 cột tiền chưa VAT / VAT nhập tay / sau VAT;
+  chi phí bắt buộc gắn dự án; bỏ tab Nhập hằng ngày; Lương/Thưởng nhóm Gián tiếp chỉ cho bộ máy gián tiếp.
+- Báo cáo tính trên tiền CHƯA VAT; thêm Lãi gộp; bảng chi phí theo khoản mục.
+- Tiền VAT không được vượt 10% tiền chưa VAT (chặn gõ thừa số 0).
+- Số phiếu tự đề xuất; thêm ô Số hóa đơn (được trùng); gợi ý khi gõ Nội dung, Nhà cung cấp, Chủ đầu tư.
+- Chuyển dữ liệu cũ: Vật tư→TT01, Máy thi công→TT03, Nhân công→TT04, Thầu phụ→TT05; "Chi phí chung"/"Khác"/trống
+  → Chưa phân loại (báo cáo cảnh báo). VAT cũ = 0. Cột cũ `cost_type` và bảng `daily_entries` GIỮ NGUYÊN.
+- Dự án còn dữ liệu Nhập hằng ngày cũ không xóa được.
+
 ### V5.05.11.2026 — Nhập hằng ngày
 - Bảng nhập trực tiếp theo dự án (`src/routes/daily.js`, `public/grid.js`), cấu hình ở `src/entities.js` → `DAILY`.
 - Bảng mới `daily_entries` (chỉ thêm). Số lượng NUMERIC(18,3), kiểu VN (dấu phẩy = số lẻ; "12.5" bị từ chối để tránh nhầm).

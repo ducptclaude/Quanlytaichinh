@@ -15,8 +15,8 @@ Công nghệ: Node.js + Express + PostgreSQL (chỉ 2 thư viện ngoài: `expre
 
 - **Dự án / Doanh thu / Chi phí**: thêm / sửa / xóa, tìm không dấu, sắp xếp mã tự nhiên, lọc, xuất Excel, ghi người cập nhật cuối.
   Muốn thêm/bớt ô: sửa `src/entities.js`.
-- **Nhập hằng ngày** theo dự án: bảng nhập trực tiếp, Enter để lưu, gợi ý nội dung, dòng tổng, xuất Excel.
-- **Báo cáo**: doanh thu, chi phí, lợi nhuận, tỷ suất theo dự án; xuất Excel.
+- **Chi phí** chia 3 nhóm (trực tiếp / gián tiếp / tài chính), 12 khoản mục; mỗi khoản có tiền chưa VAT, VAT, sau VAT.
+- **Báo cáo** (tiền chưa VAT): doanh thu, CP trực tiếp, lãi gộp, CP gián tiếp, CP tài chính, lợi nhuận theo dự án; xuất Excel.
 
 Tình trạng & nhật ký: xem `docs/TOM-TAT-PHIEN.md`. Quy ước làm việc: `CLAUDE.md`.
 

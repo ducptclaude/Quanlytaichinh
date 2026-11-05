@@ -87,6 +87,31 @@
     if (inp.matches && inp.matches('input[data-date]')) inp.value = normDate(inp.value);
   });
 
+  // 6) Ô tự tính tổng (VD: Tổng sau VAT = Chưa VAT + VAT)
+  function num(v) { var d = String(v || '').replace(/[^0-9]/g, ''); return d ? Number(d) : 0; }
+  function recalc(form) {
+    form.querySelectorAll('output[data-sum]').forEach(function (out) {
+      var names = out.getAttribute('data-sum').split(',');
+      var first = form.querySelector('[name="' + names[0] + '"]');
+      if (!first || !String(first.value).trim()) { out.textContent = '—'; return; }
+      var total = names.reduce(function (s, n) { var i = form.querySelector('[name="' + n + '"]'); return s + (i ? num(i.value) : 0); }, 0);
+      out.textContent = total.toLocaleString('vi-VN');
+    });
+  }
+  document.addEventListener('input', function (e) {
+    if (e.target.form && e.target.form.querySelector('output[data-sum]')) recalc(e.target.form);
+  });
+
+  // 7) Chọn khoản mục có lưu ý (VD: Lãi vay chỉ nhập phần lãi) -> hiện nhắc nhở
+  document.addEventListener('change', function (e) {
+    var sel = e.target;
+    if (!sel.matches || !sel.matches('select[data-warn-select]')) return;
+    var box = sel.parentNode.querySelector('.select-warn');
+    var opt = sel.options[sel.selectedIndex];
+    var w = opt && opt.getAttribute('data-warn');
+    if (box) { box.hidden = !w; box.textContent = w ? '⚠ ' + w : ''; }
+  });
+
   // 4) Ô lọc dạng chọn: đổi là lọc ngay
   document.querySelectorAll('select[data-autosubmit]').forEach(function (sel) {
     sel.addEventListener('change', function () { if (sel.form) sel.form.submit(); });

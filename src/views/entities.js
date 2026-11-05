@@ -3,6 +3,18 @@
 const { esc, layout, alertBox, fmtDate } = require('./layout');
 const T = require('../text');
 
+/** Danh sách lựa chọn dạng chuẩn { value, label, group, groupLabel, warn } */
+const optionList = (f) => (f.options || []).map((o) => (typeof o === 'string' ? { value: o, label: o } : o));
+
+/** Các thẻ <option>, tự chia nhóm (optgroup) nếu lựa chọn có nhóm */
+function optionTags(f, cur) {
+  const list = optionList(f);
+  const one = (o) => `<option value="${esc(o.value)}"${o.warn ? ` data-warn="${esc(o.warn)}"` : ''} ${String(cur) === o.value ? 'selected' : ''}>${esc(o.label)}</option>`;
+  if (!list.some((o) => o.groupLabel)) return list.map(one).join('');
+  const groups = [...new Set(list.map((o) => o.groupLabel))];
+  return groups.map((g) => `<optgroup label="${esc(g)}">${list.filter((o) => o.groupLabel === g).map(one).join('')}</optgroup>`).join('');
+}
+
 const STATUS_CLASS = { 'Chuẩn bị thi công': 'st-prep', 'Đang thi công': 'st-doing', 'Đã hoàn thành': 'st-done' };
 const statusBadge = (v) => (v ? `<span class="badge ${STATUS_CLASS[v] || ''}">${esc(v)}</span>` : '');
 
@@ -19,6 +31,7 @@ function qs(query, over = {}) {
 function cellHtml(f, rec, shown) {
   const v = shown[f.name];
   if (f.name === 'status') return statusBadge(v);
+  if (f.type === 'select' && f.required && !rec[f.name]) return '<span class="badge badge-warn">Chưa phân loại</span>';
   if (f.type === 'ref') {
     return rec[f.name] ? `<a href="/du-an/${rec[f.name]}" class="ref-link">${esc(v)}</a>` : '';
   }
@@ -28,7 +41,7 @@ function cellHtml(f, rec, shown) {
 function listPage(ctx, d) {
   const { e, refs, query, sort, dir, filters, search } = d;
   const listFields = e.fields.filter((f) => f.list);
-  const isFiltered = Boolean(search) || filters.some((f) => query[`f_${f.name}`]);
+  const isFiltered = Boolean(search) || filters.some((f) => query[`f_${f.name}`] || (f.groupFilter && query[`f_${f.groupFilter.name}`]));
 
   const th = (name, label, cls = '') => {
     const active = sort === name;
@@ -39,12 +52,22 @@ function listPage(ctx, d) {
 
   const filterControls = filters.map((f) => {
     const cur = String(query[`f_${f.name}`] || '');
-    const opts = f.type === 'ref'
-      ? refs[f.ref].list.map((r) => [String(r.id), `${r.code} – ${r.name || ''}`])
-      : f.options.map((o) => [o, o]);
-    return `<label class="flt"><span>${esc(f.label)}</span>
-      <select name="f_${f.name}" data-autosubmit><option value="">Tất cả</option>${opts.map(([v, l]) =>
-        `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
+    let opts;
+    if (f.type === 'ref') {
+      opts = refs[f.ref].list.map((r) => `<option value="${r.id}" ${String(r.id) === cur ? 'selected' : ''}>${esc(r.code)} – ${esc(r.name || '')}</option>`).join('');
+    } else {
+      opts = optionTags(f, cur)
+        + (f.required ? `<option value="__none" ${cur === '__none' ? 'selected' : ''}>(Chưa phân loại)</option>` : '');
+    }
+    let group = '';
+    if (f.groupFilter) {
+      const g = String(query[`f_${f.groupFilter.name}`] || '');
+      group = `<label class="flt"><span>${esc(f.groupFilter.label)}</span>
+      <select name="f_${f.groupFilter.name}" data-autosubmit><option value="">Tất cả</option>${f.groupFilter.groups.map((x) =>
+        `<option value="${esc(x.key)}" ${x.key === g ? 'selected' : ''}>${esc(x.label)}</option>`).join('')}</select></label>`;
+    }
+    return `${group}<label class="flt"><span>${esc(f.label)}</span>
+      <select name="f_${f.name}" data-autosubmit><option value="">Tất cả</option>${opts}</select></label>`;
   }).join('');
 
   const totalsHtml = Object.entries(d.totals).map(([name, sum]) => {
@@ -99,19 +122,28 @@ ${d.rows.length ? `
   });
 }
 
-function fieldHtml(f, values, refs) {
+function fieldHtml(f, values, refs, suggest = {}) {
   const raw = values[f.name];
   const v = raw === null || raw === undefined ? '' : raw;
   const req = f.required ? ' required' : '';
   const star = f.required ? ' <span class="req">*</span>' : '';
   const label = `<span>${esc(f.label)}${star}</span>`;
+  const hint = f.hint ? `<small class="hint">${esc(f.hint)}</small>` : '';
+  if (f.computed) {
+    const n = typeof v === 'number' ? v : null;
+    return `<label>${label}<output class="computed" data-sum="${esc((f.sumOf || []).join(','))}">${n === null ? '—' : T.fmtMoney(n)}</output>
+      <small class="hint">Tự tính = ${esc((f.sumOf || []).map((k) => k === 'amount' ? 'Chưa VAT' : k === 'vat_amount' ? 'VAT' : k).join(' + '))}</small></label>`;
+  }
   switch (f.type) {
     case 'textarea':
       return `<label class="full">${label}<textarea name="${f.name}" rows="3" maxlength="${f.maxlength || 1000}">${esc(v)}</textarea></label>`;
-    case 'select':
-      return `<label>${label}<select name="${f.name}"${req}>
+    case 'select': {
+      const sel = optionList(f).find((o) => o.value === String(v));
+      return `<label>${label}<select name="${f.name}"${req} data-warn-select>
         ${f.required && f.default ? '' : '<option value="">— Chọn —</option>'}
-        ${f.options.map((o) => `<option ${String(v) === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+        ${optionTags(f, v)}</select>${hint}
+        <span class="alert alert-warn select-warn" ${sel && sel.warn ? '' : 'hidden'}>⚠ ${esc(sel && sel.warn ? sel.warn : '')}</span></label>`;
+    }
     case 'ref': {
       const list = refs[f.ref].list;
       if (!list.length) {
@@ -123,18 +155,21 @@ function fieldHtml(f, values, refs) {
     }
     case 'money': {
       const shown = typeof v === 'number' ? T.fmtMoney(v) : v;
-      return `<label>${label}<input name="${f.name}" value="${esc(shown)}" inputmode="numeric" autocomplete="off" data-money placeholder="VD: 1.250.000.000"${req}></label>`;
+      return `<label>${label}<input name="${f.name}" value="${esc(shown)}" inputmode="numeric" autocomplete="off" data-money placeholder="${f.blankAsZero ? '0' : 'VD: 1.250.000.000'}"${req}>${hint}</label>`;
     }
     case 'date': {
       const shown = /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? T.fmtDay(v) : v;
       return `<label>${label}<input name="${f.name}" value="${esc(shown)}" placeholder="dd/mm/yyyy" inputmode="numeric" autocomplete="off" data-date${req}></label>`;
     }
-    default:
-      return `<label>${label}<input name="${f.name}" value="${esc(v)}" maxlength="${f.maxlength || 200}"${req}></label>`;
+    default: {
+      const list = suggest[f.name] && suggest[f.name].length ? ` list="dl-${f.name}"` : '';
+      const dl = list ? `<datalist id="dl-${f.name}">${suggest[f.name].map((x) => `<option value="${esc(x)}">`).join('')}</datalist>` : '';
+      return `<label>${label}<input name="${f.name}" value="${esc(v)}" maxlength="${f.maxlength || 200}" autocomplete="off"${list}${req}>${hint}${dl}</label>`;
+    }
   }
 }
 
-function formPage(ctx, { e, refs, values = {}, rec, errors, success, isNew }) {
+function formPage(ctx, { e, refs, values = {}, rec, errors, success, isNew, suggest }) {
   const isAdmin = ctx.user.role === 'admin';
   const title = isNew ? `Thêm ${e.single}` : `${e.codeLabel}: ${rec.code}`;
   const isProject = e.key === 'projects';
@@ -153,7 +188,7 @@ ${alertBox(errors)}
     <label><span>${esc(e.codeLabel)} <span class="req">*</span></span>
       <input name="code" value="${esc(values.code || '')}" required maxlength="50" placeholder="${esc(e.codePlaceholder)}" autocomplete="off">
       <small class="hint">Không được trùng. Chữ không dấu, số, . _ / -</small></label>
-    ${e.fields.map((f) => fieldHtml(f, values, refs)).join('')}
+    ${e.fields.map((f) => fieldHtml(f, values, refs, suggest)).join('')}
     <div class="form-actions full">
       <button class="btn btn-primary" type="submit">Lưu</button>
       ${isNew ? '<button class="btn btn-outline" type="submit" name="next" value="new">Lưu & thêm tiếp</button>' : ''}
@@ -170,7 +205,6 @@ ${isNew ? '' : `
       <dt>Cập nhật cuối</dt><dd>${esc(rec.updated_by_name || '—')} · ${fmtDate(rec.updated_at)}</dd>
     </dl>
     ${isProject ? `<p class="quick">
-      <a class="btn btn-sm btn-outline" href="/nhap-hang-ngay?du_an=${rec.id}">Nhập hằng ngày</a>
       <a class="btn btn-sm btn-outline" href="/doanh-thu?f_project_id=${rec.id}">Doanh thu của dự án</a>
       <a class="btn btn-sm btn-outline" href="/chi-phi?f_project_id=${rec.id}">Chi phí của dự án</a></p>` : ''}
   </section>

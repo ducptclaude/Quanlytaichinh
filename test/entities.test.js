@@ -101,65 +101,112 @@ test('Sửa: ghi tên người cập nhật cuối; không đổi mã thành mã
   assert.match(dup.text, /đã tồn tại/);
 });
 
-test('Doanh thu / Chi phí: gắn dự án, số tiền hợp lệ, tổng cộng', async () => {
+test('Doanh thu / Chi phí: gắn dự án, 3 cột tiền (chưa VAT, VAT, sau VAT), khoản mục', async () => {
   const bad = await user.post('/doanh-thu/moi', { code: 'DT-1', project_id: '9999', doc_date: '2026-13-01', content: '', amount: '-5' });
   assert.equal(bad.status, 400);
   assert.match(bad.text, /Dự án: chưa chọn hoặc không còn tồn tại/);
   assert.match(bad.text, /Ngày: ngày không hợp lệ/);
   assert.match(bad.text, /không được âm/);
 
-  const rev = [['DT-1', 'DA-10', '2026-01-15', '10.000.000.000'], ['DT-2', 'DA-10', '2026-06-15', '5.000.000.000'], ['DT-3', 'DA-2', '2026-03-01', '2.000.000.000']];
-  for (const [code, p, d, a] of rev) {
-    const r = await user.post('/doanh-thu/moi', { code, project_id: String(ids[p]), doc_date: d, content: `Thu ${code}`, kind: 'Tạm ứng', amount: a });
+  // Số phiếu tự đề xuất
+  assert.match((await user.get('/doanh-thu/moi')).text, /name="code" value="DT-0001"/);
+
+  const rev = [['DT-1', 'DA-10', '2026-01-15', '10.000.000.000', '1.000.000.000'], ['DT-2', 'DA-10', '2026-06-15', '5.000.000.000', ''],
+    ['DT-3', 'DA-2', '2026-03-01', '2.000.000.000', '160.000.000']];
+  for (const [code, p, d, a, v] of rev) {
+    const r = await user.post('/doanh-thu/moi', { code, project_id: String(ids[p]), doc_date: d, content: `Thu ${code}`, kind: 'Tạm ứng', amount: a, vat_amount: v, total_amount: '999' });
     assert.equal(r.location, '/doanh-thu?ok=created', code);
   }
-  const cost = [['CP-1', 'DA-10', '2026-02-01', '8.500.000.000', 'Vật tư'], ['CP-2', 'DA-2', '2026-03-05', '2.500.000.000', 'Nhân công']];
-  for (const [code, p, d, a, t] of cost) {
-    const r = await user.post('/chi-phi/moi', { code, project_id: String(ids[p]), doc_date: d, content: `Chi ${code}`, cost_type: t, amount: a });
+  const cost = [
+    ['CP-1', 'DA-10', '2026-02-01', '6.000.000.000', '600.000.000', 'TT01', 'Thép Hòa Phát'],
+    ['CP-2', 'DA-10', '2026-02-10', '1.000.000.000', '', 'GT02', 'Lương ban chỉ huy'],
+    ['CP-3', 'DA-10', '2026-03-01', '1.500.000.000', '', 'TC02', 'Lãi vay tháng 2'],
+    ['CP-4', 'DA-2', '2026-03-05', '2.500.000.000', '200.000.000', 'TT04', 'Nhân công tổ đội'],
+  ];
+  for (const [code, p, d, a, v, item, content] of cost) {
+    const r = await user.post('/chi-phi/moi', { code, project_id: String(ids[p]), doc_date: d, content, cost_item: item, amount: a, vat_amount: v, invoice_no: '0000123' });
     assert.equal(r.location, '/chi-phi?ok=created', code);
   }
-  const zero = await user.post('/chi-phi/moi', { code: 'CP-9', project_id: String(ids['DA-1']), doc_date: '2026-01-01', content: 'x', amount: '0' });
-  assert.match(zero.text, /phải lớn hơn 0/);
+  // Số hóa đơn được trùng; số phiếu chi tiếp theo = CP-0005
+  assert.match((await user.get('/chi-phi/moi')).text, /name="code" value="CP-0005"/);
 
+  const noItem = await user.post('/chi-phi/moi', { code: 'CP-8', project_id: String(ids['DA-1']), doc_date: '2026-01-01', content: 'x', amount: '100' });
+  assert.match(noItem.text, /Chưa nhập Khoản mục chi phí/);
+  const zero = await user.post('/chi-phi/moi', { code: 'CP-9', project_id: String(ids['DA-1']), doc_date: '2026-01-01', content: 'x', cost_item: 'TT01', amount: '0' });
+  assert.match(zero.text, /phải lớn hơn 0/);
+  const vatHigh = await user.post('/chi-phi/moi', { code: 'CP-9', project_id: String(ids['DA-1']), doc_date: '2026-01-01', content: 'x', cost_item: 'TT01', amount: '1.000.000', vat_amount: '1.000.000' });
+  assert.match(vatHigh.text, /Tiền VAT \(đ\): không được vượt 10% Tiền chưa VAT \(tối đa 100\.000 đ\)/);
+  const badItem = await user.post('/chi-phi/moi', { code: 'CP-9', project_id: String(ids['DA-1']), doc_date: '2026-01-01', content: 'x', cost_item: 'Vật tư', amount: '100' });
+  assert.match(badItem.text, /Khoản mục chi phí: giá trị không hợp lệ/);
+
+  // Tổng sau VAT do máy tính (bỏ qua số người dùng gửi lên)
   const list = await user.get(`/doanh-thu?f_project_id=${ids['DA-10']}`);
-  assert.match(list.text, /Số tiền: <b>15\.000\.000\.000 đ<\/b>/);
-  const s = await user.get(`/chi-phi?q=${encodeURIComponent('vat tu')}`);
+  assert.match(list.text, /Tiền chưa VAT: <b>15\.000\.000\.000 đ<\/b>/);
+  assert.match(list.text, /Tiền VAT: <b>1\.000\.000\.000 đ<\/b>/);
+  assert.match(list.text, /Tổng sau VAT: <b>16\.000\.000\.000 đ<\/b>/);
+  // Lọc theo nhóm chi phí, tìm không dấu theo tên khoản mục
+  const g = await user.get('/chi-phi?f_cost_group=TC');
+  assert.match(g.text, /CP-3/);
+  assert.doesNotMatch(g.text, /CP-1</);
+  const s = await user.get(`/chi-phi?q=${encodeURIComponent('vat tu chinh')}`);
   assert.match(s.text, /CP-1/);
-  assert.doesNotMatch(s.text, /CP-2</);
+  assert.doesNotMatch(s.text, /CP-4</);
+  // Lãi vay: có lời nhắc chỉ nhập phần lãi
+  const form = await user.get('/chi-phi/moi');
+  assert.match(form.text, /<optgroup label="3\. Chi phí tài chính">/);
+  assert.match(form.text, /data-warn="Chỉ nhập phần LÃI vay/);
+  // Gợi ý khi gõ: nhà cung cấp / nội dung đã nhập
+  assert.match(form.text, /<option value="Thép Hòa Phát">/);
 });
 
-test('Báo cáo: công thức Lợi nhuận, Tỷ suất, % Thu/HĐ; lọc theo ngày', async () => {
+test('Báo cáo: Lãi gộp, CP gián tiếp, tài chính, Lợi nhuận (chưa VAT); lọc theo ngày; chưa phân loại', async () => {
   const { buildReport } = require('../src/routes/reports');
   const fake = {
     async listRecords(k) {
       return {
         projects: [{ id: 1, code: 'A-2', name: 'A', status: 'Đang thi công', contract_value: 1000 },
           { id: 2, code: 'A-10', name: 'B', status: 'Đã hoàn thành', contract_value: null }],
-        revenues: [{ project_id: 1, doc_date: '2026-01-01', amount: 400 }, { project_id: 1, doc_date: '2026-05-01', amount: 100 }],
-        costs: [{ project_id: 1, doc_date: '2026-01-10', amount: 350 }, { project_id: 2, doc_date: '2026-02-01', amount: 30 }],
+        revenues: [{ project_id: 1, doc_date: '2026-01-01', amount: 400, vat_amount: 40 }, { project_id: 1, doc_date: '2026-05-01', amount: 100, vat_amount: 10 }],
+        costs: [
+          { project_id: 1, doc_date: '2026-01-10', amount: 200, vat_amount: 20, cost_item: 'TT01' },
+          { project_id: 1, doc_date: '2026-01-11', amount: 50, cost_item: 'TT05' },
+          { project_id: 1, doc_date: '2026-03-01', amount: 60, cost_item: 'GT02' },
+          { project_id: 1, doc_date: '2026-03-02', amount: 40, cost_item: 'TC02' },
+          { project_id: 2, doc_date: '2026-02-01', amount: 30, cost_item: null }, // dữ liệu cũ chưa phân loại
+        ],
       }[k];
     },
   };
   const rep = await buildReport(fake);
   assert.deepEqual(rep.rows.map((r) => r.code), ['A-2', 'A-10']);
   const a = rep.rows[0];
-  assert.equal(a.revenue, 500); assert.equal(a.cost, 350); assert.equal(a.profit, 150);
-  assert.equal(a.margin, 30); assert.equal(a.collected, 50);
+  assert.equal(a.revenue, 500); // chưa VAT, không cộng 50 VAT
+  assert.equal(a.direct, 250); assert.equal(a.gross, 250); assert.equal(a.grossMargin, 50);
+  assert.equal(a.indirect, 60); assert.equal(a.financial, 40);
+  assert.equal(a.cost, 350); assert.equal(a.profit, 150); assert.equal(a.margin, 30); assert.equal(a.collected, 50);
   const b = rep.rows[1];
-  assert.equal(b.profit, -30); assert.equal(b.margin, null); assert.equal(b.collected, null);
+  assert.equal(b.unclassified, 30); assert.equal(b.profit, -30); assert.equal(b.margin, null); assert.equal(b.collected, null);
   assert.equal(rep.totals.profit, 120);
-  const ranged = await buildReport(fake, { from: '2026-01-01', to: '2026-01-31' });
+  assert.equal(rep.totals.unclassified, 30);
+  const tt = rep.items.find((x) => x.key === 'TT');
+  assert.equal(tt.amount, 250);
+  assert.equal(tt.items.find((i) => i.value === 'TT01').amount, 200);
+  assert.equal(rep.items.find((x) => x.key === 'NONE').amount, 30);
+  const ranged = await buildReport(fake, { from: '01/01/2026', to: '31/01/2026' });
   assert.equal(ranged.rows[0].revenue, 400);
-  assert.equal(ranged.rows[0].profit, 50);
+  assert.equal(ranged.rows[0].cost, 250);
+  assert.equal(ranged.rows[0].profit, 150);
   assert.equal(ranged.rows[1].cost, 0);
 
   const page = await admin.get('/bao-cao');
-  // DA-10: DT 15 tỷ, CP 8,5 tỷ -> LN 6,5 tỷ, tỷ suất 43,3%, thu/HĐ 30%
+  // DA-10: DT 15 tỷ; TT 6 tỷ -> lãi gộp 9 tỷ (60%); GT 1 tỷ; TC 1,5 tỷ -> LN 6,5 tỷ (43,3%), thu/HĐ 30%
+  assert.match(page.text, /9\.000\.000\.000/);
+  assert.match(page.text, /60%/);
   assert.match(page.text, /6\.500\.000\.000/);
   assert.match(page.text, /43,3%/);
-  assert.match(page.text, /30%/);
   // DA-2: DT 2 tỷ, CP 2,5 tỷ -> lỗ 500 triệu
   assert.match(page.text, /class="num neg"><b>-500\.000\.000/);
+  assert.match(page.text, /Lãi vay ngân hàng \(chỉ phần lãi\)/);
 });
 
 test('Xóa: chỉ Quản trị; không xóa được dự án đang có doanh thu/chi phí', async () => {
@@ -168,7 +215,7 @@ test('Xóa: chỉ Quản trị; không xóa được dự án đang có doanh th
   const inUse = await admin.post(`/du-an/${ids['DA-10']}/xoa`);
   assert.match(inUse.location, /err=in_use/);
   const msg = await admin.get(inUse.location);
-  assert.match(msg.text, /2 khoản doanh thu, 1 khoản chi phí/);
+  assert.match(msg.text, /2 khoản doanh thu, 3 khoản chi phí/);
   const ok = await admin.post(`/du-an/${ids['DA-1']}/xoa`);
   assert.equal(ok.location, '/du-an?ok=deleted');
   assert.doesNotMatch((await admin.get('/du-an')).text, /Trường học Hòa Bình/);

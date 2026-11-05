@@ -37,8 +37,8 @@ Người dùng là quản lý dự án xây dựng / tài chính, **không biế
   · `src/routes/*` (tài khoản, cá nhân, liên hệ) · `src/views/*` (giao diện HTML) · `public/` (CSS, JS trình duyệt)
 - Danh mục (Dự án / Doanh thu / Chi phí): cấu hình ô ở `src/entities.js`, xử lý chung `src/routes/entities.js`,
   lưu trữ `src/db-entities.js`. Đổi KIỂU của ô đã có dữ liệu = thay đổi lớn → báo người dùng trước.
-- Nhập hằng ngày: cấu hình `DAILY` trong `src/entities.js`, xử lý `src/routes/daily.js`, bảng nhập `public/grid.js`.
-  Số lượng: phần nghìn (milli) khi tính; Thành tiền = `calcAmount()` trong `src/text.js` (BigInt, làm tròn đến đồng).
+- Khoản mục chi phí: `COST_ITEMS` trong `src/entities.js` (mã TT/GT/TC). Không đổi mã đã dùng. Báo cáo tính trên tiền CHƯA VAT.
+- Tab "Nhập hằng ngày" đã bỏ (V6) – bảng `daily_entries` giữ lại, KHÔNG xóa.
 - Tiền: số nguyên đồng (BIGINT), không dùng số thập phân. Công thức báo cáo ở `src/routes/reports.js` (đầu tệp).
 - Xuất Excel: `src/xlsx.js` (tự viết, không thư viện).
 - Router dùng `src/router.js` (bắt lỗi async). Mọi nội dung đưa vào HTML phải qua `esc()`.

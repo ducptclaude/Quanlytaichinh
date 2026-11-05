@@ -53,45 +53,6 @@ function fmtDay(iso) {
   return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
 }
 
-/* ---------- Số lượng (tối đa 3 chữ số lẻ) ----------
- * Kiểu Việt Nam: dấu chấm phân cách hàng nghìn, dấu PHẨY là số lẻ.  "1.250,5" = 1250,5
- * Để tránh hiểu nhầm, "12.5" (nhóm sau dấu chấm không đủ 3 số) bị từ chối.
- * Trả về số nguyên "phần nghìn" (milli): 12,5 -> 12500 ; rỗng -> null ; sai -> NaN
- */
-const QTY_MAX_MILLI = 1e12; // 1 tỷ đơn vị
-function parseQty(input) {
-  let s = String(input ?? '').trim().replace(/\s+/g, '');
-  if (!s) return null;
-  if (!/^[0-9][0-9.,]*$/.test(s)) return NaN;
-  const parts = s.split(',');
-  if (parts.length > 2) return NaN;
-  const [intPart, frac = ''] = parts;
-  if (intPart.includes('.') && !/^\d{1,3}(\.\d{3})+$/.test(intPart)) return NaN;
-  if (frac.length > 3 || !/^\d*$/.test(frac)) return NaN;
-  s = intPart.replace(/\./g, '');
-  const milli = Number(s) * 1000 + Number((frac + '000').slice(0, 3));
-  return Number.isSafeInteger(milli) ? milli : NaN;
-}
-/** 12500 -> "12,5" ; 1250000 -> "1.250" */
-function fmtQty(milli) {
-  if (milli === null || milli === undefined || milli === '') return '';
-  const m = Math.round(Number(milli));
-  const int = Math.trunc(m / 1000);
-  const frac = String(Math.abs(m % 1000)).padStart(3, '0').replace(/0+$/, '');
-  return int.toLocaleString('vi-VN') + (frac ? `,${frac}` : '');
-}
-/** Số lượng lưu trong kho dữ liệu dạng "12.500" (NUMERIC) -> milli */
-const qtyToMilli = (v) => (v === null || v === undefined || v === '' ? null : Math.round(Number(v) * 1000));
-/** milli -> chuỗi lưu kho "12.5" */
-const milliToDb = (m) => (m === null ? null : (m / 1000).toFixed(3));
-
-/** Thành tiền = Số lượng × Đơn giá, làm tròn đến đồng (từ 0,5 làm tròn lên). Tính bằng số nguyên lớn, không sai số. */
-function calcAmount(qtyMilli, unitPrice) {
-  if (qtyMilli === null || unitPrice === null || Number.isNaN(qtyMilli) || Number.isNaN(unitPrice)) return null;
-  const v = (BigInt(qtyMilli) * BigInt(unitPrice) + 500n) / 1000n;
-  return Number(v);
-}
-
 /** Hôm nay theo giờ Việt Nam, dạng YYYY-MM-DD */
 function todayVN() {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' })
@@ -100,4 +61,4 @@ function todayVN() {
 }
 
 module.exports = {
-  parseQty, fmtQty, qtyToMilli, milliToDb, calcAmount, todayVN, QTY_MAX_MILLI, normalize, matches, naturalCompare, parseMoney, fmtMoney, MONEY_MAX, parseDate, fmtDay };
+  todayVN, normalize, matches, naturalCompare, parseMoney, fmtMoney, MONEY_MAX, parseDate, fmtDay };

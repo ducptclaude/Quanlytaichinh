@@ -5,7 +5,7 @@
  * Quyền: mọi người đã đăng nhập xem / thêm / sửa; chỉ Quản trị được XÓA.
  */
 const asyncRouter = require('../router');
-const { ENTITIES, DAILY } = require('../entities');
+const { ENTITIES } = require('../entities');
 const T = require('../text');
 const { sendXlsx } = require('../xlsx');
 const views = require('../views/entities');
@@ -35,6 +35,10 @@ function display(f, v, refs) {
   switch (f.type) {
     case 'money': return T.fmtMoney(v);
     case 'date': return T.fmtDay(v);
+    case 'select': {
+      const o = optionList(f).find((x) => x.value === String(v));
+      return o ? o.label : String(v);
+    }
     case 'ref': {
       const r = refs[f.ref] && refs[f.ref].byId.get(v);
       return r ? `${r.code} – ${r.name || ''}` : '(đã xóa)';
@@ -53,17 +57,19 @@ function validate(e, body, refs) {
   data.code = code;
 
   for (const f of e.fields) {
+    if (f.computed) continue; // ô tự tính: không nhận từ người dùng
     const raw = String(body[f.name] ?? '').trim();
-    let v = raw === '' ? null : raw;
+    let v = raw === '' ? (f.blankAsZero ? 0 : null) : raw;
     if (v !== null) {
       switch (f.type) {
         case 'text': case 'textarea':
           if (f.maxlength && v.length > f.maxlength) errors.push(`${f.label}: tối đa ${f.maxlength} ký tự`);
           break;
         case 'select':
-          if (!f.options.includes(v)) errors.push(`${f.label}: giá trị không hợp lệ`);
+          if (!optionList(f).some((o) => o.value === v)) errors.push(`${f.label}: giá trị không hợp lệ`);
           break;
         case 'money':
+          if (raw === '' && f.blankAsZero) break;
           v = T.parseMoney(raw);
           if (Number.isNaN(v)) errors.push(`${f.label}: chỉ nhập số (VD: 1.250.000)`);
           else if (v < 0) errors.push(`${f.label}: không được âm`);
@@ -84,6 +90,20 @@ function validate(e, body, refs) {
     if (f.required && (v === null || v === undefined)) errors.push(`Chưa nhập ${f.label}`);
     data[f.name] = v;
   }
+  // Ô tự tính (VD: Tổng sau VAT = Chưa VAT + VAT)
+  for (const f of e.fields.filter((x) => x.computed)) {
+    const ok = !errors.length;
+    data[f.name] = ok ? f.computed(data) : null;
+  }
+  // Giới hạn tỷ lệ (VD: Tiền VAT không vượt 10% tiền chưa VAT)
+  for (const f of e.fields.filter((x) => x.maxRatio)) {
+    const base = data[f.maxRatio.of];
+    const v = data[f.name];
+    if (typeof base === 'number' && typeof v === 'number' && v > Math.ceil(base * f.maxRatio.ratio)) {
+      errors.push(`${f.label}: không được vượt ${f.maxRatio.ratio * 100}% ${e.fields.find((x) => x.name === f.maxRatio.of).label.replace(' (đ)', '')} `
+        + `(tối đa ${T.fmtMoney(Math.ceil(base * f.maxRatio.ratio))} đ)`);
+    }
+  }
   // Ngày kết thúc không trước ngày bắt đầu (Dự án)
   if (data.start_date && data.end_date && data.end_date < data.start_date) {
     errors.push('Ngày hoàn thành không được trước ngày khởi công');
@@ -102,7 +122,12 @@ function query(e, records, refs, q) {
   if (search) rows = rows.filter((x) => T.matches(x.hay, search));
   for (const f of filters) {
     const v = q[`f_${f.name}`];
-    if (v) rows = rows.filter((x) => String(x.r[f.name] ?? '') === String(v));
+    if (v === '__none') rows = rows.filter((x) => x.r[f.name] == null || x.r[f.name] === '');
+    else if (v) rows = rows.filter((x) => String(x.r[f.name] ?? '') === String(v));
+    if (f.groupFilter) {
+      const g = q[`f_${f.groupFilter.name}`];
+      if (g) rows = rows.filter((x) => (optionList(f).find((o) => o.value === x.r[f.name]) || {}).group === g);
+    }
   }
 
   const sortable = ['code', 'updated_at', ...e.fields.filter((f) => f.list).map((f) => f.name)];
@@ -162,20 +187,28 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
   r.get('/xuat-excel', async (req, res) => {
     const refs = await loadRefs(store, key);
     const result = query(e, await store.listRecords(key), refs, req.query);
+    const gf = e.fields.find((f) => f.groupFilter);
+    const groupOf = (rec) => {
+      if (!gf) return '';
+      const o = optionList(gf).find((x) => x.value === rec[gf.name]);
+      return o ? o.groupLabel : 'Chưa phân loại';
+    };
     const columns = [
       { label: e.codeLabel, type: 'text', width: 14 },
+      ...(gf ? [{ label: gf.groupFilter.label, type: 'text', width: 22 }] : []),
       ...e.fields.map((f) => ({ label: f.label, type: f.type === 'money' ? 'money' : 'text', width: f.type === 'textarea' ? 40 : undefined })),
       { label: 'Người cập nhật cuối', type: 'text' },
       { label: 'Thời gian cập nhật', type: 'text', width: 18 },
     ];
     const rows = result.rows.map(({ r: rec, shown }) => [
       rec.code,
+      ...(gf ? [groupOf(rec)] : []),
       ...e.fields.map((f) => (f.type === 'money' ? rec[f.name] : shown[f.name])),
       rec.updated_by_name || '', fmtDate(rec.updated_at),
     ]);
     const hasTotal = e.fields.some((f) => f.total);
     const totals = hasTotal
-      ? [`Tổng (${rows.length})`, ...e.fields.map((f) => (f.total ? result.totals[f.name] : '')), '', '']
+      ? [`Tổng (${rows.length})`, ...(gf ? [''] : []), ...e.fields.map((f) => (f.total ? result.totals[f.name] : '')), '', '']
       : null;
     const stamp = new Date().toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }).replace(/\//g, '-');
     const s = ctxOf(req);
@@ -192,7 +225,11 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
     const refs = await loadRefs(store, key);
     const values = Object.fromEntries(e.fields.filter((f) => f.default).map((f) => [f.name, f.default]));
     if (req.query.project_id) values.project_id = Number(req.query.project_id);
-    res.send(views.formPage(ctxOf(req), { e, refs, values, isNew: true, success: OK_MSG[req.query.ok] }));
+    const all = await store.listRecords(key);
+    if (e.autoCode) values.code = nextCode(e.autoCode, all);
+    res.send(views.formPage(ctxOf(req), {
+      e, refs, values, isNew: true, success: OK_MSG[req.query.ok], suggest: suggestions(e, all),
+    }));
   });
 
   r.post('/moi', async (req, res) => {
@@ -211,7 +248,9 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
         else throw err;
       }
     }
-    res.status(400).send(views.formPage(ctxOf(req), { e, refs, values: { ...req.body, ...pickValid(data) }, errors, isNew: true }));
+    res.status(400).send(views.formPage(ctxOf(req), {
+      e, refs, values: { ...req.body, ...pickValid(data) }, errors, isNew: true, suggest: suggestions(e, await store.listRecords(key)),
+    }));
   });
 
   /* Xem / sửa */
@@ -221,7 +260,7 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
     if (!rec) return res.redirect(`${e.path}?err=not_found`);
     const refs = await loadRefs(store, key);
     res.send(views.formPage(ctxOf(req), {
-      e, refs, values: rec, rec, success: OK_MSG[req.query.ok],
+      e, refs, values: rec, rec, success: OK_MSG[req.query.ok], suggest: suggestions(e, await store.listRecords(key)),
       errors: req.query.err === 'in_use' ? [await inUseMessage(store, key, id)] : undefined,
     }));
   });
@@ -244,7 +283,9 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
         else throw err;
       }
     }
-    res.status(400).send(views.formPage(ctxOf(req), { e, refs, values: { ...req.body, ...pickValid(data) }, rec, errors }));
+    res.status(400).send(views.formPage(ctxOf(req), {
+      e, refs, values: { ...req.body, ...pickValid(data) }, rec, errors, suggest: suggestions(e, await store.listRecords(key)),
+    }));
   });
 
   /* Xóa (chỉ Quản trị) */
@@ -267,6 +308,37 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
   return r;
 }
 
+/** Danh sách lựa chọn dạng chuẩn { value, label, group, groupLabel, warn } */
+function optionList(f) {
+  return (f.options || []).map((o) => (typeof o === 'string' ? { value: o, label: o } : o));
+}
+
+/** Số phiếu tiếp theo: lớn nhất trong các mã cùng tiền tố + 1 (VD: CP-0007 -> CP-0008) */
+function nextCode({ prefix, pad }, records) {
+  const pre = prefix.toLowerCase();
+  let max = 0;
+  for (const r of records) {
+    const c = String(r.code).toLowerCase();
+    const rest = c.startsWith(pre) ? c.slice(pre.length) : '';
+    if (/^[0-9]+$/.test(rest)) max = Math.max(max, Number(rest));
+  }
+  return `${prefix}${String(max + 1).padStart(pad, '0')}`;
+}
+
+/** Gợi ý khi gõ: giá trị đã từng nhập của các ô có suggest: true (nhiều lần dùng xếp trước) */
+function suggestions(e, records) {
+  const out = {};
+  for (const f of e.fields.filter((x) => x.suggest)) {
+    const count = new Map();
+    for (const r of records) {
+      const v = String(r[f.name] ?? '').trim();
+      if (v) count.set(v, (count.get(v) || 0) + 1);
+    }
+    out[f.name] = [...count.entries()].sort((a, b) => b[1] - a[1]).slice(0, 300).map(([v]) => v);
+  }
+  return out;
+}
+
 /** Giữ lại giá trị đã chuẩn hóa hợp lệ để hiện lại trên biểu mẫu */
 function pickValid(data) {
   return Object.fromEntries(Object.entries(data).filter(([, v]) => v !== null && !Number.isNaN(v)));
@@ -274,9 +346,12 @@ function pickValid(data) {
 
 async function inUseMessage(store, key, id) {
   const used = await store.countRefs(key, id);
-  const parts = used.map((u) => `${u.n} ${u.key === 'daily' ? DAILY.single : ENTITIES[u.key].single}`);
+  const parts = used.map((u) => `${u.n} ${u.single}`);
+  const legacy = used.some((u) => u.legacy);
   return `Không xóa được: đang có ${parts.join(', ')} gắn với ${ENTITIES[key].single} này. `
-    + 'Hãy xóa hoặc chuyển các dòng đó sang dự án khác trước.';
+    + (legacy
+      ? 'Dữ liệu cũ của tab "Nhập hằng ngày" (đã bỏ) được giữ lại để không mất số liệu – nếu thật sự cần xóa dự án, hãy báo người phụ trách hệ thống.'
+      : 'Hãy xóa hoặc chuyển các khoản đó sang dự án khác trước.');
 }
 
-module.exports = { entityRouter, loadRefs, display };
+module.exports = { entityRouter, loadRefs, display, optionList, nextCode };
