@@ -6,45 +6,18 @@
  */
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const { spawn } = require('node:child_process');
-const path = require('node:path');
+const { startServer } = require('./helpers');
 
-const PORT = 3900 + Math.floor(Math.random() * 90);
-const BASE = `http://127.0.0.1:${PORT}`;
 const PW = 'Abcd@1234';
-let server;
+let srv; let BASE;
+const browser = () => srv.browser();
 
 before(async () => {
-  server = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
-    env: { ...process.env, PORT: String(PORT), DATABASE_URL: process.env.TEST_DATABASE_URL || '', APP_ENV: 'staging' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  for (let i = 0; i < 50; i++) {
-    try { if ((await fetch(`${BASE}/health`)).ok) return; } catch (_) { /* chờ */ }
-    await new Promise((r) => setTimeout(r, 200));
-  }
-  throw new Error('Máy chủ không khởi động được');
+  srv = await startServer();
+  BASE = srv.base;
 });
-after(() => server && server.kill());
+after(async () => srv && srv.stop());
 
-/** Trình duyệt giả lập có giữ cookie */
-function browser() {
-  let cookie = '';
-  async function req(method, url, form) {
-    const res = await fetch(BASE + url, {
-      method, redirect: 'manual',
-      headers: { cookie, ...(form ? { 'content-type': 'application/x-www-form-urlencoded' } : {}) },
-      body: form ? new URLSearchParams(form).toString() : undefined,
-    });
-    const set = res.headers.get('set-cookie');
-    if (set) {
-      const m = set.match(/sid=([^;]*)/);
-      if (m) cookie = m[1] ? `sid=${m[1]}` : '';
-    }
-    return { status: res.status, location: res.headers.get('location') || '', text: await res.text() };
-  }
-  return { get: (u) => req('GET', u), post: (u, f) => req('POST', u, f) };
-}
 async function login(username, password = PW) {
   const b = browser();
   const r = await b.post('/login', { username, password });

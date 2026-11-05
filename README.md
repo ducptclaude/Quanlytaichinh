@@ -13,6 +13,10 @@ Công nghệ: Node.js + Express + PostgreSQL (chỉ 2 thư viện ngoài: `expre
 - Bản thử nghiệm hiện **dải đỏ "HỆ THỐNG THỬ NGHIỆM"**.
 - Phiên bản dạng `V[lần trong ngày].[ngày].[tháng].[năm]` — tăng bằng `npm run bump`.
 
+- **Dự án / Doanh thu / Chi phí**: thêm / sửa / xóa, tìm không dấu, sắp xếp mã tự nhiên, lọc, xuất Excel, ghi người cập nhật cuối.
+  Muốn thêm/bớt ô: sửa `src/entities.js`.
+- **Báo cáo**: doanh thu, chi phí, lợi nhuận, tỷ suất theo dự án; xuất Excel.
+
 Tình trạng & nhật ký: xem `docs/TOM-TAT-PHIEN.md`. Quy ước làm việc: `CLAUDE.md`.
 
 ## Biến cấu hình (đặt trên Railway → Variables)

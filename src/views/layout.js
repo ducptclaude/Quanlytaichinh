@@ -52,6 +52,10 @@ function nav(ctx) {
   if (!ctx.user || ctx.user.must_change_password) return '';
   const items = [
     ['/', 'Trang chủ'],
+    ['/du-an', 'Dự án'],
+    ['/doanh-thu', 'Doanh thu'],
+    ['/chi-phi', 'Chi phí'],
+    ['/bao-cao', 'Báo cáo'],
     ...(ctx.user.role === 'admin' ? [['/tai-khoan', 'Tài khoản']] : []),
     ['/ca-nhan', 'Cá nhân'],
     ['/lien-he', 'Liên hệ'],

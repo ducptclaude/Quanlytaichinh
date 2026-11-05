@@ -44,4 +44,27 @@
       if (!window.confirm(form.getAttribute('data-confirm'))) e.preventDefault();
     });
   });
+
+  // 3) Ô số tiền: tự thêm dấu chấm phân cách hàng nghìn khi gõ
+  function fmt(v) {
+    var digits = String(v).replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, '');
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  document.querySelectorAll('input[data-money]').forEach(function (inp) {
+    inp.addEventListener('input', function () {
+      var before = inp.value;
+      var pos = inp.selectionStart;
+      var digitsLeft = before.slice(0, pos).replace(/[^0-9]/g, '').length;
+      var after = fmt(before);
+      inp.value = after;
+      var i = 0, seen = 0;
+      while (i < after.length && seen < digitsLeft) { if (/[0-9]/.test(after[i])) seen++; i++; }
+      try { inp.setSelectionRange(i, i); } catch (e) { /* bỏ qua */ }
+    });
+  });
+
+  // 4) Ô lọc dạng chọn: đổi là lọc ngay
+  document.querySelectorAll('select[data-autosubmit]').forEach(function (sel) {
+    sel.addEventListener('change', function () { if (sel.form) sel.form.submit(); });
+  });
 })();

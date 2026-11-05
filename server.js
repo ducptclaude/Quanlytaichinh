@@ -8,6 +8,9 @@ const pages = require('./src/views/pages');
 const { version } = require('./src/version');
 const usersRouter = require('./src/routes/users');
 const accountRouter = require('./src/routes/account');
+const { entityRouter } = require('./src/routes/entities');
+const reportsRouter = require('./src/routes/reports');
+const { ENTITIES } = require('./src/entities');
 
 const PORT = process.env.PORT || 3000;
 const SESSION_HOURS = 12;
@@ -305,9 +308,17 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-app.get('/', requireLogin, (req, res) => {
-  res.send(pages.homePage(ctxOf(req)));
+app.get('/', requireLogin, async (req, res, next) => {
+  try {
+    const rep = await reportsRouter.buildReport(store);
+    res.send(pages.homePage(ctxOf(req), rep));
+  } catch (e) { next(e); }
 });
+
+for (const key of Object.keys(ENTITIES)) {
+  app.use(ENTITIES[key].path, entityRouter(key, { store, ctxOf, requireLogin }));
+}
+app.use('/bao-cao', reportsRouter({ store, ctxOf, requireLogin }));
 
 app.use('/tai-khoan', usersRouter({ store, ctxOf, requireAdmin }));
 app.use(accountRouter({ store, ctxOf, requireLogin, reloadSettings: loadSettings, sessionToken, clientIp }));

@@ -1,4 +1,5 @@
 'use strict';
+const T = require('../text');
 const { esc, layout, alertBox, logo, newPasswordFields, roleLabel, fmtDate, version } = require('./layout');
 
 function setupPage(ctx, { errors, values = {}, needToken }) {
@@ -77,21 +78,26 @@ function loginPage(ctx, { error, username = '', info } = {}) {
   });
 }
 
-function homePage(ctx) {
+function homePage(ctx, rep) {
+  const t = rep.totals;
+  const money = (n) => `${T.fmtMoney(n || 0)} đ`;
   return layout(ctx, {
     title: 'Trang chủ',
     body: `
 <section class="hero">
   <h1>Xin chào, ${esc(ctx.user.full_name)} 👋</h1>
-  <p>Chào mừng đến với <b>${esc(ctx.appName)}</b>. Khung hệ thống đã sẵn sàng — các chức năng nghiệp vụ sẽ được bổ sung tiếp.</p>
+  <p><b>${esc(ctx.appName)}</b> · ${esc(ctx.companyName)}</p>
 </section>
 <section class="grid">
-  <div class="tile"><div class="tile-label">Đơn vị</div><div class="tile-value">${esc(ctx.companyName)}</div></div>
-  <div class="tile"><div class="tile-label">Vai trò</div><div class="tile-value">${roleLabel(ctx.user.role)}</div></div>
-  <div class="tile"><div class="tile-label">Kho dữ liệu</div><div class="tile-value">${
-    ctx.dbMode === 'postgres' ? (ctx.dbHealthy ? '🟢 Đã kết nối' : '🔴 Mất kết nối') : '🟡 Chạy tạm'}</div></div>
-  <div class="tile"><div class="tile-label">Phiên bản</div><div class="tile-value">${esc(version)}</div></div>
-</section>`,
+  <a class="tile tile-link" href="/du-an"><div class="tile-label">Dự án</div><div class="tile-value">${rep.projectCount}</div>
+    <div class="tile-sub">Đang thi công: ${rep.byStatus['Đang thi công'] || 0} · Chuẩn bị: ${rep.byStatus['Chuẩn bị thi công'] || 0} · Hoàn thành: ${rep.byStatus['Đã hoàn thành'] || 0}</div></a>
+  <a class="tile tile-link" href="/doanh-thu"><div class="tile-label">Tổng doanh thu</div><div class="tile-value">${money(t.revenue)}</div></a>
+  <a class="tile tile-link" href="/chi-phi"><div class="tile-label">Tổng chi phí</div><div class="tile-value">${money(t.cost)}</div></a>
+  <a class="tile tile-link" href="/bao-cao"><div class="tile-label">Lợi nhuận</div><div class="tile-value ${t.profit < 0 ? 'neg' : ''}">${money(t.profit)}</div>
+    <div class="tile-sub">Xem báo cáo chi tiết →</div></a>
+</section>
+<p class="hint home-meta">Kho dữ liệu: ${
+    ctx.dbMode === 'postgres' ? (ctx.dbHealthy ? '🟢 Đã kết nối' : '🔴 Mất kết nối') : '🟡 Chạy tạm'} · Vai trò: ${roleLabel(ctx.user.role)} · Phiên bản ${esc(version)}</p>`,
   });
 }
 

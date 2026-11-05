@@ -11,6 +11,7 @@
  *   'not_found'  – không tìm thấy tài khoản
  */
 const crypto = require('crypto');
+const { pgEntities, memoryEntities, entityMigrations } = require('./db-entities');
 
 const MIGRATIONS = [
   `CREATE TABLE IF NOT EXISTS settings (
@@ -48,7 +49,9 @@ const ADMIN_LOCK = 424243;
 
 /* ================= PostgreSQL ================= */
 function createPgStore(url) {
-  const { Pool } = require('pg');
+  const { Pool, types } = require('pg');
+  types.setTypeParser(20, (v) => (v === null ? null : Number(v))); // BIGINT (số tiền) -> số
+  types.setTypeParser(1082, (v) => v); // DATE giữ nguyên 'YYYY-MM-DD', tránh lệch múi giờ
   const needSsl = /sslmode=require/i.test(url) || process.env.PGSSL === 'true';
   const pool = new Pool({
     connectionString: url,
@@ -83,6 +86,7 @@ function createPgStore(url) {
   }
 
   return {
+    ...pgEntities(pool),
     mode: 'postgres',
     isHealthy: () => healthy,
 
@@ -93,7 +97,7 @@ function createPgStore(url) {
         try {
           const client = await pool.connect();
           try {
-            for (const sql of MIGRATIONS) await client.query(sql);
+            for (const sql of [...MIGRATIONS, ...entityMigrations()]) await client.query(sql);
           } finally {
             client.release();
           }
@@ -306,6 +310,7 @@ function createMemoryStore() {
   };
 
   return {
+    ...memoryEntities(),
     mode: 'memory',
     isHealthy: () => true,
     async init() {},

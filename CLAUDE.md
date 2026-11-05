@@ -35,5 +35,9 @@ Người dùng là quản lý dự án xây dựng / tài chính, **không biế
 - Node.js ≥ 20 + Express 4 + PostgreSQL (`pg`). Ít thư viện, không khung giao diện.
 - `server.js` (luồng chính) · `src/db.js` (lưu trữ: PostgreSQL hoặc bộ nhớ tạm) · `src/auth.js` (mật khẩu, chặn đăng nhập sai)
   · `src/routes/*` (tài khoản, cá nhân, liên hệ) · `src/views/*` (giao diện HTML) · `public/` (CSS, JS trình duyệt)
+- Danh mục (Dự án / Doanh thu / Chi phí): cấu hình ô ở `src/entities.js`, xử lý chung `src/routes/entities.js`,
+  lưu trữ `src/db-entities.js`. Đổi KIỂU của ô đã có dữ liệu = thay đổi lớn → báo người dùng trước.
+- Tiền: số nguyên đồng (BIGINT), không dùng số thập phân. Công thức báo cáo ở `src/routes/reports.js` (đầu tệp).
+- Xuất Excel: `src/xlsx.js` (tự viết, không thư viện).
 - Router dùng `src/router.js` (bắt lỗi async). Mọi nội dung đưa vào HTML phải qua `esc()`.
 - Bản thử: `APP_ENV=staging` hoặc Railway tự nhận theo tên môi trường / nhánh → hiện dải đỏ "HỆ THỐNG THỬ NGHIỆM".
