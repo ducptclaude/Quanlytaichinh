@@ -3,7 +3,7 @@
 > Tệp này ghi lại tình trạng dự án sau mỗi phiên, để phiên sau (dev / revi) nắm nhanh. Mục mới nhất ở trên cùng.
 
 ## Tình trạng hiện tại
-- **Phiên bản:** V4.05.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
+- **Phiên bản:** V5.05.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
 - **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
   → địa chỉ https://quanlytaichinh-production.up.railway.app (đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
 - **Kho dữ liệu:** PostgreSQL trên Railway (đã Online).
@@ -24,6 +24,7 @@
 | Doanh thu (`/doanh-thu`) | Số CT*, Dự án*, Ngày*, Nội dung*, Hình thức, Số tiền*, Ghi chú |
 | Chi phí (`/chi-phi`) | Số CT*, Dự án*, Ngày*, Nội dung*, Loại chi phí, Nhà cung cấp, Số tiền*, Ghi chú |
 | Báo cáo (`/bao-cao`) | DT, CP, LN, Tỷ suất LN, % Thu/HĐ theo dự án; lọc trạng thái, khoảng ngày |
+| Nhập hằng ngày (`/nhap-hang-ngay`) | Theo từng Dự án; mỗi dòng: Ngày* (dd/mm/yyyy), Số CT, Nội dung*, ĐVT, Số lượng*, Đơn giá*, Thành tiền (= SL × ĐG, tự tính), Ghi chú; sửa trực tiếp trên bảng, Enter để lưu, gợi ý nội dung (tự điền ĐVT + đơn giá gần nhất), dòng tổng, xuất Excel |
 | Chung cho danh mục | Mã không trùng (không phân biệt hoa/thường), tìm không dấu, sắp xếp tự nhiên (DA-2 < DA-10), lọc, phân trang 50, xuất Excel (.xlsx), ghi người tạo / người cập nhật cuối |
 
 Vai trò hiện có: **Quản trị**, **Người dùng**.
@@ -33,8 +34,19 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 - Logo (file PNG), có cần thêm vai trò khác (VD: Chỉ xem, Kế toán, Duyệt) không.
 - Danh sách ô chính thức cho Dự án / Doanh thu / Chi phí (hiện là bộ ô mặc định – sửa ở `src/entities.js`).
 - Quyền: hiện mọi người xem/thêm/sửa, chỉ Quản trị xóa – có cần giới hạn thêm?
+- Nhập hằng ngày: tên nghiệp vụ, danh sách ô, quy tắc ràng buộc chính thức; có cộng vào Chi phí / Báo cáo không (hiện: CHƯA cộng).
 
 ## Nhật ký
+### V5.05.11.2026 — Nhập hằng ngày
+- Bảng nhập trực tiếp theo dự án (`src/routes/daily.js`, `public/grid.js`), cấu hình ở `src/entities.js` → `DAILY`.
+- Bảng mới `daily_entries` (chỉ thêm). Số lượng NUMERIC(18,3), kiểu VN (dấu phẩy = số lẻ; "12.5" bị từ chối để tránh nhầm).
+- Thành tiền = SL × ĐG tính bằng số nguyên lớn, làm tròn đến đồng (từ 0,5 lên).
+- Quy tắc mặc định: ngày bắt buộc, không sau hôm nay, không trước 01/01/2000; nội dung, số lượng (> 0), đơn giá (≥ 0) bắt buộc.
+- Chống ghi đè: 2 người sửa cùng 1 dòng → người lưu sau được báo, hiện số liệu mới nhất.
+- Mọi ô ngày (cả Dự án / Doanh thu / Chi phí / Báo cáo) chuyển sang dd/mm/yyyy, gõ tắt "5" hoặc "5/3".
+- Dự án đang có dòng nhập hằng ngày không xóa được.
+- Bài thử: 29 bài, đạt cả bộ nhớ tạm và PostgreSQL; thử thao tác bàn phím thật trên máy tính + điện thoại.
+
 ### V4.05.11.2026 — Danh mục chính: Dự án, Doanh thu, Chi phí, Báo cáo
 - Cấu hình ô tập trung ở `src/entities.js`; kho dữ liệu tự THÊM bảng/cột (không xóa). Đã thử nâng cấp kho cũ: giữ nguyên dữ liệu.
 - Số tiền lưu số nguyên (đồng), ô nhập tự thêm dấu chấm; ngày lưu YYYY-MM-DD.

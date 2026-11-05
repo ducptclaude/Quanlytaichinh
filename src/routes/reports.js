@@ -19,8 +19,9 @@ const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : null); // 1 chữ s
 
 async function buildReport(store, q = {}) {
   const status = PROJECT_STATUS.includes(q.status) ? q.status : '';
-  const from = T.parseDate(q.from) || '';
-  const to = T.parseDate(q.to) || '';
+  const okDate = (v) => { const d = T.parseDate(v); return d && !Number.isNaN(d) ? d : ''; };
+  const from = okDate(q.from);
+  const to = okDate(q.to);
   const inRange = (d) => (!from || (d && d >= from)) && (!to || (d && d <= to));
 
   const [projects, revenues, costs] = await Promise.all([

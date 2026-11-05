@@ -35,8 +35,8 @@ function reportPage(ctx, rep) {
   <label class="flt"><span>Trạng thái dự án</span>
     <select name="status" data-autosubmit><option value="">Tất cả</option>
     ${PROJECT_STATUS.map((s) => `<option ${s === f.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select></label>
-  <label class="flt"><span>Từ ngày</span><input type="date" name="from" value="${esc(f.from)}"></label>
-  <label class="flt"><span>Đến ngày</span><input type="date" name="to" value="${esc(f.to)}"></label>
+  <label class="flt"><span>Từ ngày</span><input name="from" value="${esc(T.fmtDay(f.from))}" placeholder="dd/mm/yyyy" inputmode="numeric" autocomplete="off" data-date></label>
+  <label class="flt"><span>Đến ngày</span><input name="to" value="${esc(T.fmtDay(f.to))}" placeholder="dd/mm/yyyy" inputmode="numeric" autocomplete="off" data-date></label>
   <div class="flt-actions"><button class="btn btn-primary" type="submit">Xem</button>
     ${f.status || f.from || f.to ? '<a class="btn btn-outline" href="/bao-cao">Bỏ lọc</a>' : ''}</div>
 </form>

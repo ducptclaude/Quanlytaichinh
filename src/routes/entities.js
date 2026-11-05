@@ -5,7 +5,7 @@
  * Quyền: mọi người đã đăng nhập xem / thêm / sửa; chỉ Quản trị được XÓA.
  */
 const asyncRouter = require('../router');
-const { ENTITIES } = require('../entities');
+const { ENTITIES, DAILY } = require('../entities');
 const T = require('../text');
 const { sendXlsx } = require('../xlsx');
 const views = require('../views/entities');
@@ -274,9 +274,9 @@ function pickValid(data) {
 
 async function inUseMessage(store, key, id) {
   const used = await store.countRefs(key, id);
-  const parts = used.map((u) => `${u.n} ${ENTITIES[u.key].single}`);
+  const parts = used.map((u) => `${u.n} ${u.key === 'daily' ? DAILY.single : ENTITIES[u.key].single}`);
   return `Không xóa được: đang có ${parts.join(', ')} gắn với ${ENTITIES[key].single} này. `
-    + 'Hãy xóa hoặc chuyển các khoản đó sang dự án khác trước.';
+    + 'Hãy xóa hoặc chuyển các dòng đó sang dự án khác trước.';
 }
 
 module.exports = { entityRouter, loadRefs, display };

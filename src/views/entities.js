@@ -125,8 +125,10 @@ function fieldHtml(f, values, refs) {
       const shown = typeof v === 'number' ? T.fmtMoney(v) : v;
       return `<label>${label}<input name="${f.name}" value="${esc(shown)}" inputmode="numeric" autocomplete="off" data-money placeholder="VD: 1.250.000.000"${req}></label>`;
     }
-    case 'date':
-      return `<label>${label}<input type="date" name="${f.name}" value="${esc(v)}"${req}></label>`;
+    case 'date': {
+      const shown = /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? T.fmtDay(v) : v;
+      return `<label>${label}<input name="${f.name}" value="${esc(shown)}" placeholder="dd/mm/yyyy" inputmode="numeric" autocomplete="off" data-date${req}></label>`;
+    }
     default:
       return `<label>${label}<input name="${f.name}" value="${esc(v)}" maxlength="${f.maxlength || 200}"${req}></label>`;
   }
@@ -168,6 +170,7 @@ ${isNew ? '' : `
       <dt>Cập nhật cuối</dt><dd>${esc(rec.updated_by_name || '—')} · ${fmtDate(rec.updated_at)}</dd>
     </dl>
     ${isProject ? `<p class="quick">
+      <a class="btn btn-sm btn-outline" href="/nhap-hang-ngay?du_an=${rec.id}">Nhập hằng ngày</a>
       <a class="btn btn-sm btn-outline" href="/doanh-thu?f_project_id=${rec.id}">Doanh thu của dự án</a>
       <a class="btn btn-sm btn-outline" href="/chi-phi?f_project_id=${rec.id}">Chi phí của dự án</a></p>` : ''}
   </section>

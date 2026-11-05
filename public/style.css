@@ -260,6 +260,44 @@ a.tile-link:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
 .table-report td:nth-child(2) { min-width: 170px; }
 .table-report th { white-space: nowrap; }
 
+/* Bảng nhập trực tiếp (Nhập hằng ngày) */
+.dgrid { font-size: 14px; }
+.dgrid th { white-space: nowrap; }
+.dgrid td { padding: 3px 4px; }
+.dgrid td.c-stt { width: 34px; text-align: center; color: var(--muted); font-size: 12px; }
+.dgrid input {
+  font-size: 14px; padding: 7px 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; min-width: 0;
+}
+.dgrid input:hover { border-color: var(--border); background: #fff; }
+.dgrid input:focus { background: #fff; border-color: var(--teal); }
+.dgrid td.num input { text-align: right; font-variant-numeric: tabular-nums; }
+.dgrid .c-entry_date { width: 112px; }
+.dgrid .c-doc_no { width: 96px; }
+.dgrid .c-content { min-width: 220px; }
+.dgrid .c-unit { width: 78px; }
+.dgrid .c-quantity { width: 100px; }
+.dgrid .c-unit_price { width: 128px; }
+.dgrid .c-amount { width: 140px; font-weight: 700; padding-right: 12px; }
+.dgrid .c-note { min-width: 130px; }
+.dgrid .c-meta { width: 130px; font-size: 12px; line-height: 1.3; }
+.dgrid .c-meta small { display: block; color: var(--muted); }
+.dgrid .c-act { width: 52px; white-space: nowrap; text-align: right; }
+.dgrid tr.g-new td { background: #f8fffe; }
+.dgrid tr.g-new td.c-stt { color: var(--teal); font-weight: 700; }
+.dgrid tr.dirty td:first-child { box-shadow: inset 4px 0 0 #f79009; }
+.dgrid tr.saving { opacity: .7; }
+.dgrid tr.saved td:first-child { box-shadow: inset 4px 0 0 var(--success); }
+.dgrid tr.failed td:first-child { box-shadow: inset 4px 0 0 var(--danger); }
+.dgrid input.err { border-color: var(--danger); background: var(--danger-bg); }
+.dgrid tr.g-msg td { color: var(--danger); background: var(--danger-bg); font-size: 13px; padding: 6px 12px; }
+.g-state { display: inline-block; width: 16px; text-align: center; font-weight: 700; }
+tr.dirty .g-state { color: #f79009; }
+tr.saved .g-state { color: var(--success); }
+tr.failed .g-state { color: var(--danger); }
+.g-del { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 6px; }
+.g-del:hover { color: var(--danger); background: var(--danger-bg); }
+.dgrid tfoot td.t-label { text-align: right; }
+
 /* Chân trang */
 .footer {
   padding: 14px 16px; font-size: 12.5px; color: var(--muted);
@@ -280,7 +318,7 @@ a.tile-link:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
   .card { padding: 20px 16px; }
   .topbar { padding: 10px 16px 6px; }
   .tabs { margin: 0 -16px; padding: 0 12px 2px; }
-  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; overflow: visible; }
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; overflow: visible; }
   .tabs a { padding: 8px 4px; text-align: center; font-size: 13px; }
   .table-report td:nth-child(2) { min-width: 0; }
   .logo-badge { width: 38px; height: 38px; font-size: 14px; }
@@ -306,6 +344,21 @@ a.tile-link:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
   .table tfoot tr { background: #f0fdfa; border-top: 2px solid var(--teal); }
   .table tfoot td::before { content: attr(data-label); color: var(--muted); font-size: 12.5px; font-weight: 500; }
   .table tfoot td:first-child::before { content: none; }
+  /* Bảng nhập trên điện thoại: mỗi dòng 1 thẻ */
+  .dgrid td { align-items: center; padding: 2px 0; }
+  .dgrid td { width: 100% !important; min-width: 0 !important; }
+  .dgrid td > input { flex: 0 0 64%; width: 64%; border-color: var(--border); background: #fff; font-size: 16px; }
+  .dgrid td.c-amount { padding-right: 0; }
+  .dgrid td.c-meta { display: block; text-align: right; }
+  .dgrid td.c-meta span, .dgrid td.c-meta small { display: inline; margin-left: 6px; }
+  .dgrid td.c-stt { width: 100%; text-align: left; font-weight: 700; color: var(--navy); }
+  .dgrid td.c-stt::before { content: 'Dòng'; }
+  .dgrid .c-content, .dgrid .c-note { min-width: 0; }
+  .dgrid td.c-act { justify-content: flex-end; }
+  .dgrid td.c-act::before, .dgrid td.c-meta::before { content: none; }
+  .dgrid tr.g-new { background: #f0fdfa; }
+  .dgrid tfoot td { width: 100%; }
+  .dgrid tfoot td:empty { display: none; }
   /* Bảng -> dạng thẻ trên điện thoại */
   .table thead { display: none; }
   .table, .table tbody, .table tfoot, .table tr, .table td { display: block; width: 100%; }

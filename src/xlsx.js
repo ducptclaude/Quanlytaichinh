@@ -64,13 +64,13 @@ function colName(i) {
 // Kiểu ô: 0 thường, 1 tiêu đề cột, 2 tiền, 3 tiêu đề lớn, 4 tổng (chữ), 5 tổng (tiền), 6 phần trăm, 7 tổng (phần trăm)
 const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0"/><numFmt numFmtId="165" formatCode="0.0&quot;%&quot;"/></numFmts>
+<numFmts count="3"><numFmt numFmtId="164" formatCode="#,##0"/><numFmt numFmtId="165" formatCode="0.0&quot;%&quot;"/><numFmt numFmtId="166" formatCode="#,##0.###"/></numFmts>
 <fonts count="3"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font></fonts>
 <fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>
 <fill><patternFill patternType="solid"><fgColor rgb="FFD9F0EE"/><bgColor indexed="64"/></patternFill></fill></fills>
 <borders count="2"><border/><border><left style="thin"><color rgb="FFBFC8D2"/></left><right style="thin"><color rgb="FFBFC8D2"/></right><top style="thin"><color rgb="FFBFC8D2"/></top><bottom style="thin"><color rgb="FFBFC8D2"/></bottom></border></borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="8">
+<cellXfs count="9">
 <xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyBorder="1"><alignment vertical="top" wrapText="1"/></xf>
 <xf numFmtId="0" fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1"><alignment vertical="center" wrapText="1"/></xf>
 <xf numFmtId="164" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"><alignment vertical="top"/></xf>
@@ -79,13 +79,14 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xf numFmtId="164" fontId="1" fillId="2" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
 <xf numFmtId="165" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"><alignment vertical="top"/></xf>
 <xf numFmtId="165" fontId="1" fillId="2" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="166" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"><alignment vertical="top"/></xf>
 </cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 
 function cell(ref, value, type, isTotal) {
-  const numeric = type === 'money' || type === 'number' || type === 'percent';
+  const numeric = type === 'money' || type === 'number' || type === 'percent' || type === 'qty';
   if (numeric && value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value))) {
-    const s = type === 'percent' ? (isTotal ? 7 : 6) : (isTotal ? 5 : 2);
+    const s = type === 'qty' ? 8 : type === 'percent' ? (isTotal ? 7 : 6) : (isTotal ? 5 : 2);
     return `<c r="${ref}" s="${s}"><v>${Number(value)}</v></c>`;
   }
   const s = isTotal ? 4 : 0;

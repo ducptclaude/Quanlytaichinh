@@ -53,6 +53,7 @@ function nav(ctx) {
   const items = [
     ['/', 'Trang chủ'],
     ['/du-an', 'Dự án'],
+    ['/nhap-hang-ngay', 'Nhập hằng ngày'],
     ['/doanh-thu', 'Doanh thu'],
     ['/chi-phi', 'Chi phí'],
     ['/bao-cao', 'Báo cáo'],
@@ -65,7 +66,7 @@ function nav(ctx) {
     `<a href="${href}" class="${isActive(href) ? 'active' : ''}">${label}</a>`).join('')}</nav>`;
 }
 
-function layout(ctx, { title, body, bare = false }) {
+function layout(ctx, { title, body, bare = false, scripts = [] }) {
   const year = new Date().getFullYear();
   const footer = ctx.copyright
     ? esc(ctx.copyright)
@@ -105,6 +106,7 @@ ${header}
 <main class="main">${body}</main>
 <footer class="footer"><span>${footer}</span><a class="ver" href="/lien-he">Phiên bản ${esc(version)}</a></footer>
 <script src="/app.js?v=${esc(version)}" defer></script>
+${scripts.map((s) => `<script src="${esc(s)}?v=${esc(version)}" defer></script>`).join('')}
 </body>
 </html>`;
 }

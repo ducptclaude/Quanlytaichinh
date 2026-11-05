@@ -74,7 +74,31 @@ const ENTITIES = {
   },
 };
 
+/**
+ * NHẬP HẰNG NGÀY (bảng nhập trực tiếp theo từng dự án)
+ * Đổi tên nghiệp vụ / nhãn cột / giới hạn tại đây.
+ * Thành tiền = Số lượng × Đơn giá (tự tính, làm tròn đến đồng).
+ */
+const DAILY = {
+  table: 'daily_entries',
+  path: '/nhap-hang-ngay',
+  title: 'Nhập hằng ngày',
+  single: 'dòng nhập hằng ngày',
+  parent: 'projects', // nhập theo từng Dự án
+  labels: {
+    entry_date: 'Ngày', doc_no: 'Số CT', content: 'Nội dung', unit: 'ĐVT',
+    quantity: 'Số lượng', unit_price: 'Đơn giá', amount: 'Thành tiền', note: 'Ghi chú',
+  },
+  rules: {
+    contentMax: 300, unitMax: 20, docMax: 50, noteMax: 500,
+    priceMax: 1e12, // đơn giá tối đa 1.000 tỷ
+    minDate: '2000-01-01',
+    allowFutureDate: false, // không cho nhập ngày sau hôm nay
+    blockCompletedProject: false, // true = không cho nhập vào dự án "Đã hoàn thành"
+  },
+};
+
 // Thứ tự tạo bảng (bảng được tham chiếu phải tạo trước)
 const ORDER = ['projects', 'revenues', 'costs'];
 
-module.exports = { ENTITIES, ORDER, PROJECT_STATUS };
+module.exports = { ENTITIES, ORDER, PROJECT_STATUS, DAILY };

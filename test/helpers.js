@@ -51,7 +51,15 @@ async function startServer(env = {}) {
       const body = type.includes('spreadsheet') ? Buffer.from(await res.arrayBuffer()) : await res.text();
       return { status: res.status, location: res.headers.get('location') || '', text: typeof body === 'string' ? body : '', body, type };
     }
-    return { get: (u) => req('GET', u), post: (u, f) => req('POST', u, f) };
+    async function json(url, obj) {
+      const res = await fetch(base + url, {
+        method: 'POST', redirect: 'manual',
+        headers: { cookie, 'content-type': 'application/json', origin: base }, body: JSON.stringify(obj),
+      });
+      const type = res.headers.get('content-type') || '';
+      return { status: res.status, body: type.includes('json') ? await res.json() : await res.text() };
+    }
+    return { get: (u) => req('GET', u), post: (u, f) => req('POST', u, f), json };
   }
   const stop = async () => {
     proc.kill();

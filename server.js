@@ -10,6 +10,7 @@ const usersRouter = require('./src/routes/users');
 const accountRouter = require('./src/routes/account');
 const { entityRouter } = require('./src/routes/entities');
 const reportsRouter = require('./src/routes/reports');
+const dailyRouter = require('./src/routes/daily');
 const { ENTITIES } = require('./src/entities');
 
 const PORT = process.env.PORT || 3000;
@@ -319,6 +320,7 @@ for (const key of Object.keys(ENTITIES)) {
   app.use(ENTITIES[key].path, entityRouter(key, { store, ctxOf, requireLogin }));
 }
 app.use('/bao-cao', reportsRouter({ store, ctxOf, requireLogin }));
+app.use('/nhap-hang-ngay', dailyRouter({ store, ctxOf, requireLogin }));
 
 app.use('/tai-khoan', usersRouter({ store, ctxOf, requireAdmin }));
 app.use(accountRouter({ store, ctxOf, requireLogin, reloadSettings: loadSettings, sessionToken, clientIp }));
