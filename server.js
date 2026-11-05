@@ -4,13 +4,29 @@ const crypto = require('crypto');
 const express = require('express');
 const { createStore } = require('./src/db');
 const auth = require('./src/auth');
-const views = require('./src/views');
-const { version } = require('./package.json');
+const pages = require('./src/views/pages');
+const { version } = require('./src/version');
+const usersRouter = require('./src/routes/users');
+const accountRouter = require('./src/routes/account');
 
 const PORT = process.env.PORT || 3000;
 const SESSION_HOURS = 12;
 const COOKIE = 'sid';
 const SETUP_TOKEN = (process.env.SETUP_TOKEN || '').trim();
+
+/* ---------- Bản thử nghiệm hay bản chính ----------
+ * APP_ENV=staging | production  (đặt tay, ưu tiên cao nhất)
+ * Nếu không đặt: Railway tự cấp RAILWAY_ENVIRONMENT_NAME và RAILWAY_GIT_BRANCH
+ *  -> môi trường khác "production" hoặc chạy từ nhánh staging thì coi là bản thử.
+ */
+function detectStaging() {
+  const appEnv = (process.env.APP_ENV || '').trim().toLowerCase();
+  if (appEnv) return appEnv !== 'production';
+  const envName = (process.env.RAILWAY_ENVIRONMENT_NAME || '').trim().toLowerCase();
+  const branch = (process.env.RAILWAY_GIT_BRANCH || '').trim().toLowerCase();
+  return Boolean((envName && envName !== 'production') || branch === 'staging');
+}
+const IS_STAGING = detectStaging();
 
 const store = createStore();
 const app = express();
@@ -29,10 +45,15 @@ function ctxOf(req) {
     appName: s.app_name || 'Hệ thống quản lý',
     companyName: s.company_name || '',
     copyright: s.copyright || '',
+    contactPerson: s.contact_person || '',
+    contactPhone: s.contact_phone || '',
+    contactEmail: s.contact_email || '',
     logoUrl: process.env.LOGO_URL || '',
     dbMode: store.mode,
     dbHealthy: store.isHealthy(),
+    isStaging: IS_STAGING,
     user: req.user || null,
+    path: (req.originalUrl || req.path).split('?')[0],
   };
 }
 
@@ -76,9 +97,15 @@ function parseCookies(req) {
   const out = {};
   (req.headers.cookie || '').split(';').forEach((p) => {
     const i = p.indexOf('=');
-    if (i > 0) out[p.slice(0, i).trim()] = decodeURIComponent(p.slice(i + 1).trim());
+    if (i > 0) {
+      try { out[p.slice(0, i).trim()] = decodeURIComponent(p.slice(i + 1).trim()); } catch (_) { /* bỏ cookie lỗi */ }
+    }
   });
   return out;
+}
+function sessionToken(req) {
+  const t = parseCookies(req)[COOKIE];
+  return t && /^[a-f0-9]{64}$/.test(t) ? t : null;
 }
 function setSessionCookie(req, res, token, maxAgeSec) {
   const parts = [`${COOKIE}=${token}`, 'Path=/', 'HttpOnly', 'SameSite=Lax', `Max-Age=${maxAgeSec}`];
@@ -95,6 +122,7 @@ app.get('/health', async (req, res) => {
   res.status(ok ? 200 : 503).json({
     status: ok ? 'ok' : 'degraded',
     version,
+    environment: IS_STAGING ? 'staging' : 'production',
     database,
     setup_done: settings ? Boolean(settings.setup_done) : null,
     uptime_seconds: Math.round(process.uptime()),
@@ -108,14 +136,14 @@ app.use(async (req, res, next) => {
     if (!settings) await loadSettings();
   } catch (e) {
     console.error('[app] Không đọc được cấu hình:', e.message);
-    return res.status(503).send(views.messagePage(ctxOf(req), {
+    return res.status(503).send(pages.messagePage(ctxOf(req), {
       title: 'Không kết nối được kho dữ liệu',
       message: 'Hệ thống tạm thời không truy cập được kho dữ liệu. Vui lòng thử lại sau ít phút.',
     }));
   }
   try {
-    const token = parseCookies(req)[COOKIE];
-    if (token && /^[a-f0-9]{64}$/.test(token)) req.user = await store.getSessionUser(token);
+    const token = sessionToken(req);
+    if (token) req.user = await store.getSessionUser(token);
   } catch (e) {
     console.error('[app] Lỗi đọc phiên đăng nhập:', e.message);
   }
@@ -130,9 +158,18 @@ app.use((req, res, next) => {
   next();
 });
 
+/* Bị Quản trị đặt lại mật khẩu -> phải đổi mật khẩu trước khi làm việc khác */
+app.use((req, res, next) => {
+  if (req.user && req.user.must_change_password
+      && !['/ca-nhan', '/ca-nhan/doi-mat-khau', '/logout'].includes(req.path)) {
+    return res.redirect('/ca-nhan');
+  }
+  next();
+});
+
 /* ---------- Khởi tạo lần đầu ---------- */
 app.get('/setup', (req, res) => {
-  res.send(views.setupPage(ctxOf(req), { needToken: Boolean(SETUP_TOKEN) }));
+  res.send(pages.setupPage(ctxOf(req), { needToken: Boolean(SETUP_TOKEN) }));
 });
 
 app.post('/setup', async (req, res) => {
@@ -166,7 +203,7 @@ app.post('/setup', async (req, res) => {
   if (password !== String(b.password2 || '')) errors.push('Hai lần nhập mật khẩu không khớp');
 
   if (errors.length) {
-    return res.status(400).send(views.setupPage(ctxOf(req), { errors, values, needToken: Boolean(SETUP_TOKEN) }));
+    return res.status(400).send(pages.setupPage(ctxOf(req), { errors, values, needToken: Boolean(SETUP_TOKEN) }));
   }
 
   try {
@@ -182,13 +219,13 @@ app.post('/setup', async (req, res) => {
     await loadSettings();
     if (!result.ok) return res.redirect('/login');
     console.log(`[setup] Đã khởi tạo hệ thống, quản trị: ${values.username}`);
-    res.send(views.loginPage(ctxOf(req), {
+    res.send(pages.loginPage(ctxOf(req), {
       username: values.username,
       info: 'Khởi tạo thành công! Trang khởi tạo đã tự khóa. Hãy đăng nhập bằng tài khoản Quản trị vừa tạo.',
     }));
   } catch (e) {
     console.error('[setup] Lỗi:', e.message);
-    res.status(500).send(views.setupPage(ctxOf(req), {
+    res.status(500).send(pages.setupPage(ctxOf(req), {
       errors: ['Có lỗi khi lưu dữ liệu, vui lòng thử lại.'], values, needToken: Boolean(SETUP_TOKEN),
     }));
   }
@@ -199,7 +236,7 @@ const DUMMY_HASH_P = auth.hashPassword(crypto.randomBytes(16).toString('hex'));
 
 app.get('/login', (req, res) => {
   if (req.user) return res.redirect('/');
-  res.send(views.loginPage(ctxOf(req)));
+  res.send(pages.loginPage(ctxOf(req)));
 });
 
 app.post('/login', async (req, res) => {
@@ -210,7 +247,7 @@ app.post('/login', async (req, res) => {
 
   const locked = auth.lockRemaining(username, ip);
   if (locked > 0) {
-    return res.status(429).send(views.loginPage(ctx, {
+    return res.status(429).send(pages.loginPage(ctx, {
       username,
       error: `Đăng nhập sai quá nhiều lần. Tạm khóa, vui lòng thử lại sau ${Math.ceil(locked / 60)} phút.`,
     }));
@@ -221,12 +258,17 @@ app.post('/login', async (req, res) => {
     // luôn kiểm tra mật khẩu (kể cả khi không có tài khoản) để không lộ tài khoản nào tồn tại
     const ok = await auth.verifyPassword(password, user ? user.password_hash : await DUMMY_HASH_P);
 
-    if (!user || !ok || !user.is_active) {
+    if (!user || !ok) {
       const left = auth.recordFailure(username, ip);
       const msg = left > 0
         ? `Sai tên đăng nhập hoặc mật khẩu. Còn ${left} lần thử trước khi bị tạm khóa.`
         : `Đăng nhập sai quá nhiều lần. Tạm khóa ${auth.LOCK_MS / 60000} phút.`;
-      return res.status(401).send(views.loginPage(ctx, { username, error: msg }));
+      return res.status(401).send(pages.loginPage(ctx, { username, error: msg }));
+    }
+    if (!user.is_active) {
+      return res.status(403).send(pages.loginPage(ctx, {
+        username, error: 'Tài khoản đã bị khóa. Vui lòng liên hệ Quản trị.',
+      }));
     }
 
     auth.clearFailures(username);
@@ -234,15 +276,15 @@ app.post('/login', async (req, res) => {
     await store.createSession(token, user.id, new Date(Date.now() + SESSION_HOURS * 3600 * 1000));
     await store.touchLogin(user.id);
     setSessionCookie(req, res, token, SESSION_HOURS * 3600);
-    res.redirect('/');
+    res.redirect(user.must_change_password ? '/ca-nhan' : '/');
   } catch (e) {
     console.error('[login] Lỗi:', e.message);
-    res.status(500).send(views.loginPage(ctx, { username, error: 'Có lỗi hệ thống, vui lòng thử lại.' }));
+    res.status(500).send(pages.loginPage(ctx, { username, error: 'Có lỗi hệ thống, vui lòng thử lại.' }));
   }
 });
 
 app.post('/logout', async (req, res) => {
-  const token = parseCookies(req)[COOKIE];
+  const token = sessionToken(req);
   if (token) await store.deleteSession(token).catch(() => {});
   setSessionCookie(req, res, '', 0);
   res.redirect('/login');
@@ -253,21 +295,33 @@ function requireLogin(req, res, next) {
   if (!req.user) return res.redirect('/login');
   next();
 }
+function requireAdmin(req, res, next) {
+  if (!req.user) return res.redirect('/login');
+  if (req.user.role !== 'admin') {
+    return res.status(403).send(pages.messagePage(ctxOf(req), {
+      title: 'Không có quyền', message: 'Chức năng này chỉ dành cho Quản trị.',
+    }));
+  }
+  next();
+}
 
 app.get('/', requireLogin, (req, res) => {
-  res.send(views.homePage(ctxOf(req)));
+  res.send(pages.homePage(ctxOf(req)));
 });
+
+app.use('/tai-khoan', usersRouter({ store, ctxOf, requireAdmin }));
+app.use(accountRouter({ store, ctxOf, requireLogin, reloadSettings: loadSettings, sessionToken, clientIp }));
 
 /* ---------- Không tìm thấy / lỗi ---------- */
 app.use((req, res) => {
-  res.status(404).send(views.messagePage(ctxOf(req), {
+  res.status(404).send(pages.messagePage(ctxOf(req), {
     title: 'Không tìm thấy trang', message: 'Đường dẫn không tồn tại.',
   }));
 });
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.error('[app] Lỗi:', err.message);
-  res.status(err.status === 413 ? 413 : 500).send(views.messagePage(ctxOf(req), {
+  console.error('[app] Lỗi:', err.stack || err.message);
+  res.status(err.status === 413 ? 413 : 500).send(pages.messagePage(ctxOf(req), {
     title: 'Có lỗi xảy ra', message: 'Vui lòng thử lại sau.',
   }));
 });
@@ -294,7 +348,10 @@ async function start() {
 
   setInterval(() => store.purgeExpiredSessions().catch(() => {}), 60 * 60 * 1000).unref();
 
-  app.listen(PORT, () => console.log(`[app] Phiên bản ${version} đang chạy tại cổng ${PORT}`));
+  app.listen(PORT, () => console.log(
+    `[app] Phiên bản ${version} (${IS_STAGING ? 'BẢN THỬ' : 'bản chính'}) đang chạy tại cổng ${PORT}`
+  ));
 }
 
-start();
+if (require.main === module) start();
+module.exports = { app, start };

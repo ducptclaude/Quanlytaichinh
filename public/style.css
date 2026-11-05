@@ -38,6 +38,11 @@ body.page-bare { background: var(--navy) var(--grad) no-repeat; background-size:
 /* Thanh cảnh báo */
 .banner { padding: 10px 16px; font-size: 14px; text-align: center; }
 .banner-warn { background: var(--warn-bg); color: var(--warn-text); border-bottom: 1px solid #eab308; }
+.banner-staging {
+  background: #b91c1c; color: #fff; font-weight: 700; letter-spacing: 1px;
+  padding: 8px 16px; border-bottom: 2px solid #7f1d1d; position: sticky; top: 0; z-index: 50;
+}
+.banner-staging span { font-weight: 500; letter-spacing: 0; opacity: .9; font-size: 13px; }
 .banner-error { background: #fee4e2; color: var(--danger); border-bottom: 1px solid #fda29b; }
 
 /* Thanh trên */
@@ -73,6 +78,19 @@ body.page-bare { background: var(--navy) var(--grad) no-repeat; background-size:
 .userbox form { margin: 0; }
 .user-name { display: flex; flex-direction: column; text-align: right; font-weight: 600; font-size: 14px; }
 .user-name small { font-weight: 400; opacity: .8; font-size: 12px; }
+
+/* Menu tab */
+.tabs {
+  background: #fff; border-bottom: 1px solid var(--border);
+  display: flex; gap: 4px; padding: 0 16px; overflow-x: auto; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a {
+  padding: 12px 14px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px;
+  border-bottom: 3px solid transparent; white-space: nowrap;
+}
+.tabs a:hover { color: var(--navy); }
+.tabs a.active { color: var(--navy); border-bottom-color: var(--teal); }
 
 /* Nội dung */
 .main { flex: 1; width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
@@ -144,6 +162,56 @@ input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rg
 .tile-label { color: var(--muted); font-size: 13px; }
 .tile-value { font-weight: 700; font-size: 17px; color: var(--navy); margin-top: 4px; word-break: break-word; }
 
+/* Trang chức năng */
+.page-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.page-head .page-title { margin: 0; }
+.page-title { font-size: 22px; color: var(--navy); margin: 0 0 14px; }
+.page-title small { font-size: 14px; font-weight: 500; }
+.count { display: inline-block; min-width: 26px; padding: 0 8px; border-radius: 13px; background: var(--teal); color: #fff; font-size: 13px; text-align: center; vertical-align: middle; }
+.crumb { margin: 0 0 8px; font-size: 14px; }
+.crumb a, .support a, .info a { color: var(--teal); }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.panel h2 { font-size: 16px; color: var(--navy); margin: 0 0 14px; }
+.panel-narrow { max-width: 560px; }
+.panel-flush { padding: 0; overflow: hidden; }
+.panel-danger { border-color: #fecdca; }
+.panel-danger h2 { color: var(--danger); }
+.inline-form { margin: 0 0 6px; }
+.info { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; margin: 0 0 12px; font-size: 14px; }
+.info dt { color: var(--muted); }
+.info dd { margin: 0; font-weight: 600; word-break: break-word; }
+.info.small { font-size: 13px; }
+.support { text-align: center; font-size: 13px; color: var(--muted); margin: 16px 0 0; }
+select {
+  font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; width: 100%;
+}
+select:disabled, input:disabled { background: #f1f5f9; color: var(--muted); }
+label.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 500; }
+label.check input { width: 18px; height: 18px; flex: none; accent-color: var(--teal); }
+
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th { text-align: left; font-size: 12.5px; color: var(--muted); font-weight: 600; background: #f8fafc; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table .actions { text-align: right; white-space: nowrap; }
+.you { color: var(--teal); font-size: 12px; font-weight: 600; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #e0f2f1; color: var(--teal); white-space: nowrap; }
+.badge-on { background: var(--success-bg); color: var(--success); }
+.badge-off { background: #f2f4f7; color: #475467; }
+.badge-warn { background: #fffaeb; color: #b54708; }
+
+.btn-sm { padding: 7px 12px; font-size: 13px; }
+.btn-outline { background: #fff; color: var(--navy); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+.btn-warn { background: #f79009; color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-warn:hover, .btn-danger:hover { filter: brightness(1.08); }
+.alert-warn { background: #fffaeb; color: #b54708; border: 1px solid #fedf89; }
+.alert-info { background: #eff8ff; color: #175cd3; border: 1px solid #b2ddff; }
+.footer a.ver { color: inherit; text-decoration: none; }
+
 /* Chân trang */
 .footer {
   padding: 14px 16px; font-size: 12.5px; color: var(--muted);
@@ -162,5 +230,18 @@ input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rg
   .user-name { display: none; }
   .pw-rules { grid-template-columns: 1fr; }
   .hero { padding: 18px; }
+  .cols { grid-template-columns: 1fr; }
+  .panel { padding: 16px; }
+  .info { grid-template-columns: 1fr; gap: 2px; }
+  .info dd { margin-bottom: 8px; }
+  .page-head .btn { width: 100%; }
+  /* Bảng -> dạng thẻ trên điện thoại */
+  .table thead { display: none; }
+  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table tr { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .table td { border: none; padding: 3px 0; display: flex; justify-content: space-between; gap: 10px; }
+  .table td::before { content: attr(data-label); color: var(--muted); font-size: 12.5px; }
+  .table td.actions { justify-content: stretch; padding-top: 8px; }
+  .table td.actions .btn { width: 100%; }
   .hero h1 { font-size: 19px; }
 }
