@@ -75,14 +75,14 @@ function layout(ctx, { title, body, bare = false }) {
         ${ctx.companyName ? `<span class="brand-sub">${esc(ctx.companyName)}</span>` : ''}
       </span>
     </a>
+    ${nav(ctx)}
     ${ctx.user ? `
     <div class="userbox">
       <span class="user-name" title="${esc(ctx.user.username)}">${esc(ctx.user.full_name)}
         <small>${roleLabel(ctx.user.role)}</small></span>
       <form method="post" action="/logout"><button class="btn btn-ghost" type="submit">Đăng xuất</button></form>
     </div>` : ''}
-  </header>
-  ${nav(ctx)}`;
+  </header>`;
 
   return `<!doctype html>
 <html lang="vi">

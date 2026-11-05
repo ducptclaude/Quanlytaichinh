@@ -3,7 +3,7 @@
 > Tệp này ghi lại tình trạng dự án sau mỗi phiên, để phiên sau (dev / revi) nắm nhanh. Mục mới nhất ở trên cùng.
 
 ## Tình trạng hiện tại
-- **Phiên bản:** V2.05.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
+- **Phiên bản:** V3.05.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
 - **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
   → địa chỉ https://quanlytaichinh-production.up.railway.app (đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
 - **Kho dữ liệu:** PostgreSQL trên Railway (đã Online).
@@ -29,6 +29,11 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 - Tên chức năng nghiệp vụ tiếp theo (dự án, hợp đồng, thu chi, ...).
 
 ## Nhật ký
+### V3.05.11.2026 — Đưa menu lên thanh trên
+- 4 tab (Trang chủ / Tài khoản / Cá nhân / Liên hệ) nằm trong thanh màu trên cùng, giữa tên hệ thống và tên người dùng.
+- Màn hình ≤ 1100px (laptop nhỏ, máy tính bảng, điện thoại): menu xuống dòng 2 nhưng vẫn trong thanh màu.
+- Đã kiểm tra 1366 / 1180 / 1024 / 768px, iPhone 13, iPhone SE: đủ 4 tab, không tràn ngang.
+
 ### V2.05.11.2026 — Tài khoản, phiên bản, bản thử
 - Thêm quản lý tài khoản, tab Cá nhân, tab Liên hệ, số phiên bản tự động, dải đỏ bản thử.
 - Thêm cột `must_change_password`, `updated_at` vào bảng `users` (chỉ thêm, không mất dữ liệu cũ — đã thử nâng cấp kho cũ).

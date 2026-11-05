@@ -54,10 +54,10 @@ body.page-bare { background: var(--navy) var(--grad) no-repeat; background-size:
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   box-shadow: 0 2px 10px rgba(0, 0, 0, .15);
 }
-.brand { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; min-width: 0; flex: 0 1 auto; max-width: 42%; }
 .brand-text { display: flex; flex-direction: column; min-width: 0; }
 .brand-name { font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand-sub { font-size: 12px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -79,18 +79,18 @@ body.page-bare { background: var(--navy) var(--grad) no-repeat; background-size:
 .user-name { display: flex; flex-direction: column; text-align: right; font-weight: 600; font-size: 14px; }
 .user-name small { font-weight: 400; opacity: .8; font-size: 12px; }
 
-/* Menu tab */
+/* Menu tab (nằm trong thanh trên) */
 .tabs {
-  background: #fff; border-bottom: 1px solid var(--border);
-  display: flex; gap: 4px; padding: 0 16px; overflow-x: auto; scrollbar-width: none;
+  display: flex; gap: 4px; flex: 1; min-width: 0; margin-left: 28px;
+  overflow-x: auto; scrollbar-width: none;
 }
 .tabs::-webkit-scrollbar { display: none; }
 .tabs a {
-  padding: 12px 14px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px;
-  border-bottom: 3px solid transparent; white-space: nowrap;
+  padding: 8px 14px; color: rgba(255, 255, 255, .78); text-decoration: none; font-weight: 600; font-size: 14px;
+  border-radius: 8px; white-space: nowrap; transition: background .15s, color .15s;
 }
-.tabs a:hover { color: var(--navy); }
-.tabs a.active { color: var(--navy); border-bottom-color: var(--teal); }
+.tabs a:hover { color: #fff; background: rgba(255, 255, 255, .10); }
+.tabs a.active { color: #fff; background: rgba(255, 255, 255, .18); box-shadow: inset 0 -2px 0 var(--teal-2); }
 
 /* Nội dung */
 .main { flex: 1; width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
@@ -220,10 +220,19 @@ label.check input { width: 18px; height: 18px; flex: none; accent-color: var(--t
 }
 .page-bare .footer { background: transparent; color: rgba(255, 255, 255, .8); border-top-color: rgba(255, 255, 255, .15); }
 
+/* Màn hình vừa (laptop nhỏ, máy tính bảng): menu xuống dòng 2 trong thanh màu */
+@media (max-width: 1100px) {
+  .topbar { flex-wrap: wrap; row-gap: 8px; padding-bottom: 8px; }
+  .brand { flex: 1; max-width: none; }
+  .tabs { order: 3; flex-basis: 100%; margin-left: -8px; }
+}
+
 /* Điện thoại */
 @media (max-width: 560px) {
   .card { padding: 20px 16px; }
-  .topbar { padding: 10px 16px; flex-wrap: nowrap; }
+  .topbar { padding: 10px 16px 6px; }
+  .tabs { margin: 0 -16px; padding: 0 12px 2px; }
+  .tabs a { padding: 8px 12px; }
   .logo-badge { width: 38px; height: 38px; font-size: 14px; }
   .brand-sub { display: none; }
   .brand-name { font-size: 15px; }
@@ -244,4 +253,11 @@ label.check input { width: 18px; height: 18px; flex: none; accent-color: var(--t
   .table td.actions { justify-content: stretch; padding-top: 8px; }
   .table td.actions .btn { width: 100%; }
   .hero h1 { font-size: 19px; }
+}
+
+/* Điện thoại nhỏ (iPhone SE...) */
+@media (max-width: 380px) {
+  .tabs { gap: 0; padding: 0 4px 2px; justify-content: space-between; }
+  .tabs a { padding: 8px 9px; font-size: 13px; }
+  .btn-ghost { padding: 7px 10px; font-size: 13px; }
 }
