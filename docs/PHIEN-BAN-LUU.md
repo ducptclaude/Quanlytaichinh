@@ -13,6 +13,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | phien-06.11.26-14h45 | V12.06.11.26 | `22aa169` | 06/11/2026 | Trước khi thay nhóm Dòng tiền thực tế trên Dashboard bằng bảng Kế hoạch – Thực – Còn lại |
 | phien-06.11.26-14h36 | V10.06.11.26 | `1b0f914` | 06/11/2026 | Trước khi đổi công thức mục III |
 | phien-06.11.26-15h16 | V16.06.11.26 | `806852c` | 06/11/2026 | Trước khi ẩn Phân tích chi tiết với vai Chỉ xem |
+| **qltc-tu061126-rv1** (bản lưu – backup) | V17.06.11.26 | `5540e51` | 06/11/2026 | Như qltc-tu061126 + Chỉ xem ẩn Phân tích chi tiết, chặn liên kết sang nhập liệu (KHÔNG xóa) |
 | **qltc-tu061126** (bản lưu – backup) | V14.06.11.26 | `2c0cad0` | 06/11/2026 | Mục III công thức mới + nút TĐ, Dashboard bảng Kế hoạch – Thực – Còn lại, Dashboard PDF như Dashboard (KHÔNG xóa) |
 | **quanlytaichinh06112026** (bản lưu của sếp – backup) | V10.06.11.26 | `b18ac61` | 06/11/2026 | Bản sao lưu toàn bộ hệ thống ngày 06/11/2026 (KHÔNG xóa) |
 | phien-06.11.26-11h32 | V06.06.11.26 | `f04164e` | 06/11/2026 | Trước khi thêm chuyển ngôn ngữ |
