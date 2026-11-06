@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.06.11.26 — Mục III: Dòng tiền còn lại phải thu – chi (công thức mới)
+- **Còn phải thu** = Doanh thu TĐk (mục I) − Dòng thu (mục II) · **Còn phải chi** = Chi phí TĐk (mục I) − Dòng chi (mục II) · **Còn lại** = phải thu − phải chi.
+  TĐk = thời điểm đang chọn ở mục I (TĐ1 / TĐ2 / TĐ3) – đổi TĐ thì mục III tự lấy theo. Dòng thu, dòng chi: lũy kế đến kỳ đang chọn, theo nút VAT.
+- Hàm mới `bMuc3Data` (`public/report.js`); bảng mục III hiện đủ thành phần: DT TĐk, dòng thu, còn phải thu, CP TĐk, dòng chi, còn phải chi, còn lại.
+- Dashboard khối III + chỉ số "Còn phải thu" dùng cùng công thức theo TĐ đang chọn của dashboard. Thêm câu dịch English.
+- Kiểm tra: đối chiếu dòng tổng mục III với mục I, II ở cả TĐ1/2/3 – khớp; tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-06.11.26-14h36`.
+
 ## V10.06.11.26 — Thu = Tiền về = Collections
 - Người dùng chốt: gộp "Thu" và "Tiền về" cùng dịch **Collections** (bỏ Receipts). 31 câu đổi theo:
   Thực thu = Actual collections; Còn lại thực = Net actual cash (collections − expenditure); Kế hoạch thu = Planned collections.

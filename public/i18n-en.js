@@ -1,6 +1,13 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Dòng thu còn lại phải thu": "Remaining collections receivable",
+"Dòng chi còn lại phải chi": "Remaining expenditure payable",
+"Còn phải thu − Còn phải chi": "Receivable − Remaining to pay",
+"Phần còn phải chi lớn hơn phần còn phải thu": "Remaining payable exceeds receivable",
+"Tiền dự án còn dư khi thu – chi hết": "Project surplus once everything is collected and paid",
+"− Dòng thu": "− Collections",
+"− Dòng chi": "− Expenditure",
 "Bỏ": "Skip",
 "Có": "Yes",
 "HĐ": "Contract",
@@ -1187,6 +1194,42 @@ window.BKS_EN = {
 "Xem": "View"
 },
 "patterns": [
+[
+"Doanh thu TĐ{}",
+"Revenue M{}"
+],
+[
+"Chi phí TĐ{}",
+"Cost M{}"
+],
+[
+"doanh thu TĐ{}",
+"of M{} revenue"
+],
+[
+"chi phí TĐ{}",
+"of M{} cost"
+],
+[
+"Doanh thu, chi phí dự kiến TĐ{} (mục I) trừ dòng thu, dòng chi thực tế (mục II)",
+"Planned revenue, cost at M{} (section I) minus actual collections, expenditure (section II)"
+],
+[
+"Từ mục I (TĐ{}) và II",
+"From sections I (M{}) and II"
+],
+[
+"Còn phải thu = Doanh thu TĐ{} (mục I) − Dòng thu (mục II) · Còn phải chi = Chi phí TĐ{} (mục I) − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. Đổi thời điểm ở mục I (TĐ1 / TĐ2 / TĐ3) thì mục III tự lấy theo.",
+"Receivable = Revenue M{} (section I) − Collections (section II) · Remaining to pay = Cost M{} (section I) − Expenditure (section II) · Balance = Receivable − Remaining to pay. Changing the milestone in section I (M1 / M2 / M3) updates section III."
+],
+[
+"Theo TĐ{} − dòng thu, dòng chi",
+"Per M{} − collections, expenditure"
+],
+[
+"Doanh thu TĐ{} − dòng thu · chi phí TĐ{} − dòng chi",
+"Revenue M{} − collections · cost M{} − expenditure"
+],
 [
 "Đơn vị: {}, sau VAT · Thực chi = chi phí đã chi + thanh toán HĐ đầu vào (gồm tạm ứng); không gồm tiền vay nhận về ({} {}) và trả nợ gốc vay ({} {}) vì đó là vay – trả nợ, không phải doanh thu / chi phí · Còn lại âm = đang bỏ tiền ra nhiều hơn tiền thu về · Kế hoạch theo hợp đồng chỉ để so sánh, không phải tiền thật.",
 "Unit: {}, after VAT · Expenditure = costs paid + procurement contract payments (incl. advances); excl. loan proceeds ({} {}) and principal repayments ({} {}) since these are borrowing – repayment, not revenue / cost · Negative balance = spending more than collected · Plan per contract is for comparison only, not real cash."

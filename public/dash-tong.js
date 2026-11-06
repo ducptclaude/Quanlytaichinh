@@ -29,6 +29,7 @@ function bDashRender(list, v, one) {
   // ---- Thanh chỉ số: nhóm DT – CP – LN theo TĐ đang chọn · nhóm dòng tiền thực tế ----
   const k = [1, 2, 3].includes(Number(BST.db_td)) ? Number(BST.db_td) : 3;
   const tk = MT['t' + k], ck = MT['c' + k], lk = MT['l' + k];
+  const { T: T3 } = bMuc3Data(list, v, rows, k); // mục III theo TĐ đang chọn của dashboard
   const tdLab = { 1: 'TĐ1 · hợp đồng', 2: 'TĐ2 · điều chỉnh', 3: 'TĐ3 · mới nhất' }[k];
   const vs = (a, b, good) => (k === 1 ? '<span class="db-eq">kế hoạch lúc ký hợp đồng</span>' : `${dlt(a, b, good)} so với TĐ1`);
   const kpi = (k, lab, val, sub, col) => `<div class="db-kpi" style="--db-c:${col}"><span class="db-kl">${lab}</span>
@@ -41,7 +42,7 @@ function bDashRender(list, v, one) {
   const kpis2 = [
     kpi('thu', 'Đã thu (tiền về)', T.thu, `Đạt <b>${pc(T.thu, T.hd_sv)}</b> doanh thu`, DBC.thu),
     kpi('chi', 'Đã chi', T.chi, `Bằng <b>${pc(T.chi, T.thu)}</b> dòng thu`, DBC.chi),
-    kpi('pt', 'Còn phải thu', T.phai_thu, `Còn lại thực (thu − chi): <b>${n(T.con)}</b>`, DBC.pt),
+    kpi('pt', 'Còn phải thu', T3.pt, `Còn lại thực (thu − chi): <b>${n(T.con)}</b>`, DBC.pt),
   ].join('');
   const tdSeg = `<div class="db-tdseg" role="group" aria-label="Chọn thời điểm">${DB_TD.map(([i, a, b]) =>
     `<button type="button" data-dbtd="${i}" class="${i === k ? 'on' : ''}"><b>${a}</b> ${b}</button>`).join('')}</div>`;
@@ -49,7 +50,7 @@ function bDashRender(list, v, one) {
   // ---- Dòng chảy 4 khối ----
   const go = (no) => `<button type="button" class="db-go" data-dbgo="${no}">Xem mục ${no} ›</button>`;
   const line = (lab, x, max, col, extra = '') => `<li><span>${lab}</span>${bar(x, max, col)}<b>${n(x)}</b>${extra}</li>`;
-  const mx1 = Math.max(T.dt1, T.cp1, 1), mx2 = Math.max(T.thu, T.chi, 1), mx3 = Math.max(T.hd_sv, T.chi, 1);
+  const mx1 = Math.max(T.dt1, T.cp1, 1), mx2 = Math.max(T.thu, T.chi, 1), mx3 = Math.max(Math.abs(T3.pt), Math.abs(T3.pc), Math.abs(T3.con), 1);
   const lnPts = [MT.l1, MT.l2, MT.l3], lMax = Math.max(...lnPts.map(Math.abs), 1);
   const step = lnPts.map((x, i) => {
     const h = Math.max(4, (Math.abs(x) / lMax) * 54);
@@ -71,9 +72,9 @@ function bDashRender(list, v, one) {
       `<ul class="db-lines">${line('Dòng thu', T.thu, mx2, DBC.thu)}${line('Dòng chi', T.chi, mx2, DBC.chi)}${line('Còn lại', T.con, mx2, DBC.ln)}</ul>
       <div class="db-note2">Đã thu <b>${pc(T.thu, T.hd_sv)}</b> doanh thu HĐ · không gồm tiền vay, trả nợ gốc</div>`),
     arrow(),
-    blk('III', 'b3', 'Còn phải thu – chi', 'Doanh thu mới nhất − thực chi', T.hd_sv - T.chi, `Còn lại · thực chi ${pc(T.chi, T.hd_sv)} DT`,
-      `<ul class="db-lines">${line('Doanh thu', T.hd_sv, mx3, DBC.dt)}${line('Thực chi', T.chi, mx3, DBC.cp)}${line('Còn lại', T.hd_sv - T.chi, mx3, DBC.ln)}</ul>
-      <div class="db-note2">Còn phải thu CĐT <b>${n(T.phai_thu)}</b> ${TY()} (doanh thu − đã thu)</div>`),
+    blk('III', 'b3', 'Còn phải thu – chi', `Theo TĐ${k} − dòng thu, dòng chi`, T3.con, 'Còn lại (thu − chi)',
+      `<ul class="db-lines">${line('Còn phải thu', T3.pt, mx3, DBC.dt)}${line('Còn phải chi', T3.pc, mx3, DBC.cp)}${line('Còn lại', T3.con, mx3, DBC.ln)}</ul>
+      <div class="db-note2">Doanh thu TĐ${k} − dòng thu · chi phí TĐ${k} − dòng chi</div>`),
     arrow(),
     blk('IV', 'b4', 'Lợi nhuận TĐ1 → TĐ3', 'Hợp đồng → điều chỉnh → quyết toán', MT.l3, `LN mới nhất · ${dlt(MT.l3, MT.l1)}`,
       `<div class="db-steps">${step}</div>`),
