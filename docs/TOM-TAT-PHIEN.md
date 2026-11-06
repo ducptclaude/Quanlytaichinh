@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.06.11.26 — Thuật ngữ tài chính Thu / Chi
+- Người dùng chốt: Thu = dòng tiền về (Receipts), Chi = chi phí mình chi ra (Expenditure) – không dùng In / Out, Cash in / Cash out.
+- Đổi 51 câu: Thực thu / Thực chi = Actual receipts / Actual expenditure; Dòng thu / chi = Receipts / Expenditure;
+  Còn lại thực = Net actual cash; Kế hoạch thu / chi = Planned receipts / expenditure; THU (tiền về) = RECEIPTS (collections).
+
 ## V08.06.11.26 — Sửa dịch chữ không dấu
 - Lỗi: "Doanh thu" (chữ Việt không dấu) không được dịch vì bộ dịch chỉ xét chữ có dấu → nay tra cả chữ không dấu (nguyên câu) + câu chứa "Doanh thu".
 - Tên hệ thống "Quản trị tài chính" (dữ liệu Quản trị đặt) → thêm vào từ điển: Financial Management. Đổi tên hệ thống thì phải thêm câu dịch mới.
