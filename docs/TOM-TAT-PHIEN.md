@@ -1,139 +1,68 @@
 # Tóm tắt phiên làm việc
 
-> Tệp này ghi lại tình trạng dự án sau mỗi phiên, để phiên sau (dev / revi) nắm nhanh. Mục mới nhất ở trên cùng.
+> Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
-## Tình trạng hiện tại
-- **Phiên bản:** V3.06.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
-- **Mã nguồn:** https://github.com/ducptclaude/Quanlytaichinh (nhánh `staging`).
-- **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
-  → địa chỉ https://quanlytaichinh.up.railway.app (địa chỉ cũ `quanlytaichinh-production…` đã ngừng; đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
-- **Kho dữ liệu:** PostgreSQL trên Railway (đã Online).
+## Phiên 06/11/2026 — Thay hệ thống: Quản lý tài chính → BKS (V01.06.11.26)
+- Người dùng chọn **thay** web Quản lý tài chính bằng hệ thống BKS từ gói `BKS-staging-V30.04.11.26.zip` (bản staging, commit gốc `e3b1199`).
+- Kho mã: `ducptclaude/Quanlytaichinh`, nhánh `staging` → Railway dự án `lavish-essence`, địa chỉ https://quanlytaichinh.up.railway.app
+- **Mã cũ** (Quản lý tài chính V3.06.11.2026) lưu ở nhánh `backup-qltc-V3.06.11.2026` – quay lại được.
+- **Dữ liệu cũ GIỮ NGUYÊN** ở ngăn `public` của kho dữ liệu Railway. BKS dùng ngăn riêng `bks` (thêm biến `DB_SCHEMA`, `lib/db.js`)
+  vì 2 hệ thống trùng tên bảng `users`, `sessions`, `settings`.
+- Thay đổi so với gói gốc: chỉ `lib/db.js` (ngăn riêng + kiểm tra cột theo đúng ngăn), thêm `CLAUDE.md`, tóm tắt này, phiên bản.
+- Kiểm tra trước khi đưa lên: chạy bộ nhớ tạm + PostgreSQL dùng chung có sẵn dữ liệu cũ → tester **4.518 ĐẠT / 0 LỖI**;
+  dữ liệu cũ trước/sau giống hệt (đối chiếu mã kiểm tra); máy tính 1366px + iPhone 13 không tràn ngang.
+- Sau khi đưa lên: BKS mới chưa có tài khoản → người dùng vào `/setup` tạo Quản trị (cần SETUP_TOKEN nếu Railway có đặt).
+  Nên đặt `APP_ENV=staging` trên Railway để hiện nhãn thử nghiệm.
 
-## Chức năng đã có
-| Chức năng | Ghi chú |
-|---|---|
-| Khởi tạo lần đầu (`/setup`) | Tên công ty, tên hệ thống, dòng bản quyền, tài khoản Quản trị; xong tự khóa; có mã `SETUP_TOKEN` |
-| Đăng nhập / Đăng xuất | Sai 5 lần / 15 phút → tạm khóa 15 phút; một máy sai 20 lần cũng bị khóa |
-| Mật khẩu mạnh | ≥ 8 ký tự, hoa, thường, số, ký tự đặc biệt |
-| Quản lý tài khoản (`/tai-khoan`, chỉ Quản trị) | Tạo / sửa / khóa / mở khóa / xóa / đặt lại mật khẩu; luôn còn ≥ 1 Quản trị; không tự khóa, tự xóa, tự hạ quyền |
-| Cá nhân (`/ca-nhan`) | Xem thông tin, đổi mật khẩu; bắt buộc đổi nếu Quản trị vừa đặt lại |
-| Liên hệ (`/lien-he`) | SĐT, email, người phụ trách hỗ trợ (Quản trị sửa); hiện số phiên bản |
-| Kiểm tra (`/health`) | Phiên bản, môi trường (staging/production), kết nối kho dữ liệu |
-| Chạy tạm khi chưa có kho dữ liệu | Thanh vàng cảnh báo |
-| Bản thử | Dải đỏ "HỆ THỐNG THỬ NGHIỆM" |
-| Dự án (`/du-an`) | Mã*, Tên*, Chủ đầu tư, Địa điểm, Nhóm, Giá trị HĐ, Ngày khởi công/hoàn thành, Trạng thái*, Ghi chú |
-| Doanh thu (`/doanh-thu`) | Số CT* (tự đề xuất DT-0001), Dự án*, Ngày*, Số hóa đơn, Nội dung*, Hình thức, Tiền chưa VAT*, Tiền VAT (nhập tay), Tổng sau VAT (tự tính), Ghi chú |
-| Chi phí (`/chi-phi`) | **1 dòng = 1 hợp đồng** (từ V2.06.11): Nhóm chi phí* (12 khoản, chia 3 nhóm), Thuộc hợp đồng chủ đầu tư* (chọn dự án, hiện CĐT + giá trị HĐ), Số hợp đồng (không trùng trong cùng 1 NCC), Thầu phụ / NCC / Hộ kinh doanh (2 ô này **bắt buộc với chi phí trực tiếp**), Hạng mục thi công*, Ngày ký* (gõ hoặc 📅 chọn lịch), Giá trị HĐ*, VAT (trống = 0), Giá trị sau VAT (tạm tính), Ghi chú. Mã CP-0001 hệ thống tự đánh, không hiện trên biểu mẫu. **Khung nhập nằm ngay đầu trang Chi phí** (từ V3.06.11) |
-| Báo cáo (`/bao-cao`) | Theo dự án, tiền chưa VAT: DT, (1) CP trực tiếp, Lãi gộp, (2) CP gián tiếp, (3) CP tài chính, Lợi nhuận, tỷ suất, % Thu/HĐ; bảng chi phí theo khoản mục |
-| Chung cho danh mục | Mã không trùng (không phân biệt hoa/thường), tìm không dấu, sắp xếp tự nhiên (DA-2 < DA-10), lọc, phân trang 50, xuất Excel (.xlsx), ghi người tạo / người cập nhật cuối |
+---
 
-Vai trò hiện có: **Quản trị**, **Người dùng**.
+# Tóm tắt phiên làm việc – PROJECT PROFIT (Ban Kiểm soát TMN)
 
-## Việc đang chờ người dùng quyết
-1. Nói **"chuyển qua chính"** để tạo nhánh `main`, rồi tách Railway thành 2 môi trường: `production` ← `main`, `staging` ← `staging` (hướng dẫn đã gửi trong phiên 05/11).
-2. Logo (file PNG); có cần thêm vai trò khác (VD: Chỉ xem, Kế toán, Duyệt) không.
-3. Danh sách ô chính thức cho Dự án / Doanh thu (Chi phí đã chốt 3 nhóm / 12 khoản mục).
-4. Quyền: hiện mọi người xem/thêm/sửa, chỉ Quản trị xóa – có cần giới hạn thêm?
-5. ~~Quy tắc VAT ≤ 10%~~ → người dùng chốt **GIỮ** (06/11).
-6. Doanh thu nhập trước V6 được coi là **chưa VAT** (VAT = 0) – nếu từng nhập số có VAT thì cần sửa lại.
-7. Chi phí cũ "Chưa phân loại" (từ loại "Chi phí chung"/"Khác") – vào Báo cáo → "Xem và phân loại lại".
+Cập nhật: 22/10/2026. Đọc file này đầu phiên mới; chi tiết kỹ thuật xem code và `git log`.
 
-## Việc dở dang (chuyển sang phiên sau)
-- Không có. (DA-01 TEST người dùng đã tự xóa 06/11. Người dùng yêu cầu KHÔNG nhắc lại việc đổi mật khẩu `revi`.)
+## 1. Hệ thống
+| | Repo / nhánh | Địa chỉ |
+|---|---|---|
+| Bản chính | `TuLee116/Project-Profit-BKS-TMN` · `main` | https://bks.up.railway.app |
+| Thử nghiệm | cùng repo · `staging` | https://bks-staging.up.railway.app (APP_ENV=staging, Postgres riêng) |
+| Hệ thống khác | `TuLee116/Bao-Cao-DT-CP-BKS-TMN` (T&T Helio, điện mặt trời, đơn vị triệu đồng) | https://bks-tmn-report.up.railway.app |
 
-## Khoản mục chi phí (mã lưu trong kho – KHÔNG đổi mã đã dùng)
-| Nhóm | Mã – Khoản mục |
-|---|---|
-| 1. Trực tiếp | TT01 Vật tư chính · TT02 Vật tư phụ · TT03 Máy móc thiết bị · TT04 Nhân công (thợ trực tiếp) · TT05 Thầu phụ |
-| 2. Gián tiếp | GT01 Tiện ích phục vụ thi công · GT02 Lương (BCH, gián tiếp) · GT03 Thưởng · GT04 Ngoại giao |
-| 3. Tài chính | TC01 Chi phí tài chính · TC02 Lãi vay ngân hàng (chỉ phần lãi) · TC03 Đóng phạt chủ đầu tư |
+- Stack: Node/Express + PostgreSQL (`lib/db.js`), giao diện JS thuần (`public/app.js`, `public/report.js`, `public/common.js`, `public/style.css`, `views/index.html`).
+- Quy trình: sửa trên `staging` → người dùng nói **"chuyển qua chính" / "sync staging → main"** thì fast-forward `main`. Giữ 2 nhánh đồng bộ.
+- Phiên bản: `node scripts/bump-version.js` trước mỗi lần phát hành (dạng `Vlần.dd.mm.yy`, giờ VN).
+- Kiểm thử: `node scripts/tester.js <url> <user> <pass>` (~4.500 kiểm tra).
+- Commit kết thúc bằng dòng `Co-Authored-By` theo hướng dẫn phiên.
 
-## Nhật ký
-### V3.06.11.2026 — Khung nhập ngay trong trang Chi phí; bắt buộc Số HĐ + NCC với chi phí trực tiếp
-- Người dùng chốt: Số HĐ + Thầu phụ/NCC chỉ **bắt buộc với nhóm 1. Chi phí trực tiếp** (TT01–TT05); nhóm Gián tiếp / Tài chính để trống được.
-  Dấu * tự hiện khi chọn khoản mục trực tiếp. Lưu ý: dòng TT cũ chưa có Số HĐ khi SỬA sẽ phải bổ sung Số HĐ.
-- Sau khi cập nhật (người dùng đồng ý): đã điền Số HĐ tạm `CHUA-CO-<mã>` cho **10 dòng** chi phí trực tiếp đang trống trên web
-  (sửa qua web bằng tài khoản `revi`, ghi người cập nhật). Tổng giá trị không đổi: 9.533.000.000 đ. Khi có số HĐ thật thì sửa lại.
-- Giữ quy tắc VAT ≤ 10% giá trị.
-- Khung "Thêm hợp đồng chi phí" đặt **ngay đầu trang Chi phí** (không đặt trên Trang chủ – người dùng đã yêu cầu bỏ);
-  lưu xong quay lại trang Chi phí, báo "Đã lưu CP-xxxx". "Lưu & thêm tiếp" giữ dự án đã chọn. Trang `/chi-phi/moi` vẫn dùng được.
-- Mã: `inlineForm` (src/entities.js), `entityForm` dùng chung (src/views/entities.js), `requiredWhen` + `DIRECT_ONLY`, public/app.js mục 8.
-- Kiểm tra: 22/22 bài thử (bộ nhớ tạm + PostgreSQL, thêm kiểm tra khung nhập + bắt buộc có điều kiện); chụp 1366px + iPhone 13 không tràn ngang.
+## 2. Người dùng & cách làm việc
+- PMP / QS / Ban Kiểm soát, không lập trình. Trả lời **tiếng Việt, ngắn, đúng số liệu**.
+- **Tiết kiệm credit**: không rà soát/chụp màn hình thừa, không theo dõi chạy nền, báo kết quả ngắn. Chỉ chạy khi người dùng bảo.
+- **Không tự lấy ảnh từ Internet** (đã có sự cố ảnh không phù hợp – người dùng cấm).
+- Tài khoản dùng để thao tác: `claude` (quyền Nhập liệu) và `test1` – mật khẩu người dùng cung cấp trong chat, **không ghi vào file**. Đã khuyên khóa/đổi sau khi dùng.
 
-### V2.06.11.2026 — Chi phí theo hợp đồng thầu phụ / nhà cung cấp
-- Người dùng chốt: **1 dòng Chi phí = 1 hợp đồng**; báo cáo cộng **giá trị hợp đồng (chưa VAT)**; Số HĐ không trùng trong cùng 1 NCC.
-- Biểu mẫu mới theo thứ tự: Nhóm chi phí → Thuộc HĐ chủ đầu tư → Số HĐ → Thầu phụ/NCC/HKD → Hạng mục → Ngày ký → Giá trị HĐ → VAT → Sau VAT → Ghi chú.
-- Bỏ khỏi biểu mẫu: Số phiếu chi (hệ thống tự đánh CP-xxxx, xem ở mục Lịch sử), Số hóa đơn (cột `invoice_no` GIỮ trong kho, không xóa).
-- Dữ liệu cũ giữ nguyên: Nội dung → hiện là Hạng mục, Ngày → Ngày ký, Tiền chưa VAT → Giá trị HĐ; Số HĐ cũ để trống.
-- Số HĐ và NCC không bắt buộc (cho Lương, Lãi vay… không có hợp đồng). So trùng: bỏ dấu, không phân biệt hoa/thường.
-- Mọi ô ngày (cả Dự án, Doanh thu) có thêm nút 📅 chọn trên lịch; vẫn gõ tay dd/mm/yyyy được.
-- Danh sách Chi phí dùng tên cột ngắn (Dự án (HĐ CĐT), Thầu phụ / NCC, Hạng mục, Giá trị HĐ, Sau VAT) để đủ cột ở 1280–1366px.
-- Kiểm tra: 22/22 bài thử đạt (bộ nhớ tạm + PostgreSQL); thử nâng cấp từ kho bản V1.06.11: không mất dữ liệu, Số hóa đơn cũ còn nguyên;
-  chụp 1366px + iPhone 13: không tràn ngang; tạm tính sau VAT và chọn lịch hoạt động đúng.
-- Mã: `src/entities.js` (`costs`: `codeAuto`, `uniqueWith`, `refDetail`, `listLabel`), `src/routes/entities.js` (`uniqueError`, tự đánh mã có thử lại khi trùng),
-  `src/views/entities.js`, `public/app.js` (5b nút lịch), `public/style.css`.
+## 3. Tính năng đã có (tóm tắt)
+- Bảo mật: header CSP/HSTS, giới hạn tần suất **600 yêu cầu/phút, 120 lệnh ghi/phút → chặn IP 10 phút**, khóa đăng nhập sai, kiểm tra Origin (`lib/security.js`).
+- Trực tuyến theo phiên, tự đăng xuất khi không thao tác 60 phút.
+- Nhật ký hoạt động cho quản trị (trước → sau), nén Brotli nhật ký > 7 ngày (`lib/audit.js`).
+- Doanh thu / Chi phí: nhóm **"Vay và trả nợ ngân hàng"** có *Nhận tiền vay – giải ngân* (tiền vào), *Trả nợ gốc* (không tính CP), *Lãi vay*. Nhóm lương, ngoại giao, phí tài chính, phạt: không chịu VAT.
+- Báo cáo: lưới ô công trình kèm ảnh; khung tổng quan nhanh 6 tab. Tab DT/CP/LN chỉ 2 lớp **Kế hoạch (theo HĐ)** và **Thực (tiền thật, sau VAT)**; số "thực hiện" ẩn sau nút *Thực hiện đến hiện tại*.
+- Mục **Thực thu – Thực chi – Còn lại thực**: Còn lại thực = thực thu − thực chi (không gồm vay / trả gốc); bấm số xem chi tiết.
+- **TĐ1–TĐ3** (ban đầu / có phát sinh / quyết toán): số kế hoạch nhập tay, đối chiếu HT (DT theo HĐ gốc / HĐ+PL / QT; CP = thầu phụ cùng mốc + chi phí khác có ngày ≤ ngày chốt). Nút *So với thực tế* hiện tiền thật đến ngày chốt.
+- Ngày bắt đầu / kết thúc công trình: trống = tự lấy ngày ký HĐ đầu tiên / ngày quyết toán (công trình Hoàn thành mà còn HĐ chưa QT → "nghiệm thu cuối"); 1 nút **✎ Sửa ngày** (`PUT /api/du-an/:id/ngay`).
+- Xuất: **Excel** (11 trang, định dạng mẫu TMN qua ExcelJS phía trình duyệt), **Excel mẫu TMN** (bảng DT–CP trình ký, `lib/export-dtcp.js`, `GET /api/bao-cao/dtcp.xlsx`), PowerPoint, In/PDF.
+- Dữ liệu mẫu 12 dự án DEMO (`lib/demo.js`, seed mặc định 22): 0 cảnh báo, 12/12 có lãi, VAT 10% (nhân công 8%), ảnh minh họa tự vẽ `lib/assets/demo/`.
+- **Giao diện điện thoại** (commit `3401ea3`, V01.22.10.26): bảng → thẻ (≤ 900px), menu lưới 4×2, danh sách trước form; máy tính và bản in giữ nguyên.
 
-### Phiên 06/11/2026 — mở mạng tới web
-- Địa chỉ web đổi thành https://quanlytaichinh.up.railway.app (`/health`: V1.06.11.2026, staging, kho dữ liệu đã kết nối).
-  Địa chỉ cũ `quanlytaichinh-production.up.railway.app` trả về 404 "Application not found".
-- Đã thêm 2 tên miền trên vào danh sách được phép của môi trường Default (các phiên sau không phải làm lại).
-- Người dùng cho phép nối kho GitHub → tệp tóm tắt này được đẩy lên nhánh `staging`.
-- **Revi nhập dữ liệu thử qua web (tài khoản `revi`, 1 lần đăng nhập): 30/30 lần lưu thành công, không lỗi.**
-  - 4 dự án DA-02…DA-05 (HĐ 3 – 9,5 tỷ; đủ 3 trạng thái); 6 doanh thu DT-0001…0006 (VAT 8% và 10%);
-    20 chi phí CP-0001…0020 phủ đủ 12 khoản mục (có lãi vay TC02, phạt CĐT TC03). Ô Ghi chú ghi "Dữ liệu thử".
-  - Đối chiếu báo cáo với tính tay: **khớp 100%**. Tổng DT 13.600.000.000; CP trực tiếp 9.100.000.000; Lãi gộp 4.500.000.000 (33,1%);
-    CP gián tiếp 305.000.000; CP tài chính 128.000.000; LN 4.067.000.000 (29,9%). VAT DT 1.228.000.000, VAT CP 764.000.000 khớp.
-  - DA-04 lỗ (LN −470.000.000, −31,3%): báo cáo hiện số âm đúng.
-  - Nhận xét: % Thu/HĐ tổng tính cả DA-01 TEST (HĐ 1 tỷ, chưa thu) → 49,1%.
+## 4. Trạng thái hiện tại (23/10/2026)
+- GitHub: `staging` = `main` (V01.23.10.26, có giao diện điện thoại) – đã sync 23/10/2026.
+- Railway: sự cố đã cho build lại mọi gói. Việc người dùng tự làm trên Railway: đổi mật khẩu Postgres (production + staging), xóa `SETUP_TOKEN`, kiểm tra kết nối GitHub (Settings → Source), Redeploy nếu site không tự lên bản mới.
+  - Tài khoản Railway là **Trial** → cần nâng gói Hobby trước khi chạy số liệu thật.
+- **Nhập liệu thật trên bản chính (tài khoản `claude`) – ĐÃ XONG 3 dự án** (23/10/2026):
+  - DA-2026-01 (id 27) đủ. Lỗi còn lại: tạm ứng TP-02…TP-05 ngày 20/03/2025 trước ngày ký HĐTP (HĐ đã quyết toán, bị khóa).
+  - DA-2026-02 (id 28): nhập bổ sung (không xóa) điện nước T8–13, lương T9–13, vay BIDV; sửa ngày tạm ứng TP-07/08/09.
+  - DA-2026-03 (id 29): nhập mới đủ theo mục 5 (tên đối tác/ngày do Claude đặt – chờ người dùng xác nhận).
+  - Quy tắc: số tròn, mỗi HĐ thầu phụ ≤ 5 tỷ, mỗi dự án ≤ 30 tỷ; ghi chậm (~0,8 s/lệnh, < 120 lệnh/phút). API cần header `X-Requested-With: fetch` + `Origin`.
 
-### Phiên 05–06/11/2026 — tổng hợp
-- Từ kho GitHub trống → hệ thống chạy trên Railway (PostgreSQL), 6 lần cập nhật V1 → V6.05.11.2026, tất cả trên nhánh `staging`.
-- Người dùng chốt: menu nằm trên thanh màu; Chi phí 3 nhóm / 12 khoản mục; 3 cột tiền (chưa VAT / VAT nhập tay / sau VAT);
-  lãi vay chỉ nhập phần lãi; chi phí bắt buộc gắn dự án; bỏ tab Nhập hằng ngày (giữ dữ liệu cũ); báo cáo tính trên tiền chưa VAT.
-- Rà soát (Revi) mục Chi phí: phát hiện trùng số chứng từ giữa nhà cung cấp, nguy cơ tính trùng, thiếu VAT → đã xử lý ở V6.
-- Kiểm tra cuối phiên: 22/22 bài thử tự động đạt (bộ nhớ tạm + PostgreSQL); đã thử nâng cấp từ dữ liệu bản cũ, không mất dữ liệu.
-- Lỗi gặp và đã xử lý: menu che tab ở màn hình hẹp; bảng báo cáo che cột; tên kiểu bảng nhập trùng ô thống kê trang chủ;
-  ô ngày hiện mm/dd/yyyy trên máy tiếng Anh (chuyển hết sang dd/mm/yyyy); lời nhắc xóa dự án sai sau khi bỏ tab.
-- Lưu ý kỹ thuật cho phiên sau: Railway tự cập nhật khi đẩy lên `staging`; bảng `daily_entries` và cột `costs.cost_type` là dữ liệu cũ, KHÔNG xóa.
-
-### V6.05.11.2026 — Chi phí 3 nhóm, VAT, bỏ tab Nhập hằng ngày
-- Quyết định của người dùng: lãi vay chỉ nhập phần lãi (có lời nhắc); 3 cột tiền chưa VAT / VAT nhập tay / sau VAT;
-  chi phí bắt buộc gắn dự án; bỏ tab Nhập hằng ngày; Lương/Thưởng nhóm Gián tiếp chỉ cho bộ máy gián tiếp.
-- Báo cáo tính trên tiền CHƯA VAT; thêm Lãi gộp; bảng chi phí theo khoản mục.
-- Tiền VAT không được vượt 10% tiền chưa VAT (chặn gõ thừa số 0).
-- Số phiếu tự đề xuất; thêm ô Số hóa đơn (được trùng); gợi ý khi gõ Nội dung, Nhà cung cấp, Chủ đầu tư.
-- Chuyển dữ liệu cũ: Vật tư→TT01, Máy thi công→TT03, Nhân công→TT04, Thầu phụ→TT05; "Chi phí chung"/"Khác"/trống
-  → Chưa phân loại (báo cáo cảnh báo). VAT cũ = 0. Cột cũ `cost_type` và bảng `daily_entries` GIỮ NGUYÊN.
-- Dự án còn dữ liệu Nhập hằng ngày cũ không xóa được.
-
-### V5.05.11.2026 — Nhập hằng ngày
-- Bảng nhập trực tiếp theo dự án (`src/routes/daily.js`, `public/grid.js`), cấu hình ở `src/entities.js` → `DAILY`.
-- Bảng mới `daily_entries` (chỉ thêm). Số lượng NUMERIC(18,3), kiểu VN (dấu phẩy = số lẻ; "12.5" bị từ chối để tránh nhầm).
-- Thành tiền = SL × ĐG tính bằng số nguyên lớn, làm tròn đến đồng (từ 0,5 lên).
-- Quy tắc mặc định: ngày bắt buộc, không sau hôm nay, không trước 01/01/2000; nội dung, số lượng (> 0), đơn giá (≥ 0) bắt buộc.
-- Chống ghi đè: 2 người sửa cùng 1 dòng → người lưu sau được báo, hiện số liệu mới nhất.
-- Mọi ô ngày (cả Dự án / Doanh thu / Chi phí / Báo cáo) chuyển sang dd/mm/yyyy, gõ tắt "5" hoặc "5/3".
-- Dự án đang có dòng nhập hằng ngày không xóa được.
-- Bài thử: 29 bài, đạt cả bộ nhớ tạm và PostgreSQL; thử thao tác bàn phím thật trên máy tính + điện thoại.
-
-### V4.05.11.2026 — Danh mục chính: Dự án, Doanh thu, Chi phí, Báo cáo
-- Cấu hình ô tập trung ở `src/entities.js`; kho dữ liệu tự THÊM bảng/cột (không xóa). Đã thử nâng cấp kho cũ: giữ nguyên dữ liệu.
-- Số tiền lưu số nguyên (đồng), ô nhập tự thêm dấu chấm; ngày lưu YYYY-MM-DD.
-- Xóa: chỉ Quản trị; không xóa được dự án đang có doanh thu/chi phí.
-- Báo cáo: LN = DT − CP; Tỷ suất = LN ÷ DT; % Thu/HĐ = DT ÷ Giá trị HĐ (làm tròn 1 chữ số thập phân khi hiển thị).
-- Xuất Excel tự viết (không thư viện): số tiền là số thật, có hàng tổng, cố định dòng tiêu đề, bộ lọc, in A4 ngang.
-- Bài thử: 22 bài, đạt cả bộ nhớ tạm và PostgreSQL (mỗi bộ thử dùng ngăn dữ liệu riêng, tự dọn).
-
-### V3.05.11.2026 — Đưa menu lên thanh trên
-- 4 tab (Trang chủ / Tài khoản / Cá nhân / Liên hệ) nằm trong thanh màu trên cùng, giữa tên hệ thống và tên người dùng.
-- Màn hình hẹp: menu xuống dòng 2 nhưng vẫn trong thanh màu (V4 nâng ngưỡng lên ≤ 1440px khi menu có 8 mục).
-- Đã kiểm tra 1366 / 1180 / 1024 / 768px, iPhone 13, iPhone SE: đủ 4 tab, không tràn ngang.
-
-### V2.05.11.2026 — Tài khoản, phiên bản, bản thử
-- Thêm quản lý tài khoản, tab Cá nhân, tab Liên hệ, số phiên bản tự động, dải đỏ bản thử.
-- Thêm cột `must_change_password`, `updated_at` vào bảng `users` (chỉ thêm, không mất dữ liệu cũ — đã thử nâng cấp kho cũ).
-- Thêm bộ chạy thử tự động `npm test` (13 bài, đạt cả bộ nhớ tạm và PostgreSQL).
-- Thêm `CLAUDE.md` + 2 vai `dev`, `revi` (`.claude/agents/`).
-
-### V1.05.11.2026 (0.1.1) — Khởi tạo web
-- Khung web, trang khởi tạo, đăng nhập, `/health`, chế độ chạy tạm, giao diện Navy → Teal, font Montserrat.
+## 5. Số liệu 3 dự án (để nhập lại nếu cần), đơn vị triệu đồng
+- **DA-2026-02** – CĐT Ban QLDA ĐTXD quận Cẩm Lệ, HĐ `05/2025/HĐTC-TMN` 18.000 (05/09/2025), PL01 +1.500 (10/02/2026); NT đợt 1–3 mỗi đợt 4.000 (20/12/2025, 20/04/2026, 20/08/2026); tiền về TƯ 2.000, đợt 1 3.500, đợt 2 3.500, đợt 3 3.000. Thầu phụ: Phần thô 4.000 (XD Hòa Khánh), Cửa – nhôm kính 3.000 (Nhôm kính Đà Thành), Điện nước 2.500 (ME Miền Trung), Sân trường 1.500 (Cảnh quan Xanh); trả TƯ 10% + 1 đợt 40% (sau VAT). Chi phí vật tư (Hợp Nhân 900…), nhân công, máy, lán trại, bảo lãnh 40; lương BCH 50/tháng; vay 2.000, trả gốc 1.000 + lãi 20.
+- **DA-2026-03** – CĐT Cty CP Đầu tư Biển Mỹ Khê, HĐ `03/2026/HĐTC-TMN` 28.000 (10/05/2026); NT đợt 1 3.000 (25/08/2026); tiền về TƯ 4.000, đợt 1 2.500. Thầu phụ: Cọc – móng 5.000, BTCT thân 5.000, MEP 3.500, Mặt dựng kính 2.500; trả TƯ 10% (+ đợt 20% cho 2 HĐ đầu). Chi phí vật tư (Hợp Nhân 600), thí nghiệm cọc 60, cẩu tháp 250, lán trại 200, bảo lãnh 60; lương BCH 70/tháng; vay 3.000.
+- VAT: HĐ và thầu phụ 10%, vật tư 10%, nhân công 8%; TĐ nhập theo số HT tại ngày chốt.

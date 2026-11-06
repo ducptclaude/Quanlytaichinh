@@ -1,368 +1,1119 @@
-'use strict';
+const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
-const express = require('express');
-const { createStore } = require('./src/db');
-const auth = require('./src/auth');
-const pages = require('./src/views/pages');
-const { version } = require('./src/version');
-const usersRouter = require('./src/routes/users');
-const accountRouter = require('./src/routes/account');
-const { entityRouter } = require('./src/routes/entities');
-const reportsRouter = require('./src/routes/reports');
-const { ENTITIES } = require('./src/entities');
+const store = require('./lib/db');
+const auth = require('./lib/auth');
+const security = require('./lib/security');
+const audit = require('./lib/audit');
+const { TP_NHOM, TRANG_THAI, ROLES, QUYEN, validateProject, validateUser, validateSettings, validateContact, validateTarget, validateRevenue, validateTienVe, validateCost, validateTp, validateTpLine, validateTpPay, passwordErrors, passcodeErrors } = require('./lib/validate');
+const { buildContracts, summarizeContracts } = require('./lib/subcontract');
+const { KHOI_CHI_PHI, NHOM_CHI_PHI, summarizeCost, sortCost, costLine } = require('./lib/cost');
+const { summarizeProject } = require('./lib/dashboard');
+const { projectReport } = require('./lib/report');
+const { DEMO_PREFIX, seedDemo } = require('./lib/demo');
+const { buildDtcp, costLinesFor, CONG_TY } = require('./lib/export-dtcp');
+const PHIEN_BAN = require('./lib/version').readVersion(); // đọc 1 lần khi khởi động
+const { LOAI_DOANH_THU, calcLine, summarize, sortRevenue, tienVeLabel, sortTienVe, summarizeTienVe } = require('./lib/revenue');
 
+const app = express();
 const PORT = process.env.PORT || 3000;
-const SESSION_HOURS = 12;
-const COOKIE = 'sid';
+const APP_ENV = (process.env.APP_ENV || 'production').trim().toLowerCase();
 const SETUP_TOKEN = (process.env.SETUP_TOKEN || '').trim();
 
-/* ---------- Bản thử nghiệm hay bản chính ----------
- * APP_ENV=staging | production  (đặt tay, ưu tiên cao nhất)
- * Nếu không đặt: Railway tự cấp RAILWAY_ENVIRONMENT_NAME và RAILWAY_GIT_BRANCH
- *  -> môi trường khác "production" hoặc chạy từ nhánh staging thì coi là bản thử.
- */
-function detectStaging() {
-  const appEnv = (process.env.APP_ENV || '').trim().toLowerCase();
-  if (appEnv) return appEnv !== 'production';
-  const envName = (process.env.RAILWAY_ENVIRONMENT_NAME || '').trim().toLowerCase();
-  const branch = (process.env.RAILWAY_GIT_BRANCH || '').trim().toLowerCase();
-  return Boolean((envName && envName !== 'production') || branch === 'staging');
-}
-const IS_STAGING = detectStaging();
-
-const store = createStore();
-const app = express();
+app.set('trust proxy', 1); // Railway đứng sau proxy HTTPS
 app.disable('x-powered-by');
-app.set('trust proxy', 1); // Railway đứng sau proxy https
+app.use(security.headers);   // header bảo mật (CSP, HSTS, chặn iframe...)
+app.use(security.rateLimit); // giới hạn tần suất theo IP, vượt ngưỡng chặn tạm thời
+app.use(express.json({ limit: '1mb' }));
 
-/* ---------- Cấu hình hệ thống (đọc từ kho dữ liệu, giữ tạm trong bộ nhớ) ---------- */
-let settings = null; // null = chưa đọc được
-async function loadSettings() {
-  settings = await store.getSettings();
-  return settings;
-}
-function ctxOf(req) {
-  const s = settings || {};
-  return {
-    appName: s.app_name || 'Hệ thống quản lý',
-    companyName: s.company_name || '',
-    copyright: s.copyright || '',
-    contactPerson: s.contact_person || '',
-    contactPhone: s.contact_phone || '',
-    contactEmail: s.contact_email || '',
-    logoUrl: process.env.LOGO_URL || '',
-    dbMode: store.mode,
-    dbHealthy: store.isHealthy(),
-    isStaging: IS_STAGING,
-    user: req.user || null,
-    path: (req.originalUrl || req.path).split('?')[0],
-  };
-}
+// Trạng thái kết nối CSDL (web vẫn chạy khi CSDL lỗi để hiển thị nguyên nhân)
+const dbState = { ready: false, error: null, attempts: 0 };
 
-/* ---------- Bảo mật cơ bản ---------- */
-app.use((req, res, next) => {
-  res.set({
-    'Content-Security-Policy': [
-      "default-src 'self'",
-      "script-src 'self'",
-      "style-src 'self' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data:",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-    ].join('; '),
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'Referrer-Policy': 'same-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  });
-  if (req.secure) res.set('Strict-Transport-Security', 'max-age=31536000');
-  next();
-});
-
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '7d', index: false }));
-app.use(express.urlencoded({ extended: false, limit: '20kb' }));
-
-/* Chống gửi biểu mẫu giả mạo từ trang khác */
-app.use((req, res, next) => {
-  if (req.method !== 'POST') return next();
-  const origin = req.get('origin') || req.get('referer') || '';
-  if (!origin) return next(); // một số trình duyệt cũ không gửi; cookie SameSite vẫn bảo vệ
-  try {
-    if (new URL(origin).host === req.get('host')) return next();
-  } catch (_) { /* bỏ qua */ }
-  res.status(403).send('Yêu cầu không hợp lệ.');
-});
-
-function parseCookies(req) {
-  const out = {};
-  (req.headers.cookie || '').split(';').forEach((p) => {
-    const i = p.indexOf('=');
-    if (i > 0) {
-      try { out[p.slice(0, i).trim()] = decodeURIComponent(p.slice(i + 1).trim()); } catch (_) { /* bỏ cookie lỗi */ }
+// Health check cho Railway: luôn trả 200 khi web đang chạy, kèm tình trạng CSDL
+app.get('/health', async (_req, res) => {
+  if (dbState.ready) {
+    try {
+      await store.ping();
+    } catch (e) {
+      return res.json({ status: 'db_error', db: store.kind, target: store.target, error: e.message });
     }
+  }
+  res.json({
+    status: dbState.ready ? 'ok' : 'db_error',
+    db: store.kind,
+    target: store.target,
+    ...(dbState.ready ? {} : { error: dbState.error || 'Đang kết nối...', attempts: dbState.attempts }),
   });
+});
+
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+// Khi CSDL chưa sẵn sàng: trả trang báo lỗi rõ ràng thay vì 502
+app.use((req, res, next) => {
+  if (dbState.ready) return next();
+  if (req.path.startsWith('/api/')) {
+    return res.status(503).json({ errors: ['Chưa kết nối được cơ sở dữ liệu: ' + (dbState.error || 'đang kết nối...')] });
+  }
+  res.status(503).type('html').send(dbErrorPage());
+});
+app.use(auth.loadUser);
+
+const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
+const view = (name) => path.join(__dirname, 'views', name);
+const parseId = (v) => {
+  const id = Number(v);
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+const bad = (res, errors, code = 400) => res.status(code).json({ errors: [].concat(errors) });
+const safeEq = (a, b) => {
+  const x = Buffer.from(String(a)), y = Buffer.from(String(b));
+  return x.length === y.length && crypto.timingSafeEqual(x, y);
+};
+
+// =====================================================================
+// Trang (HTML)
+// =====================================================================
+app.get('/', wrap(async (req, res) => {
+  if ((await store.countUsers()) === 0) return res.redirect('/setup');
+  if (!req.user) return res.redirect('/login');
+  res.sendFile(view('index.html'));
+}));
+app.get('/login', wrap(async (req, res) => {
+  if ((await store.countUsers()) === 0) return res.redirect('/setup');
+  if (req.user) return res.redirect('/');
+  res.sendFile(view('login.html'));
+}));
+app.get('/setup', wrap(async (_req, res) => {
+  if ((await store.countUsers()) > 0) return res.redirect('/login');
+  res.sendFile(view('setup.html'));
+}));
+
+// =====================================================================
+// API
+// =====================================================================
+const api = express.Router();
+// Quyền theo nhóm thao tác (lib/validate.js QUYEN)
+const quyen = (k) => auth.requireRole(...QUYEN[k]);
+const canHd = quyen('hd'), canTien = quyen('tien'), canTd = quyen('td'), canXoaDa = quyen('xoa_da');
+const canAny = auth.requireRole(...new Set([...QUYEN.hd, ...QUYEN.tien, ...QUYEN.ns]));
+const canMoKhoa = auth.requireRole(...new Set([...QUYEN.hd, ...QUYEN.tien])); // mở khóa HĐ đầu vào: người sửa HĐ/PL hoặc thanh toán
+api.use(security.sameOrigin);
+api.use(auth.csrfGuard);
+
+api.get('/meta', wrap(async (_req, res) => {
+  const s = await store.getSettings();
+  res.json({
+    trang_thai: TRANG_THAI,
+    loai_doanh_thu: LOAI_DOANH_THU,
+    nhom_chi_phi: NHOM_CHI_PHI,
+    khoi_chi_phi: KHOI_CHI_PHI,
+    roles: ROLES, quyen: QUYEN, tp_nhom: TP_NHOM,
+    db: store.kind,
+    ten_cong_ty: s.ten_cong_ty,
+    ten_he_thong: s.ten_he_thong,
+    needs_setup: (await store.countUsers()) === 0,
+    setup_token_required: Boolean(SETUP_TOKEN),
+    phien_ban: PHIEN_BAN,
+    idle_phut: store.IDLE_SEC / 60, // không thao tác quá số phút này -> tự đăng xuất
+    moi_truong: APP_ENV, // 'staging' = hệ thống thử nghiệm (đặt biến APP_ENV trên Railway)
+  });
+}));
+
+// ---------- Setup lần đầu ----------
+api.post('/setup', wrap(async (req, res) => {
+  const body = req.body || {};
+  if (SETUP_TOKEN && !safeEq(body.setup_token || '', SETUP_TOKEN)) return bad(res, 'Mã khởi tạo (SETUP_TOKEN) không đúng', 403);
+  const s = validateSettings(body);
+  const u = validateUser({ ...body, role: 'admin' }, true);
+  const errors = [...s.errors, ...u.errors];
+  if (errors.length) return bad(res, errors);
+
+  const id = await store.createFirstAdmin(
+    { username: u.data.username, full_name: u.data.full_name, password_hash: await auth.hashPassword(u.data.password) },
+    s.data);
+  if (!id) return bad(res, 'Hệ thống đã được khởi tạo trước đó', 409);
+  await auth.startSession(req, res, id);
+  await store.touchLogin(id);
+  res.status(201).json({ ok: true });
+}));
+
+// ---------- Đăng nhập / đăng xuất ----------
+api.post('/auth/login', wrap(async (req, res) => {
+  const ip = req.ip;
+  const username = String(req.body?.username || '').trim().toLowerCase();
+  const wait = Math.max(auth.loginBlocked(ip), auth.loginBlocked('u:' + username));
+  if (wait) return bad(res, `Sai quá nhiều lần. Thử lại sau ${wait} phút`, 429);
+
+  const password = String(req.body?.password || '');
+  const user = await store.getUserForLogin(username);
+  const ok = await auth.verifyPassword(password, user ? user.password_hash : auth.DUMMY_HASH);
+  if (!user || !ok) {
+    // khóa theo IP và theo tài khoản (chống dò mật khẩu từ nhiều IP vào 1 tài khoản)
+    auth.loginFailed(ip);
+    if (user) auth.loginFailed('u:' + username);
+    security.loginFailedIp(ip);
+    security.log(`Đăng nhập sai: "${username.slice(0, 50)}" từ IP ${ip}`);
+    audit.log(req, 'Đăng nhập sai', 'Tài khoản', user ? 'Sai mật khẩu' : 'Tên đăng nhập không tồn tại', { username: username.slice(0, 50), ho_ten: user?.full_name || '', user_id: user?.id || null });
+    return bad(res, 'Sai tên đăng nhập hoặc mật khẩu', 401);
+  }
+  if (!user.active) return bad(res, 'Tài khoản đã bị khóa. Liên hệ quản trị viên', 403);
+  auth.loginOk(ip);
+  auth.loginOk('u:' + username);
+  console.log(`[ĐĂNG NHẬP] ${new Date().toISOString()} ${user.username} từ IP ${ip}`);
+  audit.log(req, 'Đăng nhập', 'Tài khoản', `Đăng nhập thành công · ${audit.device(req.get('User-Agent'))}`,
+    { user_id: user.id, username: user.username, ho_ten: user.full_name });
+  await auth.startSession(req, res, user.id);
+  await store.touchLogin(user.id);
+  res.json({ ok: true });
+}));
+
+api.post('/auth/logout', wrap(async (req, res) => {
+  if (req.user) {
+    const idle = req.body?.ly_do === 'het_phien';
+    audit.log(req, idle ? 'Hết phiên' : 'Đăng xuất', 'Tài khoản', idle ? `Tự đăng xuất do không thao tác ${store.IDLE_SEC / 60} phút` : 'Đăng xuất');
+  }
+  await auth.endSession(req, res);
+  res.json({ ok: true });
+}));
+// Trang đóng / tải lại -> tạm ngoại tuyến (gửi bằng fetch keepalive khi rời trang)
+api.post('/auth/away', wrap(async (req, res) => {
+  await auth.markAway(req);
+  res.json({ ok: true });
+}));
+
+// Từ đây trở xuống: bắt buộc đăng nhập
+api.use(auth.requireAuth);
+// IT (Kỹ thuật hệ thống): chỉ vào phần kỹ thuật – không đọc / ghi số liệu dự án, báo cáo tài chính
+const IT_DUOC_VAO = /^\/(meta|auth\/|users(\/|$)|nhat-ky|lien-he$|settings$)/;
+api.use((req, res, next) => (req.user?.role === 'it' && !IT_DUOC_VAO.test(req.path) ? bad(res, 'Vai trò Kỹ thuật hệ thống không xem số liệu dự án', 403) : next()));
+api.use(audit.middleware); // ghi nhật ký mọi thao tác thêm / sửa / xóa
+
+// ---------- Nhật ký hoạt động ----------
+const SU_KIEN = { xuat_excel: 'Excel', xuat_pptx: 'PowerPoint', in_pdf: 'In / PDF', xuat_csv: 'CSV' };
+const LOG_PAGE_DEPTH = 10000; // xem theo trang tối đa 10.000 dòng mới nhất (sâu hơn: lọc theo ngày hoặc xuất CSV)
+api.post('/nhat-ky/su-kien', wrap(async (req, res) => {
+  const loai = SU_KIEN[req.body?.loai];
+  if (!loai) return bad(res, 'Sự kiện không hợp lệ');
+  audit.log(req, 'Xuất báo cáo', 'Báo cáo', `${loai} · ${String(req.body?.pham_vi || '').replace(/[<>]/g, '').slice(0, 200)}`);
+  res.json({ ok: true });
+}));
+api.get('/nhat-ky', quyen('nhat_ky'), wrap(async (req, res) => {
+  const q = req.query;
+  const date = (s) => (/^\d{4}-\d{2}-\d{2}$/.test(String(s || '')) ? String(s) : '');
+  const limit = Math.min(500, Math.max(1, Number(q.limit) || 100));
+  // Chuyển trang theo số: lấy page × limit dòng mới nhất rồi cắt trang; giới hạn độ sâu để không giải nén quá nhiều lưu trữ
+  const page = q.before ? 1 : Math.min(Math.max(1, parseInt(q.page, 10) || 1), Math.max(1, Math.floor(LOG_PAGE_DEPTH / limit)));
+  const rows = await store.listLogs({
+    user_id: parseId(q.user_id), hanh_dong: audit.HANH_DONG.includes(q.hanh_dong) ? q.hanh_dong : '',
+    q: String(q.q || '').trim().slice(0, 100), tu: date(q.tu), den: date(q.den), before: parseId(q.before), limit: page * limit,
+  });
+  res.json({ items: rows.slice((page - 1) * limit, page * limit), more: rows.length > page * limit, page, max_page: Math.max(1, Math.floor(LOG_PAGE_DEPTH / limit)),
+    hanh_dong: audit.HANH_DONG, ...(q.before ? {} : { thong_ke: await store.logStats(), tai_khoan: (await store.listUsers()).map((u) => ({ id: u.id, username: u.username, full_name: u.full_name })) }) });
+}));
+
+api.get('/auth/me', (req, res) => res.json(req.user));
+
+api.post('/auth/change-password', wrap(async (req, res) => {
+  const { current_password, new_password } = req.body || {};
+  const hash = await store.getPasswordHash(req.user.id);
+  if (!(await auth.verifyPassword(current_password || '', hash))) return bad(res, 'Mật khẩu hiện tại không đúng');
+  if (String(new_password) === String(current_password)) return bad(res, 'Mật khẩu mới phải khác mật khẩu hiện tại');
+  const errors = passwordErrors(new_password, req.user.username);
+  if (errors.length) return bad(res, errors);
+  await store.updateUser(req.user.id, { password_hash: await auth.hashPassword(new_password) });
+  await store.deleteUserSessions(req.user.id, req.sessionHash); // đăng xuất các thiết bị khác
+  res.json({ ok: true });
+}));
+
+// ---------- Cài đặt hệ thống ----------
+const PASSCODE_KEY = 'xoa_hd_passcode';
+api.get('/settings', wrap(async (_req, res) => {
+  const s = await store.getSettings();
+  res.json({ ten_cong_ty: s.ten_cong_ty, ten_he_thong: s.ten_he_thong, passcode_set: Boolean(s[PASSCODE_KEY]) });
+}));
+
+// Đặt / đổi Passcode xóa HĐ/PL (chỉ Quản trị, phải nhập lại mật khẩu đăng nhập)
+api.put('/settings/passcode', auth.requireRole('admin'), wrap(async (req, res) => {
+  const { current_password, passcode, passcode2 } = req.body || {};
+  const hash = await store.getPasswordHash(req.user.id);
+  if (!(await auth.verifyPassword(current_password || '', hash))) return bad(res, 'Mật khẩu đăng nhập không đúng');
+  if (String(passcode) !== String(passcode2)) return bad(res, 'Passcode nhập lại không khớp');
+  const errors = passcodeErrors(passcode);
+  if (errors.length) return bad(res, errors);
+  await store.saveSettings({ [PASSCODE_KEY]: await auth.hashPassword(String(passcode)) });
+  console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã đặt/đổi Passcode xóa HĐ/PL`);
+  res.json({ ok: true });
+}));
+
+// Chống dò passcode: sai 5 lần / 15 phút / tài khoản -> khóa xóa
+const passFails = new Map();
+const PASS_WINDOW = 15 * 60e3;
+function passcodeLocked(uid) {
+  const a = passFails.get(uid);
+  if (!a || Date.now() - a.first > PASS_WINDOW) return 0;
+  return a.count >= 5 ? Math.ceil((a.first + PASS_WINDOW - Date.now()) / 60e3) : 0;
+}
+// Kiểm tra Passcode xóa (gửi lỗi và trả false nếu không hợp lệ)
+async function requirePasscode(req, res) {
+  const stored = (await store.getSettings())[PASSCODE_KEY];
+  if (!stored) { bad(res, 'Quản trị chưa đặt Passcode xóa (tab Cài đặt). Chưa thể xóa.', 403); return false; }
+  const wait = passcodeLocked(req.user.id);
+  if (wait) { bad(res, `Nhập sai Passcode quá nhiều lần. Thử lại sau ${wait} phút`, 429); return false; }
+  if (!(await auth.verifyPassword(String(req.body?.passcode ?? ''), stored))) {
+    const left = passcodeFailed(req.user.id);
+    bad(res, left > 0 ? `Passcode không đúng (còn ${left} lần thử)` : 'Passcode không đúng. Đã khóa chức năng xóa 15 phút', 403);
+    return false;
+  }
+  passFails.delete(req.user.id);
+  return true;
+}
+function passcodeFailed(uid) {
+  const a = passFails.get(uid);
+  if (!a || Date.now() - a.first > PASS_WINDOW) passFails.set(uid, { first: Date.now(), count: 1 });
+  else a.count++;
+  return 5 - passFails.get(uid).count;
+}
+api.put('/settings', auth.requireRole('admin'), wrap(async (req, res) => {
+  const { data, errors } = validateSettings(req.body || {});
+  if (errors.length) return bad(res, errors);
+  await store.saveSettings(data);
+  res.json(data);
+}));
+
+// ---------- Tab Liên hệ: Thông tin hệ thống & hỗ trợ ----------
+//   Phiên bản tự động theo version.json; Quản trị có thể ghi đè – bản ghi đè chỉ áp dụng đến lần phát hành kế tiếp
+const CONTACT_KEY = 'lien_he';
+const CONTACT_DEFAULT = { ten: 'Hệ thống nội bộ', so_huu: 'Ban Kiểm soát - TMN', phat_trien: 'Le Phan Vinh Tu', sdt: '0794 570 057', mail: 'lephanvinhtu.tu@gmail.com' };
+async function readContact() {
+  let saved = {};
+  try { saved = JSON.parse((await store.getSettings())[CONTACT_KEY] || '{}'); } catch {}
+  const info = { ...CONTACT_DEFAULT, ...saved };
+  const override = saved.phien_ban && saved.phien_ban_goc === PHIEN_BAN.ma ? saved.phien_ban : '';
+  delete info.phien_ban; delete info.phien_ban_goc;
+  return { ...info, phien_ban: override ? { ma: override, tu_dong: PHIEN_BAN.ma, ghi_de: true } : { ...PHIEN_BAN, ghi_de: false } };
+}
+api.get('/lien-he', wrap(async (_req, res) => res.json(await readContact())));
+api.put('/lien-he', quyen('lien_he'), wrap(async (req, res) => {
+  const { data, errors } = validateContact(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const save = { ...data, phien_ban_goc: data.phien_ban ? PHIEN_BAN.ma : '' };
+  if (data.phien_ban === PHIEN_BAN.ma) { save.phien_ban = ''; save.phien_ban_goc = ''; } // trùng số tự động -> không cần ghi đè
+  await store.saveSettings({ [CONTACT_KEY]: JSON.stringify(save) });
+  console.log(`[NHẬT KÝ] ${req.user.username} sửa thông tin Liên hệ${save.phien_ban ? ` (ghi đè phiên bản ${save.phien_ban})` : ''}`);
+  res.json(await readContact());
+}));
+
+// ---------- Quản lý tài khoản (chỉ Quản trị) ----------
+const users = express.Router();
+users.use(quyen('tai_khoan'));
+// IT quản lý tài khoản nhưng không đụng tới tài khoản / vai trò Quản trị và không xóa tài khoản
+const laIT = (req) => req.user.role === 'it';
+
+users.get('/', wrap(async (_req, res) => res.json(await store.listUsers())));
+
+users.post('/', wrap(async (req, res) => {
+  const { data, errors } = validateUser(req.body || {}, true);
+  if (errors.length) return bad(res, errors);
+  if (laIT(req) && data.role === 'admin') return bad(res, 'Kỹ thuật hệ thống không được tạo tài khoản Quản trị', 403);
+  const id = await store.createUser({ ...data, password_hash: await auth.hashPassword(data.password) });
+  res.status(201).json({ id });
+}));
+
+users.put('/:id', wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const target = await store.getUserById(id);
+  if (!target) return bad(res, 'Không tìm thấy tài khoản', 404);
+  const { data, errors } = validateUser(req.body || {}, false, target.username);
+  if (errors.length) return bad(res, errors);
+  if (laIT(req) && (target.role === 'admin' || data.role === 'admin')) return bad(res, 'Kỹ thuật hệ thống không được sửa tài khoản Quản trị hoặc cấp quyền Quản trị', 403);
+
+  const isSelf = id === req.user.id;
+  if (isSelf && (data.role !== 'admin' || !data.active)) return bad(res, 'Không thể tự hạ quyền hoặc khóa chính mình');
+  const losesAdmin = target.role === 'admin' && target.active && (data.role !== 'admin' || !data.active);
+  if (losesAdmin && (await store.countActiveAdmins(id)) === 0) return bad(res, 'Hệ thống phải còn ít nhất 1 Quản trị đang hoạt động');
+
+  const fields = { full_name: data.full_name, role: data.role, active: data.active };
+  if (data.password) fields.password_hash = await auth.hashPassword(data.password);
+  await store.updateUser(id, fields);
+  // Đổi mật khẩu / khóa / đổi quyền -> buộc đăng nhập lại
+  if (data.password || !data.active || data.role !== target.role) {
+    await store.deleteUserSessions(id, isSelf ? req.sessionHash : '');
+  }
+  res.json({ id });
+}));
+
+// ---------- Phiên đăng nhập của 1 tài khoản (quản trị): xem và buộc đăng xuất ----------
+const sessionTarget = async (req, res) => {
+  const id = parseId(req.params.id);
+  const u = id && (await store.getUserById(id));
+  if (!u) { bad(res, 'Không tìm thấy tài khoản', 404); return null; }
+  if (laIT(req) && u.role === 'admin') { bad(res, 'Kỹ thuật hệ thống không xem / đăng xuất phiên của Quản trị', 403); return null; }
+  return u;
+};
+users.get('/:id/sessions', wrap(async (req, res) => {
+  const u = await sessionTarget(req, res); if (!u) return;
+  const rows = await store.listUserSessions(u.id);
+  res.json(rows.map(({ token_hash, ua, ...r }) => ({ ...r, thiet_bi: audit.device(ua), hien_tai: token_hash === req.sessionHash })));
+}));
+// Đăng xuất 1 phiên (sid) hoặc tất cả phiên (không có sid); không đăng xuất chính phiên quản trị đang dùng
+users.delete('/:id/sessions/:sid?', wrap(async (req, res) => {
+  const u = await sessionTarget(req, res); if (!u) return;
+  const sid = req.params.sid ? String(req.params.sid).replace(/[^0-9a-f]/gi, '').slice(0, 16) : '';
+  if (sid) {
+    if (req.sessionHash && req.sessionHash.startsWith(sid)) return bad(res, 'Không thể đăng xuất phiên bạn đang dùng (dùng nút Đăng xuất)');
+    const s = await store.deleteSessionById(u.id, sid);
+    if (!s) return bad(res, 'Phiên đã kết thúc hoặc không tồn tại', 404);
+    audit.log(req, 'Đăng xuất', 'Tài khoản', `Quản trị buộc đăng xuất 1 phiên của ${u.username} · ${audit.device(s.ua)} · IP ${s.ip || '—'}`);
+    return res.json({ ok: true, so_phien: 1 });
+  }
+  const n = (await store.listUserSessions(u.id)).filter((x) => x.token_hash !== req.sessionHash).length;
+  await store.deleteUserSessions(u.id, req.sessionHash || '');
+  audit.log(req, 'Đăng xuất', 'Tài khoản', `Quản trị buộc đăng xuất tất cả phiên của ${u.username} (${n} phiên)`);
+  res.json({ ok: true, so_phien: n });
+}));
+
+users.delete('/:id', wrap(async (req, res) => {
+  if (laIT(req)) return bad(res, 'Kỹ thuật hệ thống chỉ được khóa, không được xóa tài khoản', 403);
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  if (id === req.user.id) return bad(res, 'Không thể xóa tài khoản đang đăng nhập');
+  const target = await store.getUserById(id);
+  if (!target) return bad(res, 'Không tìm thấy tài khoản', 404);
+  if (target.role === 'admin' && target.active && (await store.countActiveAdmins(id)) === 0) {
+    return bad(res, 'Hệ thống phải còn ít nhất 1 Quản trị đang hoạt động');
+  }
+  await store.deleteUser(id);
+  res.status(204).end();
+}));
+api.use('/users', users);
+
+// ---------- Dự án ----------
+
+api.get('/du-an', wrap(async (_req, res) => res.json(await store.listProjects())));
+
+api.post('/du-an', canHd, wrap(async (req, res) => {
+  const { data, errors } = validateProject(req.body || {});
+  if (errors.length) return bad(res, errors);
+  res.status(201).json(await store.createProject(data, req.user.id));
+}));
+
+api.put('/du-an/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const { data, errors } = validateProject(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const ok = await store.updateProject(id, data, req.user.id);
+  ok ? res.json({ id }) : bad(res, 'Không tìm thấy dự án', 404);
+}));
+
+// Sửa riêng ngày bắt đầu / kết thúc (từ khung công trình ở Báo cáo): để trống = hệ thống tự lấy theo ngày ký HĐ / ngày quyết toán
+api.put('/du-an/:id/ngay', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.listProjects()).find((p) => p.id === id);
+  if (!cur) return bad(res, 'Không tìm thấy dự án', 404);
+  const iso = (x) => (x === null || x === '' || x === undefined ? null : String(x));
+  const { data, errors } = validateProject({ ...cur, ngay_bat_dau: iso(req.body?.ngay_bat_dau), ngay_ket_thuc: iso(req.body?.ngay_ket_thuc) });
+  if (errors.length) return bad(res, errors);
+  await store.updateProject(id, data, req.user.id);
+  res.json({ id, ngay_bat_dau: data.ngay_bat_dau, ngay_ket_thuc: data.ngay_ket_thuc });
+}));
+
+// Số liệu nhập tay của công trình: DT-CP dự kiến (mục I) · BH/Khác + ghi chú (mục IV)
+api.put('/du-an/:id/bh', canAny, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.listProjects()).find((p) => p.id === id);
+  if (!cur) return bad(res, 'Không tìm thấy dự án', 404);
+  const raw = String(req.body?.bh_khac ?? '').replace(/[.,\s]/g, '');
+  const bh = raw === '' ? 0 : Number(raw);
+  if (!Number.isInteger(bh) || Math.abs(bh) > 1e15) return bad(res, 'BH/Khác phải là số nguyên (đồng)');
+  const ghi = String(req.body?.ghi_chu_bh ?? '').trim().slice(0, 300);
+  // DT-CP dự kiến – chi phí (trước VAT): không gửi -> giữ nguyên
+  const rawNs = req.body?.ns_cp === undefined ? null : String(req.body.ns_cp).replace(/[.,\s]/g, '');
+  const ns = rawNs === null ? Number(cur.ns_cp) || 0 : rawNs === '' ? 0 : Number(rawNs);
+  if (!Number.isInteger(ns) || ns < 0 || ns > 1e15) return bad(res, 'DT-CP dự kiến phải là số nguyên không âm (đồng)');
+  // DT-CP dự kiến: Lãnh đạo (QUYEN.ns) · BH/Khác + ghi chú: Kế toán (QUYEN.tien); đổi trường không thuộc quyền -> từ chối
+  const doi = (a, b) => (Number(a) || 0) !== (Number(b) || 0);
+  if (doi(ns, cur.ns_cp) && !QUYEN.ns.includes(req.user.role)) return bad(res, 'Bạn không có quyền sửa DT-CP dự kiến', 403);
+  if ((doi(bh, cur.bh_khac) || ghi !== (cur.ghi_chu_bh || '')) && !QUYEN.tien.includes(req.user.role)) return bad(res, 'Bạn không có quyền sửa BH/Khác, ghi chú', 403);
+  await store.setProjectBh(id, { bh_khac: bh, ghi_chu_bh: ghi, ns_cp: ns }, req.user.id);
+  const f = (x) => new Intl.NumberFormat('vi-VN').format(Number(x) || 0);
+  audit.log(req, 'Sửa', 'Dự án', `DT-CP dự kiến ${f(ns)} đ · BH/Khác ${f(bh)} đ · Ghi chú: ${ghi || '—'} | Trước: DT-CP dự kiến ${f(cur.ns_cp)} đ · BH ${f(cur.bh_khac)} đ · ${cur.ghi_chu_bh || '—'}`, { du_an: cur.ma_du_an });
+  res.json({ id, bh_khac: bh, ghi_chu_bh: ghi, ns_cp: ns });
+}));
+
+// Dữ liệu sẽ bị xóa theo dự án (hiện trước khi xác nhận, ghi vào nhật ký)
+async function projectImpact(id) {
+  const [rev, tv, cost, tp, td] = await Promise.all([store.listRevenue(id), store.listTienVe(id), store.listCost(id), store.listTp(id), store.listThoiDiem(id)]);
+  const c = tp.contracts || tp;
+  return { hd_pl: rev.filter((r) => r.loai === 'hd').length, nt_qt: rev.filter((r) => r.loai === 'qt').length, tien_ve: tv.length,
+    chi_phi: cost.length, thau_phu: c.length, tp_thanh_toan: (tp.pays || c.flatMap((x) => x.pays || [])).length, thoi_diem: td.length };
+}
+const impactTxt = (x) => `${x.hd_pl} dòng HĐ/PL, ${x.nt_qt} nghiệm thu/QT, ${x.tien_ve} tiền về, ${x.thau_phu} HĐ thầu phụ (${x.tp_thanh_toan} thanh toán), ${x.chi_phi} chi phí, ${x.thoi_diem} thời điểm TĐ`;
+api.get('/du-an/:id/impact', canXoaDa, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id || !(await store.getProject(id))) return bad(res, 'Không tìm thấy dự án', 404);
+  res.json(await projectImpact(id));
+}));
+// Xóa dự án: xóa luôn toàn bộ dữ liệu liên quan -> bắt buộc Passcode xóa (như xóa HĐ/PL, HĐ thầu phụ)
+api.delete('/du-an/:id', canXoaDa, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const p = await store.getProject(id);
+  if (!p) return bad(res, 'Không tìm thấy dự án', 404);
+  if (!(await requirePasscode(req, res))) return;
+  const x = await projectImpact(id);
+  const ok = await store.deleteProject(id);
+  if (!ok) return bad(res, 'Không tìm thấy dự án', 404);
+  console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã XÓA DỰ ÁN ${p.ma_du_an} – ${p.ten_du_an}: ${impactTxt(x)}`);
+  audit.log(req, 'Xóa', 'Dự án', `Xóa dự án ${p.ma_du_an} – ${p.ten_du_an} (có Passcode) · kèm ${impactTxt(x)}`, { du_an: p.ma_du_an });
+  res.status(204).end();
+}));
+
+// Nâng cấp dữ liệu (1 lần): HĐ thầu phụ chưa gắn HĐ CĐT mà ghi chú / số HĐTP chứa đúng 1 số HĐ CĐT -> tự gắn
+async function migrateTpHdCdt() {
+  const KEY = 'mig_tp_hd_cdt';
+  if ((await store.getSettings())[KEY]) return 0;
+  let n = 0;
+  for (const p of await store.listProjects()) {
+    const masters = (await store.listRevenue(p.id)).filter((r) => r.loai === 'hd' && r.ma_loai === 'HĐ' && r.so_ma);
+    if (!masters.length) continue;
+    for (const t of (await store.listTp(p.id)).contracts) {
+      if (t.hd_cdt_id) continue;
+      const text = `${t.ghi_chu} ${t.so_ma}`.toLowerCase();
+      const hit = masters.filter((m) => text.includes(String(m.so_ma).toLowerCase()));
+      // nhiều số khớp (vd "01/04" nằm trong "01/04/2025") -> lấy số dài nhất nếu duy nhất
+      const best = hit.sort((a, b) => b.so_ma.length - a.so_ma.length).filter((m, i, a) => m.so_ma.length === a[0].so_ma.length);
+      if (best.length === 1) { await store.setTpHdCdt(t.id, best[0].id); n++; }
+    }
+  }
+  await store.saveSettings({ [KEY]: new Date().toISOString() });
+  if (n) console.log(`[NHẬT KÝ] Tự gắn ${n} HĐ thầu phụ vào HĐ chủ đầu tư theo ghi chú`);
+  return n;
+}
+
+// ---------- Dashboard tổng: số liệu từ Doanh thu + Chi phí của mọi dự án ----------
+api.get('/dashboard', wrap(async (_req, res) => {
+  const list = await store.listProjects();
+  const du_an = await Promise.all(list.map(async (p) => {
+    const [rev, tienVe, cost, tp] = await Promise.all([
+      store.listRevenue(p.id), store.listTienVe(p.id), store.listCost(p.id), store.listTp(p.id)]);
+    return {
+      id: p.id, ma_du_an: p.ma_du_an, ten_du_an: p.ten_du_an,
+      ...summarizeProject({ rev: rev.map(calcLine), tienVe, cost: cost.map(costLine), tp: buildContracts(tp) }),
+    };
+  }));
+  res.json({ du_an });
+}));
+
+// ---------- Báo cáo tổng quan (tab Báo cáo): toàn bộ số liệu liên kết + dòng chi tiết để xuất ----------
+// Số liệu báo cáo của các dự án (withCost: kèm dòng chi phí gốc cho bản xuất Excel mẫu TMN)
+async function reportProjects({ withCost = false } = {}) {
+  const list = await store.listProjects();
+  const du_an = await Promise.all(list.map(async (p) => {
+    const [rev, tienVe, cost, tp] = await Promise.all([
+      store.listRevenue(p.id), store.listTienVe(p.id), store.listCost(p.id), store.listTp(p.id)]);
+    const lines = sortCost(cost).map(costLine);
+    const d = projectReport(p, { rev: sortRevenue(rev).map(calcLine), tienVe: sortTienVe(tienVe), cost: lines, tp: buildContracts(tp) });
+    if (withCost) d.chi_tiet_cp = costLinesFor(lines);
+    return d;
+  }));
+  const tds = await store.listThoiDiem();
+  for (const d of du_an) d.thoi_diem = tds.filter((t) => t.du_an_id === d.id).map(({ du_an_id, ...t }) => t);
+  return du_an;
+}
+api.get('/bao-cao', wrap(async (req, res) => {
+  const du_an = await reportProjects();
+  const s = await store.getSettings();
+  res.json({
+    lap_luc: new Date().toISOString(), nguoi_lap: req.user.full_name || req.user.username,
+    ten_cong_ty: s.ten_cong_ty, ten_he_thong: s.ten_he_thong, phien_ban: PHIEN_BAN.ma, cong_ty: CONG_TY,
+    khoi: KHOI_CHI_PHI.map((k) => ({ code: k.code, ten: k.ten })), du_an,
+    muc_tieu: await readTargets(), la_quan_tri: req.user.role === 'admin',
+  });
+}));
+
+// Xuất Excel theo mẫu trình ký TMN (logo, font, bố cục) – ?ids=1,2,3 (bỏ trống = tất cả dự án)
+api.get('/bao-cao/dtcp.xlsx', wrap(async (req, res) => {
+  const ids = String(req.query.ids || '').split(',').map(Number).filter(Boolean);
+  const all = await reportProjects({ withCost: true });
+  const du_an = ids.length ? all.filter((d) => ids.includes(d.id)) : all;
+  if (!du_an.length) return bad(res, 'Không có dự án để xuất');
+  const ngay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
+  const buf = await buildDtcp({ du_an, ngay, nguoi_lap: req.user.full_name || req.user.username });
+  audit.log(req, 'Xuất báo cáo', 'Báo cáo', `Excel mẫu TMN (DT–CP) · ${du_an.length} dự án`);
+  const ten = `BaoCao_DTCP_TMN_${ngay.replace(/-/g, '')}.xlsx`;
+  res.set({ 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition': `attachment; filename="${ten}"` });
+  res.send(Buffer.from(buf));
+}));
+
+// ---------- Thời điểm chốt số thực tế của công trình (TĐ1–TĐ3) ----------
+const tdVal = (b) => {
+  const errors = [];
+  const td = Number(b.td), ngay = String(b.ngay || ''), dt = Number(b.dt), cp = Number(b.cp);
+  if (![1, 2, 3].includes(td)) errors.push('Thời điểm phải là TĐ1, TĐ2 hoặc TĐ3');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ngay) || Number.isNaN(Date.parse(ngay))) errors.push('Nhập ngày chốt số hợp lệ');
+  if (!Number.isInteger(dt) || dt < 0 || dt > 1e15) errors.push('Doanh thu phải là số nguyên không âm (đồng)');
+  if (!Number.isInteger(cp) || cp < 0 || cp > 1e15) errors.push('Chi phí phải là số nguyên không âm (đồng)');
+  return { data: { td, ngay, dt, cp, ghi_chu: String(b.ghi_chu || '').trim().slice(0, 200) }, errors };
+};
+const TD_TEN = { 1: 'Ký hợp đồng', 2: 'Có phát sinh', 3: 'Quyết toán' };
+const tdTxt = (t) => (t ? `${TD_TEN[t.td] || ''} · ${t.ngay.split('-').reverse().join('/')} · DT ${new Intl.NumberFormat('vi-VN').format(t.dt)} đ · CP ${new Intl.NumberFormat('vi-VN').format(t.cp)} đ` : '—');
+api.put('/du-an/:id/thoi-diem/:td', canTd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const p = id && (await store.getProject(id));
+  if (!p) return bad(res, 'Không tìm thấy công trình', 404);
+  const { data, errors } = tdVal({ ...(req.body || {}), td: req.params.td });
+  if (errors.length) return bad(res, errors);
+  const all = await store.listThoiDiem(id);
+  const old = all.find((t) => t.td === data.td);
+  // TĐ gần nhất trước / sau đã chốt (TĐ2 có thể bỏ trống khi không phát sinh: TĐ3 chỉ cần TĐ1)
+  const prev = all.filter((t) => t.td < data.td).sort((a, b) => b.td - a.td)[0], next = all.filter((t) => t.td > data.td).sort((a, b) => a.td - b.td)[0];
+  if (data.td > 1 && !all.some((t) => t.td === 1)) return bad(res, `Cần chốt TĐ1 (ký hợp đồng) trước khi nhập TĐ${data.td}`);
+  if (prev && data.ngay < prev.ngay) return bad(res, `Ngày TĐ${data.td} không được trước ngày TĐ${prev.td} (${prev.ngay.split('-').reverse().join('/')})`);
+  if (next && data.ngay > next.ngay) return bad(res, `Ngày TĐ${data.td} không được sau ngày TĐ${next.td} (${next.ngay.split('-').reverse().join('/')})`);
+  await store.setThoiDiem(id, data.td, data, req.user.id);
+  audit.log(req, old ? 'Sửa' : 'Thêm', 'Thời điểm', `TĐ${data.td} · ${tdTxt(data)}${old ? ` | Trước: ${tdTxt(old)}` : ''}`, { du_an: p.ma_du_an });
+  res.json(await store.listThoiDiem(id));
+}));
+api.delete('/du-an/:id/thoi-diem/:td', canTd, wrap(async (req, res) => {
+  const id = parseId(req.params.id), td = Number(req.params.td);
+  const p = id && (await store.getProject(id));
+  if (!p) return bad(res, 'Không tìm thấy công trình', 404);
+  const all = await store.listThoiDiem(id);
+  const old = all.find((t) => t.td === td);
+  if (all.some((t) => t.td > td)) return bad(res, `Xóa TĐ${Math.max(...all.map((t) => t.td))} trước (xóa từ thời điểm sau cùng)`);
+  if (!old || !(await store.deleteThoiDiem(id, td))) return bad(res, 'Thời điểm chưa có số liệu', 404);
+  audit.log(req, 'Xóa', 'Thời điểm', `TĐ${td} · ${tdTxt(old)}`, { du_an: p.ma_du_an });
+  res.status(204).end();
+}));
+
+// ---------- Mục tiêu năm (Báo cáo) ----------
+const TARGET_KEY = 'muc_tieu';
+async function readTargets() {
+  try { return JSON.parse((await store.getSettings())[TARGET_KEY] || '{}'); } catch { return {}; }
+}
+api.get('/muc-tieu', wrap(async (_req, res) => res.json(await readTargets())));
+api.put('/muc-tieu', auth.requireRole('admin'), wrap(async (req, res) => {
+  const { data, errors } = validateTarget(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const all = await readTargets();
+  const { nam, ...t } = data;
+  if (Object.values(t).every((x) => x === null)) delete all[nam]; else all[nam] = t;
+  await store.saveSettings({ [TARGET_KEY]: JSON.stringify(all) });
+  console.log(`[NHẬT KÝ] ${req.user.username} đặt mục tiêu năm ${nam}: ${JSON.stringify(t)}`);
+  res.json(all);
+}));
+
+// ---------- Dữ liệu mẫu (tester) – chỉ Quản trị ----------
+const demoProjects = async () => (await store.listProjects()).filter((p) => p.ma_du_an.startsWith(DEMO_PREFIX));
+api.get('/demo', auth.requireRole('admin'), wrap(async (_req, res) => res.json({ count: (await demoProjects()).length })));
+api.post('/demo', auth.requireRole('admin'), wrap(async (req, res) => {
+  if ((await demoProjects()).length) return bad(res, 'Đã có dữ liệu mẫu (DEMO-...). Hãy xóa dữ liệu mẫu trước khi tạo lại.', 409);
+  const seed = Number.isInteger(req.body?.seed) ? req.body.seed : 22; // bộ số mẫu đã chọn: mọi công trình có lãi, không cảnh báo
+  const t0 = Date.now();
+  try {
+    const count = await seedDemo(store, req.user.id, seed);
+    console.log(`[NHẬT KÝ] ${req.user.username} tạo dữ liệu mẫu (${Date.now() - t0} ms):`, JSON.stringify(count));
+    res.status(201).json({ count, ms: Date.now() - t0 });
+  } catch (e) {
+    for (const p of await demoProjects()) await store.deleteProject(p.id); // tạo lỗi giữa chừng -> dọn sạch
+    throw e;
+  }
+}));
+api.delete('/demo', auth.requireRole('admin'), wrap(async (req, res) => {
+  if (!(await requirePasscode(req, res))) return;
+  const list = await demoProjects();
+  for (const p of list) await store.deleteProject(p.id);
+  console.log(`[NHẬT KÝ] ${req.user.username} xóa ${list.length} dự án dữ liệu mẫu`);
+  res.json({ deleted: list.length });
+}));
+
+// ---------- Ảnh công trình (1 ảnh đại diện / dự án, lưu trong CSDL) ----------
+const IMG_MAX = 3 * 1024 * 1024;
+function imageMime(buf) {
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
+  if (buf.length > 8 && buf.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (buf.length > 12 && buf.slice(0, 4).toString() === 'RIFF' && buf.slice(8, 12).toString() === 'WEBP') return 'image/webp';
+  return null;
+}
+api.get('/du-an/:id/anh', wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const img = id && (await store.getProjectImage(id));
+  if (!img) return res.status(404).end();
+  const etag = `"anh-${id}-${img.v}"`;
+  res.set({ 'Cache-Control': 'private, max-age=86400', ETag: etag });
+  if (req.headers['if-none-match'] === etag) return res.status(304).end();
+  res.type(img.mime).send(img.data);
+}));
+api.put('/du-an/:id/anh', canHd, express.raw({ type: () => true, limit: IMG_MAX }), wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id || !(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
+  const buf = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+  const mime = imageMime(buf);
+  if (!mime) return bad(res, 'Chỉ nhận ảnh JPG, PNG hoặc WEBP');
+  await store.setProjectImage(id, mime, buf);
+  console.log(`[NHẬT KÝ] ${req.user.username} cập nhật ảnh công trình #${id} (${Math.round(buf.length / 1024)} KB)`);
+  res.json({ ok: true });
+}));
+api.delete('/du-an/:id/anh', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  await store.deleteProjectImage(id);
+  res.status(204).end();
+}));
+
+// ---------- Doanh thu theo công trình ----------
+api.get('/du-an/:id/doanh-thu', wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const du_an = await store.getProject(id);
+  if (!du_an) return bad(res, 'Không tìm thấy công trình', 404);
+  const items = sortRevenue(await store.listRevenue(id)).map(calcLine);
+  const tien_ve = sortTienVe(await store.listTienVe(id)).map((r) => ({ ...r, nhan: tienVeLabel(r) }));
+  res.json({ du_an, items, tong: summarize(items), tien_ve, tong_tien_ve: summarizeTienVe(tien_ve) });
+}));
+
+// Doanh thu tổng hợp TẤT CẢ dự án (chỉ xem): số HĐ/PL ghi kèm mã dự án để không gộp nhầm HĐ trùng số giữa các dự án
+api.get('/doanh-thu-tong', wrap(async (_req, res) => {
+  const projects = await store.listProjects();
+  const items = [], tien_ve = [];
+  for (const p of projects) {
+    const [rev, tv] = await Promise.all([store.listRevenue(p.id), store.listTienVe(p.id)]);
+    for (const r of sortRevenue(rev).map(calcLine))
+      items.push({ ...r, du_an_id: p.id, ma_du_an: p.ma_du_an, so_ma: r.so_ma ? `${p.ma_du_an} · ${r.so_ma}` : r.so_ma, so_hieu: `${p.ma_du_an} · ${r.so_hieu}` });
+    for (const t of sortTienVe(tv)) tien_ve.push({ ...t, du_an_id: p.id, ma_du_an: p.ma_du_an, nhan: `${p.ma_du_an} · ${tienVeLabel(t)}` });
+  }
+  res.json({ tat_ca: true, so_du_an: projects.length, du_an: { id: 0, ma_du_an: 'Tất cả', ten_du_an: `Tất cả dự án (${projects.length})`, chu_dau_tu: '' },
+    items, tong: summarize(items), tien_ve, tong_tien_ve: summarizeTienVe(tien_ve) });
+}));
+
+// ---------- Giá trị tiền về ----------
+api.post('/du-an/:id/tien-ve', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  if (!(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
+  const { data, errors } = validateTienVe(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const refErr = await checkHeadRef(data.hd_id, id);
+  if (refErr) return bad(res, refErr);
+  res.status(201).json(await store.createTienVe(id, data, req.user.id));
+}));
+
+api.put('/tien-ve/:id', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const cur = await store.getTienVe(id);
+  if (!cur) return bad(res, 'Không tìm thấy dòng tiền về', 404);
+  const { data, errors } = validateTienVe(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const refErr = await checkHeadRef(data.hd_id, cur.du_an_id);
+  if (refErr) return bad(res, refErr);
+  const ok = await store.updateTienVe(id, data, req.user.id);
+  ok ? res.json({ id }) : bad(res, 'Không tìm thấy dòng tiền về', 404);
+}));
+
+api.delete('/tien-ve/:id', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const ok = await store.deleteTienVe(id);
+  ok ? res.status(204).end() : bad(res, 'Không tìm thấy dòng tiền về', 404);
+}));
+
+api.post('/du-an/:id/doanh-thu', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  if (!(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
+  const { data, errors } = validateRevenue(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const refErr = await checkHdRef(data, id);
+  if (refErr) return bad(res, refErr);
+  res.status(201).json(await store.createRevenue(id, data, req.user.id));
+}));
+
+// Phải là hợp đồng gốc (HĐ) của cùng công trình
+async function checkHeadRef(hdId, duAnId) {
+  const hd = await store.getRevenue(hdId);
+  if (!hd || hd.loai !== 'hd' || hd.du_an_id !== duAnId) return 'Số HĐ không thuộc công trình này, hãy chọn lại';
+  return hd.ma_loai === 'HĐ' ? null : 'Chỉ chọn hợp đồng gốc (HĐ), không chọn phụ lục';
+}
+
+// Mục 1: không trùng tên "HĐ/PL + Số mã" trong cùng công trình
+// Mục 2: dòng HT/QT phải tham chiếu 1 dòng HĐ/PL của cùng công trình
+async function checkHdRef(data, duAnId, selfId = 0) {
+  if (data.loai === 'hd') {
+    const list = await store.listRevenue(duAnId);
+    // PL cùng Số mã với một HĐ đã có -> dùng đúng cách viết của HĐ đó (gộp nhóm chính xác)
+    if (data.ma_loai !== 'HĐ') {
+      const head = list.find((r) => r.loai === 'hd' && r.ma_loai === 'HĐ' && r.id !== selfId &&
+        String(r.so_ma).toLowerCase() === data.so_ma.toLowerCase());
+      if (head) { data.so_ma = head.so_ma; data.so_hieu = `${data.ma_loai} ${data.so_ma}`; }
+    }
+    const dup = list.some((r) =>
+      r.loai === 'hd' && r.id !== selfId && String(r.so_hieu).toLowerCase() === data.so_hieu.toLowerCase());
+    return dup ? `"${data.so_hieu}" đã có trong công trình này` : null;
+  }
+  // Chỉ gắn với hợp đồng gốc (HĐ), không gắn vào phụ lục để tránh nhiễu số liệu
+  return checkHeadRef(data.hd_id, duAnId);
+}
+
+api.put('/doanh-thu/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const cur = await store.getRevenue(id);
+  if (!cur) return bad(res, 'Không tìm thấy dòng doanh thu', 404);
+  // Không cho đổi loại dòng (HĐ/PL ↔ HT/QT) khi sửa
+  const { data, errors } = validateRevenue({ ...(req.body || {}), loai: cur.loai });
+  if (errors.length) return bad(res, errors);
+  const refErr = await checkHdRef(data, cur.du_an_id, id);
+  if (refErr) return bad(res, refErr);
+  if (cur.loai === 'hd' && cur.ma_loai === 'HĐ' && data.ma_loai !== 'HĐ') {
+    const { qt, tv } = await store.countRevenueRefs(id);
+    if (qt || tv) return bad(res, `Không đổi được loại của "${cur.so_hieu}" vì đang có dòng HT/QT hoặc Tiền về gắn vào HĐ này`);
+  }
+  const ok = await store.updateRevenue(id, data, req.user.id);
+  ok ? res.json({ id }) : bad(res, 'Không tìm thấy dòng doanh thu', 404);
+}));
+
+// Phạm vi ảnh hưởng khi xóa 1 dòng HĐ/PL (để hiện cho người dùng xác nhận)
+async function contractImpact(cur) {
+  const items = (await store.listRevenue(cur.du_an_id)).map(calcLine);
+  const self = items.find((r) => r.id === cur.id);
+  const out = { so_hieu: cur.so_hieu, sau_vat: self?.sau_vat || 0, pls: [], qt: { n: 0, sau_vat: 0 }, tv: { n: 0, so_tien: 0 } };
+  if (cur.loai !== 'hd' || cur.ma_loai !== 'HĐ') return out;
+  const so = String(cur.so_ma).toLowerCase();
+  out.pls = items.filter((r) => r.loai === 'hd' && r.ma_loai !== 'HĐ' && String(r.so_ma).toLowerCase() === so)
+    .map((r) => ({ so_hieu: r.so_hieu, sau_vat: r.sau_vat }));
+  const qts = items.filter((r) => r.loai === 'qt' && r.hd_id === cur.id);
+  out.qt = { n: qts.length, sau_vat: qts.reduce((s, r) => s + r.sau_vat, 0) };
+  const tvs = (await store.listTienVe(cur.du_an_id)).filter((r) => r.hd_id === cur.id);
+  out.tv = { n: tvs.length, so_tien: tvs.reduce((s, r) => s + r.so_tien, 0) };
   return out;
 }
-function sessionToken(req) {
-  const t = parseCookies(req)[COOKIE];
-  return t && /^[a-f0-9]{64}$/.test(t) ? t : null;
-}
-function setSessionCookie(req, res, token, maxAgeSec) {
-  const parts = [`${COOKIE}=${token}`, 'Path=/', 'HttpOnly', 'SameSite=Lax', `Max-Age=${maxAgeSec}`];
-  if (req.secure) parts.push('Secure');
-  res.append('Set-Cookie', parts.join('; '));
-}
-const clientIp = (req) => req.ip || req.socket.remoteAddress || 'unknown';
 
-/* ---------- Trang kiểm tra /health (không cần đăng nhập) ---------- */
-app.get('/health', async (req, res) => {
-  const dbOk = await store.ping();
-  const database = store.mode === 'memory' ? 'not_configured' : dbOk ? 'connected' : 'error';
-  const ok = database !== 'error';
-  res.status(ok ? 200 : 503).json({
-    status: ok ? 'ok' : 'degraded',
-    version,
-    environment: IS_STAGING ? 'staging' : 'production',
-    database,
-    setup_done: settings ? Boolean(settings.setup_done) : null,
-    uptime_seconds: Math.round(process.uptime()),
-    time: new Date().toISOString(),
-  });
-});
+api.get('/doanh-thu/:id/impact', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getRevenue(id));
+  if (!cur) return bad(res, 'Không tìm thấy dòng doanh thu', 404);
+  const im = await contractImpact(cur);
+  // HĐ thầu phụ đang gắn HĐ CĐT này (không bị xóa, chỉ chuyển về "Chưa gắn HĐ CĐT")
+  im.tp = cur.ma_loai === 'HĐ' ? (await store.listTp(cur.du_an_id)).contracts.filter((t) => t.hd_cdt_id === cur.id).length : 0;
+  res.json(im);
+}));
 
-/* ---------- Đọc cấu hình + người đang đăng nhập ---------- */
-app.use(async (req, res, next) => {
-  try {
-    if (!settings) await loadSettings();
-  } catch (e) {
-    console.error('[app] Không đọc được cấu hình:', e.message);
-    return res.status(503).send(pages.messagePage(ctxOf(req), {
-      title: 'Không kết nối được kho dữ liệu',
-      message: 'Hệ thống tạm thời không truy cập được kho dữ liệu. Vui lòng thử lại sau ít phút.',
-    }));
-  }
-  try {
-    const token = sessionToken(req);
-    if (token) req.user = await store.getSessionUser(token);
-  } catch (e) {
-    console.error('[app] Lỗi đọc phiên đăng nhập:', e.message);
-  }
-  next();
-});
-
-/* Chưa khởi tạo -> mọi trang chuyển về /setup */
-app.use((req, res, next) => {
-  const done = Boolean(settings.setup_done);
-  if (!done && req.path !== '/setup') return res.redirect('/setup');
-  if (done && req.path === '/setup') return res.redirect(req.user ? '/' : '/login');
-  next();
-});
-
-/* Bị Quản trị đặt lại mật khẩu -> phải đổi mật khẩu trước khi làm việc khác */
-app.use((req, res, next) => {
-  if (req.user && req.user.must_change_password
-      && !['/ca-nhan', '/ca-nhan/doi-mat-khau', '/logout'].includes(req.path)) {
-    return res.redirect('/ca-nhan');
-  }
-  next();
-});
-
-/* ---------- Khởi tạo lần đầu ---------- */
-app.get('/setup', (req, res) => {
-  res.send(pages.setupPage(ctxOf(req), { needToken: Boolean(SETUP_TOKEN) }));
-});
-
-app.post('/setup', async (req, res) => {
-  const b = req.body || {};
-  const values = {
-    company_name: String(b.company_name || '').trim(),
-    app_name: String(b.app_name || '').trim(),
-    copyright: String(b.copyright || '').trim(),
-    full_name: String(b.full_name || '').trim(),
-    username: String(b.username || '').trim().toLowerCase(),
-  };
-  const password = String(b.password || '');
-  const errors = [];
-
-  if (SETUP_TOKEN) {
-    const given = crypto.createHash('sha256').update(String(b.setup_token || '')).digest();
-    const want = crypto.createHash('sha256').update(SETUP_TOKEN).digest();
-    if (!crypto.timingSafeEqual(given, want)) errors.push('Mã khởi tạo không đúng');
-  }
-  if (!values.company_name) errors.push('Chưa nhập Tên công ty');
-  if (values.company_name.length > 150) errors.push('Tên công ty tối đa 150 ký tự');
-  if (!values.app_name) errors.push('Chưa nhập Tên hệ thống');
-  if (values.app_name.length > 80) errors.push('Tên hệ thống tối đa 80 ký tự');
-  if (values.copyright.length > 200) errors.push('Dòng bản quyền tối đa 200 ký tự');
-  if (!values.full_name) errors.push('Chưa nhập Họ và tên');
-  if (values.full_name.length > 100) errors.push('Họ và tên tối đa 100 ký tự');
-  if (!/^[a-z0-9._-]{3,40}$/.test(values.username)) {
-    errors.push('Tên đăng nhập 3-40 ký tự, chỉ gồm chữ không dấu, số, dấu . _ -');
-  }
-  auth.checkPasswordStrength(password).forEach((e) => errors.push(`Mật khẩu: ${e}`));
-  if (password !== String(b.password2 || '')) errors.push('Hai lần nhập mật khẩu không khớp');
-
-  if (errors.length) {
-    return res.status(400).send(pages.setupPage(ctxOf(req), { errors, values, needToken: Boolean(SETUP_TOKEN) }));
-  }
-
-  try {
-    const password_hash = await auth.hashPassword(password);
-    const result = await store.completeSetup({
-      settings: {
-        company_name: values.company_name,
-        app_name: values.app_name,
-        copyright: values.copyright,
-      },
-      admin: { username: values.username, full_name: values.full_name, password_hash },
-    });
-    await loadSettings();
-    if (!result.ok) return res.redirect('/login');
-    console.log(`[setup] Đã khởi tạo hệ thống, quản trị: ${values.username}`);
-    res.send(pages.loginPage(ctxOf(req), {
-      username: values.username,
-      info: 'Khởi tạo thành công! Trang khởi tạo đã tự khóa. Hãy đăng nhập bằng tài khoản Quản trị vừa tạo.',
-    }));
-  } catch (e) {
-    console.error('[setup] Lỗi:', e.message);
-    res.status(500).send(pages.setupPage(ctxOf(req), {
-      errors: ['Có lỗi khi lưu dữ liệu, vui lòng thử lại.'], values, needToken: Boolean(SETUP_TOKEN),
-    }));
-  }
-});
-
-/* ---------- Đăng nhập / Đăng xuất ---------- */
-const DUMMY_HASH_P = auth.hashPassword(crypto.randomBytes(16).toString('hex'));
-
-app.get('/login', (req, res) => {
-  if (req.user) return res.redirect('/');
-  res.send(pages.loginPage(ctxOf(req)));
-});
-
-app.post('/login', async (req, res) => {
-  const username = String(req.body.username || '').trim().toLowerCase().slice(0, 40);
-  const password = String(req.body.password || '').slice(0, 200);
-  const ip = clientIp(req);
-  const ctx = ctxOf(req);
-
-  const locked = auth.lockRemaining(username, ip);
-  if (locked > 0) {
-    return res.status(429).send(pages.loginPage(ctx, {
-      username,
-      error: `Đăng nhập sai quá nhiều lần. Tạm khóa, vui lòng thử lại sau ${Math.ceil(locked / 60)} phút.`,
-    }));
-  }
-
-  try {
-    const user = username ? await store.findUserByUsername(username) : null;
-    // luôn kiểm tra mật khẩu (kể cả khi không có tài khoản) để không lộ tài khoản nào tồn tại
-    const ok = await auth.verifyPassword(password, user ? user.password_hash : await DUMMY_HASH_P);
-
-    if (!user || !ok) {
-      const left = auth.recordFailure(username, ip);
-      const msg = left > 0
-        ? `Sai tên đăng nhập hoặc mật khẩu. Còn ${left} lần thử trước khi bị tạm khóa.`
-        : `Đăng nhập sai quá nhiều lần. Tạm khóa ${auth.LOCK_MS / 60000} phút.`;
-      return res.status(401).send(pages.loginPage(ctx, { username, error: msg }));
+api.delete('/doanh-thu/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const cur = await store.getRevenue(id);
+  if (!cur) return bad(res, 'Không tìm thấy dòng doanh thu', 404);
+  const cascade = req.body?.cascade === true;
+  if (cur.loai === 'hd') {
+    const { qt, tv } = await store.countRevenueRefs(id);
+    if ((qt || tv) && !cascade) {
+      const parts = [qt && `${qt} dòng Hoàn thành/Quyết toán`, tv && `${tv} dòng Tiền về`].filter(Boolean).join(' và ');
+      return bad(res, `Không xóa được "${cur.so_hieu}": đang được ${parts} tham chiếu. Chọn "Xóa toàn bộ hợp đồng" để xóa kèm.`, 409);
     }
-    if (!user.is_active) {
-      return res.status(403).send(pages.loginPage(ctx, {
-        username, error: 'Tài khoản đã bị khóa. Vui lòng liên hệ Quản trị.',
-      }));
+    // Xóa Số HĐ/PL phải nhập Passcode do Quản trị đặt
+    if (!(await requirePasscode(req, res))) return;
+    // Xóa toàn bộ hợp đồng: HĐ + PL cùng Số mã + HT/QT + Tiền về
+    if (cascade && cur.ma_loai === 'HĐ') {
+      const im = await contractImpact(cur);
+      await store.deleteContractCascade(cur);
+      console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã XÓA TOÀN BỘ HỢP ĐỒNG "${cur.so_hieu}" ` +
+        `(công trình #${cur.du_an_id}): HĐ ${im.sau_vat}đ; ${im.pls.length} PL [${im.pls.map((p) => p.so_hieu).join(', ')}]; ` +
+        `${im.qt.n} dòng HT/QT ${im.qt.sau_vat}đ; ${im.tv.n} dòng tiền về ${im.tv.so_tien}đ`);
+      return res.status(204).end();
     }
-
-    auth.clearFailures(username);
-    const token = crypto.randomBytes(32).toString('hex');
-    await store.createSession(token, user.id, new Date(Date.now() + SESSION_HOURS * 3600 * 1000));
-    await store.touchLogin(user.id);
-    setSessionCookie(req, res, token, SESSION_HOURS * 3600);
-    res.redirect(user.must_change_password ? '/ca-nhan' : '/');
-  } catch (e) {
-    console.error('[login] Lỗi:', e.message);
-    res.status(500).send(pages.loginPage(ctx, { username, error: 'Có lỗi hệ thống, vui lòng thử lại.' }));
   }
-});
+  const ok = await store.deleteRevenue(id);
+  if (ok && cur.loai === 'hd') console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã xóa "${cur.so_hieu}" (công trình #${cur.du_an_id}, dòng #${id})`);
+  ok ? res.status(204).end() : bad(res, 'Không tìm thấy dòng doanh thu', 404);
+}));
 
-app.post('/logout', async (req, res) => {
-  const token = sessionToken(req);
-  if (token) await store.deleteSession(token).catch(() => {});
-  setSessionCookie(req, res, '', 0);
-  res.redirect('/login');
-});
+// ---------- Chi phí công trình ----------
+api.get('/du-an/:id/chi-phi', wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const du_an = await store.getProject(id);
+  if (!du_an) return bad(res, 'Không tìm thấy công trình', 404);
+  const items = sortCost(await store.listCost(id)).map(costLine);
+  const thau_phu = buildContracts(await store.listTp(id));
+  // Nhóm 1 Thầu phụ = giá trị HT/QT của các HĐTP (+ dòng thầu phụ nhập kiểu cũ nếu có)
+  const tpAsCost = thau_phu.map((c) => ({ nhom: c.nhom || 'thau_phu', gia_tri: c.qt_gia_tri, tien_vat: c.qt_tien_vat, sau_vat: c.qt_sau_vat, tam_tinh: c.tam_tinh }));
+  // Danh sách HĐ chủ đầu tư (HĐ gốc) để gộp / gắn thầu phụ, theo thứ tự như tab Doanh thu
+  const hd_cdt = sortRevenue((await store.listRevenue(id)).filter((r) => r.loai === 'hd' && r.ma_loai === 'HĐ'))
+    .map((r) => ({ id: r.id, so_ma: r.so_ma, so_hieu: r.so_hieu, ngay: r.ngay }));
+  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]) });
+}));
 
-/* ---------- Các trang cần đăng nhập ---------- */
-function requireLogin(req, res, next) {
-  if (!req.user) return res.redirect('/login');
-  next();
-}
-function requireAdmin(req, res, next) {
-  if (!req.user) return res.redirect('/login');
-  if (req.user.role !== 'admin') {
-    return res.status(403).send(pages.messagePage(ctxOf(req), {
-      title: 'Không có quyền', message: 'Chức năng này chỉ dành cho Quản trị.',
-    }));
+// Chi phí tổng hợp TẤT CẢ dự án (chỉ xem): ghép dữ liệu từng dự án, tính tổng bằng cùng hàm như từng dự án
+api.get('/chi-phi-tong', wrap(async (_req, res) => {
+  const projects = await store.listProjects();
+  const items = [], thau_phu = [], hd_cdt = [];
+  for (const p of projects) {
+    const [cost, tp, rev] = await Promise.all([store.listCost(p.id), store.listTp(p.id), store.listRevenue(p.id)]);
+    for (const r of sortCost(cost).map(costLine)) items.push({ ...r, du_an_id: p.id, ma_du_an: p.ma_du_an });
+    for (const c of buildContracts(tp)) thau_phu.push({ ...c, du_an_id: p.id, ma_du_an: p.ma_du_an });
+    for (const r of sortRevenue(rev.filter((x) => x.loai === 'hd' && x.ma_loai === 'HĐ')))
+      hd_cdt.push({ id: r.id, so_ma: r.so_ma, so_hieu: `${p.ma_du_an} · ${r.so_hieu}`, ngay: r.ngay, du_an_id: p.id });
   }
-  next();
+  const tpAsCost = thau_phu.map((c) => ({ nhom: c.nhom || 'thau_phu', gia_tri: c.qt_gia_tri, tien_vat: c.qt_tien_vat, sau_vat: c.qt_sau_vat, tam_tinh: c.tam_tinh }));
+  res.json({ tat_ca: true, so_du_an: projects.length, du_an: { id: 0, ma_du_an: 'Tất cả', ten_du_an: `Tất cả dự án (${projects.length})`, chu_dau_tu: '' },
+    items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]) });
+}));
+
+api.post('/du-an/:id/chi-phi', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  if (!(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
+  const { data, errors } = validateCost({ ...(req.body || {}), _new: true });
+  if (errors.length) return bad(res, errors);
+  res.status(201).json(await store.createCost(id, data, req.user.id));
+}));
+
+api.put('/chi-phi/:id', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const { data, errors } = validateCost(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const ok = await store.updateCost(id, data, req.user.id);
+  ok ? res.json({ id }) : bad(res, 'Không tìm thấy dòng chi phí', 404);
+}));
+
+api.delete('/chi-phi/:id', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  const ok = await store.deleteCost(id);
+  ok ? res.status(204).end() : bad(res, 'Không tìm thấy dòng chi phí', 404);
+}));
+
+// ---------- Thầu phụ theo hợp đồng ----------
+const LOCK_MSG = 'Hợp đồng đã thanh toán đủ (còn lại = 0) – đã khóa số. Muốn điều chỉnh, bấm Mở khóa (cần Passcode).';
+// Mở khóa tạm (sau khi nhập đúng Passcode): tpId -> hết hạn; khóa lại khi đóng bảng chi tiết hoặc sau 60 phút
+const tpMoKhoa = new Map();
+const TP_MO_KHOA_MS = 60 * 60 * 1000;
+async function tpIsLocked(tpId) {
+  const exp = tpMoKhoa.get(tpId);
+  if (exp && exp > Date.now()) return false;
+  if (exp) tpMoKhoa.delete(tpId);
+  const tp = await store.getTp(tpId);
+  if (!tp) return false;
+  const c = buildContracts(await store.listTp(tp.du_an_id)).find((x) => x.id === tpId);
+  return Boolean(c?.khoa);
+}
+async function lockedErr(res, tpId) {
+  if (await tpIsLocked(tpId)) { bad(res, LOCK_MSG, 423); return true; }
+  return false;
+}
+async function tpOf(req, res) {
+  const id = parseId(req.params.id);
+  const tp = id && (await store.getTp(id));
+  if (!tp) { bad(res, 'Không tìm thấy hợp đồng thầu phụ', 404); return null; }
+  return tp;
 }
 
-app.get('/', requireLogin, async (req, res, next) => {
-  try {
-    const rep = await reportsRouter.buildReport(store);
-    res.send(pages.homePage(ctxOf(req), rep));
-  } catch (e) { next(e); }
-});
+api.post('/du-an/:id/thau-phu', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id || !(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
+  const t = validateTp(req.body || {});
+  const l = validateTpLine({ ...(req.body?.hd || {}), ma_loai: 'HĐ' });
+  const errors = [...t.errors, ...l.errors];
+  if (errors.length) return bad(res, errors);
+  if (t.data.hd_cdt_id) { const e = await checkHeadRef(t.data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
+  res.status(201).json(await store.createTp(id, t.data, l.data, req.user.id));
+}));
 
-for (const key of Object.keys(ENTITIES)) {
-  app.use(ENTITIES[key].path, entityRouter(key, { store, ctxOf, requireLogin }));
-}
-app.use('/bao-cao', reportsRouter({ store, ctxOf, requireLogin }));
-
-app.use('/tai-khoan', usersRouter({ store, ctxOf, requireAdmin }));
-app.use(accountRouter({ store, ctxOf, requireLogin, reloadSettings: loadSettings, sessionToken, clientIp }));
-
-/* ---------- Không tìm thấy / lỗi ---------- */
-app.use((req, res) => {
-  res.status(404).send(pages.messagePage(ctxOf(req), {
-    title: 'Không tìm thấy trang', message: 'Đường dẫn không tồn tại.',
-  }));
-});
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  console.error('[app] Lỗi:', err.stack || err.message);
-  res.status(err.status === 413 ? 413 : 500).send(pages.messagePage(ctxOf(req), {
-    title: 'Có lỗi xảy ra', message: 'Vui lòng thử lại sau.',
-  }));
-});
-
-/* ---------- Khởi động ---------- */
-async function start() {
-  try {
-    await store.init();
-    await loadSettings();
-    console.log(`[db] Chế độ lưu trữ: ${store.mode === 'postgres' ? 'PostgreSQL' : 'BỘ NHỚ TẠM (chưa nối kho dữ liệu)'}`);
-  } catch (e) {
-    console.error('[db] Không kết nối được PostgreSQL, sẽ thử lại định kỳ:', e.message);
-    const retry = async () => {
-      try {
-        await store.init();
-        await loadSettings();
-        console.log('[db] Đã kết nối lại PostgreSQL');
-      } catch (_) {
-        setTimeout(retry, 30000); // thử lại sau 30 giây
-      }
-    };
-    setTimeout(retry, 30000);
+// Gợi ý khi nhập HĐ đầu vào: nhà thầu đã có + hạng mục từng thi công (gộp theo tên, không phân biệt hoa thường)
+api.get('/thau-phu-goi-y', wrap(async (_req, res) => {
+  const m = new Map();
+  for (const r of await store.listTpGoiY()) {
+    const k = r.doi_tac.trim().toLowerCase(); if (!k) continue;
+    const o = m.get(k) || { doi_tac: r.doi_tac.trim(), nhom: r.nhom, so_hd: 0, hang_muc: [] };
+    o.so_hd++;
+    const hm = String(r.hang_muc || '').trim();
+    if (hm) { const h = o.hang_muc.find((x) => x.ten.toLowerCase() === hm.toLowerCase()); if (h) { h.n++; if (!h.du_an.includes(r.ma_du_an)) h.du_an.push(r.ma_du_an); } else o.hang_muc.push({ ten: hm, n: 1, du_an: [r.ma_du_an] }); }
+    m.set(k, o);
   }
+  res.json([...m.values()].map((o) => ({ ...o, hang_muc: o.hang_muc.sort((a, b) => b.n - a.n) })).sort((a, b) => b.so_hd - a.so_hd || a.doi_tac.localeCompare(b.doi_tac, 'vi')));
+}));
 
-  setInterval(() => store.purgeExpiredSessions().catch(() => {}), 60 * 60 * 1000).unref();
+api.put('/thau-phu/:id', canHd, wrap(async (req, res) => {
+  const tp = await tpOf(req, res); if (!tp) return;
+  const body = req.body || {};
+  const { data, errors } = validateTp(body);
+  if (errors.length) return bad(res, errors);
+  if (!('hd_cdt_id' in body)) data.hd_cdt_id = tp.hd_cdt_id ?? null; // không gửi -> giữ nguyên liên kết
+  if (!('hang_muc' in body)) data.hang_muc = tp.hang_muc || '';   // không gửi -> giữ nguyên hạng mục
+  if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, tp.du_an_id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
+  await store.updateTp(tp.id, data, req.user.id);
+  res.json({ id: tp.id });
+}));
 
-  app.listen(PORT, () => console.log(
-    `[app] Phiên bản ${version} (${IS_STAGING ? 'BẢN THỬ' : 'bản chính'}) đang chạy tại cổng ${PORT}`
-  ));
+api.delete('/thau-phu/:id', canHd, wrap(async (req, res) => {
+  const tp = await tpOf(req, res); if (!tp) return;
+  if (!(await requirePasscode(req, res))) return;
+  const c = buildContracts(await store.listTp(tp.du_an_id)).find((x) => x.id === tp.id);
+  await store.deleteTp(tp.id);
+  console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã XÓA HĐ THẦU PHỤ "${tp.so_ma}" (công trình #${tp.du_an_id}): ` +
+    `${c.lines.length} dòng HĐ/PL, HĐ ${c.hd_sau_vat}đ, HT/QT ${c.qt_sau_vat}đ, ${c.pays.length} dòng thanh toán ${c.da_tt}đ`);
+  res.status(204).end();
+}));
+
+api.post('/thau-phu/:id/hd-pl', canHd, wrap(async (req, res) => {
+  const tp = await tpOf(req, res); if (!tp) return;
+  if (await lockedErr(res, tp.id)) return;
+  const { data, errors } = validateTpLine(req.body || {});
+  if (errors.length) return bad(res, errors);
+  res.status(201).json(await store.createTpLine(tp.id, data, req.user.id));
+}));
+
+api.put('/tp-hd-pl/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getTpLine(id));
+  if (!cur) return bad(res, 'Không tìm thấy dòng HĐ/PL', 404);
+  if (await lockedErr(res, cur.tp_id)) return;
+  const { data, errors } = validateTpLine(req.body || {});
+  if (errors.length) return bad(res, errors);
+  if ((cur.ma_loai === 'HĐ') !== (data.ma_loai === 'HĐ')) return bad(res, 'Không đổi được dòng HĐ gốc thành PL (và ngược lại)');
+  await store.updateTpLine(id, data, req.user.id);
+  res.json({ id });
+}));
+
+api.delete('/tp-hd-pl/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getTpLine(id));
+  if (!cur) return bad(res, 'Không tìm thấy dòng HĐ/PL', 404);
+  if (cur.ma_loai === 'HĐ') return bad(res, 'Dòng HĐ gốc không xóa riêng được. Hãy xóa cả hợp đồng thầu phụ.');
+  if (await lockedErr(res, cur.tp_id)) return;
+  if (!(await requirePasscode(req, res))) return;
+  await store.deleteTpLine(id);
+  const tp = await store.getTp(cur.tp_id);
+  console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã xóa "${cur.ma_loai} ${tp?.so_ma}" (HĐ thầu phụ #${cur.tp_id})`);
+  res.status(204).end();
+}));
+
+api.post('/thau-phu/:id/thanh-toan', canTien, wrap(async (req, res) => {
+  const tp = await tpOf(req, res); if (!tp) return;
+  if (await lockedErr(res, tp.id)) return;
+  const { data, errors } = validateTpPay(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const r = await store.createTpPay(tp.id, data, req.user.id);
+  res.status(201).json(r);
+}));
+
+// Mở khóa tạm HĐ đầu vào đã thanh toán đủ (cần Passcode); số liệu giữ nguyên
+api.post('/thau-phu/:id/mo-khoa', canMoKhoa, wrap(async (req, res) => {
+  const tp = await tpOf(req, res); if (!tp) return;
+  if (!(await requirePasscode(req, res))) return;
+  tpMoKhoa.set(tp.id, Date.now() + TP_MO_KHOA_MS);
+  console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã MỞ KHÓA HĐ đầu vào "${tp.so_ma}" (#${tp.id}) để điều chỉnh`);
+  res.json({ ok: true, het_han: TP_MO_KHOA_MS / 60000 });
+}));
+// Khóa lại (đóng bảng chi tiết): nếu Còn lại vẫn = 0 thì tự khóa như cũ
+api.post('/thau-phu/:id/khoa', canMoKhoa, wrap(async (req, res) => {
+  const tp = await tpOf(req, res); if (!tp) return;
+  tpMoKhoa.delete(tp.id);
+  res.json({ ok: true });
+}));
+
+api.put('/tp-thanh-toan/:id', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getTpPay(id));
+  if (!cur) return bad(res, 'Không tìm thấy dòng thanh toán', 404);
+  if (await lockedErr(res, cur.tp_id)) return;
+  const { data, errors } = validateTpPay(req.body || {});
+  if (errors.length) return bad(res, errors);
+  await store.updateTpPay(id, data, req.user.id);
+  res.json({ id });
+}));
+
+api.delete('/tp-thanh-toan/:id', canTien, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getTpPay(id));
+  if (!cur) return bad(res, 'Không tìm thấy dòng thanh toán', 404);
+  if (await lockedErr(res, cur.tp_id)) return;
+  await store.deleteTpPay(id);
+  res.status(204).end();
+}));
+
+app.use('/api', api);
+app.use('/api', (_req, res) => bad(res, 'Không tìm thấy API', 404));
+
+// Xử lý lỗi chung
+app.use((err, req, res, _next) => {
+  if (err.code === '23505') {
+    const msg = /thau-phu$|thau-phu\/\d+$/.test(req.path) ? 'Số hợp đồng này đã có trong công trình (thầu phụ, vật tư, MMTB, nhân công dùng chung danh sách số HĐ)'
+      : req.path.includes('hd-pl') ? 'Loại HĐ/PL này đã có trong hợp đồng thầu phụ'
+      : req.path.includes('thanh-toan') ? 'Trùng dữ liệu: số đợt thanh toán / quyết toán này đã có'
+      : req.path.includes('tien-ve')
+      ? 'Trùng dữ liệu: số đợt thanh toán này đã có trong HĐ, hoặc HĐ đã có dòng Quyết toán'
+      : /users/.test(err.table || err.detail || '') || req.path.includes('/users') || req.path.includes('/setup')
+        ? 'Tên đăng nhập đã tồn tại' : 'Mã dự án đã tồn tại';
+    return bad(res, msg, 409);
+  }
+  if (err.type === 'entity.parse.failed') return bad(res, 'Dữ liệu JSON không hợp lệ');
+  if (err.type === 'entity.too.large') return bad(res, req.path.endsWith('/anh') ? 'Ảnh quá lớn (tối đa 3 MB)' : 'Dữ liệu gửi lên quá lớn', 413);
+  console.error(err);
+  bad(res, 'Lỗi máy chủ', 500);
+});
+
+// =====================================================================
+// Chẩn đoán lỗi CSDL
+// =====================================================================
+function dbHint(msg = '') {
+  if (/ENOTFOUND|EAI_AGAIN|getaddrinfo/i.test(msg)) return 'Không tìm thấy máy chủ CSDL. Service PostgreSQL chưa có, sai tên trong ${{...}}, hoặc nằm ở project/môi trường khác.';
+  if (/ECONNREFUSED/i.test(msg)) return 'Máy chủ CSDL từ chối kết nối. Service PostgreSQL chưa chạy xong (chờ 1–2 phút) hoặc đang lỗi.';
+  if (/password authentication|authentication failed/i.test(msg)) return 'Sai mật khẩu CSDL. Hãy dùng tham chiếu ${{Postgres.DATABASE_URL}} thay vì dán tay giá trị cũ.';
+  if (/does not exist/i.test(msg)) return 'Tên database trong DATABASE_URL không tồn tại.';
+  if (/timeout|ETIMEDOUT/i.test(msg)) return 'Hết thời gian chờ kết nối CSDL. Kiểm tra service PostgreSQL có đang Active.';
+  if (/Invalid URL|invalid connection|getaddrinfo .*undefined/i.test(msg)) return 'DATABASE_URL sai định dạng. Phải có dạng postgresql://user:pass@host:5432/db';
+  if (/SSL|certificate/i.test(msg)) return 'Lỗi SSL khi kết nối CSDL.';
+  return 'Kiểm tra biến DATABASE_URL và service PostgreSQL trên Railway.';
 }
 
-if (require.main === module) start();
-module.exports = { app, start };
+function dbErrorPage() {
+  const e = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  return `<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="10"><title>Chưa kết nối CSDL</title><link rel="icon" href="/img/favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap&subset=vietnamese"><link rel="stylesheet" href="/style.css"></head>
+<body class="auth-page"><div class="auth-box wide"><div class="auth-brand"><img class="logo-full" src="/img/logo-full.png" alt="TMN">
+<h1>Chưa kết nối được cơ sở dữ liệu</h1><p class="muted">Web đang chạy, đang tự thử kết nối lại (lần ${dbState.attempts}). Trang tự tải lại sau 10 giây.</p></div>
+<div class="stack"><div><b>Nguyên nhân có thể:</b><br>${e(dbHint(dbState.error))}</div>
+<div><b>Lỗi chi tiết:</b><br><code>${e(dbState.error || 'Đang kết nối...')}</code></div>
+<div><b>DATABASE_URL đang trỏ tới:</b><br><code>${e(store.target)}</code></div></div></div>
+<div class="auth-foot">Produced by the Supervisory Board of Tan Minh Nhan Corporation®</div></body></html>`;
+}
+
+// =====================================================================
+// Khởi động: mở cổng web NGAY, rồi kết nối CSDL (tự thử lại mãi, không tắt web)
+// =====================================================================
+console.log(`Khởi động... PORT=${PORT} | CSDL: ${store.kind} | DATABASE_URL: ${store.target}`);
+app.listen(PORT, '0.0.0.0', () => console.log(`Server chạy tại cổng ${PORT}`));
+
+(async function connectDb() {
+  for (;;) {
+    dbState.attempts++;
+    try {
+      await store.init();
+      const n = await store.migrateHdCodes();
+      if (n) console.log(`Đã tách Loại/Số mã cho ${n} dòng HĐ/PL cũ`);
+      const m = await store.migrateQtToHead();
+      if (m) console.log(`Đã chuyển ${m} dòng HT/QT từ phụ lục sang HĐ gốc`);
+      const t = await store.migrateTienVeHd();
+      if (t) console.log(`Đã gắn HĐ cho ${t} dòng tiền về cũ`);
+      await migrateTpHdCdt();
+      dbState.ready = true;
+      dbState.error = null;
+      audit.startPrune();
+      console.log(`Đã kết nối CSDL (${store.kind}) sau ${dbState.attempts} lần thử`);
+      return;
+    } catch (e) {
+      dbState.error = e.message || String(e);
+      console.error(`Kết nối CSDL thất bại (lần ${dbState.attempts}): ${dbState.error} -> ${dbHint(dbState.error)}`);
+      await new Promise((r) => setTimeout(r, Math.min(30000, 3000 * dbState.attempts)));
+    }
+  }
+})();
+
+// Không để lỗi bất ngờ làm sập web
+process.on('unhandledRejection', (e) => console.error('Lỗi chưa xử lý:', e));

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap&subset=vietnamese">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="auth-page">
+  <div class="auth-box">
+    <div class="auth-brand">
+      <img class="logo-full" src="/img/logo-full.png" alt="Tân Minh Nhân">
+      <h1 id="sys-name">Quản lý dự án</h1>
+      <p id="company" class="muted"></p>
+    </div>
+    <form id="form" class="stack">
+      <label>Tên đăng nhập<input name="username" autocomplete="username" required autofocus></label>
+      <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit" class="primary block">Đăng nhập</button>
+      <div id="msg" class="msg" role="alert"></div>
+    </form>
+    <p class="muted small center">Quên mật khẩu? Liên hệ quản trị viên để được cấp lại.</p>
+  </div>
+  <div class="auth-foot">Produced by the Supervisory Board of Tan Minh Nhan Corporation®</div>
+  <script src="/common.js"></script>
+  <script src="/login.js"></script>
+</body>
+</html>

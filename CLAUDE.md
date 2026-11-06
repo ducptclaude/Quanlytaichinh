@@ -1,45 +1,44 @@
-# Quy ước làm việc của dự án
+# Quy ước làm việc của dự án – Hệ thống BKS (Quản lý hiệu quả dự án)
 
-Người dùng là quản lý dự án xây dựng / tài chính, **không biết lập trình**.
+Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm soát, **không biết lập trình**.
 
 ## Giao tiếp
 - Luôn trả lời **tiếng Việt**, ngắn gọn, thẳng vấn đề, **không dùng thuật ngữ IT** khi báo cáo.
 - Cuối mỗi yêu cầu báo **3 ý**: *Đã làm gì* / *Đã kiểm tra gì* / *Việc cần tôi quyết*.
+- Không nhắc lại việc đổi mật khẩu tài khoản thử (người dùng đã yêu cầu).
+- Không tự lấy ảnh từ Internet.
 
 ## Hai vai (người dùng ghi ở đầu tin nhắn)
-- **`Dev:`** → vai **dev**: được sửa mã, làm theo quy trình bên dưới. Chi tiết: `.claude/agents/dev.md`.
-- **`Revi:`** → vai **revi**: chỉ **rà soát**, **không sửa** bất kỳ tệp nào, không lưu lên GitHub. Chi tiết: `.claude/agents/revi.md`.
+- **`Dev:`** → sửa mã theo quy trình dưới. Chi tiết: `.claude/agents/dev.md`.
+- **`Revi:`** → chỉ rà soát, không sửa tệp, không lưu GitHub. Chi tiết: `.claude/agents/revi.md`.
 
 ## Nhánh
-- Chỉ làm trên **`staging`** (bản thử).
-- Chỉ khi người dùng nói **"chuyển qua chính"** mới đưa lên **`main`** (bản chính).
+- Chỉ làm trên **`staging`**. Chỉ khi người dùng nói **"chuyển qua chính"** mới đưa lên **`main`**.
+- Nhánh `backup-qltc-V3.06.11.2026` = mã hệ thống cũ "Quản lý tài chính" (V3.06.11.2026). KHÔNG xóa.
 
 ## Quy trình mỗi yêu cầu (vai dev)
 1. Làm thay đổi.
-2. Tăng phiên bản: `npm run bump` (dạng `V[lần trong ngày].[ngày].[tháng].[năm]`, giờ Việt Nam, lưu ở `version.json`).
-3. Tự chạy thử: `npm test` (chế độ bộ nhớ tạm) và, nếu có PostgreSQL, `TEST_DATABASE_URL=... npm test`.
+2. Tăng phiên bản: `node scripts/bump-version.js` (dạng `Vlần.dd.mm.yy`, giờ Việt Nam, lưu `version.json`).
+3. Chạy thử: `npm start` (không có DATABASE_URL = bộ nhớ tạm), Quản trị → Cài đặt → Tạo dữ liệu mẫu,
+   rồi đối chiếu số liệu: `node scripts/tester.js <url> <tài khoản> <mật khẩu>` (~4.500 kiểm tra, phải 0 LỖI).
    Chụp màn hình máy tính (1366px) + điện thoại (iPhone 13) các trang bị ảnh hưởng, kiểm tra không tràn ngang.
-4. Lưu lên GitHub nhánh `staging`.
+4. Lưu lên GitHub nhánh `staging` (Railway tự cập nhật).
 5. Cập nhật `docs/TOM-TAT-PHIEN.md`.
 6. Báo 3 ý.
 
 ## Lỗi
-- **Lỗi lớn** (ảnh hưởng dữ liệu, công thức tiền, phân quyền): **dừng lại, báo người dùng trước**.
+- **Lỗi lớn** (dữ liệu, công thức tiền, phân quyền, cấu trúc kho dữ liệu): **dừng lại, báo người dùng trước**.
 - **Lỗi nhỏ**: tự sửa và báo lại.
 
-## An toàn
-- Không lưu mật khẩu / khóa bí mật vào tệp (dùng biến môi trường trên Railway).
-- Không xóa dữ liệu thật khi thay đổi cấu trúc: chỉ `CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`; không `DROP`, không đổi tên cột đang dùng.
+## An toàn dữ liệu
+- Không lưu mật khẩu / khóa bí mật vào tệp.
+- **Kho dữ liệu Railway dùng chung với hệ thống cũ.** BKS chỉ dùng ngăn (schema) `bks` – biến `DB_SCHEMA`, mặc định `bks`
+  (`lib/db.js`). Dữ liệu cũ nằm ở ngăn `public` (users, sessions, settings, projects, revenues, costs, daily_entries) – KHÔNG đụng, KHÔNG xóa.
+- Thay đổi cấu trúc chỉ THÊM (`CREATE ... IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`), không DROP / đổi tên cột đang dùng.
+- Ghi qua API cần header `X-Requested-With: fetch` + `Origin`; giới hạn 120 lệnh ghi/phút (quá thì bị chặn IP 10 phút) → ghi chậm.
 
-## Kỹ thuật (tóm tắt)
-- Node.js ≥ 20 + Express 4 + PostgreSQL (`pg`). Ít thư viện, không khung giao diện.
-- `server.js` (luồng chính) · `src/db.js` (lưu trữ: PostgreSQL hoặc bộ nhớ tạm) · `src/auth.js` (mật khẩu, chặn đăng nhập sai)
-  · `src/routes/*` (tài khoản, cá nhân, liên hệ) · `src/views/*` (giao diện HTML) · `public/` (CSS, JS trình duyệt)
-- Danh mục (Dự án / Doanh thu / Chi phí): cấu hình ô ở `src/entities.js`, xử lý chung `src/routes/entities.js`,
-  lưu trữ `src/db-entities.js`. Đổi KIỂU của ô đã có dữ liệu = thay đổi lớn → báo người dùng trước.
-- Khoản mục chi phí: `COST_ITEMS` trong `src/entities.js` (mã TT/GT/TC). Không đổi mã đã dùng. Báo cáo tính trên tiền CHƯA VAT.
-- Tab "Nhập hằng ngày" đã bỏ (V6) – bảng `daily_entries` giữ lại, KHÔNG xóa.
-- Tiền: số nguyên đồng (BIGINT), không dùng số thập phân. Công thức báo cáo ở `src/routes/reports.js` (đầu tệp).
-- Xuất Excel: `src/xlsx.js` (tự viết, không thư viện).
-- Router dùng `src/router.js` (bắt lỗi async). Mọi nội dung đưa vào HTML phải qua `esc()`.
-- Bản thử: `APP_ENV=staging` hoặc Railway tự nhận theo tên môi trường / nhánh → hiện dải đỏ "HỆ THỐNG THỬ NGHIỆM".
+## Kỹ thuật (tóm tắt) – chi tiết xem `README.md`, `ban-giao/HUONG-DAN-BUILD.md`
+- Node.js ≥ 18 + Express 4 + PostgreSQL (`pg`) + ExcelJS. Giao diện HTML/JS thuần (`views/`, `public/`).
+- `server.js` (API) · `lib/db.js` (lưu trữ) · `lib/dashboard.js`, `lib/report.js` (công thức báo cáo) · `lib/demo.js` (dữ liệu mẫu DEMO-xx)
+  · `lib/security.js` (CSP, giới hạn tần suất) · `lib/audit.js` (nhật ký).
+- Bản thử: đặt biến `APP_ENV=staging` trên Railway để hiện nhãn thử nghiệm.

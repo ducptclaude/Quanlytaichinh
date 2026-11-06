@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý dự án</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap&subset=vietnamese">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-chip"><img src="/img/logo-icon.png" alt="TMN"></div>
+      <div>
+        <div id="sys-name" class="sys-name">Quản lý dự án</div>
+        <div id="company" class="company"></div>
+      </div>
+    </div>
+    <!-- Menu: Báo cáo (mặc định) · Nhập liệu ▾ (Dự án, Doanh thu, Chi phí) · Quản trị ▾ (Tài khoản, Cài đặt) · tên người dùng ▾ (Cá nhân, Liên hệ, Đăng xuất) -->
+    <nav id="tabs" class="tabs">
+      <button data-tab="report" data-role="admin lanh_dao bks qs ke_toan editor viewer">Báo cáo</button>
+      <div class="tab-grp" data-role="admin editor qs ke_toan lanh_dao bks" data-grp="nhap">
+        <button type="button" class="tab-grp-btn" data-grp-toggle aria-expanded="false" aria-haspopup="true">Nhập liệu <span class="caret">▾</span></button>
+        <div class="tab-menu" role="menu">
+          <button data-tab="projects" role="menuitem">Dự án</button>
+          <button data-tab="revenue" role="menuitem">Doanh thu</button>
+          <button data-tab="cost" role="menuitem">Chi phí</button>
+        </div>
+      </div>
+      <div class="tab-grp" data-role="admin bks it" data-grp="qt">
+        <button type="button" class="tab-grp-btn" data-grp-toggle aria-expanded="false" aria-haspopup="true">Quản trị <span class="caret">▾</span></button>
+        <div class="tab-menu" role="menu">
+          <button data-tab="users" role="menuitem" data-role="admin it">Tài khoản &amp; nhật ký</button>
+          <button data-tab="users" role="menuitem" data-role="bks">Nhật ký hoạt động</button>
+          <button data-tab="settings" role="menuitem" data-role="admin">Cài đặt</button>
+        </div>
+      </div>
+    </nav>
+    <div class="user-box">
+      <div class="tab-grp xuat-grp" data-grp="xuat" id="xuat-grp" hidden>
+        <button type="button" class="tab-grp-btn xuat-btn" data-grp-toggle aria-expanded="false" aria-haspopup="true" title="Xuất báo cáo đang xem"><span id="xuat-txt">⤓ Xuất</span> <span class="caret">▾</span></button>
+        <div class="tab-menu right" role="menu">
+          <button type="button" id="b-print" role="menuitem" title="In hoặc lưu PDF trang báo cáo đang xem">In / PDF</button>
+          <button type="button" id="b-dash-pdf" role="menuitem" title="Dashboard tổng hợp 1 trang A4 ngang – chọn 'Lưu dưới dạng PDF' trong hộp in">Dashboard PDF</button>
+          <button type="button" id="b-xlsx" role="menuitem" title="Toàn bộ số liệu báo cáo, nhiều trang tính">Excel</button>
+          <button type="button" id="b-xlsx-tmn" role="menuitem" title="Bảng tổng hợp doanh thu – chi phí theo mẫu trình ký TMN (logo, font, bố cục chuẩn)">Excel mẫu TMN</button>
+          <button type="button" id="b-pptx" role="menuitem" title="Bộ slide trình chiếu báo cáo">PowerPoint</button>
+        </div>
+      </div>
+      <label class="dv-pick" title="Đơn vị hiển thị số tiền trên toàn hệ thống (chỉ đổi cách hiện, không đổi số liệu)"><span>Đơn vị</span>
+        <select id="dv-pick"><option value="auto">Tự động</option><option value="dong">Đồng</option><option value="nghin">Nghìn</option><option value="trieu">Triệu</option><option value="ty">Tỷ</option></select></label>
+      <div class="tab-grp user-grp" data-grp="me">
+        <button type="button" class="tab-grp-btn" data-grp-toggle aria-expanded="false" aria-haspopup="true"><span id="me-name"></span> <span id="me-role" class="badge"></span> <span class="caret">▾</span></button>
+        <div class="tab-menu right" role="menu">
+          <button data-tab="profile" role="menuitem">Cá nhân</button>
+          <button data-tab="contact" role="menuitem">Liên hệ</button>
+          <button id="btn-logout" class="menu-out" role="menuitem">Đăng xuất</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Thanh chuyển nhanh trong nhóm Nhập liệu: 1 chạm giữa Dự án / Doanh thu / Chi phí -->
+    <div id="subnav" class="subnav no-print" hidden>
+      <button data-tab="projects">Dự án</button><button data-tab="revenue">Doanh thu</button><button data-tab="cost">Chi phí</button>
+    </div>
+    <!-- ================= DỰ ÁN ================= -->
+    <section id="tab-projects" class="tab-panel">
+      <div class="card" data-role="admin editor qs">
+        <h2 id="p-form-title">Thêm dự án</h2>
+        <form id="p-form" class="grid-form">
+          <input type="hidden" name="id">
+          <label>Mã dự án *<input name="ma_du_an" required maxlength="50"></label>
+          <label>Tên dự án *<input name="ten_du_an" required maxlength="255"></label>
+          <label>Chủ đầu tư<input name="chu_dau_tu" maxlength="255"></label>
+          <label>Loại công trình<input name="loai_cong_trinh" maxlength="100" placeholder="Nhà cao tầng, Nhà xưởng..."></label>
+          <label>Địa điểm<input name="dia_diem" maxlength="150" placeholder="Quận 1, TP.HCM"></label>
+          <label>Khu vực (phường / quận) <small class="muted">– dùng tính trọng điểm trên bản đồ</small><input name="khu_vuc" maxlength="80" placeholder="Hải Châu"></label>
+          <label>Vị trí (tọa độ) <small class="muted">– vĩ độ, kinh độ</small>
+            <span class="map-in"><input name="toa_do" maxlength="60" placeholder="16.068900, 108.223000" autocomplete="off"><button type="button" id="p-map-pick" class="sm" title="Chọn vị trí trên bản đồ">📍 Chọn trên bản đồ</button></span></label>
+          <label>Tiến độ (%)<input name="tien_do" type="number" min="0" max="100" step="0.01" value="0"></label>
+          <label>Trạng thái<select name="trang_thai"></select></label>
+          <label>Ngày bắt đầu <small class="muted">(trống = ngày ký HĐ đầu tiên)</small><input name="ngay_bat_dau" type="date"></label>
+          <label>Ngày kết thúc <small class="muted">(trống = ngày quyết toán)</small><input name="ngay_ket_thuc" type="date"></label>
+          <div class="actions">
+            <button type="submit" class="primary">Lưu</button>
+            <button type="button" id="p-cancel">Hủy</button>
+          </div>
+          <div id="p-msg" class="msg" role="alert"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <h2>Danh sách dự án</h2>
+          <span class="muted small p-note">Doanh thu · Chi phí · Lợi nhuận: số thực hiện, trước VAT — bấm tên dự án để xem báo cáo chi tiết</span>
+          <input id="p-search" type="search" placeholder="Tìm mã, tên, chủ đầu tư...">
+          <button id="p-csv">Xuất CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã / Tên dự án</th><th>Chủ đầu tư</th>
+                <th class="num">Doanh thu</th><th class="num">Chi phí</th><th class="num">Lợi nhuận</th>
+                <th>Tiến độ</th><th>Trạng thái</th><th>Thời gian</th><th>Cập nhật</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="p-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= DOANH THU ================= -->
+    <section id="tab-revenue" class="tab-panel" hidden>
+      <div class="card">
+        <div class="toolbar">
+          <h2>DOANH THU</h2>
+          <select id="r-project" class="project-select" aria-label="Chọn công trình"></select>
+        </div>
+        <div id="r-project-info" class="muted small"></div>
+      </div>
+
+      <div id="r-body" class="section-stack" hidden>
+        <div class="kpis">
+          <div class="kpi"><div class="label">HĐ/PL sau VAT</div><div class="value" id="r-k-hd">0</div><div class="sub" id="r-k-hd-sub"></div></div>
+          <div class="kpi"><div class="label">HT/QT sau VAT</div><div class="value" id="r-k-qt">0</div><div class="sub" id="r-k-qt-sub"></div></div>
+          <div class="kpi"><div class="label">Giá trị tiền về</div><div class="value" id="r-k-tv">0</div><div class="sub" id="r-k-tv-sub"></div></div>
+        </div>
+        <div id="r-sections" class="section-stack"></div>
+      </div>
+      <div id="r-empty" class="card empty" hidden>Chưa có công trình nào. Hãy thêm công trình ở tab <b>Dự án</b> trước.</div>
+    </section>
+
+    <!-- ================= CHI PHÍ ================= -->
+    <section id="tab-cost" class="tab-panel" hidden>
+      <div class="card">
+        <div class="toolbar">
+          <h2>CHI PHÍ</h2>
+          <select id="c-project" class="project-select" aria-label="Chọn công trình"></select>
+        </div>
+        <div id="c-project-info" class="muted small"></div>
+      </div>
+
+      <div id="c-body" class="section-stack" hidden>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Chi phí trực tiếp</div><div class="value" id="c-k-B1">0</div><div class="sub" id="c-k-B1-sub"></div></div>
+          <div class="kpi"><div class="label">Chi phí gián tiếp</div><div class="value" id="c-k-B2">0</div><div class="sub" id="c-k-B2-sub"></div></div>
+          <div class="kpi"><div class="label">Chi phí tài chính</div><div class="value" id="c-k-B3">0</div><div class="sub" id="c-k-B3-sub"></div></div>
+          <div class="kpi"><div class="label">Tổng chi phí sau VAT</div><div class="value" id="c-k-sau">0</div><div class="sub" id="c-k-sub"></div></div>
+        </div>
+
+        <div class="card" data-role="admin editor qs ke_toan">
+          <h2 id="c-form-title">Thêm chi phí</h2>
+          <form id="c-form" class="grid-form" novalidate>
+            <input type="hidden" name="id">
+            <label>Nhóm chi phí *<select name="nhom"></select></label>
+            <label id="c-ht-wrap" hidden>Hình thức *<select name="hinh_thuc"><option value="le">Dòng chi phí (mua lẻ, không có HĐ)</option><option value="hd">Hợp đồng (HĐ, PL, quyết toán, thanh toán)</option></select></label>
+            <label id="c-sub-wrap">Hạng mục *<select name="nhom_con"></select></label>
+            <label class="c-tp">Thuộc HĐ chủ đầu tư<select name="hd_cdt"></select></label>
+            <label class="c-tp"><span id="c-so-label">Số HĐ thầu phụ *</span><input name="so_tp" maxlength="120" placeholder="Số mới: gõ · Số đã có: nhấp đúp" title="Số HĐ mới: gõ trực tiếp. Số đã có: nhấp đúp để mở bảng chi tiết"></label>
+            <label class="span-2 c-gen">Nội dung *<input name="noi_dung" maxlength="300"></label>
+            <label><span id="c-dt-label">Đối tác / Nhà cung cấp</span><input name="doi_tac" maxlength="200"></label>
+            <datalist id="bank-list"></datalist>
+            <label class="c-tp span-2 tp-hm-wrap">Hạng mục thi công<input name="hang_muc" maxlength="300" placeholder="Chọn nhà thầu để tự điền, hoặc gõ / chọn trong danh sách" autocomplete="off"></label>
+            <label class="c-gen">Số HĐ / Chứng từ<input name="so_ct" maxlength="100"></label>
+            <label><span id="c-ngay-label">Ngày</span><input name="ngay" class="date-dmy"></label>
+            <label><span id="c-gt-label">Giá trị (trước VAT) *</span><input name="gia_tri" placeholder="0"></label>
+            <label>VAT (%)<input name="vat" type="number" min="0" max="100" step="1" placeholder="0 = chưa có VAT"></label>
+            <label>Giá trị (sau VAT)<output class="calc" name="sau_vat">0</output><span class="calc-note vat-note"></span></label>
+            <label class="span-2">Ghi chú<input name="ghi_chu" maxlength="500"></label>
+            <div class="actions">
+              <button type="submit" class="primary">Thêm dòng</button>
+              <button type="button" id="c-cancel">Hủy</button>
+            </div>
+            <div class="c-tp tp-hint span-2 muted small">Sau khi tạo: <b>HT/QT</b> = giá trị HĐ (chưa quyết toán) · <b>Đã thanh toán</b> = 0 · <b>Còn lại</b> = HT/QT. Nhấp đúp vào Số HĐ ở bảng "1. Hợp đồng đầu vào" để nhập PL, HT/QT và thanh toán.</div>
+            <div class="msg" id="c-msg" role="alert"></div>
+          </form>
+        </div>
+
+        <div class="card" id="tp-card">
+          <div class="toolbar tv-head">
+            <h2>1. Hợp đồng đầu vào <span class="muted small">thầu phụ · vật tư · MMTB · nhân công</span></h2>
+            <div class="tv-total">Còn lại: <b id="tp-total">0</b></div>
+          </div>
+          <div class="tp-filter">
+            <input id="tp-q" type="search" placeholder="Tìm số HĐ, đối tác, ghi chú, HĐ CĐT…" aria-label="Tìm hợp đồng đầu vào">
+            <div class="tp-fg"><span class="tp-fl">Loại</span><div class="seg" id="tp-nhom" role="group" aria-label="Lọc theo loại hợp đồng"></div></div>
+            <div class="tp-fg"><span class="tp-fl">Quyết toán</span><div class="seg" id="tp-loc" role="group" aria-label="Lọc theo quyết toán">
+              <button type="button" data-v="" class="on">Tất cả</button><button type="button" data-v="chua">Chưa QT</button><button type="button" data-v="con">Đã QT · còn phải trả</button><button type="button" data-v="du">Đã QT · trả đủ</button>
+            </div></div>
+            <span class="tp-unit" id="tp-unit">Đơn vị: triệu đồng · sau VAT</span>
+            <button type="button" class="sm tp-tg" id="tp-toggle-all">Mở tất cả</button>
+          </div>
+          <div class="table-wrap">
+            <table class="tp-table">
+              <thead><tr>
+                <th class="num">#</th><th>Hợp đồng</th><th>Đối tác</th>
+                <th class="num">Giá trị HĐ</th><th class="num">Giá trị HT/QT</th><th class="num">Đã thanh toán</th><th class="num">Còn lại</th><th>Hạng mục / Ghi chú</th><th></th>
+              </tr></thead>
+              <tbody id="tp-tbody"></tbody>
+              <tfoot id="tp-tfoot"></tfoot>
+            </table>
+          </div>
+          <p class="muted small">Nhấp đúp vào <b>Số hợp đồng</b> (hoặc bấm Chi tiết) để nhập HĐ/PL, giá trị HT/QT và thanh toán. Đơn vị theo ô <b>Đơn vị</b> trên cùng (mặc định triệu đồng), sau VAT (rê chuột vào số để xem số đồng đầy đủ); HT/QT chưa nhập = bằng giá trị HĐ/PL (chưa quyết toán).</p>
+        </div>
+
+        <!-- B1 / B2 / B3: dựng từ danh mục khối chi phí -->
+        <div class="card c-blocks-bar">
+          <button type="button" class="primary" id="c-blocks-toggle" aria-expanded="false">Hiện bảng chi tiết chi phí ▾</button>
+          <span class="muted small" id="c-blocks-sum"></span>
+        </div>
+        <div id="c-blocks" class="section-stack" hidden></div>
+      </div>
+      <div id="c-empty" class="card empty" hidden>Chưa có công trình nào. Hãy thêm công trình ở tab <b>Dự án</b> trước.</div>
+    </section>
+
+    <!-- ================= TÀI KHOẢN ================= -->
+    <section id="tab-users" class="tab-panel" hidden>
+      <div class="card" data-role="admin it">
+        <h2 id="u-form-title">Thêm tài khoản</h2>
+        <form id="u-form" class="grid-form">
+          <input type="hidden" name="id">
+          <label>Tên đăng nhập *<input name="username" required pattern="[A-Za-z0-9._\-]{3,50}" autocomplete="off"
+            title="3–50 ký tự: chữ không dấu, số, dấu . _ -"></label>
+          <label>Họ tên *<input name="full_name" required maxlength="100"></label>
+          <label><span class="lbl-help">Vai trò <button type="button" class="help-q" id="role-help" aria-expanded="false" aria-controls="role-guide" title="Xem quyền của từng vai trò" aria-label="Xem quyền của từng vai trò"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="6.3" r="1.15" fill="currentColor"/><rect x="9.15" y="8.6" width="1.7" height="5.6" rx=".85" fill="currentColor"/></svg></button></span><select name="role"></select></label>
+          <label><span id="u-pass-label">Mật khẩu *</span><input name="password" type="password" required autocomplete="new-password"></label>
+          <label class="check"><input name="active" type="checkbox" checked> Đang hoạt động</label>
+          <div class="actions">
+            <button type="submit" class="primary">Lưu</button>
+            <button type="button" id="u-cancel">Hủy</button>
+          </div>
+          <div id="u-msg" class="msg" role="alert"></div>
+        </form>
+        <div id="role-guide" class="role-guide" hidden></div>
+        <p class="muted small">Bấm <span class="help-q help-q-sm"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="6.3" r="1.15" fill="currentColor"/><rect x="9.15" y="8.6" width="1.7" height="5.6" rx=".85" fill="currentColor"/></svg></span> cạnh ô Vai trò để xem quyền của từng vai trò. Khi sửa, để trống mật khẩu nếu không muốn đổi.</p>
+      </div>
+      <div class="card" data-role="admin it">
+        <h2>Danh sách tài khoản</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tên đăng nhập</th><th>Họ tên</th><th>Quyền</th><th>Trạng thái</th><th>Đăng nhập gần nhất</th><th>Truy cập gần nhất</th><th></th></tr></thead>
+            <tbody id="u-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" id="nk-card">
+        <div class="nk-head">
+          <h2>Nhật ký hoạt động</h2>
+          <span class="muted small">Tự ghi mọi thao tác thêm / sửa / xóa, đăng nhập, xuất báo cáo · lưu 1 năm · tự làm mới 10 giây</span>
+        </div>
+        <div id="nk-stat" class="nk-stat muted small"></div>
+        <form id="nk-filter" class="nk-filter">
+          <label>Tài khoản<select name="user_id"><option value="">Tất cả</option></select></label>
+          <label>Hành động<select name="hanh_dong"><option value="">Tất cả</option></select></label>
+          <label>Từ ngày<input type="date" name="tu"></label>
+          <label>Đến ngày<input type="date" name="den"></label>
+          <label class="nk-q">Tìm<input type="search" name="q" placeholder="Mã dự án, nội dung, IP..."></label>
+          <label>Hiển thị<select name="limit"><option value="50">50 dòng</option><option value="100" selected>100 dòng</option><option value="150">150 dòng</option></select></label>
+          <div class="nk-actions"><button type="button" id="nk-reset">Xóa lọc</button><button type="button" id="nk-csv">Xuất CSV</button></div>
+        </form>
+        <div class="table-wrap">
+          <table class="nk-table">
+            <thead><tr><th>Thời gian</th><th>Tài khoản</th><th>Hành động</th><th>Đối tượng</th><th>Dự án</th><th>Nội dung</th><th>IP</th></tr></thead>
+            <tbody id="nk-tbody"><tr><td colspan="7" class="empty">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="nk-more"><div id="nk-pager" class="nk-pager"></div><span id="nk-count" class="muted small"></span></div>
+      </div>
+    </section>
+
+    <!-- ================= CÀI ĐẶT ================= -->
+    <section id="tab-settings" class="tab-panel" hidden>
+      <div class="card narrow">
+        <h2>Cài đặt hệ thống</h2>
+        <form id="s-form" class="stack">
+          <label>Tên công ty / đơn vị *<input name="ten_cong_ty" required maxlength="150"></label>
+          <label>Tên hệ thống<input name="ten_he_thong" maxlength="100"></label>
+          <div class="actions"><button type="submit" class="primary">Lưu cài đặt</button></div>
+          <div id="s-msg" class="msg" role="alert"></div>
+        </form>
+        <hr>
+        <h2>Passcode xóa (dự án, HĐ/PL, HĐ thầu phụ)</h2>
+        <p id="pc-status" class="small"></p>
+        <form id="pc-form" class="stack" autocomplete="off">
+          <label>Mật khẩu đăng nhập của bạn *<input name="current_password" type="password" required autocomplete="current-password"></label>
+          <label>Passcode mới (8 chữ số) *<input name="passcode" type="password" inputmode="numeric" maxlength="8" required autocomplete="new-password"></label>
+          <label>Nhập lại passcode *<input name="passcode2" type="password" inputmode="numeric" maxlength="8" required autocomplete="new-password"></label>
+          <p class="muted small">Không dùng dãy dễ đoán (11111111, 12345678...). Passcode được mã hóa, không ai xem lại được; quên thì đặt mã mới.</p>
+          <div class="actions"><button type="submit" class="primary" id="pc-submit">Đặt passcode</button></div>
+          <div id="pc-msg" class="msg" role="alert"></div>
+        </form>
+        <hr>
+        <h2>Dữ liệu mẫu (chạy thử hệ thống)</h2>
+        <p class="small">Tạo 12 dự án mẫu mã <b>DEMO-01…12</b>: mỗi dự án 5–10 HĐ chủ đầu tư ở các giai đoạn (mới ký / đang thi công / đã quyết toán), mỗi HĐ 5–10 HĐ thầu phụ và các khoản chi phí khác; khoản vay ngân hàng (giải ngân, trả gốc + lãi); kèm 3 thời điểm TĐ1 ban đầu · TĐ2 có phát sinh · TĐ3 quyết toán (công trình hoàn thành). Dữ liệu chuẩn: đủ ngày, VAT 10% (nhân công 8%), không cảnh báo. Không ảnh hưởng dữ liệu thật; xóa được toàn bộ bằng Passcode.</p>
+        <p id="demo-status" class="small muted"></p>
+        <div class="actions">
+          <button type="button" class="primary" id="demo-seed">Tạo dữ liệu mẫu</button>
+          <button type="button" class="danger" id="demo-del">Xóa dữ liệu mẫu</button>
+        </div>
+        <div id="demo-msg" class="msg" role="alert"></div>
+        <hr>
+        <h2>Trạng thái kỹ thuật</h2>
+        <div id="sys-tech" class="muted small"></div>
+      </div>
+    </section>
+
+    <!-- ================= BÁO CÁO ================= -->
+    <section id="tab-report" class="tab-panel" hidden>
+      <div class="card no-print b-bar">
+        <div class="b-filters">
+          <label class="b-f"><span>Phạm vi</span><select id="b-project" aria-label="Phạm vi báo cáo"></select></label>
+          <label class="b-f"><span>Kỳ báo cáo</span><select id="b-ky" aria-label="Kỳ báo cáo">
+            <option value="thang">Tháng này</option><option value="quy">Quý này</option><option value="nam">Năm nay</option>
+            <option value="6t">6 tháng gần nhất</option><option value="luyke">Lũy kế đến nay</option><option value="all">Toàn bộ thời gian (All time)</option><option value="tuychon">Tùy chọn...</option>
+          </select></label>
+          <span id="b-ky-custom" class="b-ky-custom b-f" hidden><span>Từ – đến tháng</span><span class="b-ky-in"><input type="month" id="b-tu" aria-label="Từ tháng"> – <input type="month" id="b-den" aria-label="Đến tháng"></span></span>
+          <div class="b-f"><span>Cơ sở VAT</span><div class="seg" id="b-vat" role="group" aria-label="Cơ sở VAT">
+            <button type="button" data-v="gt" class="on">Trước VAT</button><button type="button" data-v="sv">Sau VAT</button>
+          </div></div>
+          <div class="b-f"><span>Hiển thị</span><div class="seg" id="b-view" role="group" aria-label="Chế độ xem">
+            <button type="button" data-view="bc" class="on">Báo cáo</button><button type="button" data-view="db">Dashboard</button>
+          </div></div>
+          <div class="b-actions">
+            <button type="button" id="b-reload" title="Lấy lại số liệu mới nhất">↻ Làm mới</button>
+          </div>
+        </div>
+        <div id="b-msg" class="msg" role="alert"></div>
+      </div>
+      <div id="b-report" class="report"></div>
+    </section>
+
+    <!-- ================= LIÊN HỆ ================= -->
+    <section id="tab-contact" class="tab-panel" hidden>
+      <div class="card narrow">
+        <div id="lh-view">
+          <div class="toolbar"><h2>Thông tin hệ thống</h2><button type="button" class="sm" id="lh-edit" data-role="admin it">Sửa</button></div>
+          <dl class="info-list" id="sys-info"></dl>
+          <hr>
+          <h2>Liên hệ hỗ trợ</h2>
+          <dl class="info-list" id="sys-contact"></dl>
+        </div>
+        <form id="lh-form" class="stack" hidden data-role="admin it">
+          <h2>Sửa thông tin hệ thống</h2>
+          <label>Tên hệ thống/Website *<input name="ten" required maxlength="150"></label>
+          <label>Đơn vị sở hữu *<input name="so_huu" required maxlength="150"></label>
+          <label>Đơn vị phát triển<input name="phat_trien" maxlength="150"></label>
+          <label>Phiên bản hiện tại<input name="phien_ban" maxlength="20" placeholder="Để trống = tự động"></label>
+          <p class="muted small" id="lh-pb-note"></p>
+          <h2>Liên hệ hỗ trợ</h2>
+          <label>SĐT<input name="sdt" maxlength="50" inputmode="tel"></label>
+          <label>Mail<input name="mail" type="email" maxlength="150"></label>
+          <div class="actions"><button type="submit" class="primary">Lưu</button><button type="button" id="lh-cancel">Hủy</button></div>
+          <div id="lh-msg" class="msg" role="alert"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= CÁ NHÂN ================= -->
+    <section id="tab-profile" class="tab-panel" hidden>
+      <div class="card narrow">
+        <h2>Đổi mật khẩu</h2>
+        <form id="pw-form" class="stack">
+          <label>Mật khẩu hiện tại<input name="current_password" type="password" required autocomplete="current-password"></label>
+          <label>Mật khẩu mới<input name="new_password" type="password" required minlength="8" autocomplete="new-password"></label>
+          <label>Nhập lại mật khẩu mới<input name="new_password2" type="password" required minlength="8" autocomplete="new-password"></label>
+          <p class="muted small">Sau khi đổi, các thiết bị khác đang đăng nhập sẽ bị đăng xuất.</p>
+          <div class="actions"><button type="submit" class="primary">Đổi mật khẩu</button></div>
+          <div id="pw-msg" class="msg" role="alert"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">Produced by the Supervisory Board of Tan Minh Nhan Corporation®</footer>
+
+  <div id="d-tip" class="chart-tip" hidden></div>
+  <script src="/common.js"></script>
+  <script src="/app.js"></script>
+  <script src="/report.js"></script>
+  <script src="/map.js"></script>
+  <script src="/dash-tong.js"></script>
+  <script src="/dash-pdf.js"></script>
+  <script src="/assistant.js"></script>
+</body>
+</html>
