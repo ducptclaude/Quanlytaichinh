@@ -52,6 +52,8 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 ### V3.06.11.2026 — Khung nhập ngay trong trang Chi phí; bắt buộc Số HĐ + NCC với chi phí trực tiếp
 - Người dùng chốt: Số HĐ + Thầu phụ/NCC chỉ **bắt buộc với nhóm 1. Chi phí trực tiếp** (TT01–TT05); nhóm Gián tiếp / Tài chính để trống được.
   Dấu * tự hiện khi chọn khoản mục trực tiếp. Lưu ý: dòng TT cũ chưa có Số HĐ khi SỬA sẽ phải bổ sung Số HĐ.
+- Sau khi cập nhật (người dùng đồng ý): đã điền Số HĐ tạm `CHUA-CO-<mã>` cho **10 dòng** chi phí trực tiếp đang trống trên web
+  (sửa qua web bằng tài khoản `revi`, ghi người cập nhật). Tổng giá trị không đổi: 9.533.000.000 đ. Khi có số HĐ thật thì sửa lại.
 - Giữ quy tắc VAT ≤ 10% giá trị.
 - Khung "Thêm hợp đồng chi phí" đặt **ngay đầu trang Chi phí** (không đặt trên Trang chủ – người dùng đã yêu cầu bỏ);
   lưu xong quay lại trang Chi phí, báo "Đã lưu CP-xxxx". "Lưu & thêm tiếp" giữ dự án đã chọn. Trang `/chi-phi/moi` vẫn dùng được.
