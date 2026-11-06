@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.06.11.26 — Giao diện tối kiểu kính trong suốt
+- Người dùng phản hồi: tối quá, chữ khó thấy → đổi sang kiểu kính mờ: nền xanh đêm có quầng sáng (teal / chàm), thẻ trong suốt
+  `rgba(255,255,255,.055)` + làm mờ nền sau, viền sáng mảnh; nền kem/be không còn bị nâu đục; chữ sáng hơn.
+- Menu xổ, hộp thoại, trợ lý, nhãn bản đồ, cột cố định bảng: nền đặc `#131f33` để không lẫn chữ.
+- Bộ chuyển màu: `scratchpad` không lưu – quy tắc nằm trong phần cuối `public/style.css` (khối `:root[data-theme="dark"]`).
+- Kiểm tra: quét tương phản 9 trang → chỉ còn số "III" (thiết kế gốc); 1366px + iPhone 13 không tràn ngang. Giao diện sáng không đổi.
+- Điểm khôi phục trước khi sửa: `phien-06.11.26-11h20` (V05.06.11.26).
+
 ## V02.06.11.26 — Giao diện Sáng / Tối
 - Nút ☀️/🌙 trên thanh đầu trang (cạnh tên người dùng); trang Đăng nhập / Khởi tạo có nút nổi góc phải.
 - Lần đầu theo cài đặt của máy (Windows / điện thoại để tối thì hiện tối); bấm nút thì ghi nhớ trên máy đó (`localStorage bks-theme`).
