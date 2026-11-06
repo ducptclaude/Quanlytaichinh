@@ -2613,3 +2613,7 @@ html { transition: background-color .2s; }
 .dp-mx .dp-mxc { background: #fdf1e6; }
 .dp-mx .neg { color: var(--fg-b4471c); }
 @media print { .dp-mx thead th, .dp-mx .dp-mxc, .dp-mx tbody th i { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+/* Chỉ xem: ẩn mọi liên kết / nút mở trang nhập liệu Dự án – Doanh thu – Chi phí từ báo cáo */
+body.chi-xem [data-tgo], body.chi-xem [data-bgo] { display: none !important; }
+body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: none; }

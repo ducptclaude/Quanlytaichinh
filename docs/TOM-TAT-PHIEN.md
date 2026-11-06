@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V17.06.11.26 — Chỉ xem: ẩn Phân tích chi tiết, không có đường sang trang nhập liệu
+- `public/report.js`: vai viewer không dựng khối "Phân tích chi tiết" (I → V, cảnh báo, liên kết Mở Doanh thu / Chi phí).
+- `public/app.js` `showTab`: viewer chỉ mở được trang có trên menu của mình (Báo cáo, Cá nhân, Liên hệ) – mọi liên kết khác bị bỏ qua.
+- `style.css` `body.chi-xem`: ẩn nút "Mở" (`data-tgo`) / liên kết `data-bgo`, tắt bấm cảnh báo.
+- Kiểm tra: viewer – không có chữ "Phân tích chi tiết", 0 liên kết, gọi mở Dự án / Doanh thu / Chi phí vẫn ở Báo cáo; Quản trị vẫn đủ; tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-06.11.26-15h16`.
+
 ## V16.06.11.26 — Quay lại bản phien-06.11.26-15h01 (mã của V14.06.11.26)
 - Người dùng yêu cầu "quay về bản phien-06.11.26-15h01" → lấy lại mã V11 → V14 (mục III theo TĐ, nút TĐ mục III, Dashboard / Dashboard PDF bảng Kế hoạch – Thực – Còn lại).
 - Điểm khôi phục trước khi quay: `phien-06.11.26-15h09` (= V15, mã V10). Dữ liệu đã nhập không đổi.

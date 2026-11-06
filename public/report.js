@@ -1214,7 +1214,7 @@ function renderReport() {
 
   ${bPcSection(list, v)}
 
-  <div class="card b-detail-bar">
+  ${ME?.role === 'viewer' ? '' /* Chỉ xem: không hiện Phân tích chi tiết */ : `<div class="card b-detail-bar">
     <div><b>Phân tích chi tiết</b> <span class="muted small">(I → ${one ? 'IV' : 'V'}: tổng quan theo hợp đồng, biểu đồ, ${one ? '' : 'tổng hợp dự án, '}chi tiết từng dự án, cảnh báo${warnN ? ` – <b class="warn-text">${warnN} cảnh báo</b>` : ''})</span></div>
     <button type="button" class="${BST.chi_tiet ? '' : 'primary'}" id="b-detail-toggle">${BST.chi_tiet ? 'Ẩn chi tiết ▴' : 'Hiện chi tiết ▾'}</button>
   </div>
@@ -1289,7 +1289,7 @@ function renderReport() {
     ${bWarnTable(list)}
   </section>
 
-  </div>
+  </div>`}
   <div class="b-foot">Nguồn: ${esc(BC.ten_he_thong || 'PROJECT PROFIT')} · ${esc(BC.phien_ban)} · Số liệu lấy tự động từ các tab Doanh thu, Chi phí, Thầu phụ, Tiền về tại thời điểm lập báo cáo.</div>`;
 
   bWrapSections();

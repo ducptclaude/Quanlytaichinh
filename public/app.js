@@ -32,7 +32,8 @@ let users = [];
   { const g = $('[data-grp="qt"] [data-grp-toggle]'); const ten = { bks: 'Kiểm soát', it: 'Hệ thống' }[ME.role]; if (g && ten) g.innerHTML = `${ten} <span class="caret">▾</span>`; } // BKS: nhật ký · IT: tài khoản, nhật ký
   // Lãnh đạo, Ban Kiểm soát: xem Dự án / Doanh thu / Chi phí (chỉ xem – không có form, nút sửa) -> nhóm menu gọi là "Dữ liệu"
   if (!can('hd') && !can('tien')) { const g = $('[data-grp="nhap"] [data-grp-toggle]'); if (g) g.innerHTML = 'Dữ liệu <span class="caret">▾</span>'; }
-  if (!can('xuat')) document.body.classList.add('no-xuat'); // Chỉ xem: chặn in (Ctrl+P) – xem style.css
+  if (!can('xuat')) document.body.classList.add('no-xuat');
+  if (ME.role === 'viewer') document.body.classList.add('chi-xem'); // ẩn liên kết sang trang nhập liệu – xem style.css // Chỉ xem: chặn in (Ctrl+P) – xem style.css
   document.body.classList.add('roles-ready'); // đến đây mới hiện các mục theo quyền (tránh nhấp nháy tab quản trị)
 
   const stSel = $('#p-form [name=trang_thai]');
@@ -74,6 +75,7 @@ if ($('#dv-pick')) {
 }
 const closeMenus = () => $$('.tab-grp.open').forEach((g) => { g.classList.remove('open'); $('[data-grp-toggle]', g).setAttribute('aria-expanded', 'false'); });
 function showTab(name) {
+  if (ME?.role === 'viewer' && !$(`.topbar [data-tab="${name}"]`)) return; // Chỉ xem: không mở trang ngoài quyền (Dự án, Doanh thu, Chi phí…) dù bấm từ liên kết nào
   closeMenus();
   $$('.topbar [data-tab], #subnav [data-tab]').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   $$('.tab-grp').forEach((g) => g.classList.toggle('active', Boolean($(`[data-tab="${name}"]`, g))));
