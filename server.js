@@ -186,8 +186,8 @@ api.use(auth.requireAuth);
 // IT (Kỹ thuật hệ thống): chỉ vào phần kỹ thuật – không đọc / ghi số liệu dự án, báo cáo tài chính
 const IT_DUOC_VAO = /^\/(meta|auth\/|users(\/|$)|nhat-ky|lien-he$|settings$)/;
 api.use((req, res, next) => (req.user?.role === 'it' && !IT_DUOC_VAO.test(req.path) ? bad(res, 'Vai trò Kỹ thuật hệ thống không xem số liệu dự án', 403) : next()));
-// Chỉ xem: chặn mọi lệnh ghi (trừ đăng xuất / tạm vắng) – chỉ đọc số liệu; đổi đơn vị tiền hiển thị lưu trên trình duyệt, không qua máy chủ
-const CHI_XEM_DUOC_GHI = /^\/auth\/(logout|away)$/;
+// Chỉ xem: chặn mọi lệnh ghi (trừ đăng xuất / tạm vắng / tự đổi mật khẩu) – chỉ đọc số liệu; đổi đơn vị tiền hiển thị lưu trên trình duyệt, không qua máy chủ
+const CHI_XEM_DUOC_GHI = /^\/auth\/(logout|away|change-password)$/;
 api.use((req, res, next) => (req.user?.role === 'viewer' && !['GET', 'HEAD'].includes(req.method) && !CHI_XEM_DUOC_GHI.test(req.path)
   ? bad(res, 'Vai trò Chỉ xem không được thay đổi hoặc xuất dữ liệu', 403) : next()));
 api.use(audit.middleware); // ghi nhật ký mọi thao tác thêm / sửa / xóa
@@ -217,7 +217,7 @@ api.get('/nhat-ky', quyen('nhat_ky'), wrap(async (req, res) => {
 
 api.get('/auth/me', (req, res) => res.json(req.user));
 
-api.post('/auth/change-password', quyen('doi_mk'), wrap(async (req, res) => {
+api.post('/auth/change-password', wrap(async (req, res) => {
   const { current_password, new_password } = req.body || {};
   const hash = await store.getPasswordHash(req.user.id);
   if (!(await auth.verifyPassword(current_password || '', hash))) return bad(res, 'Mật khẩu hiện tại không đúng');

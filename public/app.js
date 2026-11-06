@@ -2290,7 +2290,7 @@ const ROLE_GUIDE = {
   qs: ['Nhập dự án, HĐ / phụ lục, nghiệm thu – quyết toán với CĐT, HĐ đầu vào (thầu phụ, vật tư, MMTB, nhân công) và phụ lục, ngày, ảnh công trình', 'Không nhập tiền về, thanh toán thầu phụ, chi phí; không xóa dự án'],
   ke_toan: ['Nhập tiền về, thanh toán HĐ đầu vào (thầu phụ, vật tư…), chi phí, vay – trả nợ, BH/Khác', 'Không sửa HĐ, phụ lục, nghiệm thu, HĐ đầu vào; không xóa dự án'],
   editor: ['Nhập toàn bộ (giá trị + tiền), chốt TĐ, DT-CP dự kiến, xóa dự án (cần Passcode) – vai trò cũ, nên chuyển dần sang QS / Kế toán', 'Không quản lý tài khoản, cài đặt, nhật ký'],
-  viewer: ['Chỉ xem báo cáo; đổi đơn vị tiền hiển thị', 'Không xuất (In / PDF, Excel, PowerPoint), không sửa gì (kể cả tự đổi mật khẩu – nhờ Quản trị đặt lại); không vào trang Dữ liệu, nhật ký'],
+  viewer: ['Chỉ xem báo cáo; đổi đơn vị tiền hiển thị; tự đổi mật khẩu', 'Không xuất (In / PDF, Excel, PowerPoint), không thêm / sửa / xóa số liệu; không vào trang Dữ liệu, nhật ký'],
 };
 function renderRoleGuide() {
   const box = $('#role-guide');

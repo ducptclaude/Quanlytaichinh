@@ -85,7 +85,7 @@ Tổng hợp toàn bộ số liệu liên kết (API `GET /api/bao-cao`, `lib/re
 | Nhập liệu | ✔ | ✔ | |
 | Chỉ xem | ✔ | | |
 
-**Chỉ xem:** chỉ xem trang Báo cáo; chỉ được đổi đơn vị tiền hiển thị (và sáng / tối). Không xuất (In / PDF, Excel, PowerPoint – Ctrl+P ra trang trắng), không vào Dữ liệu / Cá nhân / Quản trị, không tự đổi mật khẩu; máy chủ chặn mọi lệnh ghi của vai này (trừ đăng xuất).
+**Chỉ xem:** chỉ xem trang Báo cáo; chỉ được đổi đơn vị tiền hiển thị (và sáng / tối). Được tự đổi mật khẩu (mục Cá nhân). Không xuất (In / PDF, Excel, PowerPoint – Ctrl+P ra trang trắng), không vào Dữ liệu / Quản trị; máy chủ chặn mọi lệnh ghi của vai này (trừ đăng xuất, đổi mật khẩu).
 
 ### Quy tắc mật khẩu
 Áp dụng khi khởi tạo, tạo tài khoản, đặt lại và đổi mật khẩu. Máy chủ kiểm tra bắt buộc; giao diện hiện danh sách điều kiện ✓/✗ ngay khi gõ.
