@@ -145,6 +145,23 @@ test('Doanh thu / Chi phí: gắn dự án, 3 cột tiền (chưa VAT, VAT, sau 
   assert.equal(keep.location, `/chi-phi/${firstId}?ok=updated`);
   assert.match((await user.get(`/chi-phi/${firstId}`)).text, /<dd>CP-0001<\/dd>/);
 
+  // Khung nhập nằm ngay trong trang Chi phí; lưu xong quay về đúng trang đó, báo mã vừa lưu
+  assert.match(listAll.text, /id="nhap"[\s\S]*name="back" value="list"/);
+  assert.doesNotMatch((await user.get('/')).text, /name="back"/); // không đặt trên Trang chủ
+  const inl = await user.post('/chi-phi/moi', { back: 'list', cost_item: 'GT04', project_id: String(ids['DA-1']), doc_date: '01/03/2026', content: 'Tiếp khách', amount: '5.000.000' });
+  assert.equal(inl.location, '/chi-phi?ok=created&saved=CP-0005#nhap');
+  assert.match((await user.get('/chi-phi?ok=created&saved=CP-0005')).text, /Đã lưu CP-0005\./);
+  // Chi phí trực tiếp: bắt buộc Số HĐ + Nhà cung cấp; nhóm khác (GT04 ở trên) không bắt buộc
+  const ttMiss = await user.post('/chi-phi/moi', { back: 'list', cost_item: 'TT02', project_id: String(ids['DA-1']), doc_date: '01/03/2026', content: 'Vật tư phụ', amount: '5.000.000' });
+  assert.equal(ttMiss.status, 400);
+  assert.match(ttMiss.text, /Chưa nhập Số hợp đồng \(bắt buộc với chi phí trực tiếp\)/);
+  assert.match(ttMiss.text, /Chưa nhập Thầu phụ \/ Nhà cung cấp \/ Hộ kinh doanh \(bắt buộc với chi phí trực tiếp\)/);
+  assert.match(ttMiss.text, /name="back" value="list"/); // sửa lỗi xong lưu vẫn quay về trang Chi phí
+  assert.match(ttMiss.text, /data-req-when="cost_item" data-req-group="TT">\*/); // dấu * đang hiện
+  // dọn dòng thử CP-0005 (để các bài sau giữ nguyên số liệu)
+  const id5 = ((await user.get('/chi-phi')).text.match(/href="\/chi-phi\/(\d+)">CP-0005</) || [])[1];
+  assert.equal((await admin.post(`/chi-phi/${id5}/xoa`)).location, '/chi-phi?ok=deleted');
+
   const noItem = await user.post('/chi-phi/moi', { project_id: String(ids['DA-1']), doc_date: '2026-01-01', content: 'x', amount: '100' });
   assert.match(noItem.text, /Chưa nhập Nhóm chi phí/);
   const zero = await user.post('/chi-phi/moi', { project_id: String(ids['DA-1']), doc_date: '2026-01-01', content: 'x', cost_item: 'TT01', amount: '0' });

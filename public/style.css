@@ -352,3 +352,7 @@ input[data-money] { text-align: right; font-variant-numeric: tabular-nums; }
 .date-btn .date-pick { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
   padding: 0; margin: 0; border: 0; min-width: 0; box-shadow: none; }
 .date-btn .date-pick::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+
+/* Khung nhập ngay trong trang danh mục (Chi phí) */
+.quick-entry { margin: 0 0 18px; }
+.quick-entry h2 { margin: 0 0 12px; }

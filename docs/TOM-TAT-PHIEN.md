@@ -3,7 +3,7 @@
 > Tệp này ghi lại tình trạng dự án sau mỗi phiên, để phiên sau (dev / revi) nắm nhanh. Mục mới nhất ở trên cùng.
 
 ## Tình trạng hiện tại
-- **Phiên bản:** V2.06.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
+- **Phiên bản:** V3.06.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
 - **Mã nguồn:** https://github.com/ducptclaude/Quanlytaichinh (nhánh `staging`).
 - **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
   → địa chỉ https://quanlytaichinh.up.railway.app (địa chỉ cũ `quanlytaichinh-production…` đã ngừng; đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
@@ -23,7 +23,7 @@
 | Bản thử | Dải đỏ "HỆ THỐNG THỬ NGHIỆM" |
 | Dự án (`/du-an`) | Mã*, Tên*, Chủ đầu tư, Địa điểm, Nhóm, Giá trị HĐ, Ngày khởi công/hoàn thành, Trạng thái*, Ghi chú |
 | Doanh thu (`/doanh-thu`) | Số CT* (tự đề xuất DT-0001), Dự án*, Ngày*, Số hóa đơn, Nội dung*, Hình thức, Tiền chưa VAT*, Tiền VAT (nhập tay), Tổng sau VAT (tự tính), Ghi chú |
-| Chi phí (`/chi-phi`) | **1 dòng = 1 hợp đồng** (từ V2.06.11): Nhóm chi phí* (12 khoản, chia 3 nhóm), Thuộc hợp đồng chủ đầu tư* (chọn dự án, hiện CĐT + giá trị HĐ), Số hợp đồng (không trùng trong cùng 1 NCC), Thầu phụ / NCC / Hộ kinh doanh, Hạng mục thi công*, Ngày ký* (gõ hoặc 📅 chọn lịch), Giá trị HĐ*, VAT (trống = 0), Giá trị sau VAT (tạm tính), Ghi chú. Mã CP-0001 hệ thống tự đánh, không hiện trên biểu mẫu |
+| Chi phí (`/chi-phi`) | **1 dòng = 1 hợp đồng** (từ V2.06.11): Nhóm chi phí* (12 khoản, chia 3 nhóm), Thuộc hợp đồng chủ đầu tư* (chọn dự án, hiện CĐT + giá trị HĐ), Số hợp đồng (không trùng trong cùng 1 NCC), Thầu phụ / NCC / Hộ kinh doanh (2 ô này **bắt buộc với chi phí trực tiếp**), Hạng mục thi công*, Ngày ký* (gõ hoặc 📅 chọn lịch), Giá trị HĐ*, VAT (trống = 0), Giá trị sau VAT (tạm tính), Ghi chú. Mã CP-0001 hệ thống tự đánh, không hiện trên biểu mẫu. **Khung nhập nằm ngay đầu trang Chi phí** (từ V3.06.11) |
 | Báo cáo (`/bao-cao`) | Theo dự án, tiền chưa VAT: DT, (1) CP trực tiếp, Lãi gộp, (2) CP gián tiếp, (3) CP tài chính, Lợi nhuận, tỷ suất, % Thu/HĐ; bảng chi phí theo khoản mục |
 | Chung cho danh mục | Mã không trùng (không phân biệt hoa/thường), tìm không dấu, sắp xếp tự nhiên (DA-2 < DA-10), lọc, phân trang 50, xuất Excel (.xlsx), ghi người tạo / người cập nhật cuối |
 
@@ -34,13 +34,12 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 2. Logo (file PNG); có cần thêm vai trò khác (VD: Chỉ xem, Kế toán, Duyệt) không.
 3. Danh sách ô chính thức cho Dự án / Doanh thu (Chi phí đã chốt 3 nhóm / 12 khoản mục).
 4. Quyền: hiện mọi người xem/thêm/sửa, chỉ Quản trị xóa – có cần giới hạn thêm?
-5. Giữ hay bỏ quy tắc chặn **Tiền VAT ≤ 10% tiền chưa VAT**.
+5. ~~Quy tắc VAT ≤ 10%~~ → người dùng chốt **GIỮ** (06/11).
 6. Doanh thu nhập trước V6 được coi là **chưa VAT** (VAT = 0) – nếu từng nhập số có VAT thì cần sửa lại.
 7. Chi phí cũ "Chưa phân loại" (từ loại "Chi phí chung"/"Khác") – vào Báo cáo → "Xem và phân loại lại".
 
 ## Việc dở dang (chuyển sang phiên sau)
-- Người dùng **đổi mật khẩu tài khoản `revi`** (đã lộ trong khung chat phiên 06/11).
-- Dự án `DA-01 – TEST` (HĐ 1 tỷ, không có số liệu) làm % Thu/HĐ tổng giảm (49,1% thay vì 50,9%) → cân nhắc xóa.
+- Không có. (DA-01 TEST người dùng đã tự xóa 06/11. Người dùng yêu cầu KHÔNG nhắc lại việc đổi mật khẩu `revi`.)
 
 ## Khoản mục chi phí (mã lưu trong kho – KHÔNG đổi mã đã dùng)
 | Nhóm | Mã – Khoản mục |
@@ -50,6 +49,15 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 | 3. Tài chính | TC01 Chi phí tài chính · TC02 Lãi vay ngân hàng (chỉ phần lãi) · TC03 Đóng phạt chủ đầu tư |
 
 ## Nhật ký
+### V3.06.11.2026 — Khung nhập ngay trong trang Chi phí; bắt buộc Số HĐ + NCC với chi phí trực tiếp
+- Người dùng chốt: Số HĐ + Thầu phụ/NCC chỉ **bắt buộc với nhóm 1. Chi phí trực tiếp** (TT01–TT05); nhóm Gián tiếp / Tài chính để trống được.
+  Dấu * tự hiện khi chọn khoản mục trực tiếp. Lưu ý: dòng TT cũ chưa có Số HĐ khi SỬA sẽ phải bổ sung Số HĐ.
+- Giữ quy tắc VAT ≤ 10% giá trị.
+- Khung "Thêm hợp đồng chi phí" đặt **ngay đầu trang Chi phí** (không đặt trên Trang chủ – người dùng đã yêu cầu bỏ);
+  lưu xong quay lại trang Chi phí, báo "Đã lưu CP-xxxx". "Lưu & thêm tiếp" giữ dự án đã chọn. Trang `/chi-phi/moi` vẫn dùng được.
+- Mã: `inlineForm` (src/entities.js), `entityForm` dùng chung (src/views/entities.js), `requiredWhen` + `DIRECT_ONLY`, public/app.js mục 8.
+- Kiểm tra: 22/22 bài thử (bộ nhớ tạm + PostgreSQL, thêm kiểm tra khung nhập + bắt buộc có điều kiện); chụp 1366px + iPhone 13 không tràn ngang.
+
 ### V2.06.11.2026 — Chi phí theo hợp đồng thầu phụ / nhà cung cấp
 - Người dùng chốt: **1 dòng Chi phí = 1 hợp đồng**; báo cáo cộng **giá trị hợp đồng (chưa VAT)**; Số HĐ không trùng trong cùng 1 NCC.
 - Biểu mẫu mới theo thứ tự: Nhóm chi phí → Thuộc HĐ chủ đầu tư → Số HĐ → Thầu phụ/NCC/HKD → Hạng mục → Ngày ký → Giá trị HĐ → VAT → Sau VAT → Ghi chú.

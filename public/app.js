@@ -135,6 +135,18 @@
     if (box) { box.hidden = !w; box.textContent = w ? '⚠ ' + w : ''; }
   });
 
+  // 8) Dấu * bắt buộc có điều kiện (VD: Số HĐ, NCC chỉ bắt buộc khi chọn nhóm Chi phí trực tiếp)
+  function syncReq(form) {
+    form.querySelectorAll('[data-req-when]').forEach(function (star) {
+      var sel = form.querySelector('[name="' + star.getAttribute('data-req-when') + '"]');
+      var opt = sel && sel.options ? sel.options[sel.selectedIndex] : null;
+      star.hidden = !(opt && opt.getAttribute('data-group') === star.getAttribute('data-req-group'));
+    });
+  }
+  document.addEventListener('change', function (e) {
+    if (e.target.form && e.target.form.querySelector('[data-req-when]')) syncReq(e.target.form);
+  });
+
   // 4) Ô lọc dạng chọn: đổi là lọc ngay
   document.querySelectorAll('select[data-autosubmit]').forEach(function (sel) {
     sel.addEventListener('change', function () { if (sel.form) sel.form.submit(); });

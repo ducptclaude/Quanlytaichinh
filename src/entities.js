@@ -43,6 +43,10 @@ const COST_ITEMS = [
   { value: 'TC03', label: 'Đóng phạt chủ đầu tư', group: 'TC' },
 ].map((x) => ({ ...x, groupLabel: COST_GROUPS.find((g) => g.key === x.group).label }));
 
+/** Điều kiện "chỉ bắt buộc với chi phí trực tiếp" (nhóm TT) */
+const DIRECT_ONLY = { field: 'cost_item', group: 'TT', label: 'chi phí trực tiếp',
+  test: (d) => (COST_ITEMS.find((x) => x.value === d.cost_item) || {}).group === 'TT' };
+
 /** Ba ô tiền dùng chung cho Doanh thu và Chi phí (nhãn có thể đổi theo từng danh mục) */
 const moneyVatFields = (L = {}) => [
   { name: 'amount', label: L.amount || 'Tiền chưa VAT (đ)', listLabel: L.amountList, type: 'money', required: true, positive: true, list: true, total: true },
@@ -111,6 +115,7 @@ const ENTITIES = {
     single: 'hợp đồng chi phí',
     codeLabel: 'Mã',
     codeAuto: true,
+    inlineForm: true, // khung nhập nằm ngay trên đầu trang Chi phí (không phải mở trang riêng)
     autoCode: { prefix: 'CP-', pad: 4 },
     // Số hợp đồng không được trùng trong CÙNG 1 thầu phụ / nhà cung cấp (khác đơn vị thì được trùng)
     uniqueWith: { fields: ['supplier', 'contract_no'], when: 'contract_no',
@@ -119,8 +124,10 @@ const ENTITIES = {
       { name: 'cost_item', label: 'Nhóm chi phí', type: 'select', options: COST_ITEMS, required: true, list: true, filter: true,
         groupFilter: { name: 'cost_group', label: 'Phân loại', groups: COST_GROUPS } },
       { name: 'project_id', label: 'Thuộc hợp đồng chủ đầu tư', listLabel: 'Dự án (HĐ CĐT)', type: 'ref', ref: 'projects', refDetail: true, required: true, list: true, filter: true },
-      { name: 'contract_no', label: 'Số hợp đồng', type: 'text', maxlength: 50, list: true, hint: 'Không trùng trong cùng 1 thầu phụ / nhà cung cấp.' },
-      { name: 'supplier', label: 'Thầu phụ / Nhà cung cấp / Hộ kinh doanh', listLabel: 'Thầu phụ / NCC', type: 'text', maxlength: 200, suggest: true, list: true },
+      // Bắt buộc khi Nhóm chi phí thuộc "1. Chi phí trực tiếp" (quyết định 06/11/2026); nhóm khác để trống được
+      { name: 'contract_no', label: 'Số hợp đồng', type: 'text', maxlength: 50, list: true, requiredWhen: DIRECT_ONLY,
+        hint: 'Bắt buộc với chi phí trực tiếp. Không trùng trong cùng 1 thầu phụ / nhà cung cấp.' },
+      { name: 'supplier', label: 'Thầu phụ / Nhà cung cấp / Hộ kinh doanh', requiredWhen: DIRECT_ONLY, hint: 'Bắt buộc với chi phí trực tiếp.', listLabel: 'Thầu phụ / NCC', type: 'text', maxlength: 200, suggest: true, list: true },
       { name: 'content', label: 'Hạng mục thi công', listLabel: 'Hạng mục', type: 'text', required: true, maxlength: 300, list: true, suggest: true },
       { name: 'doc_date', label: 'Ngày ký', type: 'date', required: true, list: true },
       ...moneyVatFields({

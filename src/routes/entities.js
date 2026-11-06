@@ -91,6 +91,12 @@ function validate(e, body, refs, fixedCode) {
     if (f.required && (v === null || v === undefined)) errors.push(`Chưa nhập ${f.label}`);
     data[f.name] = v;
   }
+  // Bắt buộc có điều kiện (VD: Số HĐ, Nhà cung cấp chỉ bắt buộc với chi phí trực tiếp)
+  for (const f of e.fields.filter((x) => x.requiredWhen)) {
+    if ((data[f.name] === null || data[f.name] === '') && f.requiredWhen.test(data)) {
+      errors.push(`Chưa nhập ${f.label} (bắt buộc với ${f.requiredWhen.label})`);
+    }
+  }
   // Ô tự tính (VD: Tổng sau VAT = Chưa VAT + VAT)
   for (const f of e.fields.filter((x) => x.computed)) {
     const ok = !errors.length;
@@ -187,12 +193,20 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
     const refs = await loadRefs(store, key);
     const all = await store.listRecords(key);
     const result = query(e, all, refs, req.query);
+    // Khung nhập ngay trên trang (Chi phí): giá trị ban đầu + gợi ý khi gõ
+    let inline = null;
+    if (e.inlineForm) {
+      const values = { back: 'list' };
+      const pid = Number(req.query.project_id);
+      if (Number.isInteger(pid) && refs.projects && refs.projects.byId.has(pid)) values.project_id = pid;
+      inline = { values, suggest: suggestions(e, all) };
+    }
     const pages = Math.max(1, Math.ceil(result.rows.length / PAGE_SIZE));
     const page = Math.min(pages, Math.max(1, parseInt(req.query.page, 10) || 1));
     res.send(views.listPage(ctxOf(req), {
-      e, refs, ...result, total: all.length, query: req.query,
+      e, refs, ...result, total: all.length, query: req.query, inline,
       pageRows: result.rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), page, pages,
-      success: OK_MSG[req.query.ok], error: req.query.err === 'not_found' ? 'Không tìm thấy bản ghi (có thể đã bị xóa).' : '',
+      success: req.query.ok === 'created' && req.query.saved ? `Đã lưu ${String(req.query.saved).slice(0, 50)}.` : OK_MSG[req.query.ok], error: req.query.err === 'not_found' ? 'Không tìm thấy bản ghi (có thể đã bị xóa).' : '',
     }));
   });
 
@@ -261,6 +275,11 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
           }
         }
         console.log(`[${key}] ${req.user.username} thêm ${data.code}`);
+        // Nhập từ khung trên trang danh sách: quay lại đúng trang đó, báo mã vừa lưu
+        if (req.body.back === 'list') {
+          const keepP = req.body.next === 'new' && data.project_id ? `&project_id=${data.project_id}` : '';
+          return res.redirect(`${e.path}?ok=created&saved=${encodeURIComponent(data.code)}${keepP}#nhap`);
+        }
         const next = req.body.next === 'new';
         const keep = next && data.project_id ? `&project_id=${data.project_id}` : '';
         return res.redirect(next ? `${e.path}/moi?ok=created${keep}` : `${e.path}?ok=created`);
@@ -377,4 +396,4 @@ async function inUseMessage(store, key, id) {
       : 'Hãy xóa hoặc chuyển các khoản đó sang dự án khác trước.');
 }
 
-module.exports = { entityRouter, loadRefs, display, optionList, nextCode };
+module.exports = { entityRouter, loadRefs, display, optionList, nextCode, suggestions };

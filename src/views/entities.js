@@ -9,7 +9,7 @@ const optionList = (f) => (f.options || []).map((o) => (typeof o === 'string' ? 
 /** Các thẻ <option>, tự chia nhóm (optgroup) nếu lựa chọn có nhóm */
 function optionTags(f, cur) {
   const list = optionList(f);
-  const one = (o) => `<option value="${esc(o.value)}"${o.warn ? ` data-warn="${esc(o.warn)}"` : ''} ${String(cur) === o.value ? 'selected' : ''}>${esc(o.label)}</option>`;
+  const one = (o) => `<option value="${esc(o.value)}"${o.group ? ` data-group="${esc(o.group)}"` : ''}${o.warn ? ` data-warn="${esc(o.warn)}"` : ''} ${String(cur) === o.value ? 'selected' : ''}>${esc(o.label)}</option>`;
   if (!list.some((o) => o.groupLabel)) return list.map(one).join('');
   const groups = [...new Set(list.map((o) => o.groupLabel))];
   return groups.map((g) => `<optgroup label="${esc(g)}">${list.filter((o) => o.groupLabel === g).map(one).join('')}</optgroup>`).join('');
@@ -94,11 +94,15 @@ function listPage(ctx, d) {
   <h1 class="page-title">${esc(e.title)} <span class="count">${d.total}</span></h1>
   <div class="head-actions">
     <a class="btn btn-outline" href="${e.path}/xuat-excel${qs(query, { page: '' })}">⬇ Xuất Excel</a>
-    <a class="btn btn-primary" href="${e.path}/moi${query.f_project_id ? `?project_id=${esc(query.f_project_id)}` : ''}">+ Thêm ${esc(e.single)}</a>
+    ${d.inline ? '' : `<a class="btn btn-primary" href="${e.path}/moi${query.f_project_id ? `?project_id=${esc(query.f_project_id)}` : ''}">+ Thêm ${esc(e.single)}</a>`}
   </div>
 </div>
 ${alertBox(d.success, 'success')}
 ${alertBox(d.error)}
+${d.inline ? `<section class="panel quick-entry" id="nhap">
+  <h2>➕ Thêm ${esc(e.single)}</h2>
+  ${entityForm(e, refs, d.inline.values, d.inline.suggest, { isNew: true, action: `${e.path}/moi`, back: 'list' })}
+</section>` : ''}
 <form class="filterbar" method="get" action="${e.path}">
   <label class="flt flt-search"><span>Tìm kiếm</span>
     <input type="search" name="q" value="${esc(search)}" placeholder="Mã, tên, nội dung… (gõ không dấu cũng được)"></label>
@@ -126,7 +130,9 @@ function fieldHtml(f, values, refs, suggest = {}) {
   const raw = values[f.name];
   const v = raw === null || raw === undefined ? '' : raw;
   const req = f.required ? ' required' : '';
-  const star = f.required ? ' <span class="req">*</span>' : '';
+  // Bắt buộc có điều kiện: dấu * hiện/ẩn theo ô điều kiện (public/app.js mục 8)
+  const star = f.required ? ' <span class="req">*</span>'
+    : f.requiredWhen ? ` <span class="req" data-req-when="${esc(f.requiredWhen.field)}" data-req-group="${esc(f.requiredWhen.group)}"${f.requiredWhen.test(values) ? '' : ' hidden'}>*</span>` : '';
   const label = `<span>${esc(f.label)}${star}</span>`;
   const hint = f.hint ? `<small class="hint">${esc(f.hint)}</small>` : '';
   if (f.computed) {
@@ -178,6 +184,23 @@ function refOptionLabel(f, r) {
   return base + (r.investor ? ` · CĐT: ${r.investor}` : '') + (r.contract_value ? ` · HĐ ${T.fmtMoney(r.contract_value)} đ` : '');
 }
 
+/** Biểu mẫu nhập (dùng ở trang danh mục và khung nhập nhanh trên Trang chủ) */
+function entityForm(e, refs, values, suggest, { isNew, action, back }) {
+  const inList = back === 'list';
+  return `<form method="post" action="${action}" class="form form-grid" novalidate>
+    ${inList ? '<input type="hidden" name="back" value="list">' : ''}
+    ${e.codeAuto ? '' : `<label><span>${esc(e.codeLabel)} <span class="req">*</span></span>
+      <input name="code" value="${esc(values.code || '')}" required maxlength="50" placeholder="${esc(e.codePlaceholder)}" autocomplete="off">
+      <small class="hint">Không được trùng. Chữ không dấu, số, . _ / -</small></label>`}
+    ${e.fields.map((f) => fieldHtml(f, values, refs, suggest)).join('')}
+    <div class="form-actions full">
+      <button class="btn btn-primary" type="submit">Lưu</button>
+      ${isNew ? '<button class="btn btn-outline" type="submit" name="next" value="new">Lưu & thêm tiếp</button>' : ''}
+      ${inList ? `<a class="btn btn-outline" href="${e.path}?r=1#nhap">Xóa trắng</a>` : `<a class="btn btn-outline" href="${e.path}">Hủy</a>`}
+    </div>
+  </form>`;
+}
+
 function formPage(ctx, { e, refs, values = {}, rec, errors, success, isNew, suggest }) {
   const isAdmin = ctx.user.role === 'admin';
   const title = isNew ? `Thêm ${e.single}`
@@ -194,17 +217,7 @@ function formPage(ctx, { e, refs, values = {}, rec, errors, success, isNew, sugg
 ${alertBox(success, 'success')}
 ${alertBox(errors)}
 <section class="panel">
-  <form method="post" action="${isNew ? `${e.path}/moi` : `${e.path}/${rec.id}`}" class="form form-grid" novalidate>
-    ${e.codeAuto ? '' : `<label><span>${esc(e.codeLabel)} <span class="req">*</span></span>
-      <input name="code" value="${esc(values.code || '')}" required maxlength="50" placeholder="${esc(e.codePlaceholder)}" autocomplete="off">
-      <small class="hint">Không được trùng. Chữ không dấu, số, . _ / -</small></label>`}
-    ${e.fields.map((f) => fieldHtml(f, values, refs, suggest)).join('')}
-    <div class="form-actions full">
-      <button class="btn btn-primary" type="submit">Lưu</button>
-      ${isNew ? '<button class="btn btn-outline" type="submit" name="next" value="new">Lưu & thêm tiếp</button>' : ''}
-      <a class="btn btn-outline" href="${e.path}">Hủy</a>
-    </div>
-  </form>
+  ${entityForm(e, refs, values, suggest, { isNew, action: isNew ? `${e.path}/moi` : `${e.path}/${rec.id}`, back: values.back })}
 </section>
 ${isNew ? '' : `
 <div class="cols cols-meta">
@@ -231,4 +244,4 @@ ${isNew ? '' : `
   });
 }
 
-module.exports = { listPage, formPage, statusBadge, qs };
+module.exports = { listPage, formPage, entityForm, statusBadge, qs };
