@@ -3,7 +3,8 @@
 > Tệp này ghi lại tình trạng dự án sau mỗi phiên, để phiên sau (dev / revi) nắm nhanh. Mục mới nhất ở trên cùng.
 
 ## Tình trạng hiện tại
-- **Phiên bản:** V6.05.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
+- **Phiên bản:** V1.06.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
+- **Mã nguồn:** https://github.com/ducptclaude/Quanlytaichinh (nhánh `staging`).
 - **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
   → địa chỉ https://quanlytaichinh-production.up.railway.app (đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
 - **Kho dữ liệu:** PostgreSQL trên Railway (đã Online).
@@ -29,10 +30,21 @@
 Vai trò hiện có: **Quản trị**, **Người dùng**.
 
 ## Việc đang chờ người dùng quyết
-- Nói **"chuyển qua chính"** để tạo nhánh `main`, rồi tách Railway thành 2 môi trường: `production` ← `main`, `staging` ← `staging`.
-- Logo (file PNG), có cần thêm vai trò khác (VD: Chỉ xem, Kế toán, Duyệt) không.
-- Danh sách ô chính thức cho Dự án / Doanh thu / Chi phí (hiện là bộ ô mặc định – sửa ở `src/entities.js`).
-- Quyền: hiện mọi người xem/thêm/sửa, chỉ Quản trị xóa – có cần giới hạn thêm?
+1. Nói **"chuyển qua chính"** để tạo nhánh `main`, rồi tách Railway thành 2 môi trường: `production` ← `main`, `staging` ← `staging` (hướng dẫn đã gửi trong phiên 05/11).
+2. Logo (file PNG); có cần thêm vai trò khác (VD: Chỉ xem, Kế toán, Duyệt) không.
+3. Danh sách ô chính thức cho Dự án / Doanh thu (Chi phí đã chốt 3 nhóm / 12 khoản mục).
+4. Quyền: hiện mọi người xem/thêm/sửa, chỉ Quản trị xóa – có cần giới hạn thêm?
+5. Giữ hay bỏ quy tắc chặn **Tiền VAT ≤ 10% tiền chưa VAT**.
+6. Doanh thu nhập trước V6 được coi là **chưa VAT** (VAT = 0) – nếu từng nhập số có VAT thì cần sửa lại.
+7. Chi phí cũ "Chưa phân loại" (từ loại "Chi phí chung"/"Khác") – vào Báo cáo → "Xem và phân loại lại".
+
+## Việc dở dang (chuyển sang phiên sau)
+- **Revi nhập dữ liệu thử 4 dự án (< 10 tỷ/dự án, ~30 lần lưu) trên web Railway** bằng tài khoản `revi`: CHƯA làm được
+  vì môi trường làm việc chặn truy cập `quanlytaichinh-production.up.railway.app`.
+  → Người dùng thêm tên miền này vào **Allowed domains** của môi trường (Edit → Network access), mở **phiên mới**, gửi lại yêu cầu
+  kèm mật khẩu. KHÔNG ghi mật khẩu vào tệp. Sau khi nhập xong: đổi mật khẩu tài khoản `revi` (đã lộ trong khung chat).
+- Kế hoạch nhập: 4 dự án đủ 3 trạng thái, giá trị HĐ 3 – 9,5 tỷ; 1–2 khoản doanh thu/dự án (VAT 8% và 10%);
+  4–6 khoản chi phí/dự án phủ đủ 3 nhóm (có 1 khoản lãi vay, 1 khoản phạt); đăng nhập 1 lần; xong thì đối chiếu báo cáo với tính tay.
 
 ## Khoản mục chi phí (mã lưu trong kho – KHÔNG đổi mã đã dùng)
 | Nhóm | Mã – Khoản mục |
@@ -42,6 +54,16 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 | 3. Tài chính | TC01 Chi phí tài chính · TC02 Lãi vay ngân hàng (chỉ phần lãi) · TC03 Đóng phạt chủ đầu tư |
 
 ## Nhật ký
+### Phiên 05–06/11/2026 — tổng hợp
+- Từ kho GitHub trống → hệ thống chạy trên Railway (PostgreSQL), 6 lần cập nhật V1 → V6.05.11.2026, tất cả trên nhánh `staging`.
+- Người dùng chốt: menu nằm trên thanh màu; Chi phí 3 nhóm / 12 khoản mục; 3 cột tiền (chưa VAT / VAT nhập tay / sau VAT);
+  lãi vay chỉ nhập phần lãi; chi phí bắt buộc gắn dự án; bỏ tab Nhập hằng ngày (giữ dữ liệu cũ); báo cáo tính trên tiền chưa VAT.
+- Rà soát (Revi) mục Chi phí: phát hiện trùng số chứng từ giữa nhà cung cấp, nguy cơ tính trùng, thiếu VAT → đã xử lý ở V6.
+- Kiểm tra cuối phiên: 22/22 bài thử tự động đạt (bộ nhớ tạm + PostgreSQL); đã thử nâng cấp từ dữ liệu bản cũ, không mất dữ liệu.
+- Lỗi gặp và đã xử lý: menu che tab ở màn hình hẹp; bảng báo cáo che cột; tên kiểu bảng nhập trùng ô thống kê trang chủ;
+  ô ngày hiện mm/dd/yyyy trên máy tiếng Anh (chuyển hết sang dd/mm/yyyy); lời nhắc xóa dự án sai sau khi bỏ tab.
+- Lưu ý kỹ thuật cho phiên sau: Railway tự cập nhật khi đẩy lên `staging`; bảng `daily_entries` và cột `costs.cost_type` là dữ liệu cũ, KHÔNG xóa.
+
 ### V6.05.11.2026 — Chi phí 3 nhóm, VAT, bỏ tab Nhập hằng ngày
 - Quyết định của người dùng: lãi vay chỉ nhập phần lãi (có lời nhắc); 3 cột tiền chưa VAT / VAT nhập tay / sau VAT;
   chi phí bắt buộc gắn dự án; bỏ tab Nhập hằng ngày; Lương/Thưởng nhóm Gián tiếp chỉ cho bộ máy gián tiếp.
@@ -72,7 +94,7 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 
 ### V3.05.11.2026 — Đưa menu lên thanh trên
 - 4 tab (Trang chủ / Tài khoản / Cá nhân / Liên hệ) nằm trong thanh màu trên cùng, giữa tên hệ thống và tên người dùng.
-- Màn hình ≤ 1100px (laptop nhỏ, máy tính bảng, điện thoại): menu xuống dòng 2 nhưng vẫn trong thanh màu.
+- Màn hình hẹp: menu xuống dòng 2 nhưng vẫn trong thanh màu (V4 nâng ngưỡng lên ≤ 1440px khi menu có 8 mục).
 - Đã kiểm tra 1366 / 1180 / 1024 / 768px, iPhone 13, iPhone SE: đủ 4 tab, không tràn ngang.
 
 ### V2.05.11.2026 — Tài khoản, phiên bản, bản thử
