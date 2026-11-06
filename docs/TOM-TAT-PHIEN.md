@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V22.06.11.26 — Giao diện tối: nền vi mạch + phong cách HUD hologram
+- Chỉ đổi `public/style.css` (cuối tệp), chỉ áp khi giao diện tối. Giao diện sáng, In / PDF, Excel không đổi.
+- Nền: đen sâu #010308 + mạch in xanh lơ rất mờ trôi chậm (120 giây / vòng, mờ dần ra rìa) + cực quang xanh lơ / xanh dương thở 40 giây.
+  Chỉ chuyển động bằng transform / opacity; thẻ bỏ làm mờ kính (nhẹ máy). Máy bật "giảm chuyển động" → đứng yên.
+- HUD: thanh đầu trang đen + vạch sáng neon chạy; thẻ kính đen viền xanh lơ, vạch sáng mép trên, rê chuột nổi + quầng; số liệu trắng xanh phát sáng;
+  tiêu đề bảng ánh xanh lơ; nút đang chọn xanh lơ → xanh dương. Màu số liệu DT / CP / LN giữ nguyên.
+- Người dùng chọn kiểu B (HUD) sau 2 vòng xem trước (Revi). Điểm khôi phục: `phien-06.11.26-16h04`.
+
 ## V21.06.11.26 — Bỏ tên riêng TMN / Tân Minh Nhân khỏi hệ thống – lấy theo Cài đặt
 - Tên đơn vị lấy từ **Quản trị → Cài đặt → Tên công ty** (sếp đặt, VD "MYMONEY"): đầu trang, báo cáo, Excel, PowerPoint, dòng cuối trang.
 - Excel mẫu trình ký (`lib/export-dtcp.js` `congTy(ten)`): khung đầu trang + cột ký hiệu = Tên công ty; bỏ địa chỉ / điện thoại / web TMN.
