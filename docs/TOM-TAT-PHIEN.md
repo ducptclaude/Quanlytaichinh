@@ -6,7 +6,7 @@
 - **Phiên bản:** V1.06.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
 - **Mã nguồn:** https://github.com/ducptclaude/Quanlytaichinh (nhánh `staging`).
 - **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
-  → địa chỉ https://quanlytaichinh-production.up.railway.app (đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
+  → địa chỉ https://quanlytaichinh.up.railway.app (địa chỉ cũ `quanlytaichinh-production…` đã ngừng; đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
 - **Kho dữ liệu:** PostgreSQL trên Railway (đã Online).
 
 ## Chức năng đã có
@@ -39,12 +39,8 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 7. Chi phí cũ "Chưa phân loại" (từ loại "Chi phí chung"/"Khác") – vào Báo cáo → "Xem và phân loại lại".
 
 ## Việc dở dang (chuyển sang phiên sau)
-- **Revi nhập dữ liệu thử 4 dự án (< 10 tỷ/dự án, ~30 lần lưu) trên web Railway** bằng tài khoản `revi`: CHƯA làm được
-  vì môi trường làm việc chặn truy cập `quanlytaichinh-production.up.railway.app`.
-  → Người dùng thêm tên miền này vào **Allowed domains** của môi trường (Edit → Network access), mở **phiên mới**, gửi lại yêu cầu
-  kèm mật khẩu. KHÔNG ghi mật khẩu vào tệp. Sau khi nhập xong: đổi mật khẩu tài khoản `revi` (đã lộ trong khung chat).
-- Kế hoạch nhập: 4 dự án đủ 3 trạng thái, giá trị HĐ 3 – 9,5 tỷ; 1–2 khoản doanh thu/dự án (VAT 8% và 10%);
-  4–6 khoản chi phí/dự án phủ đủ 3 nhóm (có 1 khoản lãi vay, 1 khoản phạt); đăng nhập 1 lần; xong thì đối chiếu báo cáo với tính tay.
+- Người dùng **đổi mật khẩu tài khoản `revi`** (đã lộ trong khung chat phiên 06/11).
+- Dự án `DA-01 – TEST` (HĐ 1 tỷ, không có số liệu) làm % Thu/HĐ tổng giảm (49,1% thay vì 50,9%) → cân nhắc xóa.
 
 ## Khoản mục chi phí (mã lưu trong kho – KHÔNG đổi mã đã dùng)
 | Nhóm | Mã – Khoản mục |
@@ -54,6 +50,19 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 | 3. Tài chính | TC01 Chi phí tài chính · TC02 Lãi vay ngân hàng (chỉ phần lãi) · TC03 Đóng phạt chủ đầu tư |
 
 ## Nhật ký
+### Phiên 06/11/2026 — mở mạng tới web
+- Địa chỉ web đổi thành https://quanlytaichinh.up.railway.app (`/health`: V1.06.11.2026, staging, kho dữ liệu đã kết nối).
+  Địa chỉ cũ `quanlytaichinh-production.up.railway.app` trả về 404 "Application not found".
+- Đã thêm 2 tên miền trên vào danh sách được phép của môi trường Default (các phiên sau không phải làm lại).
+- Người dùng cho phép nối kho GitHub → tệp tóm tắt này được đẩy lên nhánh `staging`.
+- **Revi nhập dữ liệu thử qua web (tài khoản `revi`, 1 lần đăng nhập): 30/30 lần lưu thành công, không lỗi.**
+  - 4 dự án DA-02…DA-05 (HĐ 3 – 9,5 tỷ; đủ 3 trạng thái); 6 doanh thu DT-0001…0006 (VAT 8% và 10%);
+    20 chi phí CP-0001…0020 phủ đủ 12 khoản mục (có lãi vay TC02, phạt CĐT TC03). Ô Ghi chú ghi "Dữ liệu thử".
+  - Đối chiếu báo cáo với tính tay: **khớp 100%**. Tổng DT 13.600.000.000; CP trực tiếp 9.100.000.000; Lãi gộp 4.500.000.000 (33,1%);
+    CP gián tiếp 305.000.000; CP tài chính 128.000.000; LN 4.067.000.000 (29,9%). VAT DT 1.228.000.000, VAT CP 764.000.000 khớp.
+  - DA-04 lỗ (LN −470.000.000, −31,3%): báo cáo hiện số âm đúng.
+  - Nhận xét: % Thu/HĐ tổng tính cả DA-01 TEST (HĐ 1 tỷ, chưa thu) → 49,1%.
+
 ### Phiên 05–06/11/2026 — tổng hợp
 - Từ kho GitHub trống → hệ thống chạy trên Railway (PostgreSQL), 6 lần cập nhật V1 → V6.05.11.2026, tất cả trên nhánh `staging`.
 - Người dùng chốt: menu nằm trên thanh màu; Chi phí 3 nhóm / 12 khoản mục; 3 cột tiền (chưa VAT / VAT nhập tay / sau VAT);
