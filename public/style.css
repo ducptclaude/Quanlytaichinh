@@ -2582,3 +2582,19 @@ html { transition: background-color .2s; }
 @media print { .lang-pick { display: none !important; } }
 /* Nút chọn TĐ (mục I, III) gọn trên điện thoại – không tràn ngang */
 @media (max-width: 480px) { .i-tdseg { max-width: 100%; } .i-tdseg button { padding: 6px 8px; font-size: 12px; } }
+
+/* Dashboard: bảng Kế hoạch – Thực – Còn lại (mục I – II – III) */
+.db-mx { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.db-mx th, .db-mx td { padding: 7px 10px; border-bottom: 1px solid var(--bd-e8edf5); text-align: right; white-space: nowrap; }
+.db-mx thead th { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; color: var(--fg-1b2b4b); background: var(--bg-f1f5fb); }
+.db-mx thead th:first-child { background: transparent; }
+.db-mx thead th small { display: block; font-size: 10.5px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--fg-6b7280); }
+.db-mx tbody th { text-align: left; font-weight: 700; color: var(--fg-1b2b4b); }
+.db-mx tbody th i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 7px; vertical-align: 0; }
+.db-mx tbody td { font-weight: 700; font-size: 15px; color: var(--fg-1b2b4b); font-variant-numeric: tabular-nums; }
+.db-mx tbody tr:last-child th, .db-mx tbody tr:last-child td { border-top: 2px solid var(--bd-b9c7dc); border-bottom: 0; }
+.db-mx .db-mx-con { background: color-mix(in srgb, #e07b39 7%, var(--bg-ffffff)); }
+.db-mx thead th:last-child { background: color-mix(in srgb, #e07b39 16%, var(--bg-ffffff)); }
+.db-mx .neg { color: #d92d35; }
+.db-mx-note { margin: 7px 2px 0; font-size: 11.5px; color: var(--fg-6b7280); }
+@media (max-width: 480px) { .db-mx th, .db-mx td { padding: 6px 5px; } .db-mx tbody td { font-size: 13.5px; } }

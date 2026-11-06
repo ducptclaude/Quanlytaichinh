@@ -39,11 +39,13 @@ function bDashRender(list, v, one) {
     kpi('cp', 'Chi phí', ck, `Bằng <b>${pc(ck, tk)}</b> doanh thu · ${k === 1 ? 'lúc ký' : dlt(ck, MT.c1, false)}`, DBC.cp),
     kpi('ln', 'Lợi nhuận', lk, `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · ${dlt(lk, MT.l1, true)}`}`, DBC.ln),
   ].join('');
-  const kpis2 = [
-    kpi('thu', 'Đã thu (tiền về)', T.thu, `Đạt <b>${pc(T.thu, T.hd_sv)}</b> doanh thu`, DBC.thu),
-    kpi('chi', 'Đã chi', T.chi, `Bằng <b>${pc(T.chi, T.thu)}</b> dòng thu`, DBC.chi),
-    kpi('pt', 'Còn phải thu', T3.pt, `Còn lại thực (thu − chi): <b>${n(T.con)}</b>`, DBC.pt),
-  ].join('');
+  // Bảng Kế hoạch (mục I, TĐ đang chọn) · Thực (mục II) · Còn lại (mục III = Kế hoạch − Thực) × Doanh thu / Chi phí / Lợi nhuận
+  const mxRow = (lab, col, a, b2, c) => `<tr><th scope="row"><i style="background:${col}"></i>${lab}</th><td>${n(a)}</td><td>${n(b2)}</td><td class="db-mx-con">${n(c)}</td></tr>`;
+  const mx = `<div class="table-wrap"><table class="db-mx no-mcard">
+      <thead><tr><th></th><th>Kế hoạch<small>Mục I · TĐ${k}</small></th><th>Thực<small>Mục II · lũy kế</small></th><th>Còn lại<small>Mục III</small></th></tr></thead>
+      <tbody>${mxRow('Doanh thu', DBC.dt, T3.dt, T3.thu, T3.pt)}${mxRow('Chi phí', DBC.cp, T3.cp, T3.chi, T3.pc)}${mxRow('Lợi nhuận', DBC.ln, T3.dt - T3.cp, T3.thu - T3.chi, T3.con)}</tbody>
+    </table></div>
+    <div class="db-mx-note">Thực: doanh thu = dòng thu, chi phí = dòng chi · Còn lại = Kế hoạch − Thực · đơn vị ${TY()}</div>`;
   const tdSeg = `<div class="db-tdseg" role="group" aria-label="Chọn thời điểm">${DB_TD.map(([i, a, b]) =>
     `<button type="button" data-dbtd="${i}" class="${i === k ? 'on' : ''}"><b>${a}</b> ${b}</button>`).join('')}</div>`;
 
@@ -119,7 +121,7 @@ function bDashRender(list, v, one) {
     </div>
     <div class="db-kpis">
       <section class="db-kg"><div class="db-kgh"><span>Doanh thu – Chi phí – Lợi nhuận</span>${tdSeg}</div><div class="db-kgr">${kpis}</div></section>
-      <section class="db-kg db-kg2"><div class="db-kgh"><span>Dòng tiền thực tế · lũy kế đến hôm nay</span></div><div class="db-kgr">${kpis2}</div></section>
+      <section class="db-kg db-kg2"><div class="db-kgh"><span>Kế hoạch – Thực – Còn lại · TĐ${k}</span></div>${mx}</section>
     </div>
     <div class="db-flow">${flow}</div>
     <div class="db-row2">

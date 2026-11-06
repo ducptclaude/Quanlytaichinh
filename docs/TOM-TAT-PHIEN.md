@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.06.11.26 — Dashboard: bảng Kế hoạch – Thực – Còn lại (thay nhóm "Dòng tiền thực tế")
+- Bảng 3×3 (`public/dash-tong.js`, `.db-mx`): hàng Doanh thu / Chi phí / Lợi nhuận × cột Kế hoạch (mục I, TĐ đang chọn) · Thực (mục II: dòng thu, dòng chi, thu − chi) · Còn lại (mục III = Kế hoạch − Thực).
+  Số lấy đúng hàm `bMuc3Data` của mục III nên khớp báo cáo. Đổi TĐ ở nhóm bên trái thì bảng đổi theo.
+- Kiểm tra: TĐ3 và TĐ1 – 9 ô khớp dòng tổng mục I, II, III; sáng / tối, điện thoại không tràn. Điểm khôi phục: `phien-06.11.26-14h45`.
+
 ## V12.06.11.26 — Mục III có nút chọn TĐ1 / TĐ2 / TĐ3 (đồng bộ mục I)
 - Thêm nút chọn TĐ ngay trong mục III (`data-itd3`), dùng chung lựa chọn `BST.i_td` với mục I: đổi ở mục nào thì cả hai cùng đổi.
 - Nút chọn TĐ (mục I, III) gọn lại trên điện thoại ≤ 480px – hết tràn ngang ở dòng nút này.

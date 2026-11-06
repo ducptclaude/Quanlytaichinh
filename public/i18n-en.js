@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Thực": "Actual",
+"Mục III": "Section III",
+"Mục II · lũy kế": "Section II · cumulative",
 "Cùng thời điểm với mục I – đổi ở đây hoặc mục I đều được": "Same milestone as section I – change it here or in section I",
 "Dòng thu còn lại phải thu": "Remaining collections receivable",
 "Dòng chi còn lại phải chi": "Remaining expenditure payable",
@@ -1195,6 +1198,18 @@ window.BKS_EN = {
 "Xem": "View"
 },
 "patterns": [
+[
+"Mục I · TĐ{}",
+"Section I · M{}"
+],
+[
+"Kế hoạch – Thực – Còn lại · TĐ{}",
+"Plan – Actual – Remaining · M{}"
+],
+[
+"Thực: doanh thu = dòng thu, chi phí = dòng chi · Còn lại = Kế hoạch − Thực · đơn vị {}",
+"Actual: revenue = collections, cost = expenditure · Remaining = Plan − Actual · unit {}"
+],
 [
 "Doanh thu TĐ{}",
 "Revenue M{}"

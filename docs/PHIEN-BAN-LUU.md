@@ -6,7 +6,8 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|
-| **chot-06.11.26** | V12.06.11.26 | (mới nhất) | 06/11/2026 | BKS, giao diện Sáng / Tối kiểu kính, vai Chỉ xem, ngôn ngữ Việt Nam / English |
+| **chot-06.11.26** | V13.06.11.26 | (mới nhất) | 06/11/2026 | BKS, giao diện Sáng / Tối kiểu kính, vai Chỉ xem, ngôn ngữ Việt Nam / English |
+| phien-06.11.26-14h45 | V12.06.11.26 | `22aa169` | 06/11/2026 | Trước khi thay nhóm Dòng tiền thực tế trên Dashboard bằng bảng Kế hoạch – Thực – Còn lại |
 | phien-06.11.26-14h36 | V10.06.11.26 | `1b0f914` | 06/11/2026 | Trước khi đổi công thức mục III |
 | **quanlytaichinh06112026** (bản lưu của sếp – backup) | V10.06.11.26 | `b18ac61` | 06/11/2026 | Bản sao lưu toàn bộ hệ thống ngày 06/11/2026 (KHÔNG xóa) |
 | phien-06.11.26-11h32 | V06.06.11.26 | `f04164e` | 06/11/2026 | Trước khi thêm chuyển ngôn ngữ |
