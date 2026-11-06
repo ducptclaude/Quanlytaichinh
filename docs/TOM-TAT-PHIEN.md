@@ -2,6 +2,18 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.06.11.26 — Giao diện Sáng / Tối
+- Nút ☀️/🌙 trên thanh đầu trang (cạnh tên người dùng); trang Đăng nhập / Khởi tạo có nút nổi góc phải.
+- Lần đầu theo cài đặt của máy (Windows / điện thoại để tối thì hiện tối); bấm nút thì ghi nhớ trên máy đó (`localStorage bks-theme`).
+- **In / PDF / Dashboard PDF luôn dùng giao diện sáng** (tự chuyển khi in, in xong trả lại). Excel / PowerPoint không ảnh hưởng.
+- Cách làm (`public/style.css`): mọi mã màu cố định → biến theo ngữ cảnh `--bg-xxxxxx` (nền), `--fg-xxxxxx` (chữ), `--bd-xxxxxx` (viền),
+  `--mx-xxxxxx` (vừa nền vừa chữ). Giao diện sáng: biến = đúng màu gốc (đã so từng điểm ảnh: không đổi, trừ nút mới).
+  Giao diện tối: màu tự tính (nền sáng → xanh đậm, chữ tối → chữ sáng), cuối tệp có phần chỉnh tay. Màu biểu đồ / thương hiệu giữ nguyên.
+  Bản đồ: lớp nền bản đồ đảo màu tối. Tệp mới `public/theme.js` (nạp trong `<head>` của 3 trang).
+- **Lưu ý khi sửa giao diện:** thêm màu mới thì dùng biến (`var(--card)`, `var(--text)`, `var(--muted)`, `var(--border)`) để tự đổi theo giao diện.
+- Kiểm tra: máy quét độ tương phản chữ/nền 9 trang ở giao diện tối → chỉ còn 1 chỗ giống thiết kế gốc (số "III" trắng trên cam);
+  máy tính 1366px + iPhone 13 không tràn ngang, không lỗi trang; nút đổi + nhớ sau khi tải lại hoạt động.
+
 ## Phiên 06/11/2026 — Thay hệ thống: Quản lý tài chính → BKS (V01.06.11.26)
 - Người dùng chọn **thay** web Quản lý tài chính bằng hệ thống BKS từ gói `BKS-staging-V30.04.11.26.zip` (bản staging, commit gốc `e3b1199`).
 - Kho mã: `ducptclaude/Quanlytaichinh`, nhánh `staging` → Railway dự án `lavish-essence`, địa chỉ https://quanlytaichinh.up.railway.app
