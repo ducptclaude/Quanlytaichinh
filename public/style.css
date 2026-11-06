@@ -2773,3 +2773,11 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
   .b-charts .chart { max-height: 80mm; overflow: hidden; }
   .b-charts .chart svg { width: 100% !important; height: auto !important; max-height: 80mm; }
 }
+
+/* Dashboard PDF = nguyên cụm Dashboard (public/dash-pdf.js dpPrint): chỉ in khối .db, bỏ quy tắc chia trang của báo cáo, giữ màu nền */
+@media print {
+  body.dbp-on { background: #fff !important; }
+  body.dbp-on main { padding: 0 !important; }
+  body.dbp-on #b-report .db, body.dbp-on #b-report .db * { break-inside: auto !important; break-after: auto !important; break-before: auto !important; }
+  body.dbp-on #b-report .db-blk:hover, body.dbp-on #b-report .db-kpi:hover { transform: none !important; }
+}

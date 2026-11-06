@@ -99,18 +99,46 @@ function dpHtml(list, v) {
   </div>`;
 }
 
+// Dashboard PDF: in NGUYÊN CỤM Dashboard như trên màn hình (tiêu đề, chỉ số, bảng Kế hoạch – Thực – Còn lại, khối I–IV, biểu đồ, danh mục, bản đồ)
+// – đang ở chế độ Báo cáo thì tạm chuyển sang Dashboard rồi trả lại; tự chọn khổ A4 dọc / ngang và thu nhỏ vừa đúng 1 trang.
+// (Bản 1 trang dựng riêng cũ: dpHtml() – giữ lại, không dùng.)
 function dpPrint() {
   if (!BC) return;
-  const { list } = bScope();
-  let box = document.getElementById('dp-print');
-  if (!box) { box = document.createElement('div'); box.id = 'dp-print'; document.body.appendChild(box); }
-  box.innerHTML = dpHtml(list, BST.vat);
-  document.body.classList.add('dp-on');
-  const done = () => { document.body.classList.remove('dp-on'); box.innerHTML = ''; window.removeEventListener('afterprint', done); };
-  window.addEventListener('afterprint', done);
+  const doiView = BST.view !== 'db';
+  if (doiView) { BST.view = 'db'; renderReport(); }
   if (typeof logEvent === 'function') logEvent('dashboard_pdf', bLogScope());
-  const img = box.querySelector('img'); // chờ logo tải xong rồi mới in
-  const go = () => setTimeout(() => window.print(), 60);
-  if (img && !img.complete) { img.onload = go; img.onerror = go; } else go();
+  setTimeout(() => { // chờ biểu đồ, bản đồ vẽ xong
+    const el = document.querySelector('#b-report .db');
+    if (!el) return;
+    // Giữ nguyên bố cục màn hình: khổ giấy hẹp sẽ kích hoạt kiểu xếp điện thoại -> chụp lại kiểu dáng đang thấy, gắn tạm lên từng phần tử
+    const goc = new Map(), DS = ['display', 'gridTemplateColumns', 'gridColumnStart', 'gridColumnEnd', 'flexDirection', 'flexWrap', 'flexGrow', 'flexShrink', 'flexBasis',
+      'columnGap', 'rowGap', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'fontSize', 'lineHeight', 'whiteSpace'];
+    const CAO = '.chart, .db-c-map, .leaflet-container, svg, canvas';
+    [el, ...el.querySelectorAll('*')].forEach((x) => {
+      const cs = getComputedStyle(x);
+      goc.set(x, x.getAttribute('style'));
+      DS.forEach((k) => { x.style[k] = cs[k]; });
+      if (x.matches(CAO)) { x.style.height = cs.height; x.style.width = cs.width; }
+    });
+    const traGoc = () => goc.forEach((v, x) => (v === null ? x.removeAttribute('style') : x.setAttribute('style', v)));
+    const w = el.scrollWidth, h = el.scrollHeight;
+    const MM = 96 / 25.4, LE = 7; // lề 7mm
+    const doc = [210 - 2 * LE, 297 - 2 * LE].map((x) => x * MM), ngang = [doc[1], doc[0]];
+    const zDoc = Math.min(doc[0] / w, doc[1] / h), zNgang = Math.min(ngang[0] / w, ngang[1] / h);
+    const laNgang = zNgang > zDoc, z = Math.min(1, (laNgang ? zNgang : zDoc) * 0.985);
+    const st = document.createElement('style');
+    st.id = 'dbp-style';
+    st.textContent = `@media print { @page { size: A4 ${laNgang ? 'landscape' : 'portrait'}; margin: ${LE}mm; }
+      body.dbp-on #b-report .db { zoom: ${z.toFixed(4)}; width: ${w}px; } }`;
+    document.head.appendChild(st);
+    document.body.classList.add('dbp-on');
+    const xong = () => {
+      window.removeEventListener('afterprint', xong);
+      document.body.classList.remove('dbp-on'); st.remove(); traGoc();
+      if (doiView) { BST.view = 'bc'; renderReport(); }
+    };
+    window.addEventListener('afterprint', xong);
+    window.print();
+  }, doiView ? 900 : 150);
 }
 document.getElementById('b-dash-pdf')?.addEventListener('click', dpPrint);

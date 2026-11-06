@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V29.06.11.26 — Dashboard PDF = in nguyên cụm Dashboard như màn hình, vừa 1 trang A4
+- `public/dash-pdf.js` `dpPrint()`: đang ở Báo cáo thì tạm chuyển sang Dashboard (in xong trả lại); chụp kiểu dáng đang thấy của từng phần tử
+  (lưới, cột, cỡ chữ, chiều cao biểu đồ / bản đồ) gắn tạm lên phần tử để khổ giấy hẹp không đổi sang kiểu xếp điện thoại;
+  tự chọn A4 dọc / ngang theo tỷ lệ, thu nhỏ (zoom) vừa đúng 1 trang, lề 7mm; in xong trả lại nguyên trạng.
+- Bản 1 trang dựng riêng cũ `dpHtml()` giữ lại trong tệp, không dùng.
+- Kiểm tra: 12 dự án và 1 dự án → đúng 1 trang A4, bố cục như màn hình; sau in quay lại chế độ Báo cáo. Điểm khôi phục: `phien-06.11.26-16h41`.
+
 ## V28.06.11.26 — In / PDF: phân trang gọn, tránh ngắt
 - Khối `@media print` cuối `style.css`: tiêu đề mục (I, II, III…) + ô số liệu luôn đi cùng nhau (không để tiêu đề trơ trọi cuối trang);
   ô số liệu, bảng nhỏ (ma trận TĐ mục IV, bảng Kế hoạch – Thực – Còn lại), biểu đồ không bị cắt; dòng bảng không bị cắt ngang;
