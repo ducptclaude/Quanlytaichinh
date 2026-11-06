@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V30.06.11.26 — Dashboard PDF cân đối: căn giữa, kín bề ngang, Danh mục + Bản đồ cạnh nhau
+- `dpPrint()`: bố cục in cố định (không theo màn hình): 2 nhóm chỉ số / hàng, 4 khối I–IV một hàng, biểu đồ 3 cột, Danh mục (3 phần) + Bản đồ (1 phần) cạnh nhau,
+  bản đồ cao bằng bảng; bỏ giới hạn bề rộng, căn giữa; thử bề rộng 1300 / 1450 / 1600 / 1800px × A4 dọc / ngang, chọn cách chữ to nhất mà vừa 1 trang.
+- Kiểm tra: 12 dự án và 1 dự án → 1 trang A4 dọc, đủ cột bảng, không lệch trái. Điểm khôi phục: `phien-06.11.26-16h44`.
+
 ## V29.06.11.26 — Dashboard PDF = in nguyên cụm Dashboard như màn hình, vừa 1 trang A4
 - `public/dash-pdf.js` `dpPrint()`: đang ở Báo cáo thì tạm chuyển sang Dashboard (in xong trả lại); chụp kiểu dáng đang thấy của từng phần tử
   (lưới, cột, cỡ chữ, chiều cao biểu đồ / bản đồ) gắn tạm lên phần tử để khổ giấy hẹp không đổi sang kiểu xếp điện thoại;

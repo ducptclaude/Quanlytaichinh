@@ -113,19 +113,42 @@ function dpPrint() {
     // Giữ nguyên bố cục màn hình: khổ giấy hẹp sẽ kích hoạt kiểu xếp điện thoại -> chụp lại kiểu dáng đang thấy, gắn tạm lên từng phần tử
     const goc = new Map(), DS = ['display', 'gridTemplateColumns', 'gridColumnStart', 'gridColumnEnd', 'flexDirection', 'flexWrap', 'flexGrow', 'flexShrink', 'flexBasis',
       'columnGap', 'rowGap', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'fontSize', 'lineHeight', 'whiteSpace'];
-    const CAO = '.chart, .db-c-map, .leaflet-container, svg, canvas';
+    const CAO = '.db-mapc, canvas';
     [el, ...el.querySelectorAll('*')].forEach((x) => {
       const cs = getComputedStyle(x);
       goc.set(x, x.getAttribute('style'));
       DS.forEach((k) => { x.style[k] = cs[k]; });
-      if (x.matches(CAO)) { x.style.height = cs.height; x.style.width = cs.width; }
+      if (x.matches(CAO)) x.style.height = cs.height; // giữ chiều cao (biểu đồ co giãn theo bề ngang)
     });
     const traGoc = () => goc.forEach((v, x) => (v === null ? x.removeAttribute('style') : x.setAttribute('style', v)));
-    const w = el.scrollWidth, h = el.scrollHeight;
+    // Bố cục in cố định (không phụ thuộc màn hình): 4 khối I–IV một hàng, Danh mục + Bản đồ cạnh nhau, căn giữa trang
+    const S = (sel, o) => el.querySelectorAll(sel).forEach((x) => Object.assign(x.style, o));
+    const boCuc = (W) => {
+      Object.assign(el.style, { width: W + 'px', maxWidth: 'none', margin: '0 auto' });
+      S('.db-kpis', { gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' });
+      S('.db-kgr', { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' });
+      S('.db-flow', { gridTemplateColumns: 'minmax(0, 1fr) 46px minmax(0, 1fr) 46px minmax(0, 1fr) 46px minmax(0, 1fr)' });
+      S('.db-flow > .db-arrow', { gridColumnStart: 'auto', gridColumnEnd: 'auto', transform: 'none', height: 'auto' });
+      S('.db-flow > .db-arrow i', { transform: 'none' }); S('.db-flow > .db-arrow span', { display: 'none' });
+      S('.db-row2', { gridTemplateColumns: 'minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, .95fr)' });
+      S('.db-c-flow', { gridColumnStart: 'auto', gridColumnEnd: 'auto' });
+      S('.db-row3', { gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 1fr)' });
+      S('.db-table .db-ten', { maxWidth: '150px' }); S('.db-c-tbl .table-wrap', { overflow: 'visible' });
+      S('.db-table td, .db-table th', { paddingLeft: '4px', paddingRight: '4px', fontSize: '11.5px' }); S('.db-table .db-pc .db-bar', { width: '28px' });
+      const tbl = el.querySelector('.db-c-tbl'), mc = el.querySelector('.db-mapc'), box = mc?.closest('.db-c-map');
+      if (mc) { mc.style.minHeight = '0'; mc.style.height = '240px'; }
+      if (tbl && mc && box) mc.style.height = Math.max(240, tbl.getBoundingClientRect().height - (mc.getBoundingClientRect().top - box.getBoundingClientRect().top) - 16) + 'px';
+      return [el.scrollWidth, el.scrollHeight];
+    };
     const MM = 96 / 25.4, LE = 7; // lề 7mm
     const doc = [210 - 2 * LE, 297 - 2 * LE].map((x) => x * MM), ngang = [doc[1], doc[0]];
-    const zDoc = Math.min(doc[0] / w, doc[1] / h), zNgang = Math.min(ngang[0] / w, ngang[1] / h);
-    const laNgang = zNgang > zDoc, z = Math.min(1, (laNgang ? zNgang : zDoc) * 0.985);
+    const thu = [1300, 1450, 1600, 1800].map((W) => { // thử các độ rộng, chọn cách cho chữ to nhất mà vừa 1 trang
+      const [w, h] = boCuc(W), zD = Math.min(doc[0] / w, doc[1] / h), zN = Math.min(ngang[0] / w, ngang[1] / h);
+      return { W, w, laNgang: zN > zD, z: Math.max(zD, zN) };
+    }).sort((x, y) => y.z - x.z)[0];
+    const [w] = boCuc(thu.W);
+    const laNgang = thu.laNgang, z = Math.min(1, thu.z * 0.985);
+    if (typeof bMapObj !== 'undefined' && bMapObj) bMapObj.invalidateSize();
     const st = document.createElement('style');
     st.id = 'dbp-style';
     st.textContent = `@media print { @page { size: A4 ${laNgang ? 'landscape' : 'portrait'}; margin: ${LE}mm; }
@@ -135,10 +158,11 @@ function dpPrint() {
     const xong = () => {
       window.removeEventListener('afterprint', xong);
       document.body.classList.remove('dbp-on'); st.remove(); traGoc();
+      if (typeof bMapObj !== 'undefined' && bMapObj) bMapObj.invalidateSize();
       if (doiView) { BST.view = 'bc'; renderReport(); }
     };
     window.addEventListener('afterprint', xong);
-    window.print();
+    setTimeout(() => window.print(), 450); // chờ bản đồ vẽ lại theo khung mới
   }, doiView ? 900 : 150);
 }
 document.getElementById('b-dash-pdf')?.addEventListener('click', dpPrint);
