@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V25.06.11.26 — Giao diện tối trong suốt hơn
+- Nền thẻ `--card` .035 → .015; toàn bộ 114 biến nền bề mặt `--bg-*` của giao diện tối giảm còn ~45% độ phủ (khối ghi đè cuối `style.css`).
+  Chữ, số giữ nguyên màu. Menu / hộp thoại vẫn nền đặc.
+
 ## V24.06.11.26 — Giao diện tối (bản trước nentoi1): thẻ trong suốt, bỏ làm mờ phía sau
 - Giữ giao diện tối V21 (nền xanh đen + cực quang). Thẻ: bỏ `backdrop-filter: blur` → trong suốt hẳn; nền thẻ `--card` .055 → .035.
   Menu / hộp thoại vẫn nền đặc để dễ đọc. Điểm khôi phục: `phien-06.11.26-16h14`.

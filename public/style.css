@@ -2536,7 +2536,7 @@ td .dmy-wrap > input:not(.dmy-cal) { min-width: 128px; }
 /* Kính mờ: thẻ chính làm mờ nền phía sau + viền sáng mảnh */
 :root[data-theme="dark"] .card { border: 1px solid rgba(255,255,255,.09); }
 /* Nền thẻ trong suốt (không làm mờ phía sau): thấy rõ nền cực quang qua thẻ, nhẹ máy hơn */
-:root[data-theme="dark"] { --card: rgba(255,255,255,.035); }
+:root[data-theme="dark"] { --card: rgba(255,255,255,.015); }
 :root[data-theme="dark"] .card { -webkit-backdrop-filter: none; backdrop-filter: none; }
 :root[data-theme="dark"] .topbar { box-shadow: 0 6px 24px rgba(0,0,0,.35); }
 /* Khung nổi: nền đặc để chữ không lẫn với nội dung phía sau */
@@ -2631,3 +2631,121 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 .kh-bar { position: sticky; top: 0; z-index: 60; font-weight: 600; }
 /* Logo MyMoney (chữ M xanh đậm): giao diện tối vẫn để nền trắng cho rõ */
 :root[data-theme="dark"] .logo-chip, :root[data-theme="dark"] .b-brand img, :root[data-theme="dark"] .db-brand img { background: #fff !important; }
+
+/* Giao diện tối – trong suốt hơn: mọi nền bề mặt (thẻ con, bảng, ô) giảm còn ~45% độ phủ để thấy nền phía sau */
+:root[data-theme="dark"] {
+  --bg-ccfbf1: rgba(95,221,194,0.064);
+  --bg-d6f4f1: rgba(102,214,202,0.062);
+  --bg-d9f5ea: rgba(101,214,170,0.059);
+  --bg-dbeafe: rgba(95,149,221,0.052);
+  --bg-dcf3e6: rgba(110,205,151,0.059);
+  --bg-dcf3ef: rgba(110,205,189,0.059);
+  --bg-dff7f3: rgba(99,216,196,0.054);
+  --bg-dff7f4: rgba(99,216,201,0.054);
+  --bg-e3e9f2: rgba(122,151,193,0.055);
+  --bg-e3ecfa: rgba(95,144,221,0.050);
+  --bg-e3efe9: rgba(131,184,158,0.057);
+  --bg-e4edfb: rgba(95,144,221,0.049);
+  --bg-e6edf5: rgba(116,155,199,0.051);
+  --bg-e6edf7: rgba(108,149,208,0.050);
+  --bg-e6f5f2: rgba(116,199,183,0.051);
+  --bg-e8edf4: rgba(123,152,192,0.050);
+  --bg-e8eef5: rgba(119,155,196,0.050);
+  --bg-e8eefc: rgba(95,132,221,0.045);
+  --bg-e8f0ff: rgba(95,138,221,0.043);
+  --bg-e9dcc7: rgba(192,166,124,0.037);
+  --bg-e9f1fb: rgba(95,151,221,0.045);
+  --bg-e9f6ef: rgba(117,198,154,0.049);
+  --bg-e9f7f5: rgba(112,203,190,0.048);
+  --bg-eaf1fb: rgba(95,146,221,0.045);
+  --bg-eaf8f6: rgba(109,206,192,0.047);
+  --bg-ece6dc: rgba(186,165,129,0.030);
+  --bg-ece6f7: rgba(143,108,208,0.050);
+  --bg-ece6ff: rgba(125,95,221,0.045);
+  --bg-ede5f7: rgba(152,106,209,0.050);
+  --bg-edf1f7: rgba(120,150,195,0.045);
+  --bg-eee7db: rgba(192,167,124,0.029);
+  --bg-eef1f4: rgba(137,158,178,0.047);
+  --bg-eef2f7: rgba(123,154,192,0.045);
+  --bg-eef2f8: rgba(117,150,198,0.044);
+  --bg-eef2fb: rgba(98,135,218,0.042);
+  --bg-eef2ff: rgba(95,124,221,0.040);
+  --bg-eef3fa: rgba(105,149,210,0.043);
+  --bg-eef3fb: rgba(98,144,218,0.042);
+  --bg-eef4fb: rgba(98,153,218,0.042);
+  --bg-eef4fd: rgba(95,145,221,0.041);
+  --bg-eef6ff: rgba(95,154,221,0.040);
+  --bg-eef7f4: rgba(123,192,169,0.045);
+  --bg-eef7f6: rgba(123,192,185,0.045);
+  --bg-eefaf8: rgba(105,210,193,0.043);
+  --bg-eefaf9: rgba(105,210,202,0.043);
+  --bg-efe6cf: rgba(192,172,124,0.032);
+  --bg-efe6d8: rgba(192,165,124,0.030);
+  --bg-efe7db: rgba(192,164,124,0.029);
+  --bg-eff4e6: rgba(168,195,120,0.052);
+  --bg-f0fdfa: rgba(95,221,192,0.040);
+  --bg-f1ecf8: rgba(150,113,202,0.045);
+  --bg-f1f5f9: rgba(119,158,196,0.041);
+  --bg-f1f5fb: rgba(104,147,211,0.040);
+  --bg-f2f6fd: rgba(95,140,221,0.038);
+  --bg-f2f7fd: rgba(95,152,221,0.038);
+  --bg-f3ece1: rgba(192,165,124,0.026);
+  --bg-f3ede3: rgba(192,166,124,0.025);
+  --bg-f3f6fb: rgba(109,145,206,0.039);
+  --bg-f3f7fb: rgba(109,158,206,0.039);
+  --bg-f3f7fc: rgba(99,151,216,0.038);
+  --bg-f3f7fd: rgba(95,145,221,0.038);
+  --bg-f3faf9: rgba(118,198,186,0.040);
+  --bg-f4f7fb: rgba(112,151,203,0.038);
+  --bg-f4f8fd: rgba(95,151,221,0.037);
+  --bg-f4fbf9: rgba(112,203,177,0.038);
+  --bg-f5f8fc: rgba(105,150,210,0.037);
+  --bg-f5f8fd: rgba(95,142,221,0.036);
+  --bg-f5f9fd: rgba(95,158,221,0.036);
+  --bg-f6f1e9: rgba(192,165,124,0.023);
+  --bg-f6f8fb: rgba(120,150,195,0.037);
+  --bg-f6f9fc: rgba(109,158,206,0.036);
+  --bg-f6f9fd: rgba(96,149,219,0.036);
+  --bg-f7f5ef: rgba(190,174,125,0.021);
+  --bg-f7f9fd: rgba(99,138,216,0.035);
+  --bg-f7faff: rgba(95,142,221,0.034);
+  --bg-f7fbfd: rgba(99,177,216,0.035);
+  --bg-f8efe5: rgba(192,159,124,0.023);
+  --bg-f8f6fc: rgba(141,109,206,0.036);
+  --bg-f8faf3: rgba(175,198,118,0.040);
+  --bg-f8fafc: rgba(119,158,196,0.035);
+  --bg-f8fbff: rgba(95,149,221,0.033);
+  --bg-f9ecef: rgba(208,107,130,0.045);
+  --bg-fafbfd: rgba(116,144,199,0.033);
+  --bg-fafcff: rgba(95,145,221,0.032);
+  --bg-fbefe4: rgba(192,156,124,0.023);
+  --bg-fbf4ec: rgba(192,160,124,0.020);
+  --bg-fbf7ef: rgba(192,169,124,0.019);
+  --bg-fbf7f0: rgba(192,167,124,0.019);
+  --bg-fbf8f3: rgba(192,166,124,0.018);
+  --bg-fbfcfe: rgba(99,138,216,0.032);
+  --bg-fbfdff: rgba(95,158,221,0.032);
+  --bg-fcf6f7: rgba(206,109,125,0.036);
+  --bg-fcf8f3: rgba(192,161,124,0.018);
+  --bg-fde2e2: rgba(221,95,95,0.049);
+  --bg-fde4e5: rgba(221,95,100,0.047);
+  --bg-fde8da: rgba(192,151,124,0.025);
+  --bg-fde8e8: rgba(221,95,95,0.045);
+  --bg-fdeedd: rgba(192,160,124,0.024);
+  --bg-fdf0d9: rgba(192,167,124,0.025);
+  --bg-fdfaf5: rgba(192,166,124,0.017);
+  --bg-fee2e2: rgba(221,95,95,0.048);
+  --bg-fef3c7: rgba(192,178,124,0.031);
+  --bg-ffedd5: rgba(192,162,124,0.026);
+  --bg-fff1d6: rgba(192,168,124,0.026);
+  --bg-fff1f2: rgba(221,95,104,0.038);
+  --bg-fff3c4: rgba(192,178,124,0.031);
+  --bg-fff4d6: rgba(192,173,124,0.026);
+  --bg-fff5f5: rgba(221,95,95,0.035);
+  --bg-fff6e0: rgba(192,172,124,0.023);
+  --bg-fff7e6: rgba(192,170,124,0.021);
+  --bg-fffbeb: rgba(192,178,124,0.019);
+  --bg-fffdf8: rgba(192,172,124,0.016);
+  --bg-fffdf9: rgba(192,169,124,0.015);
+  --bg-ffffff: rgba(255,255,255,0.018);
+}
