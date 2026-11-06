@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.06.11.26 — Thu = Tiền về = Collections
+- Người dùng chốt: gộp "Thu" và "Tiền về" cùng dịch **Collections** (bỏ Receipts). 31 câu đổi theo:
+  Thực thu = Actual collections; Còn lại thực = Net actual cash (collections − expenditure); Kế hoạch thu = Planned collections.
+
 ## V09.06.11.26 — Thuật ngữ tài chính Thu / Chi
 - Người dùng chốt: Thu = dòng tiền về (Receipts), Chi = chi phí mình chi ra (Expenditure) – không dùng In / Out, Cash in / Cash out.
 - Đổi 51 câu: Thực thu / Thực chi = Actual receipts / Actual expenditure; Dòng thu / chi = Receipts / Expenditure;

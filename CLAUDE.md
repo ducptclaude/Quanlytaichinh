@@ -62,6 +62,6 @@ Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm so
   (`exact`: nguyên câu; `patterns`: câu có số liệu, `{}` = chỗ số). **Thêm chữ giao diện mới → thêm câu dịch vào `i18n-en.js`**
   theo thuật ngữ: Chủ đầu tư = Employer, Thầu phụ = Subcontractor, HĐ đầu vào = Procurement contract, Phụ lục = Addendum,
   Tạm ứng = Advance, Nghiệm thu = Certified, Quyết toán = Final account, Tiền về = Collections, TĐ1/2/3 = M1/M2/M3.
-  **Thu = Receipts (tiền về), Chi = Expenditure (tiền chi ra)**, Thực thu / Thực chi = Actual receipts / Actual expenditure,
-  Còn lại thực = Net actual cash. KHÔNG dùng In / Out, Cash in / Cash out.
+  **Thu = Tiền về = Collections, Chi = Expenditure (tiền chi ra)**, Thực thu / Thực chi = Actual collections / Actual expenditure,
+  Còn lại thực = Net actual cash. KHÔNG dùng In / Out, Cash in / Cash out, Receipts.
   Dữ liệu người dùng nhập không dịch. Chưa dịch: Trợ lý, nhật ký hoạt động, file Excel/PowerPoint xuất ra, dữ liệu mẫu.
