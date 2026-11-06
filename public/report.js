@@ -2036,18 +2036,18 @@ async function bBusy(btn, fn) {
 }
 
 // ---------- Excel ----------
-// Excel theo mẫu trình ký TMN: máy chủ dựng file có định dạng sẵn (logo, font, màu, công thức) cho các dự án đang xem
-$('#b-xlsx-tmn').addEventListener('click', (e) => bBusy(e.target, async () => {
+// Excel theo mẫu trình ký: máy chủ dựng file có định dạng sẵn (logo, font, màu, công thức) cho các dự án đang xem
+$('#b-xlsx-mau').addEventListener('click', (e) => bBusy(e.target, async () => {
   const ids = bScope().list.map((d) => d.id).join(',');
   const r = await fetch(`/api/bao-cao/dtcp.xlsx?ids=${ids}`, { credentials: 'same-origin' });
   if (!r.ok) { let m = 'Không xuất được file'; try { m = (await r.json()).errors.join('; '); } catch { /* không phải JSON */ } throw new Error(m); }
   const blob = await r.blob();
-  const name = (r.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/)?.[1] || 'BaoCao_DTCP_TMN.xlsx';
+  const name = (r.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/)?.[1] || 'BaoCao_DTCP.xlsx';
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: name });
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }));
-// ---------- Excel tổng hợp: định dạng theo mẫu trình ký TMN (ExcelJS) ----------
+// ---------- Excel tổng hợp: định dạng theo mẫu trình ký (ExcelJS) ----------
 // Mỗi trang: logo + thông tin công ty, đường kẻ, tiêu đề, ngày cập nhật; bảng Times New Roman, tiêu đề navy, khung viền,
 // số #,##0, tỷ lệ 0,0%, dòng TỔNG CỘNG (SUBTOTAL – lọc vẫn đúng), cố định tiêu đề, in ngang vừa trang.
 const XL = { FONT: 'Times New Roman', NAVY: 'FF002060', YELLOW: 'FFFFFF00', PEACH: 'FFF8CBAD', RED: 'FFFF0000',
@@ -2059,7 +2059,7 @@ function xlBook() {
   wb.created = new Date();
   return wb;
 }
-// Khung đầu trang chuẩn TMN. Trả về số dòng bắt đầu nội dung.
+// Khung đầu trang chuẩn. Trả về số dòng bắt đầu nội dung.
 function xlHeader(wb, ws, logoId, { title, sub, widths: w0 }) {
   // Trang hẹp: thêm cột trống bên phải cho đủ chỗ khung thông tin công ty (~115 ký tự)
   const widths = [...w0];
@@ -2202,7 +2202,7 @@ function xlForm(wb, logoId, name, title, sub, blocks, widths) {
 }
 async function xlLogo(wb) {
   try {
-    const buf = await (await fetch('/img/tmn-logo.png?v=mm1')).arrayBuffer();
+    const buf = await (await fetch('/img/logo-bao-cao.png?v=mm1')).arrayBuffer();
     return wb.addImage({ buffer: buf, extension: 'png' });
   } catch { return null; } // không tải được logo: vẫn xuất file
 }
@@ -2324,7 +2324,7 @@ $('#b-pptx').addEventListener('click', (e) => bBusy(e.target, async () => {
   const scope = one ? `${one.ma_du_an} – ${one.ten_du_an}` : `Tất cả dự án (${list.length})`;
   const dateTxt = new Date(BC.lap_luc).toLocaleDateString('vi-VN');
   pptx.defineSlideMaster({
-    title: 'TMN', background: { color: 'FFFFFF' },
+    title: 'MAU', background: { color: 'FFFFFF' },
     objects: [
       { rect: { x: 0, y: 0, w: 13.33, h: 0.12, fill: { color: TEAL } } },
       { text: { text: `${BC.ten_cong_ty || ''} · Báo cáo tổng quan dự án · ${dateTxt}`, options: { x: 0.5, y: 7.05, w: 9, h: 0.3, fontFace: FONT, fontSize: 9, color: MUTED } } },
@@ -2332,7 +2332,7 @@ $('#b-pptx').addEventListener('click', (e) => bBusy(e.target, async () => {
     slideNumber: { x: 12.3, y: 7.05, w: 0.6, h: 0.3, fontFace: FONT, fontSize: 9, color: MUTED, align: 'right' },
   });
   const slide = (title, sub) => {
-    const s = pptx.addSlide({ masterName: 'TMN' });
+    const s = pptx.addSlide({ masterName: 'MAU' });
     s.addText(title, { x: 0.5, y: 0.3, w: 12.3, h: 0.6, fontFace: FONT, fontSize: 24, bold: true, color: NAVY });
     if (sub) s.addText(sub, { x: 0.5, y: 0.85, w: 12.3, h: 0.35, fontFace: FONT, fontSize: 12, color: MUTED });
     return s;
@@ -2352,7 +2352,7 @@ $('#b-pptx').addEventListener('click', (e) => bBusy(e.target, async () => {
   s1.addText('BÁO CÁO TỔNG QUAN DỰ ÁN', { x: 0.8, y: 2.0, w: 11.7, h: 1.0, fontFace: FONT, fontSize: 40, color: 'FFFFFF', bold: true });
   s1.addText(scope, { x: 0.8, y: 3.1, w: 11.7, h: 0.5, fontFace: FONT, fontSize: 20, color: 'FFFFFF' });
   s1.addText(`Ngày lập: ${dateTxt} · Người lập: ${BC.nguoi_lap} · Đơn vị: tỷ đồng (${vt})`, { x: 0.8, y: 4.0, w: 11.7, h: 0.4, fontFace: FONT, fontSize: 14, color: 'BFE9E6' });
-  s1.addText('Produced by the Supervisory Board of Tan Minh Nhan Corporation®', { x: 0.8, y: 6.2, w: 11.7, h: 0.4, fontFace: FONT, fontSize: 11, color: 'BFE9E6' });
+  s1.addText(`Produced by the Supervisory Board${BC.ten_cong_ty ? ` of ${BC.ten_cong_ty}` : ''}`, { x: 0.8, y: 6.2, w: 11.7, h: 0.4, fontFace: FONT, fontSize: 11, color: 'BFE9E6' });
 
   // 1b. Tổng quan tài chính theo kỳ
   const F = bFinData(list, v);

@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V21.06.11.26 — Bỏ tên riêng TMN / Tân Minh Nhân khỏi hệ thống – lấy theo Cài đặt
+- Tên đơn vị lấy từ **Quản trị → Cài đặt → Tên công ty** (sếp đặt, VD "MYMONEY"): đầu trang, báo cáo, Excel, PowerPoint, dòng cuối trang.
+- Excel mẫu trình ký (`lib/export-dtcp.js` `congTy(ten)`): khung đầu trang + cột ký hiệu = Tên công ty; bỏ địa chỉ / điện thoại / web TMN.
+- Dòng cuối trang: "Produced by the Supervisory Board of <Tên công ty>" (`applyFoot` – common.js). Nút "Excel mẫu TMN" → "Excel mẫu trình ký",
+  tên file `BaoCao_DTCP_yyyymmdd.xlsx`. Ảnh logo Excel đổi tên `logo-bao-cao.png`. Liên hệ mặc định: "Ban Kiểm soát".
+- Kiểm tra: tên công ty MYMONEY → cuối trang, trang đăng nhập, 2 file Excel đúng tên, 0 chữ TMN, có logo. Điểm khôi phục: `phien-06.11.26-15h51`.
+
 ## V20.06.11.26 — Logo MyMoney thay toàn bộ logo cũ
 - Tạo từ ảnh người dùng gửi (nền bỏ trong suốt): `public/img/logo-icon.png` (biểu tượng M, 256px), `favicon.png` (64px),
   `logo-full.png` (M + chữ MyMoney – trang Đăng nhập / Khởi tạo), `tmn-logo.png` + `lib/assets/tmn-logo.png` (Excel mẫu TMN, Excel báo cáo).

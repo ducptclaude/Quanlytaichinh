@@ -27,6 +27,10 @@ function showMsg(el, text, type = 'ok') {
 
 const formData = (form) => Object.fromEntries(new FormData(form));
 
+// Dòng cuối trang: theo Tên công ty trong Cài đặt
+function applyFoot(ten) {
+  if (ten) document.querySelectorAll('.auth-foot, .site-foot').forEach((el) => { el.textContent = `Produced by the Supervisory Board of ${ten}`; });
+}
 function dbWarning(meta) {
   if (meta.moi_truong === 'staging') {
     const st = document.createElement('div');

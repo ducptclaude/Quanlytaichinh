@@ -11,7 +11,7 @@ const { KHOI_CHI_PHI, NHOM_CHI_PHI, summarizeCost, sortCost, costLine } = requir
 const { summarizeProject } = require('./lib/dashboard');
 const { projectReport } = require('./lib/report');
 const { DEMO_PREFIX, seedDemo } = require('./lib/demo');
-const { buildDtcp, costLinesFor, CONG_TY } = require('./lib/export-dtcp');
+const { buildDtcp, costLinesFor, congTy } = require('./lib/export-dtcp');
 const PHIEN_BAN = require('./lib/version').readVersion(); // đọc 1 lần khi khởi động
 // Tài khoản khách (Chỉ xem, dùng 1 lần): dùng 30 phút tính từ lần đăng nhập đầu, hết hạn thì tự xóa; tạo mà quá 24 giờ chưa đăng nhập cũng tự xóa
 const KHACH_PHUT = Math.max(1, Math.round(Number(process.env.KHACH_PHUT) || 30)), KHACH_CHUA_DUNG_GIO = 24; // KHACH_PHUT: biến môi trường để chạy thử nhanh (mặc định 30)
@@ -334,7 +334,7 @@ api.put('/settings', auth.requireRole('admin'), wrap(async (req, res) => {
 // ---------- Tab Liên hệ: Thông tin hệ thống & hỗ trợ ----------
 //   Phiên bản tự động theo version.json; Quản trị có thể ghi đè – bản ghi đè chỉ áp dụng đến lần phát hành kế tiếp
 const CONTACT_KEY = 'lien_he';
-const CONTACT_DEFAULT = { ten: 'Hệ thống nội bộ', so_huu: 'Ban Kiểm soát - TMN', phat_trien: 'Le Phan Vinh Tu', sdt: '0794 570 057', mail: 'lephanvinhtu.tu@gmail.com' };
+const CONTACT_DEFAULT = { ten: 'Hệ thống nội bộ', so_huu: 'Ban Kiểm soát', phat_trien: 'Le Phan Vinh Tu', sdt: '0794 570 057', mail: 'lephanvinhtu.tu@gmail.com' };
 async function readContact() {
   let saved = {};
   try { saved = JSON.parse((await store.getSettings())[CONTACT_KEY] || '{}'); } catch {}
@@ -576,7 +576,7 @@ api.get('/dashboard', wrap(async (_req, res) => {
 }));
 
 // ---------- Báo cáo tổng quan (tab Báo cáo): toàn bộ số liệu liên kết + dòng chi tiết để xuất ----------
-// Số liệu báo cáo của các dự án (withCost: kèm dòng chi phí gốc cho bản xuất Excel mẫu TMN)
+// Số liệu báo cáo của các dự án (withCost: kèm dòng chi phí gốc cho bản xuất Excel mẫu trình ký)
 async function reportProjects({ withCost = false } = {}) {
   const list = await store.listProjects();
   const du_an = await Promise.all(list.map(async (p) => {
@@ -596,22 +596,22 @@ api.get('/bao-cao', wrap(async (req, res) => {
   const s = await store.getSettings();
   res.json({
     lap_luc: new Date().toISOString(), nguoi_lap: req.user.full_name || req.user.username,
-    ten_cong_ty: s.ten_cong_ty, ten_he_thong: s.ten_he_thong, phien_ban: PHIEN_BAN.ma, cong_ty: CONG_TY,
+    ten_cong_ty: s.ten_cong_ty, ten_he_thong: s.ten_he_thong, phien_ban: PHIEN_BAN.ma, cong_ty: congTy(s.ten_cong_ty),
     khoi: KHOI_CHI_PHI.map((k) => ({ code: k.code, ten: k.ten })), du_an,
     muc_tieu: await readTargets(), la_quan_tri: req.user.role === 'admin',
   });
 }));
 
-// Xuất Excel theo mẫu trình ký TMN (logo, font, bố cục) – ?ids=1,2,3 (bỏ trống = tất cả dự án)
+// Xuất Excel theo mẫu trình ký (logo, font, bố cục) – ?ids=1,2,3 (bỏ trống = tất cả dự án)
 api.get('/bao-cao/dtcp.xlsx', quyen('xuat'), wrap(async (req, res) => {
   const ids = String(req.query.ids || '').split(',').map(Number).filter(Boolean);
   const all = await reportProjects({ withCost: true });
   const du_an = ids.length ? all.filter((d) => ids.includes(d.id)) : all;
   if (!du_an.length) return bad(res, 'Không có dự án để xuất');
   const ngay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
-  const buf = await buildDtcp({ du_an, ngay, nguoi_lap: req.user.full_name || req.user.username });
-  audit.log(req, 'Xuất báo cáo', 'Báo cáo', `Excel mẫu TMN (DT–CP) · ${du_an.length} dự án`);
-  const ten = `BaoCao_DTCP_TMN_${ngay.replace(/-/g, '')}.xlsx`;
+  const buf = await buildDtcp({ du_an, ngay, nguoi_lap: req.user.full_name || req.user.username, ten_cong_ty: (await store.getSettings()).ten_cong_ty });
+  audit.log(req, 'Xuất báo cáo', 'Báo cáo', `Excel mẫu trình ký (DT–CP) · ${du_an.length} dự án`);
+  const ten = `BaoCao_DTCP_${ngay.replace(/-/g, '')}.xlsx`;
   res.set({ 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition': `attachment; filename="${ten}"` });
   res.send(Buffer.from(buf));
 }));
@@ -1150,7 +1150,7 @@ function dbErrorPage() {
 <div class="stack"><div><b>Nguyên nhân có thể:</b><br>${e(dbHint(dbState.error))}</div>
 <div><b>Lỗi chi tiết:</b><br><code>${e(dbState.error || 'Đang kết nối...')}</code></div>
 <div><b>DATABASE_URL đang trỏ tới:</b><br><code>${e(store.target)}</code></div></div></div>
-<div class="auth-foot">Produced by the Supervisory Board of Tan Minh Nhan Corporation®</div></body></html>`;
+<div class="auth-foot">Produced by the Supervisory Board</div></body></html>`;
 }
 
 // =====================================================================

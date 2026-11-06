@@ -401,7 +401,7 @@ window.BKS_EN = {
 "Chi phí BGĐ 1": "BOD cost 1",
 "Chi phí BGĐ 2": "BOD cost 2",
 "Chi phí · TĐ3": "Cost · M3",
-"Excel mẫu TMN": "TMN Excel template",
+"Excel mẫu trình ký": "Sign-off Excel template",
 "Giá trị HT/QT": "Certified/Final value",
 "Giá trị HĐ+PL": "Contract + addenda value",
 "Giá trị HĐ/PL": "Contract/Add. value",
@@ -419,7 +419,6 @@ window.BKS_EN = {
 "Sửa tài khoản": "Edit account",
 "THU (tiền về)": "COLLECTIONS",
 "Thao tác cuối": "Last action",
-"Tân Minh Nhân": "Tan Minh Nhan",
 "Tên ngân hàng": "Bank name",
 "Tên đăng nhập": "Username",
 "Tỷ suất ≥ 15%": "Margin ≥ 15%",
@@ -647,7 +646,6 @@ window.BKS_EN = {
 "% doanh thu dự kiến": "% of forecast revenue",
 "1. Hợp đồng đầu vào": "1. Procurement contracts",
 "1. Thông tin đơn vị": "1. Organisation details",
-"Ban Kiểm soát - TMN": "Supervisory Board - TMN",
 "Bấm để mở / thu gọn": "Click to expand / collapse",
 "Bấm để xem chi tiết": "Click to view details",
 "Chèn đợt thanh toán": "Insert payment instalment",
@@ -1097,7 +1095,7 @@ window.BKS_EN = {
 "Tổng tiền đã thực về tài khoản: tạm ứng + thanh toán đợt + quyết toán (sau VAT)": "Total cash actually received: advance + interim payments + final account (after VAT)",
 "Phiên làm việc đã kết thúc do không thao tác quá 60 phút. Vui lòng đăng nhập lại.": "Your session ended after more than 60 minutes of inactivity. Please sign in again.",
 "Đơn vị hiển thị số tiền trên toàn hệ thống (chỉ đổi cách hiện, không đổi số liệu)": "Currency display unit across the system (changes display only, not the figures)",
-"Bảng tổng hợp doanh thu – chi phí theo mẫu trình ký TMN (logo, font, bố cục chuẩn)": "Revenue – cost summary in the TMN sign-off template (logo, font, standard layout)",
+"Bảng tổng hợp doanh thu – chi phí theo mẫu trình ký (logo, font, bố cục chuẩn)": "Revenue – cost summary in the sign-off template (logo, fonts, standard layout)",
 "Tiền thật, sau VAT, lũy kế đến hết kỳ · Thực chi = chi phí đã chi + trả HĐ đầu vào": "Actual cash, after VAT, cumulative to end of period · Expenditure = costs paid + procurement contract payments",
 "Trùng dữ liệu: số đợt thanh toán này đã có trong HĐ, hoặc HĐ đã có dòng Quyết toán": "Duplicate data: this payment no. already exists in the contract, or the contract already has a final account row",
 "Số liệu tổng hợp theo tháng: từ ngày 01 của tháng đầu đến ngày cuối của tháng cuối.": "Monthly figures: from the 1st of the first month to the last day of the last month.",
@@ -1629,8 +1627,8 @@ window.BKS_EN = {
 "Connected to database ({}) after {} attempts"
 ],
 [
-"Excel mẫu TMN (DT–CP) · {} dự án",
-"TMN Excel template (Rev.–Cost) · {} projects"
+"Excel mẫu trình ký (DT–CP) · {} dự án",
+"Sign-off Excel template (Rev.–Cost) · {} projects"
 ],
 [
 "Đang có {} dự án mẫu (DEMO-...).",

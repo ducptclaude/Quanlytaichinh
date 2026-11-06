@@ -9,6 +9,7 @@ if (new URLSearchParams(location.search).has('het_phien')) {
     if (meta.needs_setup) return (location.href = '/setup');
     $('#sys-name').textContent = meta.ten_he_thong;
     $('#company').textContent = meta.ten_cong_ty;
+    applyFoot(meta.ten_cong_ty);
     document.title = 'Đăng nhập – ' + meta.ten_he_thong;
     dbWarning(meta);
   } catch { /* vẫn cho đăng nhập */ }
