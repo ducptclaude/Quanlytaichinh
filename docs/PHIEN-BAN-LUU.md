@@ -7,6 +7,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|
 | **chot-06.11.26** | V02.06.11.26 | `c03d4e1` | 06/11/2026 | BKS (gói V30.04.11.26) thay hệ thống cũ, ngăn dữ liệu riêng `bks`, giao diện Sáng / Tối |
+| phien-06.11.26-10h12 (điểm khôi phục) | V02.06.11.26 | `9d67639` | 06/11/2026 | Bản trước khi để trống logo đầu trang |
 | backup-qltc-V3.06.11.2026 | V3.06.11.2026 | `7350d33` | 06/11/2026 | Hệ thống cũ "Quản lý tài chính" (bản cuối trước khi thay bằng BKS) |
 
 ## Lịch sử gói bàn giao (repo cũ `TuLee116/Project-Profit-BKS-TMN` – KHÔNG có trong repo này, chỉ để tham khảo)
