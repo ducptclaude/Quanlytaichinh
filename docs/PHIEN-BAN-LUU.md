@@ -1,7 +1,8 @@
 # Các phiên bản đã lưu (để quay lại)
 
 **Quy tắc:** mỗi ngày làm việc chốt 1 bản = nhánh `chot-dd.mm.yy` trên GitHub (trỏ vào lần lưu cuối của ngày).
-Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"** (hoặc mã phiên bản) – Claude làm trên `staging`, anh duyệt mới đưa lên `main`.
+Mỗi phiên làm việc có sửa đổi: tạo điểm khôi phục `phien-dd.mm.yy-HHhMM` (bản TRƯỚC khi sửa).
+Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bản phien-..."** hoặc mã phiên bản (VD: V02.06.11.26) – Claude làm trên `staging`, anh duyệt mới đưa lên `main`.
 
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|

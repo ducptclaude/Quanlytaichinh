@@ -30,6 +30,18 @@ Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm so
    KHÔNG xóa nhánh `chot-*`.
 6. Báo 3 ý.
 
+## Điểm khôi phục & quay lại (người dùng có thể làm sai, cần quay về phiên trước)
+- **Đầu mỗi phiên, TRƯỚC lần sửa đầu tiên:** đẩy điểm khôi phục `git push origin HEAD:refs/heads/phien-dd.mm.yy-HHhMM`
+  (giờ VN, trỏ vào bản đang chạy) + thêm 1 dòng ở `docs/PHIEN-BAN-LUU.md`. Phiên chỉ hỏi/rà soát, không sửa thì không cần.
+- Mỗi lần lưu đều có mã phiên bản (`Vlần.dd.mm.yy`) ở đầu dòng mô tả → quay về được từng lần sửa, không chỉ từng phiên.
+- Người dùng nhắn **"quay về bản <tên điểm / mã phiên bản>"** → làm:
+  1. Đẩy điểm khôi phục của bản hiện tại (`phien-...`) để có thể quay ngược lại nếu đổi ý.
+  2. Đưa mã về đúng bản cũ bằng 1 lần lưu MỚI (`git checkout <bản> -- . && git commit`) – không xóa lịch sử, không `reset --hard`/`push -f` lên `staging`.
+  3. Tăng phiên bản, lưu `staging` (Railway tự chạy lại), báo 3 ý.
+- **Lưu ý báo người dùng:** quay về chỉ đổi MÃ (giao diện, công thức); **dữ liệu đã nhập không quay lại** (kho dữ liệu chỉ thêm, bản cũ vẫn đọc được).
+  Nếu cần bỏ dữ liệu nhập sai → sửa / xóa trên web, hoặc báo để Claude hỗ trợ riêng.
+- KHÔNG xóa nhánh `phien-*`, `chot-*`, `backup-*`.
+
 ## Lỗi
 - **Lỗi lớn** (dữ liệu, công thức tiền, phân quyền, cấu trúc kho dữ liệu): **dừng lại, báo người dùng trước**.
 - **Lỗi nhỏ**: tự sửa và báo lại.
