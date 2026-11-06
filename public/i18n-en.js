@@ -10,7 +10,8 @@ window.BKS_EN = {
 "Khách · hết hạn": "Guest · expired",
 "Mật khẩu chỉ hiện 1 lần": "The password is shown only once",
 "Vai trò Chỉ xem: chỉ xem Báo cáo, không xuất, không sửa, không đổi mật khẩu. Dùng được": "View-only role: reports only, no export, no editing, no password change. Usable for",
-"30 phút tính từ lần đăng nhập đầu": "30 minutes from the first sign-in",
+"30 phút tính từ lần đăng nhập đầu, chỉ trên 1 thiết bị": "30 minutes from the first sign-in, on one device only",
+"(đăng nhập lại không giới hạn số lần), hết giờ tự đăng xuất và tự xóa tài khoản; tạo mà quá 24 giờ chưa đăng nhập cũng tự xóa. Mọi bước (tạo, đăng nhập, xóa) ghi vào Nhật ký hoạt động.": "(unlimited sign-ins), then it is signed out and deleted automatically; an account not used within 24 hours is also deleted. Every step (create, sign-in, delete) is recorded in the Activity log.",
 ", hết giờ tự đăng xuất và tự xóa tài khoản; tạo mà quá 24 giờ chưa đăng nhập cũng tự xóa. Mọi bước (tạo, đăng nhập, xóa) ghi vào Nhật ký hoạt động.": ", then it is signed out and deleted automatically; an account not used within 24 hours is also deleted. Every step (create, sign-in, delete) is recorded in the Activity log.",
 "Tỷ đồng": "VND bn",
 "Kế hoạch lúc ký hợp đồng": "Plan at contract signing",
@@ -1216,8 +1217,8 @@ window.BKS_EN = {
 "Guest · {} min left"
 ],
 [
-"– hãy sao chép gửi khách ngay. Dùng {} phút từ lần đăng nhập đầu; quá {} giờ chưa đăng nhập thì tự xóa.",
-"– copy and send it to the guest now. Valid {} min from the first sign-in; deleted if not used within {} hours."
+"– hãy sao chép gửi khách ngay. Dùng {} phút từ lần đăng nhập đầu, chỉ trên 1 thiết bị; quá {} giờ chưa đăng nhập thì tự xóa.",
+"– copy and send it to the guest now. Valid {} min from the first sign-in, on one device only; deleted if not used within {} hours."
 ],
 [
 "Tài khoản khách – chỉ xem báo cáo · còn {} · hết giờ tự đăng xuất và xóa tài khoản",

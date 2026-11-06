@@ -2553,10 +2553,10 @@ $('#kh-form')?.addEventListener('submit', async (e) => {
   btn.disabled = true;
   try {
     const r = await api('/api/users/khach', { method: 'POST', body: JSON.stringify({ ghi_chu: f.elements.ghi_chu.value }) });
-    const txt = `Địa chỉ: ${location.origin}/login\nTên đăng nhập: ${r.username}\nMật khẩu: ${r.password}\nDùng ${r.phut} phút tính từ lần đăng nhập đầu.`;
+    const txt = `Địa chỉ: ${location.origin}/login\nTên đăng nhập: ${r.username}\nMật khẩu: ${r.password}\nDùng ${r.phut} phút tính từ lần đăng nhập đầu, chỉ trên 1 thiết bị (thiết bị đăng nhập đầu tiên).`;
     out.hidden = false;
     out.innerHTML = `<div class="kh-cred"><div><span>Tên đăng nhập</span><b>${esc(r.username)}</b></div><div><span>Mật khẩu</span><b>${esc(r.password)}</b></div></div>
-      <p class="small"><b>Mật khẩu chỉ hiện 1 lần</b> – hãy sao chép gửi khách ngay. Dùng ${r.phut} phút từ lần đăng nhập đầu; quá ${r.chua_dung_gio} giờ chưa đăng nhập thì tự xóa.</p>
+      <p class="small"><b>Mật khẩu chỉ hiện 1 lần</b> – hãy sao chép gửi khách ngay. Dùng ${r.phut} phút từ lần đăng nhập đầu, chỉ trên 1 thiết bị; quá ${r.chua_dung_gio} giờ chưa đăng nhập thì tự xóa.</p>
       <button type="button" class="sm" id="kh-copy">Sao chép thông tin gửi khách</button>`;
     $('#kh-copy').onclick = async () => { try { await navigator.clipboard.writeText(txt); $('#kh-copy').textContent = 'Đã sao chép ✓'; } catch { prompt('Sao chép thông tin dưới đây:', txt.replace(/\n/g, ' · ')); } };
     f.reset();

@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V19.06.11.26 — Tài khoản khách: chỉ trên 1 thiết bị, đăng nhập không giới hạn số lần trong 30 phút
+- Lần đăng nhập đầu gắn thiết bị (cookie `tb` ngẫu nhiên, lưu 2 ngày; kho lưu bản băm ở cột MỚI `users.thiet_bi`). Thiết bị khác → từ chối + ghi nhật ký "Đăng nhập từ thiết bị khác".
+- Cùng thiết bị: đăng nhập / đăng xuất bao nhiêu lần cũng được trong 30 phút (tính từ lần đăng nhập đầu). Mốc tự xóa khi 24 giờ chưa đăng nhập: người dùng đồng ý.
+- Lưu ý: khách xóa cookie / đổi trình duyệt = coi như thiết bị khác → cần tạo tài khoản khách mới.
+- Kiểm tra (bộ nhớ tạm + PostgreSQL): máy A đăng nhập 3 lần OK, máy B bị từ chối, nhật ký đủ; tester 4.518 ĐẠT, 0 LỖI.
+
 ## V18.06.11.26 — Tài khoản khách dùng 1 lần (Chỉ xem, 30 phút từ lần đăng nhập đầu, tự xóa, có nhật ký)
 - Quản trị / IT: Tài khoản → "Tài khoản khách (dùng 1 lần)" → nhập ghi chú → tạo. Tên `khach-xxxxxx` + mật khẩu tự sinh (chỉ hiện 1 lần, nút sao chép gửi khách).
 - Khách = vai Chỉ xem + không đổi mật khẩu, không có mục Cá nhân; thanh đếm ngược trên đầu trang, hết giờ tự về trang đăng nhập.

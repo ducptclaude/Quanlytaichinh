@@ -179,6 +179,17 @@ api.post('/auth/login', wrap(async (req, res) => {
     donKhach();
     return bad(res, `Tài khoản khách đã hết thời gian sử dụng (${KHACH_PHUT} phút)`, 403);
   }
+  // Khách chỉ dùng trên 1 thiết bị: thiết bị đăng nhập đầu được gắn, thiết bị khác bị từ chối (cookie thiết bị đặt sau khi tạo phiên)
+  let tb = '';
+  if (user.khach) {
+    tb = auth.readCookie(req, 'tb') || '';
+    const dev = crypto.createHash('sha256').update(/^[A-Za-z0-9_-]{20,64}$/.test(tb || '') ? tb : (tb = crypto.randomBytes(24).toString('base64url'))).digest('hex');
+    const gan = await store.bindGuestDevice(user.id, dev);
+    if (gan !== dev) {
+      audit.log(req, 'Đăng nhập sai', 'Tài khoản khách', `Đăng nhập từ thiết bị khác (chỉ dùng trên 1 thiết bị) · ${audit.device(req.get('User-Agent'))}`, { username: user.username, ho_ten: user.full_name, user_id: user.id });
+      return bad(res, 'Tài khoản khách chỉ dùng được trên thiết bị đã đăng nhập lần đầu', 403);
+    }
+  }
   auth.loginOk(ip);
   auth.loginOk('u:' + username);
   console.log(`[ĐĂNG NHẬP] ${new Date().toISOString()} ${user.username} từ IP ${ip}`);
@@ -187,6 +198,7 @@ api.post('/auth/login', wrap(async (req, res) => {
   await auth.startSession(req, res, user.id);
   await store.touchLogin(user.id);
   if (user.khach) {
+    auth.setDeviceCookie(req, res, tb);
     const han = await store.startGuestClock(user.id, KHACH_PHUT);
     if (!user.het_han && han) audit.log(req, 'Đăng nhập', 'Tài khoản khách', `Đăng nhập lần đầu – bắt đầu tính ${KHACH_PHUT} phút, hết hạn lúc ${gioVN(han)}`,
       { user_id: user.id, username: user.username, ho_ten: user.full_name });
@@ -371,7 +383,7 @@ users.post('/khach', wrap(async (req, res) => {
     username = 'khach-' + rnd(LO + SO, 6);
     try { id = await store.createUser({ username, full_name: ghi ? `Khách – ${ghi}` : 'Khách', role: 'viewer', active: true, khach: true, password_hash }); } catch (e) { if (i === 4) throw e; }
   }
-  audit.log(req, 'Thêm', 'Tài khoản khách', `${username} (${ghi ? `Khách – ${ghi}` : 'Khách'}, Chỉ xem) – dùng ${KHACH_PHUT} phút từ lần đăng nhập đầu; chưa đăng nhập sau ${KHACH_CHUA_DUNG_GIO} giờ thì tự xóa`);
+  audit.log(req, 'Thêm', 'Tài khoản khách', `${username} (${ghi ? `Khách – ${ghi}` : 'Khách'}, Chỉ xem) – dùng ${KHACH_PHUT} phút từ lần đăng nhập đầu, chỉ trên 1 thiết bị; chưa đăng nhập sau ${KHACH_CHUA_DUNG_GIO} giờ thì tự xóa`);
   res.status(201).json({ id, username, password, phut: KHACH_PHUT, chua_dung_gio: KHACH_CHUA_DUNG_GIO });
 }));
 
