@@ -1,7 +1,14 @@
 # Các phiên bản đã lưu (để quay lại)
 
-Mỗi phiên bản là một mốc trong lịch sử Git đã đẩy lên GitHub (nhánh `staging`), nên luôn khôi phục được.
-Muốn quay lại: nhắn "quay về bản <mã phiên bản>", Claude làm trên staging trước, anh duyệt mới đưa lên main.
+**Quy tắc:** mỗi ngày làm việc chốt 1 bản = nhãn `chot-dd.mm.yy` trên GitHub (gắn vào lần lưu cuối của ngày).
+Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"** (hoặc mã phiên bản) – Claude làm trên `staging`, anh duyệt mới đưa lên `main`.
+
+| Nhãn chốt ngày | Phiên bản | Mã lưu | Ngày | Nội dung chính |
+|---|---|---|---|---|
+| **chot-06.11.26** | V02.06.11.26 | `c03d4e1` | 06/11/2026 | BKS (gói V30.04.11.26) thay hệ thống cũ, ngăn dữ liệu riêng `bks`, giao diện Sáng / Tối |
+| qltc-V3.06.11.2026 | V3.06.11.2026 | `7350d33` | 06/11/2026 | Hệ thống cũ "Quản lý tài chính" (bản cuối trước khi thay bằng BKS) – cũng ở nhánh `backup-qltc-V3.06.11.2026` |
+
+## Lịch sử gói bàn giao (repo cũ `TuLee116/Project-Profit-BKS-TMN` – KHÔNG có trong repo này, chỉ để tham khảo)
 
 | Phiên bản | Mã lưu (commit) | Ngày | Nội dung chính |
 |---|---|---|---|

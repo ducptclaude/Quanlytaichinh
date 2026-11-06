@@ -3,6 +3,7 @@
 Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm soát, **không biết lập trình**.
 
 ## Giao tiếp
+- **Tiết kiệm token:** không đọc / chụp / quét thừa, báo ngắn; chỉ kiểm tra đủ phần bị ảnh hưởng.
 - Luôn trả lời **tiếng Việt**, ngắn gọn, thẳng vấn đề, **không dùng thuật ngữ IT** khi báo cáo.
 - Cuối mỗi yêu cầu báo **3 ý**: *Đã làm gì* / *Đã kiểm tra gì* / *Việc cần tôi quyết*.
 - Không nhắc lại việc đổi mật khẩu tài khoản thử (người dùng đã yêu cầu).
@@ -24,6 +25,8 @@ Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm so
    Chụp màn hình máy tính (1366px) + điện thoại (iPhone 13) các trang bị ảnh hưởng, kiểm tra không tràn ngang.
 4. Lưu lên GitHub nhánh `staging` (Railway tự cập nhật).
 5. Cập nhật `docs/TOM-TAT-PHIEN.md`.
+   **Chốt ngày:** lần lưu cuối mỗi ngày (hoặc đầu phiên nếu ngày trước chưa chốt) gắn nhãn `chot-dd.mm.yy`
+   (`git tag chot-dd.mm.yy && git push origin chot-dd.mm.yy`) và thêm 1 dòng vào `docs/PHIEN-BAN-LUU.md`. Nhãn đã có thì dời sang lần lưu mới nhất của ngày đó (`git tag -f`, `git push -f origin chot-dd.mm.yy`).
 6. Báo 3 ý.
 
 ## Lỗi
