@@ -78,7 +78,7 @@ function listPage(ctx, d) {
   const rows = d.pageRows.map(({ r, shown }) => `
     <tr>
       <td data-label="${esc(e.codeLabel)}"><a class="code" href="${e.path}/${r.id}">${esc(r.code)}</a></td>
-      ${listFields.map((f) => `<td data-label="${esc(f.label)}" class="${f.type === 'money' ? 'num' : ''}">${cellHtml(f, r, shown)}</td>`).join('')}
+      ${listFields.map((f) => `<td data-label="${esc(f.listLabel || f.label)}" class="${f.type === 'money' ? 'num' : ''}">${cellHtml(f, r, shown)}</td>`).join('')}
       <td data-label="Cập nhật cuối" class="meta"><span>${esc(r.updated_by_name || '')}<small>${fmtDate(r.updated_at)}</small></span></td>
     </tr>`).join('');
 
@@ -113,7 +113,7 @@ ${alertBox(d.error)}
 ${d.rows.length ? `
 <div class="panel panel-flush">
   <table class="table">
-    <thead><tr>${th('code', e.codeLabel)}${listFields.map((f) => th(f.name, f.label, f.type === 'money' ? 'num' : '')).join('')}${th('updated_at', 'Cập nhật cuối')}</tr></thead>
+    <thead><tr>${th('code', e.codeLabel)}${listFields.map((f) => th(f.name, f.listLabel || f.label, f.type === 'money' ? 'num' : '')).join('')}${th('updated_at', 'Cập nhật cuối')}</tr></thead>
     <tbody>${rows}</tbody>
   </table>
 </div>${pager}` : `
@@ -132,7 +132,7 @@ function fieldHtml(f, values, refs, suggest = {}) {
   if (f.computed) {
     const n = typeof v === 'number' ? v : null;
     return `<label>${label}<output class="computed" data-sum="${esc((f.sumOf || []).join(','))}">${n === null ? '—' : T.fmtMoney(n)}</output>
-      <small class="hint">Tự tính = ${esc((f.sumOf || []).map((k) => k === 'amount' ? 'Chưa VAT' : k === 'vat_amount' ? 'VAT' : k).join(' + '))}</small></label>`;
+      <small class="hint">${esc(f.hint || 'Tự tính')}</small></label>`;
   }
   switch (f.type) {
     case 'textarea':
@@ -150,7 +150,7 @@ function fieldHtml(f, values, refs, suggest = {}) {
         return `<label>${label}<span class="hint bad">Chưa có dự án nào. <a href="/du-an/moi">Thêm dự án trước</a>.</span></label>`;
       }
       return `<label>${label}<select name="${f.name}"${req}><option value="">— Chọn dự án —</option>
-        ${list.map((r) => `<option value="${r.id}" ${String(v) === String(r.id) ? 'selected' : ''}>${esc(r.code)} – ${esc(r.name || '')}</option>`).join('')}
+        ${list.map((r) => `<option value="${r.id}" ${String(v) === String(r.id) ? 'selected' : ''}>${esc(refOptionLabel(f, r))}</option>`).join('')}
       </select></label>`;
     }
     case 'money': {
@@ -159,7 +159,9 @@ function fieldHtml(f, values, refs, suggest = {}) {
     }
     case 'date': {
       const shown = /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? T.fmtDay(v) : v;
-      return `<label>${label}<input name="${f.name}" value="${esc(shown)}" placeholder="dd/mm/yyyy" inputmode="numeric" autocomplete="off" data-date${req}></label>`;
+      // Gõ tay dd/mm/yyyy hoặc bấm 📅 để chọn trên lịch (ô lịch không gửi lên máy chủ)
+      return `<label>${label}<span class="date-wrap"><input name="${f.name}" value="${esc(shown)}" placeholder="dd/mm/yyyy" inputmode="numeric" autocomplete="off" data-date${req}>`
+        + '<span class="date-btn" title="Chọn trên lịch" aria-hidden="true">📅<input type="date" class="date-pick" tabindex="-1" aria-label="Chọn ngày trên lịch"></span></span></label>';
     }
     default: {
       const list = suggest[f.name] && suggest[f.name].length ? ` list="dl-${f.name}"` : '';
@@ -169,9 +171,17 @@ function fieldHtml(f, values, refs, suggest = {}) {
   }
 }
 
+/** Nhãn dự án trong ô chọn; refDetail: thêm chủ đầu tư + giá trị hợp đồng để chọn đúng hợp đồng */
+function refOptionLabel(f, r) {
+  const base = `${r.code} – ${r.name || ''}`;
+  if (!f.refDetail) return base;
+  return base + (r.investor ? ` · CĐT: ${r.investor}` : '') + (r.contract_value ? ` · HĐ ${T.fmtMoney(r.contract_value)} đ` : '');
+}
+
 function formPage(ctx, { e, refs, values = {}, rec, errors, success, isNew, suggest }) {
   const isAdmin = ctx.user.role === 'admin';
-  const title = isNew ? `Thêm ${e.single}` : `${e.codeLabel}: ${rec.code}`;
+  const title = isNew ? `Thêm ${e.single}`
+    : e.codeAuto ? `${e.title}: ${rec.contract_no ? `HĐ ${rec.contract_no}` : rec.code}` : `${e.codeLabel}: ${rec.code}`;
   const isProject = e.key === 'projects';
   return layout(ctx, {
     title,
@@ -185,9 +195,9 @@ ${alertBox(success, 'success')}
 ${alertBox(errors)}
 <section class="panel">
   <form method="post" action="${isNew ? `${e.path}/moi` : `${e.path}/${rec.id}`}" class="form form-grid" novalidate>
-    <label><span>${esc(e.codeLabel)} <span class="req">*</span></span>
+    ${e.codeAuto ? '' : `<label><span>${esc(e.codeLabel)} <span class="req">*</span></span>
       <input name="code" value="${esc(values.code || '')}" required maxlength="50" placeholder="${esc(e.codePlaceholder)}" autocomplete="off">
-      <small class="hint">Không được trùng. Chữ không dấu, số, . _ / -</small></label>
+      <small class="hint">Không được trùng. Chữ không dấu, số, . _ / -</small></label>`}
     ${e.fields.map((f) => fieldHtml(f, values, refs, suggest)).join('')}
     <div class="form-actions full">
       <button class="btn btn-primary" type="submit">Lưu</button>
@@ -201,6 +211,7 @@ ${isNew ? '' : `
   <section class="panel">
     <h2>Lịch sử</h2>
     <dl class="info small">
+      ${e.codeAuto ? `<dt>Mã hệ thống</dt><dd>${esc(rec.code)}</dd>` : ''}
       <dt>Tạo bởi</dt><dd>${esc(rec.created_by_name || '—')} · ${fmtDate(rec.created_at)}</dd>
       <dt>Cập nhật cuối</dt><dd>${esc(rec.updated_by_name || '—')} · ${fmtDate(rec.updated_at)}</dd>
     </dl>

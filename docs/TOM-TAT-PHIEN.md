@@ -3,7 +3,7 @@
 > Tệp này ghi lại tình trạng dự án sau mỗi phiên, để phiên sau (dev / revi) nắm nhanh. Mục mới nhất ở trên cùng.
 
 ## Tình trạng hiện tại
-- **Phiên bản:** V1.06.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
+- **Phiên bản:** V2.06.11.2026 — nhánh `staging` (bản thử). Nhánh `main` (bản chính) **chưa tạo**.
 - **Mã nguồn:** https://github.com/ducptclaude/Quanlytaichinh (nhánh `staging`).
 - **Chạy tại:** Railway, dự án `lavish-essence`, môi trường `production`, đang lấy mã từ nhánh `staging`
   → địa chỉ https://quanlytaichinh.up.railway.app (địa chỉ cũ `quanlytaichinh-production…` đã ngừng; đang hiện dải đỏ THỬ NGHIỆM vì chạy mã nhánh staging).
@@ -23,7 +23,7 @@
 | Bản thử | Dải đỏ "HỆ THỐNG THỬ NGHIỆM" |
 | Dự án (`/du-an`) | Mã*, Tên*, Chủ đầu tư, Địa điểm, Nhóm, Giá trị HĐ, Ngày khởi công/hoàn thành, Trạng thái*, Ghi chú |
 | Doanh thu (`/doanh-thu`) | Số CT* (tự đề xuất DT-0001), Dự án*, Ngày*, Số hóa đơn, Nội dung*, Hình thức, Tiền chưa VAT*, Tiền VAT (nhập tay), Tổng sau VAT (tự tính), Ghi chú |
-| Chi phí (`/chi-phi`) | Số phiếu chi* (tự đề xuất CP-0001), Dự án*, Ngày*, **Khoản mục*** (3 nhóm, 12 khoản), Nội dung*, Nhà cung cấp, Số hóa đơn, Tiền chưa VAT*, Tiền VAT, Tổng sau VAT, Ghi chú |
+| Chi phí (`/chi-phi`) | **1 dòng = 1 hợp đồng** (từ V2.06.11): Nhóm chi phí* (12 khoản, chia 3 nhóm), Thuộc hợp đồng chủ đầu tư* (chọn dự án, hiện CĐT + giá trị HĐ), Số hợp đồng (không trùng trong cùng 1 NCC), Thầu phụ / NCC / Hộ kinh doanh, Hạng mục thi công*, Ngày ký* (gõ hoặc 📅 chọn lịch), Giá trị HĐ*, VAT (trống = 0), Giá trị sau VAT (tạm tính), Ghi chú. Mã CP-0001 hệ thống tự đánh, không hiện trên biểu mẫu |
 | Báo cáo (`/bao-cao`) | Theo dự án, tiền chưa VAT: DT, (1) CP trực tiếp, Lãi gộp, (2) CP gián tiếp, (3) CP tài chính, Lợi nhuận, tỷ suất, % Thu/HĐ; bảng chi phí theo khoản mục |
 | Chung cho danh mục | Mã không trùng (không phân biệt hoa/thường), tìm không dấu, sắp xếp tự nhiên (DA-2 < DA-10), lọc, phân trang 50, xuất Excel (.xlsx), ghi người tạo / người cập nhật cuối |
 
@@ -50,6 +50,19 @@ Vai trò hiện có: **Quản trị**, **Người dùng**.
 | 3. Tài chính | TC01 Chi phí tài chính · TC02 Lãi vay ngân hàng (chỉ phần lãi) · TC03 Đóng phạt chủ đầu tư |
 
 ## Nhật ký
+### V2.06.11.2026 — Chi phí theo hợp đồng thầu phụ / nhà cung cấp
+- Người dùng chốt: **1 dòng Chi phí = 1 hợp đồng**; báo cáo cộng **giá trị hợp đồng (chưa VAT)**; Số HĐ không trùng trong cùng 1 NCC.
+- Biểu mẫu mới theo thứ tự: Nhóm chi phí → Thuộc HĐ chủ đầu tư → Số HĐ → Thầu phụ/NCC/HKD → Hạng mục → Ngày ký → Giá trị HĐ → VAT → Sau VAT → Ghi chú.
+- Bỏ khỏi biểu mẫu: Số phiếu chi (hệ thống tự đánh CP-xxxx, xem ở mục Lịch sử), Số hóa đơn (cột `invoice_no` GIỮ trong kho, không xóa).
+- Dữ liệu cũ giữ nguyên: Nội dung → hiện là Hạng mục, Ngày → Ngày ký, Tiền chưa VAT → Giá trị HĐ; Số HĐ cũ để trống.
+- Số HĐ và NCC không bắt buộc (cho Lương, Lãi vay… không có hợp đồng). So trùng: bỏ dấu, không phân biệt hoa/thường.
+- Mọi ô ngày (cả Dự án, Doanh thu) có thêm nút 📅 chọn trên lịch; vẫn gõ tay dd/mm/yyyy được.
+- Danh sách Chi phí dùng tên cột ngắn (Dự án (HĐ CĐT), Thầu phụ / NCC, Hạng mục, Giá trị HĐ, Sau VAT) để đủ cột ở 1280–1366px.
+- Kiểm tra: 22/22 bài thử đạt (bộ nhớ tạm + PostgreSQL); thử nâng cấp từ kho bản V1.06.11: không mất dữ liệu, Số hóa đơn cũ còn nguyên;
+  chụp 1366px + iPhone 13: không tràn ngang; tạm tính sau VAT và chọn lịch hoạt động đúng.
+- Mã: `src/entities.js` (`costs`: `codeAuto`, `uniqueWith`, `refDetail`, `listLabel`), `src/routes/entities.js` (`uniqueError`, tự đánh mã có thử lại khi trùng),
+  `src/views/entities.js`, `public/app.js` (5b nút lịch), `public/style.css`.
+
 ### Phiên 06/11/2026 — mở mạng tới web
 - Địa chỉ web đổi thành https://quanlytaichinh.up.railway.app (`/health`: V1.06.11.2026, staging, kho dữ liệu đã kết nối).
   Địa chỉ cũ `quanlytaichinh-production.up.railway.app` trả về 404 "Application not found".

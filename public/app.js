@@ -87,6 +87,29 @@
     if (inp.matches && inp.matches('input[data-date]')) inp.value = normDate(inp.value);
   });
 
+  // 5b) Nút 📅: ô lịch của trình duyệt nằm chồng lên nút; chọn ngày xong ghi lại dạng dd/mm/yyyy
+  function toIso(v) {
+    var g = normDate(v).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    return g ? g[3] + '-' + g[2] + '-' + g[1] : '';
+  }
+  document.querySelectorAll('.date-wrap').forEach(function (wrap) {
+    var text = wrap.querySelector('input[data-date]');
+    var pick = wrap.querySelector('.date-pick');
+    if (!text || !pick) return;
+    function sync() { pick.value = toIso(text.value); }
+    pick.addEventListener('pointerdown', sync);
+    pick.addEventListener('focus', sync);
+    pick.addEventListener('click', function () {
+      if (typeof pick.showPicker === 'function') { try { pick.showPicker(); } catch (err) { /* trình duyệt tự mở */ } }
+    });
+    pick.addEventListener('change', function () {
+      var g = String(pick.value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!g) return;
+      text.value = g[3] + '/' + g[2] + '/' + g[1];
+      text.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  });
+
   // 6) Ô tự tính tổng (VD: Tổng sau VAT = Chưa VAT + VAT)
   function num(v) { var d = String(v || '').replace(/[^0-9]/g, ''); return d ? Number(d) : 0; }
   function recalc(form) {

@@ -43,14 +43,16 @@ const COST_ITEMS = [
   { value: 'TC03', label: 'Đóng phạt chủ đầu tư', group: 'TC' },
 ].map((x) => ({ ...x, groupLabel: COST_GROUPS.find((g) => g.key === x.group).label }));
 
-/** Ba ô tiền dùng chung cho Doanh thu và Chi phí */
-const MONEY_VAT_FIELDS = [
-  { name: 'amount', label: 'Tiền chưa VAT (đ)', type: 'money', required: true, positive: true, list: true, total: true },
-  { name: 'vat_amount', label: 'Tiền VAT (đ)', type: 'money', list: true, total: true, blankAsZero: true,
-    maxRatio: { of: 'amount', ratio: 0.1 }, hint: 'Nhập tay theo hóa đơn. Để trống = 0.' },
-  { name: 'total_amount', label: 'Tổng sau VAT (đ)', type: 'money', list: true, total: true,
-    computed: (d) => (d.amount == null ? null : d.amount + (d.vat_amount || 0)), sumOf: ['amount', 'vat_amount'] },
+/** Ba ô tiền dùng chung cho Doanh thu và Chi phí (nhãn có thể đổi theo từng danh mục) */
+const moneyVatFields = (L = {}) => [
+  { name: 'amount', label: L.amount || 'Tiền chưa VAT (đ)', listLabel: L.amountList, type: 'money', required: true, positive: true, list: true, total: true },
+  { name: 'vat_amount', label: L.vat || 'Tiền VAT (đ)', type: 'money', list: L.vatList !== false, total: true, blankAsZero: true,
+    maxRatio: { of: 'amount', ratio: 0.1 }, hint: L.vatHint || 'Nhập tay theo hóa đơn. Để trống = 0.' },
+  { name: 'total_amount', label: L.total || 'Tổng sau VAT (đ)', listLabel: L.totalList, type: 'money', list: true, total: true,
+    computed: (d) => (d.amount == null ? null : d.amount + (d.vat_amount || 0)), sumOf: ['amount', 'vat_amount'],
+    hint: L.totalHint || 'Tự tính = Chưa VAT + VAT' },
 ];
+const MONEY_VAT_FIELDS = moneyVatFields();
 
 /** Câu lệnh bổ sung dữ liệu cũ (chỉ điền vào ô đang TRỐNG, không ghi đè) */
 const fillVat = (t) => [
@@ -100,22 +102,32 @@ const ENTITIES = {
   },
 
   costs: {
+    // 1 dòng = 1 hợp đồng với thầu phụ / nhà cung cấp / hộ kinh doanh (quyết định 06/11/2026).
+    // Báo cáo cộng GIÁ TRỊ HỢP ĐỒNG (chưa VAT). Mã CP-0001 do hệ thống tự đánh, không hiện trên biểu mẫu.
+    // Ô cũ "Số hóa đơn" (invoice_no) bỏ khỏi biểu mẫu nhưng cột vẫn GIỮ trong kho.
     table: 'costs',
     path: '/chi-phi',
     title: 'Chi phí',
-    single: 'khoản chi phí',
-    codeLabel: 'Số phiếu chi',
-    codePlaceholder: 'VD: CP-0001',
+    single: 'hợp đồng chi phí',
+    codeLabel: 'Mã',
+    codeAuto: true,
     autoCode: { prefix: 'CP-', pad: 4 },
+    // Số hợp đồng không được trùng trong CÙNG 1 thầu phụ / nhà cung cấp (khác đơn vị thì được trùng)
+    uniqueWith: { fields: ['supplier', 'contract_no'], when: 'contract_no',
+      message: (d) => `Số hợp đồng "${d.contract_no}" đã có cho ${d.supplier ? `"${d.supplier}"` : 'đơn vị (không tên)'}` },
     fields: [
-      { name: 'project_id', label: 'Dự án', type: 'ref', ref: 'projects', required: true, list: true, filter: true },
-      { name: 'doc_date', label: 'Ngày', type: 'date', required: true, list: true },
-      { name: 'cost_item', label: 'Khoản mục chi phí', type: 'select', options: COST_ITEMS, required: true, list: true, filter: true,
-        groupFilter: { name: 'cost_group', label: 'Nhóm chi phí', groups: COST_GROUPS } },
-      { name: 'content', label: 'Nội dung', type: 'text', required: true, maxlength: 300, list: true, suggest: true },
-      { name: 'supplier', label: 'Nhà cung cấp / Thầu phụ', type: 'text', maxlength: 200, suggest: true },
-      { name: 'invoice_no', label: 'Số hóa đơn', type: 'text', maxlength: 50, hint: 'Được trùng giữa các nhà cung cấp.' },
-      ...MONEY_VAT_FIELDS,
+      { name: 'cost_item', label: 'Nhóm chi phí', type: 'select', options: COST_ITEMS, required: true, list: true, filter: true,
+        groupFilter: { name: 'cost_group', label: 'Phân loại', groups: COST_GROUPS } },
+      { name: 'project_id', label: 'Thuộc hợp đồng chủ đầu tư', listLabel: 'Dự án (HĐ CĐT)', type: 'ref', ref: 'projects', refDetail: true, required: true, list: true, filter: true },
+      { name: 'contract_no', label: 'Số hợp đồng', type: 'text', maxlength: 50, list: true, hint: 'Không trùng trong cùng 1 thầu phụ / nhà cung cấp.' },
+      { name: 'supplier', label: 'Thầu phụ / Nhà cung cấp / Hộ kinh doanh', listLabel: 'Thầu phụ / NCC', type: 'text', maxlength: 200, suggest: true, list: true },
+      { name: 'content', label: 'Hạng mục thi công', listLabel: 'Hạng mục', type: 'text', required: true, maxlength: 300, list: true, suggest: true },
+      { name: 'doc_date', label: 'Ngày ký', type: 'date', required: true, list: true },
+      ...moneyVatFields({
+        amount: 'Giá trị hợp đồng (đ)', amountList: 'Giá trị HĐ (đ)', vat: 'VAT (đ)', vatList: false,
+        vatHint: 'Nhập tay. Không có VAT thì bỏ trống.',
+        total: 'Giá trị sau VAT (đ)', totalList: 'Sau VAT (đ)', totalHint: 'Tạm tính = Giá trị hợp đồng + VAT (VAT trống = giá trị hợp đồng)',
+      }),
       { name: 'note', label: 'Ghi chú', type: 'textarea', maxlength: 1000 },
     ],
     migrate: [

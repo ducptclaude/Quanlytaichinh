@@ -48,10 +48,11 @@ function display(f, v, refs) {
 }
 
 /** Kiểm tra dữ liệu nhập; trả về { data, errors } */
-function validate(e, body, refs) {
+function validate(e, body, refs, fixedCode) {
   const errors = [];
   const data = {};
-  const code = String(body.code || '').trim();
+  // Danh mục tự đánh mã (VD: Chi phí): không nhận mã từ người dùng
+  const code = e.codeAuto ? String(fixedCode || '') : String(body.code || '').trim();
   if (!code) errors.push(`Chưa nhập ${e.codeLabel}`);
   else if (!CODE_RE.test(code)) errors.push(`${e.codeLabel}: tối đa 50 ký tự, chỉ gồm chữ không dấu, số và . _ / -`);
   data.code = code;
@@ -109,6 +110,18 @@ function validate(e, body, refs) {
     errors.push('Ngày hoàn thành không được trước ngày khởi công');
   }
   return { data, errors };
+}
+
+/** Chuẩn hóa để so trùng: bỏ dấu, chữ thường, gộp khoảng trắng */
+const sameKey = (v) => T.normalize(String(v ?? '')).replace(/\s+/g, ' ').trim();
+
+/** Kiểm tra trùng theo nhóm ô (VD: Số hợp đồng trong cùng 1 nhà cung cấp); trả về câu báo lỗi hoặc '' */
+function uniqueError(e, data, records, selfId) {
+  const u = e.uniqueWith;
+  if (!u || !sameKey(data[u.when])) return '';
+  const key = (r) => u.fields.map((k) => sameKey(r[k])).join('\u0001');
+  const mine = key(data);
+  return records.some((r) => r.id !== selfId && key(r) === mine) ? u.message(data) : '';
 }
 
 /** Lọc + tìm + sắp xếp theo tham số trên đường dẫn */
@@ -234,10 +247,19 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
 
   r.post('/moi', async (req, res) => {
     const refs = await loadRefs(store, key);
-    const { data, errors } = validate(e, req.body, refs);
+    let all = await store.listRecords(key);
+    const { data, errors } = validate(e, req.body, refs, e.codeAuto ? nextCode(e.autoCode, all) : undefined);
+    if (!errors.length) { const u = uniqueError(e, data, all); if (u) errors.push(u); }
     if (!errors.length) {
       try {
-        await store.createRecord(key, data, req.user);
+        // Mã tự đánh: nếu 2 người lưu cùng lúc bị trùng mã thì lấy số kế tiếp (tối đa 5 lần)
+        for (let i = 0; ; i++) {
+          try { await store.createRecord(key, data, req.user); break; } catch (err) {
+            if (!(e.codeAuto && err.code === 'duplicate' && i < 4)) throw err;
+            all = await store.listRecords(key);
+            data.code = nextCode(e.autoCode, all);
+          }
+        }
         console.log(`[${key}] ${req.user.username} thêm ${data.code}`);
         const next = req.body.next === 'new';
         const keep = next && data.project_id ? `&project_id=${data.project_id}` : '';
@@ -270,7 +292,8 @@ function entityRouter(key, { store, ctxOf, requireLogin }) {
     const rec = id && (await store.getRecord(key, id));
     if (!rec) return res.redirect(`${e.path}?err=not_found`);
     const refs = await loadRefs(store, key);
-    const { data, errors } = validate(e, req.body, refs);
+    const { data, errors } = validate(e, req.body, refs, rec.code);
+    if (!errors.length) { const u = uniqueError(e, data, await store.listRecords(key), id); if (u) errors.push(u); }
     if (!errors.length) {
       try {
         await store.updateRecord(key, id, data, req.user);
