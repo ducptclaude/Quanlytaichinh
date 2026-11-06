@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V27.06.11.26 — In / PDF: khung Dòng thu / Thực chi / Còn lại nằm bên phải tiêu đề như màn hình
+- Lỗi: khổ in hẹp (≤ 760px) dính quy tắc điện thoại `.b-cash { width:100% }` → khung số rớt xuống dưới, kéo hết bề ngang.
+- Sửa: `@media print` giữ `.b-head` 1 hàng (`nowrap`), `.b-cash` rộng tự nhiên. Kiểm tra: xuất PDF A4 – đúng bố cục.
+
 ## V26.06.11.26 — Giao diện tối: nền bề mặt còn 35% độ phủ
 - Khối ghi đè cuối `style.css`: 114 biến `--bg-*` của giao diện tối = 35% độ phủ gốc (trước 45%).
 

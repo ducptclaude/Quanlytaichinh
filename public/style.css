@@ -2033,6 +2033,8 @@ button.map-r:hover { background: var(--bg-efe6d8); } button.map-r.on { backgroun
 .b-cash-i.con span { color: var(--fg-navy); font-weight: 700; } .b-cash-i.con b { font-size: 18px; }
 .b-cash-u { font-size: 11px; color: var(--muted); text-align: right; }
 @media (max-width: 760px) { .b-cash { width: 100%; min-width: 0; } }
+/* In / PDF: khổ giấy hẹp nhưng giữ bố cục như màn hình – khung Dòng thu / Thực chi / Còn lại nằm bên phải tiêu đề */
+@media print { .b-head { flex-wrap: nowrap !important; } .b-head > .b-brand { flex: 1 1 0; } .b-cash { width: auto !important; min-width: 200px !important; flex: 0 0 auto; } }
 .b-brand img { width: 56px; height: 56px; object-fit: contain; background: var(--bg-ffffff); border-radius: 12px; padding: 6px; box-shadow: 0 2px 8px rgba(15,23,42,.12); }
 
 /* =====================================================================
