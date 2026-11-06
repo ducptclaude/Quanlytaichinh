@@ -112,7 +112,7 @@ function bDashRender(list, v, one) {
   $('#b-report').innerHTML = `
   <div class="db">
     <div class="db-head">
-      <div class="db-brand"><img src="/img/logo-icon.png" alt=""><div>
+      <div class="db-brand"><img src="/img/logo-icon.png?v=mm1" alt=""><div>
         <div class="db-co">${esc(BC.ten_cong_ty || '')}</div>
         <h1>DASHBOARD TỔNG HỢP DỰ ÁN</h1>
         <div class="db-meta">${esc(scope)} · Kỳ biểu đồ: ${esc(P.label)} · ${vt} · Đơn vị: ${TYD()} · Cập nhật ${now.toLocaleString('vi-VN')}</div>

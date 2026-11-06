@@ -1194,7 +1194,7 @@ function renderReport() {
 
   $('#b-report').innerHTML = `
   <div class="card b-head">
-    <div class="b-brand"><img src="/img/logo-icon.png" alt=""><div>
+    <div class="b-brand"><img src="/img/logo-icon.png?v=mm1" alt=""><div>
       <div class="b-company">${esc(BC.ten_cong_ty || '')}</div>
       <h1>BÁO CÁO TỔNG QUAN TÀI CHÍNH DỰ ÁN</h1>
       <div class="b-tag">Theo dõi nhanh hiệu quả kinh doanh và tình hình tài chính</div>
@@ -2202,7 +2202,7 @@ function xlForm(wb, logoId, name, title, sub, blocks, widths) {
 }
 async function xlLogo(wb) {
   try {
-    const buf = await (await fetch('/img/tmn-logo.png')).arrayBuffer();
+    const buf = await (await fetch('/img/tmn-logo.png?v=mm1')).arrayBuffer();
     return wb.addImage({ buffer: buf, extension: 'png' });
   } catch { return null; } // không tải được logo: vẫn xuất file
 }

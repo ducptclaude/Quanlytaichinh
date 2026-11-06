@@ -2626,3 +2626,5 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 .kh-cred span { display: block; font-size: 12px; color: var(--fg-6b7280); }
 .kh-cred b { font-size: 18px; font-family: ui-monospace, Consolas, monospace; letter-spacing: .5px; user-select: all; word-break: break-all; }
 .kh-bar { position: sticky; top: 0; z-index: 60; font-weight: 600; }
+/* Logo MyMoney (chữ M xanh đậm): giao diện tối vẫn để nền trắng cho rõ */
+:root[data-theme="dark"] .logo-chip, :root[data-theme="dark"] .b-brand img, :root[data-theme="dark"] .db-brand img { background: #fff !important; }

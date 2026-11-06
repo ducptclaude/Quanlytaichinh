@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V20.06.11.26 — Logo MyMoney thay toàn bộ logo cũ
+- Tạo từ ảnh người dùng gửi (nền bỏ trong suốt): `public/img/logo-icon.png` (biểu tượng M, 256px), `favicon.png` (64px),
+  `logo-full.png` (M + chữ MyMoney – trang Đăng nhập / Khởi tạo), `tmn-logo.png` + `lib/assets/tmn-logo.png` (Excel mẫu TMN, Excel báo cáo).
+- Hiện lại logo ở thanh đầu trang (trước để trống). Thêm `?v=mm1` sau đường dẫn ảnh để trình duyệt không dùng ảnh cũ đã lưu.
+- Giao diện tối: ô logo giữ nền trắng (chữ M xanh đậm không bị chìm).
+- Kiểm tra: đầu trang, báo cáo, Dashboard, giao diện tối, trang Khởi tạo; Excel mẫu TMN nhúng đúng logo mới. Điểm khôi phục: `phien-06.11.26-15h47`.
+
 ## V19.06.11.26 — Tài khoản khách: chỉ trên 1 thiết bị, đăng nhập không giới hạn số lần trong 30 phút
 - Lần đăng nhập đầu gắn thiết bị (cookie `tb` ngẫu nhiên, lưu 2 ngày; kho lưu bản băm ở cột MỚI `users.thiet_bi`). Thiết bị khác → từ chối + ghi nhật ký "Đăng nhập từ thiết bị khác".
 - Cùng thiết bị: đăng nhập / đăng xuất bao nhiêu lần cũng được trong 30 phút (tính từ lần đăng nhập đầu). Mốc tự xóa khi 24 giờ chưa đăng nhập: người dùng đồng ý.

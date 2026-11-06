@@ -73,7 +73,7 @@ function dpHtml(list, v) {
   const dl = (a, b0) => { const x = a - b0; return Math.abs(x) < 5e6 ? '<span class="dp-eq">—</span>' : `<span class="${x > 0 ? 'dp-ok' : 'dp-bad'}">${x > 0 ? '▲' : '▼'} ${bTyFix(Math.abs(x))}</span>`; };
   const S = (arr, k) => arr.reduce((a, x) => a + x[k], 0), thuR = rest.reduce((a, x) => a + (byC.get(x.d.id)?.thu || 0), 0);
   return `<div class="dp">
-    <div class="dp-hd"><img src="/img/logo-icon.png" alt=""><div class="dp-ht"><div class="dp-co">${esc(BC.ten_cong_ty || '')}</div><h1>DASHBOARD TÀI CHÍNH DỰ ÁN</h1>
+    <div class="dp-hd"><img src="/img/logo-icon.png?v=mm1" alt=""><div class="dp-ht"><div class="dp-co">${esc(BC.ten_cong_ty || '')}</div><h1>DASHBOARD TÀI CHÍNH DỰ ÁN</h1>
       <div class="dp-sc">${one ? `Dự án: <b>${esc(one.ma_du_an)} – ${esc(one.ten_du_an)}</b>` : `Phạm vi: <b>Tất cả dự án (${n})</b>`} · Đơn vị: tỷ đồng, ${vt} · Số thực tế theo dữ liệu hệ thống, dòng tiền lũy kế đến ${ngay}</div></div>
       <div class="dp-dt"><span>Ngày lập</span><b>${ngay}</b></div></div>
     <div class="dp-top">${kpis}${mxT}</div>
