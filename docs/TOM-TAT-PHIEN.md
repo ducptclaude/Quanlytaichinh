@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V24.06.11.26 — Giao diện tối (bản trước nentoi1): thẻ trong suốt, bỏ làm mờ phía sau
+- Giữ giao diện tối V21 (nền xanh đen + cực quang). Thẻ: bỏ `backdrop-filter: blur` → trong suốt hẳn; nền thẻ `--card` .055 → .035.
+  Menu / hộp thoại vẫn nền đặc để dễ đọc. Điểm khôi phục: `phien-06.11.26-16h14`.
+
 ## V23.06.11.26 — Quay lại giao diện tối kính trong suốt (bản V21); lưu bản HUD thành nhánh `nentoi1`
 - Người dùng: lưu tạm bản V22 (vi mạch + HUD) thành **`nentoi1`**, quay lại bản cũ – nền / thẻ kính trong suốt.
 - Làm: `git checkout 1714bf6 -- public/style.css` (chỉ mã giao diện; sổ ghi chép giữ nguyên) + tăng phiên bản. Điểm khôi phục bản HUD: `phien-06.11.26-16h13` = `nentoi1`.

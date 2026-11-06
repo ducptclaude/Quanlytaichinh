@@ -2534,7 +2534,10 @@ td .dmy-wrap > input:not(.dmy-cal) { min-width: 128px; }
   --shadow-lg: 0 24px 60px rgba(0, 0, 0, .6);
 }
 /* Kính mờ: thẻ chính làm mờ nền phía sau + viền sáng mảnh */
-:root[data-theme="dark"] .card { border: 1px solid rgba(255,255,255,.08); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); }
+:root[data-theme="dark"] .card { border: 1px solid rgba(255,255,255,.09); }
+/* Nền thẻ trong suốt (không làm mờ phía sau): thấy rõ nền cực quang qua thẻ, nhẹ máy hơn */
+:root[data-theme="dark"] { --card: rgba(255,255,255,.035); }
+:root[data-theme="dark"] .card { -webkit-backdrop-filter: none; backdrop-filter: none; }
 :root[data-theme="dark"] .topbar { box-shadow: 0 6px 24px rgba(0,0,0,.35); }
 /* Khung nổi: nền đặc để chữ không lẫn với nội dung phía sau */
 :root[data-theme="dark"] .tab-menu, :root[data-theme="dark"] .ky-pop, :root[data-theme="dark"] .ac-list,
