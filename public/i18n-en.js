@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Tỷ đồng": "VND bn",
+"Kế hoạch lúc ký hợp đồng": "Plan at contract signing",
 "Thực": "Actual",
 "Mục III": "Section III",
 "Mục II · lũy kế": "Section II · cumulative",
@@ -1198,6 +1200,18 @@ window.BKS_EN = {
 "Xem": "View"
 },
 "patterns": [
+[
+"Doanh thu · TĐ{}",
+"Revenue · M{}"
+],
+[
+"Chi phí · TĐ{}",
+"Cost · M{}"
+],
+[
+"Lợi nhuận · TĐ{}",
+"Profit · M{}"
+],
 [
 "Mục I · TĐ{}",
 "Section I · M{}"

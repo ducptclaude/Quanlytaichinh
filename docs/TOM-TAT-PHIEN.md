@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V14.06.11.26 — Dashboard PDF: đầu trang như Dashboard
+- `public/dash-pdf.js`: bỏ 6 chỉ số cũ → 3 chỉ số DT – CP – LN theo TĐ đang chọn trên Dashboard (`BST.db_td`) + bảng Kế hoạch (mục I) – Thực (mục II) – Còn lại (mục III) (`bMuc3Data`).
+  Phần dưới (biểu đồ 3 TĐ, cơ cấu, dự án, bảng dự án, điểm nhấn) giữ nguyên theo TĐ3. Vẫn 1 trang A4 ngang.
+- Kiểm tra: TĐ3, TĐ2 – 9 ô bảng + 3 chỉ số PDF khớp Dashboard; xuất thử PDF 1 trang. Điểm khôi phục: `phien-06.11.26-14h49`.
+
 ## V13.06.11.26 — Dashboard: bảng Kế hoạch – Thực – Còn lại (thay nhóm "Dòng tiền thực tế")
 - Bảng 3×3 (`public/dash-tong.js`, `.db-mx`): hàng Doanh thu / Chi phí / Lợi nhuận × cột Kế hoạch (mục I, TĐ đang chọn) · Thực (mục II: dòng thu, dòng chi, thu − chi) · Còn lại (mục III = Kế hoạch − Thực).
   Số lấy đúng hàm `bMuc3Data` của mục III nên khớp báo cáo. Đổi TĐ ở nhóm bên trái thì bảng đổi theo.
