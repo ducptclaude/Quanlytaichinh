@@ -7,6 +7,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|
 | **chot-06.11.26** | V10.06.11.26 | (mới nhất) | 06/11/2026 | BKS, giao diện Sáng / Tối kiểu kính, vai Chỉ xem, ngôn ngữ Việt Nam / English |
+| **quanlytaichinh06112026** (bản lưu của sếp – backup) | V10.06.11.26 | `b18ac61` | 06/11/2026 | Bản sao lưu toàn bộ hệ thống ngày 06/11/2026 (KHÔNG xóa) |
 | phien-06.11.26-11h32 | V06.06.11.26 | `f04164e` | 06/11/2026 | Trước khi thêm chuyển ngôn ngữ |
 | phien-06.11.26-11h20 | V05.06.11.26 | `2dd31bc` | 06/11/2026 | Trước khi đổi giao diện tối sang kiểu kính |
 | phien-06.11.26-10h12 (điểm khôi phục) | V02.06.11.26 | `9d67639` | 06/11/2026 | Bản trước khi để trống logo đầu trang |
