@@ -492,11 +492,27 @@ function bThuGonBang() {
 document.addEventListener('click', (e) => {
   const m = e.target.closest('[data-thmore]');
   if (m) { const k = m.dataset.thmore; thMo.has(k) ? thMo.delete(k) : thMo.add(k); return bThuGonBang(); }
-  const b = e.target.closest('[data-itd]'); if (!b) return;
-  BST.i_td = Number(b.dataset.itd); bSave(); renderKeepPos(`[data-itd="${b.dataset.itd}"]`);
+  const b = e.target.closest('[data-itd], [data-itd3]'); if (!b) return; // nút TĐ ở mục I hoặc mục III (dùng chung 1 lựa chọn)
+  const a = 'itd' in b.dataset ? 'itd' : 'itd3', n = b.dataset[a];
+  BST.i_td = Number(n); bSave(); renderKeepPos(`[data-${a}="${n}"]`);
 });
+// Mục III – Dòng tiền còn lại phải thu – chi (theo TĐ k; mặc định TĐ đang chọn ở mục I)
+//  DT, CP: cùng số mục I (TĐ1 = số chốt TĐ1 / hệ thống; TĐ2, TĐ3 = mục IV) · Dòng thu, dòng chi: mục II (lũy kế, theo nút VAT)
+function bMuc3Data(list, v, rows, k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1) {
+  const m4 = new Map(bMuc4Data(list, v).rows.map((x) => [x.d.id, x]));
+  const R = rows.map((x) => {
+    const q = m4.get(x.d.id);
+    const dt = k === 1 ? x.dt1 : q ? q['t' + k] : 0, cp = k === 1 ? x.cp1 : q ? q['c' + k] : 0;
+    const pt = dt - x.thu, pc = cp - x.chi;
+    return { x, dt, cp, thu: x.thu, chi: x.chi, pt, pc, con: pt - pc };
+  });
+  const T = R.reduce((a, r) => { for (const f of ['dt', 'cp', 'thu', 'chi', 'pt', 'pc', 'con']) a[f] += r[f]; return a; }, { dt: 0, cp: 0, thu: 0, chi: 0, pt: 0, pc: 0, con: 0 });
+  return { k, R, T };
+}
 function bTongHopHtml(list, v, P) {
   const { to, rows, T } = bTongHopData(list, v, P);
+  // Mục III: theo TĐ đang chọn ở mục I – Còn phải thu = DT TĐ − dòng thu · Còn phải chi = CP TĐ − dòng chi · Còn lại = phải thu − phải chi
+  const { k: k3, R: R3, T: T3 } = bMuc3Data(list, v, rows);
   const vt = v === 'gt' ? 'trước VAT' : 'sau VAT';
   const ty = (x) => `<span class="${x < 0 ? 'neg' : ''}">${bTy(x)}</span>`;
   const meter = (a, b, color) => `<span class="f-meter"><i style="width:${b > 0 ? Math.max(0, Math.min(100, (a / b) * 100)) : 0}%;background:${a < 0 ? '#d92d35' : color}"></i></span>`;
@@ -570,18 +586,22 @@ function bTongHopHtml(list, v, P) {
     </table></div>
     ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án, làm tròn tới 0,1 tỷ.</p>' : ''}
 
-    ${thHead('III', 'Dòng tiền còn lại phải thu – chi', 'Doanh thu tại thời điểm mới nhất trừ tổng thực chi', ['Từ mục II và IV', vt[0].toUpperCase() + vt.slice(1)])}
+    ${thHead('III', 'Dòng tiền còn lại phải thu – chi', `Doanh thu, chi phí dự kiến TĐ${k3} (mục I) trừ dòng thu, dòng chi thực tế (mục II)`, [`Từ mục I (TĐ${k3}) và II`, vt[0].toUpperCase() + vt.slice(1)])}
+    <div class="i-tdbar"><div class="i-tdseg" role="group" aria-label="Chọn thời điểm">${[[1, 'Ký HĐ'], [2, 'Điều chỉnh'], [3, 'Quyết toán']].map(([n, t]) =>
+      `<button type="button" data-itd3="${n}" class="${n === k3 ? 'on' : ''}"><b>TĐ${n}</b> ${t}</button>`).join('')}</div><span class="muted small">Cùng thời điểm với mục I – đổi ở đây hoặc mục I đều được</span></div>
     <div class="f-grid th-grid3">
-      ${card('dt', 'Doanh thu (TĐ mới nhất)', T.hd_sv, ['HĐ + phụ lục tại thời điểm mới nhất', 'HĐ đã quyết toán lấy theo quyết toán (TĐ3)'])}
-      ${card('cp', 'Thực chi', T.chi, [`${meter(T.chi, T.hd_sv, BCOL.chi)}`, `Bằng <b>${bpct(T.chi, T.hd_sv)}</b> doanh thu (TĐ mới nhất)`])}
-      ${card('ln', 'Còn lại', T.hd_sv - T.chi, ['Doanh thu (TĐ mới nhất) − Thực chi', `Bằng <b>${bpct(T.hd_sv - T.chi, T.hd_sv)}</b> doanh thu (TĐ mới nhất)`])}
+      ${card('dt', 'Dòng thu còn lại phải thu', T3.pt, [`Doanh thu TĐ${k3} <b>${bTy(T3.dt)}</b> − Dòng thu <b>${bTy(T3.thu)}</b>`, `Đã thu <b>${bpct(T3.thu, T3.dt)}</b> doanh thu TĐ${k3}`])}
+      ${card('cp', 'Dòng chi còn lại phải chi', T3.pc, [`Chi phí TĐ${k3} <b>${bTy(T3.cp)}</b> − Dòng chi <b>${bTy(T3.chi)}</b>`, `Đã chi <b>${bpct(T3.chi, T3.cp)}</b> chi phí TĐ${k3}`])}
+      ${card('ln', 'Còn lại (thu − chi)', T3.con, ['Còn phải thu − Còn phải chi', T3.con < 0 ? 'Phần còn phải chi lớn hơn phần còn phải thu' : 'Tiền dự án còn dư khi thu – chi hết'])}
     </div>
     <div class="table-wrap"><table class="b-table th-table">
-      ${hd(['Doanh thu (TĐ mới nhất)', 'Thực chi', 'Còn lại', 'Hoàn thành', '% thực chi / DT'])}
-      <tbody>${rows.map((x, i) => `<tr>${prj(x, i)}<td class="num">${bTy(x.hd_sv)}</td><td class="num">${bTy(x.chi)}</td>
-        <td class="num strong ${x.hd_sv - x.chi < 0 ? 'neg' : 'pos'}">${bTy(x.hd_sv - x.chi)}</td><td class="th-ht">${meter(x.chi, x.hd_sv, BCOL.chi)}</td><td class="num"><b>${bpct(x.chi, x.hd_sv)}</b></td></tr>`).join('')}</tbody>
-      ${foot([bTy(T.hd_sv), bTy(T.chi), ty(T.hd_sv - T.chi), '', bpct(T.chi, T.hd_sv)])}
+      ${hd([`Doanh thu TĐ${k3}`, 'Dòng thu', 'Còn phải thu', `Chi phí TĐ${k3}`, 'Dòng chi', 'Còn phải chi', 'Còn lại (thu − chi)'])}
+      <tbody>${R3.map((r, i) => `<tr>${prj(r.x, i)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.thu)}</td><td class="num"><b>${ty(r.pt)}</b></td>
+        <td class="num">${bTy(r.cp)}</td><td class="num">${bTy(r.chi)}</td><td class="num"><b>${ty(r.pc)}</b></td>
+        <td class="num strong ${r.con < 0 ? 'neg' : 'pos'}">${bTy(r.con)}</td></tr>`).join('')}</tbody>
+      ${foot([bTy(T3.dt), bTy(T3.thu), ty(T3.pt), bTy(T3.cp), bTy(T3.chi), ty(T3.pc), ty(T3.con)])}
     </table></div>
+    <p class="muted small f-note">Còn phải thu = Doanh thu TĐ${k3} (mục I) − Dòng thu (mục II) · Còn phải chi = Chi phí TĐ${k3} (mục I) − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. Đổi thời điểm ở mục I (TĐ1 / TĐ2 / TĐ3) thì mục III tự lấy theo.</p>
     ${bMuc4Html(list, v)}`;
 }
 

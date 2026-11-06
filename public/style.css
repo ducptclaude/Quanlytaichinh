@@ -2580,3 +2580,36 @@ html { transition: background-color .2s; }
 .lang-pick.floating { position: fixed; top: 14px; right: 60px; z-index: 50; height: 36px; color: var(--fg-navy); background: var(--card); border-color: var(--border); box-shadow: var(--shadow); }
 :root[data-theme="dark"] .lang-pick option { color: #e9eef7; background: #131f33; }
 @media print { .lang-pick { display: none !important; } }
+/* Nút chọn TĐ (mục I, III) gọn trên điện thoại – không tràn ngang */
+@media (max-width: 480px) { .i-tdseg { max-width: 100%; } .i-tdseg button { padding: 6px 8px; font-size: 12px; } }
+
+/* Dashboard: bảng Kế hoạch – Thực – Còn lại (mục I – II – III) */
+.db-mx { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.db-mx th, .db-mx td { padding: 7px 10px; border-bottom: 1px solid var(--bd-e8edf5); text-align: right; white-space: nowrap; }
+.db-mx thead th { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; color: var(--fg-1b2b4b); background: var(--bg-f1f5fb); }
+.db-mx thead th:first-child { background: transparent; }
+.db-mx thead th small { display: block; font-size: 10.5px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--fg-6b7280); }
+.db-mx tbody th { text-align: left; font-weight: 700; color: var(--fg-1b2b4b); }
+.db-mx tbody th i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 7px; vertical-align: 0; }
+.db-mx tbody td { font-weight: 700; font-size: 15px; color: var(--fg-1b2b4b); font-variant-numeric: tabular-nums; }
+.db-mx tbody tr:last-child th, .db-mx tbody tr:last-child td { border-top: 2px solid var(--bd-b9c7dc); border-bottom: 0; }
+.db-mx .db-mx-con { background: color-mix(in srgb, #e07b39 7%, var(--bg-ffffff)); }
+.db-mx thead th:last-child { background: color-mix(in srgb, #e07b39 16%, var(--bg-ffffff)); }
+.db-mx .neg { color: #d92d35; }
+.db-mx-note { margin: 7px 2px 0; font-size: 11.5px; color: var(--fg-6b7280); }
+@media (max-width: 480px) { .db-mx th, .db-mx td { padding: 6px 5px; } .db-mx tbody td { font-size: 13.5px; } }
+
+/* Dashboard PDF: đầu trang như Dashboard – 3 chỉ số + bảng Kế hoạch – Thực – Còn lại */
+.dp-top { display: grid; grid-template-columns: repeat(3, 1fr) 3.2fr; gap: 2.5mm; align-items: stretch; }
+.dp-mx { width: 100%; border-collapse: separate; border-spacing: 0; border: .3mm solid var(--bd-e7ddcf); border-radius: 2.2mm; overflow: hidden; font-size: 7.6pt; background: var(--bg-fffdf9); }
+.dp-mx th, .dp-mx td { padding: .55mm 2mm; text-align: right; white-space: nowrap; border: 0; border-bottom: .2mm solid var(--bd-e7ddcf); }
+.dp-mx thead th { font-size: 6.6pt; font-weight: 800; text-transform: uppercase; letter-spacing: .2pt; color: var(--fg-1f2a44); background: #f4efe6; }
+.dp-mx thead th small { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--fg-8a7b6b); margin-left: .8mm; }
+.dp-mx thead th:first-child { text-align: left; font-weight: 600; text-transform: none; color: var(--fg-8a7b6b); }
+.dp-mx tbody th { text-align: left; font-weight: 700; color: var(--fg-1f2a44); background: none; }
+.dp-mx tbody th i { display: inline-block; width: 2mm; height: 2mm; border-radius: .5mm; margin-right: 1.4mm; }
+.dp-mx tbody td { font-weight: 800; font-size: 9pt; color: var(--fg-1f2a44); }
+.dp-mx tbody tr:last-child th, .dp-mx tbody tr:last-child td { border-bottom: 0; border-top: .4mm solid #b9c7dc; }
+.dp-mx .dp-mxc { background: #fdf1e6; }
+.dp-mx .neg { color: var(--fg-b4471c); }
+@media print { .dp-mx thead th, .dp-mx .dp-mxc, .dp-mx tbody th i { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }

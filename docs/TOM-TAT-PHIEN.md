@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V16.06.11.26 — Quay lại bản phien-06.11.26-15h01 (mã của V14.06.11.26)
+- Người dùng yêu cầu "quay về bản phien-06.11.26-15h01" → lấy lại mã V11 → V14 (mục III theo TĐ, nút TĐ mục III, Dashboard / Dashboard PDF bảng Kế hoạch – Thực – Còn lại).
+- Điểm khôi phục trước khi quay: `phien-06.11.26-15h09` (= V15, mã V10). Dữ liệu đã nhập không đổi.
+
 ## V15.06.11.26 — Quay về bản quanlytaichinh06112026 (mã của V10.06.11.26)
 - Người dùng yêu cầu "quay về bản quanlytaichinh06112026". Bỏ phần mã V11 → V14 (mục III Còn phải thu/chi theo TĐ, nút TĐ mục III,
   Dashboard / Dashboard PDF bảng Kế hoạch – Thực – Còn lại). Ghi chép (docs, CLAUDE.md) giữ bản mới nhất.
