@@ -1179,7 +1179,12 @@ window.BKS_EN = {
 "< 10% / lỗ": "< 10% / loss",
 "· nền HOT (openstreetmap.fr)": "· HOT basemap (openstreetmap.fr)",
 "STT": "No.",
-"Doanh thu": "Revenue"
+"Doanh thu": "Revenue",
+"Quản trị tài chính": "Financial Management",
+"Đăng nhập – Quản trị tài chính": "Sign in – Financial Management",
+"Thu": "In",
+"Chi": "Out",
+"Xem": "View"
 },
 "patterns": [
 [

@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.06.11.26 — Sửa dịch chữ không dấu
+- Lỗi: "Doanh thu" (chữ Việt không dấu) không được dịch vì bộ dịch chỉ xét chữ có dấu → nay tra cả chữ không dấu (nguyên câu) + câu chứa "Doanh thu".
+- Tên hệ thống "Quản trị tài chính" (dữ liệu Quản trị đặt) → thêm vào từ điển: Financial Management. Đổi tên hệ thống thì phải thêm câu dịch mới.
+- Thêm "Thu" → In, "Chi" → Out, "Xem" → View. Chống lặp: mọi chữ đã dịch đều ghi nhớ, không dịch lại.
+
 ## V07.06.11.26 — Chuyển ngôn ngữ Việt Nam / English
 - Ô chọn 🇻🇳 Việt Nam / 🇬🇧 English trên thanh đầu trang (trang Đăng nhập / Khởi tạo: góc phải). Ghi nhớ trên máy (`bks-lang`).
 - English: `public/i18n.js` dịch chữ hiển thị (cả phần hiện ra sau, hộp thông báo/xác nhận, tiêu đề tab); về Việt Nam = tải lại trang.

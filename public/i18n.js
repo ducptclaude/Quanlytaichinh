@@ -36,9 +36,15 @@
   }
   var done = new Set(); // câu đã là kết quả dịch (còn tên riêng tiếng Việt) -> không dịch lại, tránh lặp vô hạn
   function tr(s) {
-    if (!s || !VN.test(s) || done.has(s)) return s;
+    if (!s || done.has(s)) return s;
+    if (!VN.test(s) && s.indexOf('Doanh thu') < 0) { // chữ Việt không dấu (VD "Doanh thu"): chỉ tra nguyên câu
+      var k0 = s.trim().replace(/\s+/g, ' '), e0 = dict[k0] != null ? dict[k0] : low[k0.toLowerCase()];
+      if (e0 == null || !k0) return s;
+      var r0 = s.match(/^\s*/)[0] + (k0 === k0.toUpperCase() && /[a-z]/i.test(k0) ? e0.toUpperCase() : e0) + s.match(/\s*$/)[0];
+      done.add(r0); return r0;
+    }
     var r = tr1(s);
-    if (r !== s && VN.test(r)) done.add(r);
+    if (r !== s) done.add(r); // kết quả đã dịch -> không dịch lại (tránh lặp)
     return r;
   }
   function tr1(s) {
@@ -78,7 +84,7 @@
     var els = [root].concat([].slice.call(root.querySelectorAll('[' + ATTRS.join('],[') + '],input[type=button],input[type=submit]')));
     els.forEach(function (el) {
       if (skip(el)) return;
-      ATTRS.forEach(function (a) { var v = el.getAttribute(a); if (v && VN.test(v)) { var t = tr(v); if (t !== v) el.setAttribute(a, t); } });
+      ATTRS.forEach(function (a) { var v = el.getAttribute(a); if (v) { var t = tr(v); if (t !== v) el.setAttribute(a, t); } });
       if ((el.type === 'button' || el.type === 'submit') && el.value && VN.test(el.value)) el.value = tr(el.value);
     });
   }
