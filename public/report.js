@@ -492,8 +492,9 @@ function bThuGonBang() {
 document.addEventListener('click', (e) => {
   const m = e.target.closest('[data-thmore]');
   if (m) { const k = m.dataset.thmore; thMo.has(k) ? thMo.delete(k) : thMo.add(k); return bThuGonBang(); }
-  const b = e.target.closest('[data-itd]'); if (!b) return;
-  BST.i_td = Number(b.dataset.itd); bSave(); renderKeepPos(`[data-itd="${b.dataset.itd}"]`);
+  const b = e.target.closest('[data-itd], [data-itd3]'); if (!b) return; // nút TĐ ở mục I hoặc mục III (dùng chung 1 lựa chọn)
+  const a = 'itd' in b.dataset ? 'itd' : 'itd3', n = b.dataset[a];
+  BST.i_td = Number(n); bSave(); renderKeepPos(`[data-${a}="${n}"]`);
 });
 // Mục III – Dòng tiền còn lại phải thu – chi (theo TĐ k; mặc định TĐ đang chọn ở mục I)
 //  DT, CP: cùng số mục I (TĐ1 = số chốt TĐ1 / hệ thống; TĐ2, TĐ3 = mục IV) · Dòng thu, dòng chi: mục II (lũy kế, theo nút VAT)
@@ -586,6 +587,8 @@ function bTongHopHtml(list, v, P) {
     ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án, làm tròn tới 0,1 tỷ.</p>' : ''}
 
     ${thHead('III', 'Dòng tiền còn lại phải thu – chi', `Doanh thu, chi phí dự kiến TĐ${k3} (mục I) trừ dòng thu, dòng chi thực tế (mục II)`, [`Từ mục I (TĐ${k3}) và II`, vt[0].toUpperCase() + vt.slice(1)])}
+    <div class="i-tdbar"><div class="i-tdseg" role="group" aria-label="Chọn thời điểm">${[[1, 'Ký HĐ'], [2, 'Điều chỉnh'], [3, 'Quyết toán']].map(([n, t]) =>
+      `<button type="button" data-itd3="${n}" class="${n === k3 ? 'on' : ''}"><b>TĐ${n}</b> ${t}</button>`).join('')}</div><span class="muted small">Cùng thời điểm với mục I – đổi ở đây hoặc mục I đều được</span></div>
     <div class="f-grid th-grid3">
       ${card('dt', 'Dòng thu còn lại phải thu', T3.pt, [`Doanh thu TĐ${k3} <b>${bTy(T3.dt)}</b> − Dòng thu <b>${bTy(T3.thu)}</b>`, `Đã thu <b>${bpct(T3.thu, T3.dt)}</b> doanh thu TĐ${k3}`])}
       ${card('cp', 'Dòng chi còn lại phải chi', T3.pc, [`Chi phí TĐ${k3} <b>${bTy(T3.cp)}</b> − Dòng chi <b>${bTy(T3.chi)}</b>`, `Đã chi <b>${bpct(T3.chi, T3.cp)}</b> chi phí TĐ${k3}`])}

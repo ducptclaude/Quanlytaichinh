@@ -2580,3 +2580,5 @@ html { transition: background-color .2s; }
 .lang-pick.floating { position: fixed; top: 14px; right: 60px; z-index: 50; height: 36px; color: var(--fg-navy); background: var(--card); border-color: var(--border); box-shadow: var(--shadow); }
 :root[data-theme="dark"] .lang-pick option { color: #e9eef7; background: #131f33; }
 @media print { .lang-pick { display: none !important; } }
+/* Nút chọn TĐ (mục I, III) gọn trên điện thoại – không tràn ngang */
+@media (max-width: 480px) { .i-tdseg { max-width: 100%; } .i-tdseg button { padding: 6px 8px; font-size: 12px; } }

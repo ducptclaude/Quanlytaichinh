@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.06.11.26 — Mục III có nút chọn TĐ1 / TĐ2 / TĐ3 (đồng bộ mục I)
+- Thêm nút chọn TĐ ngay trong mục III (`data-itd3`), dùng chung lựa chọn `BST.i_td` với mục I: đổi ở mục nào thì cả hai cùng đổi.
+- Nút chọn TĐ (mục I, III) gọn lại trên điện thoại ≤ 480px – hết tràn ngang ở dòng nút này.
+- Kiểm tra: bấm TĐ2 ở mục III → mục I cùng TĐ2, số mục III đổi đúng; bấm TĐ3 ở mục I → mục III theo TĐ3.
+
 ## V11.06.11.26 — Mục III: Dòng tiền còn lại phải thu – chi (công thức mới)
 - **Còn phải thu** = Doanh thu TĐk (mục I) − Dòng thu (mục II) · **Còn phải chi** = Chi phí TĐk (mục I) − Dòng chi (mục II) · **Còn lại** = phải thu − phải chi.
   TĐk = thời điểm đang chọn ở mục I (TĐ1 / TĐ2 / TĐ3) – đổi TĐ thì mục III tự lấy theo. Dòng thu, dòng chi: lũy kế đến kỳ đang chọn, theo nút VAT.

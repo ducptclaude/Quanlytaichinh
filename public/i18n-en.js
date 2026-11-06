@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Cùng thời điểm với mục I – đổi ở đây hoặc mục I đều được": "Same milestone as section I – change it here or in section I",
 "Dòng thu còn lại phải thu": "Remaining collections receivable",
 "Dòng chi còn lại phải chi": "Remaining expenditure payable",
 "Còn phải thu − Còn phải chi": "Receivable − Remaining to pay",
