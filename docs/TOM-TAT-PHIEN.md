@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V26.06.11.26 — Giao diện tối: nền bề mặt còn 35% độ phủ
+- Khối ghi đè cuối `style.css`: 114 biến `--bg-*` của giao diện tối = 35% độ phủ gốc (trước 45%).
+
 ## V25.06.11.26 — Giao diện tối trong suốt hơn
 - Nền thẻ `--card` .035 → .015; toàn bộ 114 biến nền bề mặt `--bg-*` của giao diện tối giảm còn ~45% độ phủ (khối ghi đè cuối `style.css`).
   Chữ, số giữ nguyên màu. Menu / hộp thoại vẫn nền đặc.
