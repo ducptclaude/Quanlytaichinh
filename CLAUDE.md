@@ -25,8 +25,9 @@ Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm so
    Chụp màn hình máy tính (1366px) + điện thoại (iPhone 13) các trang bị ảnh hưởng, kiểm tra không tràn ngang.
 4. Lưu lên GitHub nhánh `staging` (Railway tự cập nhật).
 5. Cập nhật `docs/TOM-TAT-PHIEN.md`.
-   **Chốt ngày:** lần lưu cuối mỗi ngày (hoặc đầu phiên nếu ngày trước chưa chốt) gắn nhãn `chot-dd.mm.yy`
-   (`git tag chot-dd.mm.yy && git push origin chot-dd.mm.yy`) và thêm 1 dòng vào `docs/PHIEN-BAN-LUU.md`. Nhãn đã có thì dời sang lần lưu mới nhất của ngày đó (`git tag -f`, `git push -f origin chot-dd.mm.yy`).
+   **Chốt ngày:** lần lưu cuối mỗi ngày (hoặc đầu phiên nếu ngày trước chưa chốt) đẩy thêm nhánh chốt
+   `git push -f origin HEAD:refs/heads/chot-dd.mm.yy` (nhãn tag bị chặn trong môi trường này → dùng nhánh) và cập nhật 1 dòng ở `docs/PHIEN-BAN-LUU.md`.
+   KHÔNG xóa nhánh `chot-*`.
 6. Báo 3 ý.
 
 ## Lỗi
