@@ -32,6 +32,7 @@ let users = [];
   { const g = $('[data-grp="qt"] [data-grp-toggle]'); const ten = { bks: 'Kiểm soát', it: 'Hệ thống' }[ME.role]; if (g && ten) g.innerHTML = `${ten} <span class="caret">▾</span>`; } // BKS: nhật ký · IT: tài khoản, nhật ký
   // Lãnh đạo, Ban Kiểm soát: xem Dự án / Doanh thu / Chi phí (chỉ xem – không có form, nút sửa) -> nhóm menu gọi là "Dữ liệu"
   if (!can('hd') && !can('tien')) { const g = $('[data-grp="nhap"] [data-grp-toggle]'); if (g) g.innerHTML = 'Dữ liệu <span class="caret">▾</span>'; }
+  if (!can('xuat')) document.body.classList.add('no-xuat'); // Chỉ xem: chặn in (Ctrl+P) – xem style.css
   document.body.classList.add('roles-ready'); // đến đây mới hiện các mục theo quyền (tránh nhấp nháy tab quản trị)
 
   const stSel = $('#p-form [name=trang_thai]');
@@ -77,7 +78,7 @@ function showTab(name) {
   $$('.topbar [data-tab], #subnav [data-tab]').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   $$('.tab-grp').forEach((g) => g.classList.toggle('active', Boolean($(`[data-tab="${name}"]`, g))));
   $('#subnav').hidden = !NHAP_LIEU.includes(name);
-  if ($('#xuat-grp')) $('#xuat-grp').hidden = name !== 'report'; // nút Xuất chỉ hiện ở trang Báo cáo
+  if ($('#xuat-grp')) $('#xuat-grp').hidden = name !== 'report' || !can('xuat'); // nút Xuất chỉ hiện ở trang Báo cáo, vai có quyền xuất
   $$('main > .tab-panel').forEach((p) => (p.hidden = p.id !== 'tab-' + name));
   try { localStorage.setItem('tab', name); } catch {}
   return Promise.resolve(loaders[name]()).catch((err) => alert(err.message));
@@ -2289,7 +2290,7 @@ const ROLE_GUIDE = {
   qs: ['Nhập dự án, HĐ / phụ lục, nghiệm thu – quyết toán với CĐT, HĐ đầu vào (thầu phụ, vật tư, MMTB, nhân công) và phụ lục, ngày, ảnh công trình', 'Không nhập tiền về, thanh toán thầu phụ, chi phí; không xóa dự án'],
   ke_toan: ['Nhập tiền về, thanh toán HĐ đầu vào (thầu phụ, vật tư…), chi phí, vay – trả nợ, BH/Khác', 'Không sửa HĐ, phụ lục, nghiệm thu, HĐ đầu vào; không xóa dự án'],
   editor: ['Nhập toàn bộ (giá trị + tiền), chốt TĐ, DT-CP dự kiến, xóa dự án (cần Passcode) – vai trò cũ, nên chuyển dần sang QS / Kế toán', 'Không quản lý tài khoản, cài đặt, nhật ký'],
-  viewer: ['Xem và xuất báo cáo', 'Không nhập, sửa; không vào trang Dữ liệu, nhật ký'],
+  viewer: ['Chỉ xem báo cáo; đổi đơn vị tiền hiển thị', 'Không xuất (In / PDF, Excel, PowerPoint), không sửa gì (kể cả tự đổi mật khẩu – nhờ Quản trị đặt lại); không vào trang Dữ liệu, nhật ký'],
 };
 function renderRoleGuide() {
   const box = $('#role-guide');

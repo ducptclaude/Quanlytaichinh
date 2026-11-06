@@ -2543,3 +2543,9 @@ html { transition: background-color .2s; }
 /* Nhãn / nút nền trắng mờ giữ nguyên nền trắng -> chữ phải giữ màu đậm */
 :root[data-theme="dark"] .xuat-btn { color: #1f3a6e !important; }
 :root[data-theme="dark"] .db-hst .st { background: rgba(23,34,52,.92); }
+
+/* Chỉ xem (không có quyền xuất): in / lưu PDF bằng Ctrl+P ra trang trắng kèm thông báo */
+@media print {
+  body.no-xuat > * { display: none !important; }
+  body.no-xuat::before { content: 'Tài khoản Chỉ xem không có quyền in / xuất báo cáo.'; display: block; padding: 40px; font: 16px sans-serif; color: #000; }
+}
