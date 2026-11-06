@@ -58,3 +58,8 @@ Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm so
 - `server.js` (API) · `lib/db.js` (lưu trữ) · `lib/dashboard.js`, `lib/report.js` (công thức báo cáo) · `lib/demo.js` (dữ liệu mẫu DEMO-xx)
   · `lib/security.js` (CSP, giới hạn tần suất) · `lib/audit.js` (nhật ký).
 - Bản thử: đặt biến `APP_ENV=staging` trên Railway để hiện nhãn thử nghiệm.
+- **Ngôn ngữ (Việt Nam / English):** `public/i18n.js` (dịch chữ trên trang khi chọn English) + từ điển `public/i18n-en.js`
+  (`exact`: nguyên câu; `patterns`: câu có số liệu, `{}` = chỗ số). **Thêm chữ giao diện mới → thêm câu dịch vào `i18n-en.js`**
+  theo thuật ngữ: Chủ đầu tư = Employer, Thầu phụ = Subcontractor, HĐ đầu vào = Procurement contract, Phụ lục = Addendum,
+  Tạm ứng = Advance, Nghiệm thu = Certified, Quyết toán = Final account, Tiền về = Collections, TĐ1/2/3 = M1/M2/M3.
+  Dữ liệu người dùng nhập không dịch. Chưa dịch: Trợ lý, nhật ký hoạt động, file Excel/PowerPoint xuất ra, dữ liệu mẫu.

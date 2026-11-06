@@ -2,6 +2,17 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.06.11.26 — Chuyển ngôn ngữ Việt Nam / English
+- Ô chọn 🇻🇳 Việt Nam / 🇬🇧 English trên thanh đầu trang (trang Đăng nhập / Khởi tạo: góc phải). Ghi nhớ trên máy (`bks-lang`).
+- English: `public/i18n.js` dịch chữ hiển thị (cả phần hiện ra sau, hộp thông báo/xác nhận, tiêu đề tab); về Việt Nam = tải lại trang.
+  Từ điển `public/i18n-en.js`: ~1.180 câu + ~280 mẫu có số liệu; đơn vị trong số liệu tự đổi (tỷ → bn, triệu → mn, đồng → VND).
+- Revi rà soát thuật ngữ (máy so với bảng thuật ngữ chuẩn): sửa "HĐ đầu vào" → Procurement contracts; "Đợt / Hồ sơ HT/QT" →
+  Instalment / Certified–Final account doc.; chặn dịch ghép dở (mẫu ngắn chỉ áp dụng khi phần thay vào là số liệu).
+- Kiểm tra: 9 trang ở English, ngoài dữ liệu (tên dự án, đối tác, địa danh, số HĐ) chỉ còn 4 câu dài ghép nhiều mảnh; 0 lỗi trang;
+  Việt Nam giữ nguyên; máy tính + iPhone 13 không tràn ngang. Lỗi gặp và đã sửa: lặp vô hạn khi tiêu đề tab chứa tên riêng.
+- Chưa dịch (đợt sau nếu cần): Trợ lý 40 câu, nhật ký hoạt động, file Excel / PowerPoint / Excel mẫu TMN, dữ liệu mẫu. Số giữ kiểu VN (1.234,5).
+- Điểm khôi phục trước khi sửa: `phien-06.11.26-11h32`.
+
 ## V06.06.11.26 — Giao diện tối kiểu kính trong suốt
 - Người dùng phản hồi: tối quá, chữ khó thấy → đổi sang kiểu kính mờ: nền xanh đêm có quầng sáng (teal / chàm), thẻ trong suốt
   `rgba(255,255,255,.055)` + làm mờ nền sau, viền sáng mảnh; nền kem/be không còn bị nâu đục; chữ sáng hơn.

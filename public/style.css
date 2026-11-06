@@ -2571,3 +2571,12 @@ html { transition: background-color .2s; }
   body.no-xuat::before { content: 'Tài khoản Chỉ xem không có quyền in / xuất báo cáo.'; display: block; padding: 40px; font: 16px sans-serif; color: #000; }
 }
 
+
+/* Ô chọn ngôn ngữ (public/i18n.js) */
+.lang-slot { display: inline-flex; }
+.lang-pick { width: auto; padding: 6px 8px; font-size: 12.5px; font-weight: 600; border-radius: 10px; cursor: pointer;
+  color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.35); }
+.lang-pick option { color: #1b2a44; background: #fff; }
+.lang-pick.floating { position: fixed; top: 14px; right: 60px; z-index: 50; height: 36px; color: var(--fg-navy); background: var(--card); border-color: var(--border); box-shadow: var(--shadow); }
+:root[data-theme="dark"] .lang-pick option { color: #e9eef7; background: #131f33; }
+@media print { .lang-pick { display: none !important; } }
