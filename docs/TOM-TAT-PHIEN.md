@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V28.06.11.26 — In / PDF: phân trang gọn, tránh ngắt
+- Khối `@media print` cuối `style.css`: tiêu đề mục (I, II, III…) + ô số liệu luôn đi cùng nhau (không để tiêu đề trơ trọi cuối trang);
+  ô số liệu, bảng nhỏ (ma trận TĐ mục IV, bảng Kế hoạch – Thực – Còn lại), biểu đồ không bị cắt; dòng bảng không bị cắt ngang;
+  bảng dài sang trang mới lặp lại dòng tiêu đề cột, dòng tổng chỉ in 1 lần ở cuối; biểu đồ chi tiết 2 cái / hàng, cao ≤ 80mm.
+- Kiểm tra: xuất PDF dữ liệu mẫu 12 dự án – 34 → 30 trang; trang 1 = đầu báo cáo + mục I, trang 2 = mục II + III, không còn tiêu đề lẻ.
+  Điểm khôi phục: `phien-06.11.26-16h36`.
+
 ## V27.06.11.26 — In / PDF: khung Dòng thu / Thực chi / Còn lại nằm bên phải tiêu đề như màn hình
 - Lỗi: khổ in hẹp (≤ 760px) dính quy tắc điện thoại `.b-cash { width:100% }` → khung số rớt xuống dưới, kéo hết bề ngang.
 - Sửa: `@media print` giữ `.b-head` 1 hàng (`nowrap`), `.b-cash` rộng tự nhiên. Kiểm tra: xuất PDF A4 – đúng bố cục.

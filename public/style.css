@@ -2751,3 +2751,25 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
   --bg-fffdf9: rgba(192,169,124,0.012);
   --bg-ffffff: rgba(255,255,255,0.014);
 }
+
+/* =====================================================================
+   IN / PDF – PHÂN TRANG GỌN: tiêu đề mục + ô số liệu luôn đi cùng nhau, không để tiêu đề trơ trọi cuối trang; bảng dài sang trang mới lặp lại dòng tiêu đề cột, dòng tổng chỉ in 1 lần ở cuối.
+   ===================================================================== */
+@media print {
+  .card.b-head { break-inside: avoid; page-break-inside: avoid; }
+  #b-report .th-sec, .b-sec, .tt-sec { break-inside: auto; } /* mục dài được ngắt, nhưng tiêu đề + ô số liệu luôn đi cùng nhau (dưới) */
+  #b-report .th-sec { margin-bottom: 5mm; }
+  .th-head, .b-sec h2, h2, h3, .i-tdbar, .tt-head { break-after: avoid; page-break-after: avoid; }
+  .td-mx, .iv-sum, .f-grid, .th-grid3, .f-card, .db-mx, .b-kpi-grid, .b-charts > div, .f-note, figure, svg { break-inside: avoid; page-break-inside: avoid; }
+  .f-note { break-before: avoid; }
+  table { break-inside: auto; }
+  thead { display: table-header-group; }
+  tfoot { display: table-row-group; }
+  tr, td, th { break-inside: avoid; page-break-inside: avoid; }
+  p { orphans: 3; widows: 3; }
+  /* Biểu đồ chi tiết: 2 biểu đồ / hàng, cao vừa phải -> tiêu đề không bị tách khỏi biểu đồ */
+  .b-charts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6mm !important; }
+  .b-charts h3 { break-after: avoid; }
+  .b-charts .chart { max-height: 80mm; overflow: hidden; }
+  .b-charts .chart svg { width: 100% !important; height: auto !important; max-height: 80mm; }
+}
