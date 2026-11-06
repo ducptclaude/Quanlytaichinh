@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V23.06.11.26 — Quay lại giao diện tối kính trong suốt (bản V21); lưu bản HUD thành nhánh `nentoi1`
+- Người dùng: lưu tạm bản V22 (vi mạch + HUD) thành **`nentoi1`**, quay lại bản cũ – nền / thẻ kính trong suốt.
+- Làm: `git checkout 1714bf6 -- public/style.css` (chỉ mã giao diện; sổ ghi chép giữ nguyên) + tăng phiên bản. Điểm khôi phục bản HUD: `phien-06.11.26-16h13` = `nentoi1`.
+- Muốn dùng lại nền HUD: "quay về bản nentoi1".
+
 ## V22.06.11.26 — Giao diện tối: nền vi mạch + phong cách HUD hologram
 - Chỉ đổi `public/style.css` (cuối tệp), chỉ áp khi giao diện tối. Giao diện sáng, In / PDF, Excel không đổi.
 - Nền: đen sâu #010308 + mạch in xanh lơ rất mờ trôi chậm (120 giây / vòng, mờ dần ra rìa) + cực quang xanh lơ / xanh dương thở 40 giây.

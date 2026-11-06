@@ -6,7 +6,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|
-| **chot-06.11.26** | V22.06.11.26 | (mới nhất) | 06/11/2026 | Lấy lại mã V14.06.11.26 (từ phien-06.11.26-15h01) |
+| **chot-06.11.26** | V23.06.11.26 | (mới nhất) | 06/11/2026 | Lấy lại mã V14.06.11.26 (từ phien-06.11.26-15h01) |
 | phien-06.11.26-15h09 | V15.06.11.26 | `ff6c74c` | 06/11/2026 | Bản mã V10 (trước khi lấy lại V14) |
 | phien-06.11.26-15h01 | V14.06.11.26 | `b024ba1` | 06/11/2026 | Trước khi quay về V10 (có Dashboard bảng Kế hoạch – Thực – Còn lại) |
 | phien-06.11.26-14h49 | V13.06.11.26 | `1bef94c` | 06/11/2026 | Trước khi đổi đầu trang Dashboard PDF |
@@ -17,6 +17,8 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | phien-06.11.26-15h47 | V19.06.11.26 | `d020395` | 06/11/2026 | Trước khi thay logo MyMoney |
 | phien-06.11.26-15h51 | V20.06.11.26 | `fb2767a` | 06/11/2026 | Trước khi bỏ tên TMN khỏi hệ thống |
 | phien-06.11.26-16h04 | V21.06.11.26 | `1714bf6` | 06/11/2026 | Trước khi đổi giao diện tối sang vi mạch / HUD |
+| **nentoi1** (bản lưu tạm – giao diện tối HUD) | V22.06.11.26 | `9ea2872` | 06/11/2026 | Nền vi mạch + HUD hologram xanh lơ (KHÔNG xóa) |
+| phien-06.11.26-16h13 | V22.06.11.26 | `9ea2872` | 06/11/2026 | Trước khi quay lại giao diện tối kính trong suốt |
 | **qltc-tu061126-rv1** (bản lưu – backup) | V17.06.11.26 | `5540e51` | 06/11/2026 | Như qltc-tu061126 + Chỉ xem ẩn Phân tích chi tiết, chặn liên kết sang nhập liệu (KHÔNG xóa) |
 | **qltc-tu061126** (bản lưu – backup) | V14.06.11.26 | `2c0cad0` | 06/11/2026 | Mục III công thức mới + nút TĐ, Dashboard bảng Kế hoạch – Thực – Còn lại, Dashboard PDF như Dashboard (KHÔNG xóa) |
 | **quanlytaichinh06112026** (bản lưu của sếp – backup) | V10.06.11.26 | `b18ac61` | 06/11/2026 | Bản sao lưu toàn bộ hệ thống ngày 06/11/2026 (KHÔNG xóa) |
