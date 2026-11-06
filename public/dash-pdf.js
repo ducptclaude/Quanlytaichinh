@@ -14,20 +14,16 @@ function dpHtml(list, v) {
     return `<span class="${(x > 0) === good ? 'dp-ok' : 'dp-bad'}">${x > 0 ? '▲' : '▼'} ${bTyFix(Math.abs(x))}</span> <span class="dp-eq">so với lúc ký</span>`; };
   const ngay = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const one = list.length === 1 ? list[0] : null;
-  // Đầu trang như Dashboard: 3 chỉ số DT – CP – LN theo TĐ đang chọn trên Dashboard + bảng Kế hoạch (mục I) – Thực (mục II) – Còn lại (mục III)
-  const k = [1, 2, 3].includes(Number(BST.db_td)) ? Number(BST.db_td) : 3;
-  const tk = T['t' + k], ck = T['c' + k], lk = T['l' + k];
-  const M3 = bMuc3Data(list, v, C.rows, k).T;
-  const vs = (cur, base, good) => (k === 1 ? '<span class="dp-eq">Kế hoạch lúc ký hợp đồng</span>' : d(cur, base, good));
+  // 6 chỉ số
   const kpi = (lab, val, unit, sub, col) => `<div class="dp-k" style="--c:${col}"><div class="dp-kl">${lab}</div><div class="dp-kv">${val}<small>${unit}</small></div><div class="dp-ks">${sub}</div></div>`;
   const kpis = [
-    kpi(`Doanh thu · TĐ${k}`, ty(tk), 'tỷ', vs(tk, T.t1, true), DP.dt),
-    kpi(`Chi phí · TĐ${k}`, ty(ck), 'tỷ', `Bằng <b>${pc(ck, tk)}</b> doanh thu`, DP.cp),
-    kpi(`Lợi nhuận · TĐ${k}`, ty(lk), 'tỷ', `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · lúc ký ${pc(T.l1, T.t1)}`}`, DP.ln),
+    kpi('Doanh thu · TĐ3', ty(T.t3), 'tỷ', d(T.t3, T.t1, true), DP.dt),
+    kpi('Chi phí · TĐ3', ty(T.c3), 'tỷ', d(T.c3, T.c1, false), DP.cp),
+    kpi('Lợi nhuận · TĐ3', ty(T.l3), 'tỷ', `Tỷ suất <b>${pc(T.l3, T.t3)}</b> · lúc ký ${pc(T.l1, T.t1)}`, DP.ln),
+    kpi('Dòng thu', ty(TC.thu), 'tỷ', `Đạt <b>${pc(TC.thu, T.t3)}</b> doanh thu`, DP.dt),
+    kpi('Thực chi', ty(TC.chi), 'tỷ', `Bằng <b>${pc(TC.chi, TC.thu)}</b> dòng thu`, DP.cp),
+    kpi('Còn lại (thu − chi)', ty(TC.con), 'tỷ', 'Không gồm vay, trả nợ gốc', DP.navy),
   ].join('');
-  const mxR = (lab, col, a, b2, c) => `<tr><th><i style="background:${col}"></i>${lab}</th><td>${ty(a)}</td><td>${ty(b2)}</td><td class="dp-mxc">${ty(c)}</td></tr>`;
-  const mxT = `<table class="dp-mx"><thead><tr><th>Tỷ đồng</th><th>Kế hoạch <small>Mục I · TĐ${k}</small></th><th>Thực <small>Mục II · lũy kế</small></th><th class="dp-mxc">Còn lại <small>Mục III</small></th></tr></thead>
-    <tbody>${mxR('Doanh thu', DP.dt, M3.dt, M3.thu, M3.pt)}${mxR('Chi phí', DP.cp, M3.cp, M3.chi, M3.pc)}${mxR('Lợi nhuận', DP.ln, M3.dt - M3.cp, M3.thu - M3.chi, M3.con)}</tbody></table>`;
   // Biểu đồ cột 3 thời điểm (thực tế) – trục từ 0
   const TV = [[T.t1, T.c1, T.l1], [T.t2, T.c2, T.l2], [T.t3, T.c3, T.l3]];
   const W = 380, H = A.rows.length > 6 ? 118 : 132, L = 30, B = H - 20, top = 12, mx = Math.max(1, ...TV.flat());
@@ -76,7 +72,7 @@ function dpHtml(list, v) {
     <div class="dp-hd"><img src="/img/logo-icon.png" alt=""><div class="dp-ht"><div class="dp-co">${esc(BC.ten_cong_ty || '')}</div><h1>DASHBOARD TÀI CHÍNH DỰ ÁN</h1>
       <div class="dp-sc">${one ? `Dự án: <b>${esc(one.ma_du_an)} – ${esc(one.ten_du_an)}</b>` : `Phạm vi: <b>Tất cả dự án (${n})</b>`} · Đơn vị: tỷ đồng, ${vt} · Số thực tế theo dữ liệu hệ thống, dòng tiền lũy kế đến ${ngay}</div></div>
       <div class="dp-dt"><span>Ngày lập</span><b>${ngay}</b></div></div>
-    <div class="dp-top">${kpis}${mxT}</div>
+    <div class="dp-ks6">${kpis}</div>
     <div class="dp-r2">
       <div class="dp-c"><div class="dp-ct">Doanh thu – Chi phí – Lợi nhuận qua 3 thời điểm <span class="dp-lg"><i style="background:${DP.dt}"></i>DT <i style="background:${DP.cp}"></i>CP <i style="background:${DP.ln}"></i>LN</span></div>
         <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${svg}</svg>

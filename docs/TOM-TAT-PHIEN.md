@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V15.06.11.26 — Quay về bản quanlytaichinh06112026 (mã của V10.06.11.26)
+- Người dùng yêu cầu "quay về bản quanlytaichinh06112026". Bỏ phần mã V11 → V14 (mục III Còn phải thu/chi theo TĐ, nút TĐ mục III,
+  Dashboard / Dashboard PDF bảng Kế hoạch – Thực – Còn lại). Ghi chép (docs, CLAUDE.md) giữ bản mới nhất.
+- Điểm khôi phục trước khi quay về: `phien-06.11.26-15h01` (= V14.06.11.26) – muốn lấy lại V14 thì "quay về bản phien-06.11.26-15h01".
+- Dữ liệu đã nhập không đổi (chỉ đổi mã).
+
 ## V14.06.11.26 — Dashboard PDF: đầu trang như Dashboard
 - `public/dash-pdf.js`: bỏ 6 chỉ số cũ → 3 chỉ số DT – CP – LN theo TĐ đang chọn trên Dashboard (`BST.db_td`) + bảng Kế hoạch (mục I) – Thực (mục II) – Còn lại (mục III) (`bMuc3Data`).
   Phần dưới (biểu đồ 3 TĐ, cơ cấu, dự án, bảng dự án, điểm nhấn) giữ nguyên theo TĐ3. Vẫn 1 trang A4 ngang.
