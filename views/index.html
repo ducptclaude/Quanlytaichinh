@@ -245,6 +245,16 @@
         <div id="role-guide" class="role-guide" hidden></div>
         <p class="muted small">Bấm <span class="help-q help-q-sm"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="6.3" r="1.15" fill="currentColor"/><rect x="9.15" y="8.6" width="1.7" height="5.6" rx=".85" fill="currentColor"/></svg></span> cạnh ô Vai trò để xem quyền của từng vai trò. Khi sửa, để trống mật khẩu nếu không muốn đổi.</p>
       </div>
+      <div class="card" data-role="admin it" id="kh-card">
+        <h2>Tài khoản khách (dùng 1 lần)</h2>
+        <p class="muted small">Vai trò Chỉ xem: chỉ xem Báo cáo, không xuất, không sửa, không đổi mật khẩu. Dùng được <b>30 phút tính từ lần đăng nhập đầu</b>, hết giờ tự đăng xuất và tự xóa tài khoản;
+          tạo mà quá 24 giờ chưa đăng nhập cũng tự xóa. Mọi bước (tạo, đăng nhập, xóa) ghi vào Nhật ký hoạt động.</p>
+        <form id="kh-form" class="kh-form">
+          <label>Ghi chú (tên khách, mục đích – không bắt buộc)<input name="ghi_chu" maxlength="60" placeholder="VD: Đoàn kiểm toán ABC"></label>
+          <button type="submit" class="primary">+ Tạo tài khoản khách</button>
+        </form>
+        <div id="kh-out" class="kh-out" hidden></div>
+      </div>
       <div class="card" data-role="admin it">
         <h2>Danh sách tài khoản</h2>
         <div class="table-wrap">

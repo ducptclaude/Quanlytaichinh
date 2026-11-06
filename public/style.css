@@ -2617,3 +2617,12 @@ html { transition: background-color .2s; }
 /* Chỉ xem: ẩn mọi liên kết / nút mở trang nhập liệu Dự án – Doanh thu – Chi phí từ báo cáo */
 body.chi-xem [data-tgo], body.chi-xem [data-bgo] { display: none !important; }
 body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: none; }
+
+/* Tài khoản khách */
+.kh-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.kh-form label { flex: 1 1 260px; }
+.kh-out { margin-top: 12px; padding: 12px 14px; border: 1px dashed var(--bd-fde68a); border-radius: 12px; background: var(--bg-fef3c7); }
+.kh-cred { display: flex; gap: 24px; flex-wrap: wrap; }
+.kh-cred span { display: block; font-size: 12px; color: var(--fg-6b7280); }
+.kh-cred b { font-size: 18px; font-family: ui-monospace, Consolas, monospace; letter-spacing: .5px; user-select: all; word-break: break-all; }
+.kh-bar { position: sticky; top: 0; z-index: 60; font-weight: 600; }

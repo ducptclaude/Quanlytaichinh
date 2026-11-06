@@ -87,6 +87,8 @@ Tổng hợp toàn bộ số liệu liên kết (API `GET /api/bao-cao`, `lib/re
 
 **Chỉ xem:** chỉ xem trang Báo cáo; chỉ được đổi đơn vị tiền hiển thị (và sáng / tối). Được tự đổi mật khẩu (mục Cá nhân). Không xuất (In / PDF, Excel, PowerPoint – Ctrl+P ra trang trắng), không vào Dữ liệu / Quản trị; máy chủ chặn mọi lệnh ghi của vai này (trừ đăng xuất, đổi mật khẩu).
 
+**Tài khoản khách (dùng 1 lần):** Quản trị / IT tạo ở trang Tài khoản; vai Chỉ xem, không đổi mật khẩu; dùng 30 phút tính từ lần đăng nhập đầu, hết hạn tự đăng xuất + tự xóa (chưa đăng nhập sau 24 giờ cũng tự xóa); mọi bước ghi Nhật ký hoạt động.
+
 ### Quy tắc mật khẩu
 Áp dụng khi khởi tạo, tạo tài khoản, đặt lại và đổi mật khẩu. Máy chủ kiểm tra bắt buộc; giao diện hiện danh sách điều kiện ✓/✗ ngay khi gõ.
 - Tối thiểu 8 ký tự (tối đa 128), không có khoảng trắng

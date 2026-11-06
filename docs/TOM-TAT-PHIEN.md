@@ -2,6 +2,15 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V18.06.11.26 — Tài khoản khách dùng 1 lần (Chỉ xem, 30 phút từ lần đăng nhập đầu, tự xóa, có nhật ký)
+- Quản trị / IT: Tài khoản → "Tài khoản khách (dùng 1 lần)" → nhập ghi chú → tạo. Tên `khach-xxxxxx` + mật khẩu tự sinh (chỉ hiện 1 lần, nút sao chép gửi khách).
+- Khách = vai Chỉ xem + không đổi mật khẩu, không có mục Cá nhân; thanh đếm ngược trên đầu trang, hết giờ tự về trang đăng nhập.
+- Máy chủ (`server.js`): lần đăng nhập đầu đặt `het_han` = +30 phút; hết hạn → chặn mọi yêu cầu, chặn đăng nhập; mỗi phút `donKhach()` tự xóa khách hết hạn
+  và khách tạo quá 24 giờ chưa đăng nhập. Tài khoản khách không sửa được (chỉ xóa). Biến môi trường `KHACH_PHUT` (mặc định 30) chỉ để chạy thử.
+- Kho dữ liệu: `users` THÊM cột `khach`, `het_han` (`ADD COLUMN IF NOT EXISTS`) – không đụng dữ liệu cũ.
+- Nhật ký (đối tượng "Tài khoản khách"): Thêm (người tạo) · Đăng nhập lần đầu – hạn lúc … · Xóa (Hệ thống tự xóa, lý do) · đăng nhập sau hạn.
+- Kiểm tra: bộ nhớ tạm + PostgreSQL 16 (nâng cấp từ cấu trúc cũ) với hạn 1 phút: tạo → đăng nhập → hết hạn bị đăng xuất, API 401 → tự xóa → đăng nhập lại bị từ chối; nhật ký đủ 4 bước; tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-06.11.26-15h24`.
+
 ## V17.06.11.26 — Chỉ xem: ẩn Phân tích chi tiết, không có đường sang trang nhập liệu
 - `public/report.js`: vai viewer không dựng khối "Phân tích chi tiết" (I → V, cảnh báo, liên kết Mở Doanh thu / Chi phí).
 - `public/app.js` `showTab`: viewer chỉ mở được trang có trên menu của mình (Báo cáo, Cá nhân, Liên hệ) – mọi liên kết khác bị bỏ qua.

@@ -33,7 +33,8 @@ let users = [];
   // Lãnh đạo, Ban Kiểm soát: xem Dự án / Doanh thu / Chi phí (chỉ xem – không có form, nút sửa) -> nhóm menu gọi là "Dữ liệu"
   if (!can('hd') && !can('tien')) { const g = $('[data-grp="nhap"] [data-grp-toggle]'); if (g) g.innerHTML = 'Dữ liệu <span class="caret">▾</span>'; }
   if (!can('xuat')) document.body.classList.add('no-xuat');
-  if (ME.role === 'viewer') document.body.classList.add('chi-xem'); // ẩn liên kết sang trang nhập liệu – xem style.css // Chỉ xem: chặn in (Ctrl+P) – xem style.css
+  if (ME.role === 'viewer') document.body.classList.add('chi-xem');
+  if (ME.khach) khachInit(); // tài khoản khách: đồng hồ đếm ngược, không có mục Cá nhân // ẩn liên kết sang trang nhập liệu – xem style.css // Chỉ xem: chặn in (Ctrl+P) – xem style.css
   document.body.classList.add('roles-ready'); // đến đây mới hiện các mục theo quyền (tránh nhấp nháy tab quản trị)
 
   const stSel = $('#p-form [name=trang_thai]');
@@ -2320,12 +2321,12 @@ async function loadUsers(auto = false) {
       <td>${esc(u.username)}${u.id === ME.id ? ' <span class="badge light">Bạn</span>' : ''}</td>
       <td>${esc(u.full_name)}</td>
       <td><span class="st role-${u.role}">${esc(META.roles[u.role] || u.role)}</span></td>
-      <td>${u.active ? '<span class="st st-hoan-thanh">Hoạt động</span>' : '<span class="st st-tam-dung">Đã khóa</span>'}</td>
+      <td>${u.active ? '<span class="st st-hoan-thanh">Hoạt động</span>' : '<span class="st st-tam-dung">Đã khóa</span>'}${u.khach ? ` <span class="st st-chuan-bi" title="Tài khoản khách dùng 1 lần">${khachTxt(u)}</span>` : ''}</td>
       <td class="muted">${dt(u.last_login_at)}</td>
       <td>${seenTxt(u.last_seen_at, u.online)}</td>
       <td class="row-actions">
         ${ME.role === 'it' && u.role === 'admin' ? '<span class="muted small">Chỉ Quản trị</span>' : `<button data-usess="${u.id}" title="Xem các phiên đang đăng nhập, buộc đăng xuất">Phiên${u.so_phien ? ` (${u.so_phien})` : ''}</button>
-        <button data-uedit="${u.id}">Sửa</button>`}
+        ${u.khach ? '' : `<button data-uedit="${u.id}">Sửa</button>`}`}
         ${u.id === ME.id || ME.role !== 'admin' ? '' : `<button class="danger" data-udel="${u.id}">Xóa</button>`}
       </td>
     </tr>`).join('');
@@ -2539,3 +2540,40 @@ $('#pw-form').addEventListener('submit', async (e) => {
     showMsg($('#pw-msg'), err.message, 'err');
   }
 });
+
+// ---------- Tài khoản khách (Chỉ xem, dùng 30 phút từ lần đăng nhập đầu – máy chủ tự xóa khi hết hạn) ----------
+function khachTxt(u) {
+  if (!u.het_han) return 'Khách · chưa đăng nhập';
+  const m = Math.ceil((new Date(u.het_han) - Date.now()) / 60e3);
+  return m > 0 ? `Khách · còn ${m} phút` : 'Khách · hết hạn';
+}
+$('#kh-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target, out = $('#kh-out'), btn = $('button[type=submit]', f);
+  btn.disabled = true;
+  try {
+    const r = await api('/api/users/khach', { method: 'POST', body: JSON.stringify({ ghi_chu: f.elements.ghi_chu.value }) });
+    const txt = `Địa chỉ: ${location.origin}/login\nTên đăng nhập: ${r.username}\nMật khẩu: ${r.password}\nDùng ${r.phut} phút tính từ lần đăng nhập đầu.`;
+    out.hidden = false;
+    out.innerHTML = `<div class="kh-cred"><div><span>Tên đăng nhập</span><b>${esc(r.username)}</b></div><div><span>Mật khẩu</span><b>${esc(r.password)}</b></div></div>
+      <p class="small"><b>Mật khẩu chỉ hiện 1 lần</b> – hãy sao chép gửi khách ngay. Dùng ${r.phut} phút từ lần đăng nhập đầu; quá ${r.chua_dung_gio} giờ chưa đăng nhập thì tự xóa.</p>
+      <button type="button" class="sm" id="kh-copy">Sao chép thông tin gửi khách</button>`;
+    $('#kh-copy').onclick = async () => { try { await navigator.clipboard.writeText(txt); $('#kh-copy').textContent = 'Đã sao chép ✓'; } catch { prompt('Sao chép thông tin dưới đây:', txt.replace(/\n/g, ' · ')); } };
+    f.reset();
+    await loadUsers();
+  } catch (err) { alert(err.message); } finally { btn.disabled = false; }
+});
+// Khách đang đăng nhập: thanh đếm ngược, hết giờ tự về trang đăng nhập
+function khachInit() {
+  $('.topbar [data-tab="profile"]')?.remove();
+  const bar = document.createElement('div');
+  bar.className = 'warn-bar kh-bar';
+  document.body.prepend(bar);
+  const het = ME.het_han ? new Date(ME.het_han).getTime() : Date.now() + 30 * 60e3;
+  const tick = () => {
+    const s = Math.max(0, Math.round((het - Date.now()) / 1000));
+    bar.textContent = `Tài khoản khách – chỉ xem báo cáo · còn ${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')} · hết giờ tự đăng xuất và xóa tài khoản`;
+    if (s <= 0) { clearInterval(t); location.href = '/login'; }
+  };
+  const t = setInterval(tick, 1000); tick();
+}

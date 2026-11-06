@@ -13,6 +13,23 @@ const { projectReport } = require('./lib/report');
 const { DEMO_PREFIX, seedDemo } = require('./lib/demo');
 const { buildDtcp, costLinesFor, CONG_TY } = require('./lib/export-dtcp');
 const PHIEN_BAN = require('./lib/version').readVersion(); // đọc 1 lần khi khởi động
+// Tài khoản khách (Chỉ xem, dùng 1 lần): dùng 30 phút tính từ lần đăng nhập đầu, hết hạn thì tự xóa; tạo mà quá 24 giờ chưa đăng nhập cũng tự xóa
+const KHACH_PHUT = Math.max(1, Math.round(Number(process.env.KHACH_PHUT) || 30)), KHACH_CHUA_DUNG_GIO = 24; // KHACH_PHUT: biến môi trường để chạy thử nhanh (mặc định 30)
+const khachHetHan = (u) => Boolean(u?.khach && u.het_han && new Date(u.het_han).getTime() <= Date.now());
+const gioVN = (t) => new Date(t).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+let donKhachChay = false;
+async function donKhach() { // xóa tài khoản khách hết hạn + ghi nhật ký (chạy mỗi phút và khi phát hiện khách hết hạn)
+  if (donKhachChay || !dbState.ready) return;
+  donKhachChay = true;
+  try {
+    for (const u of await store.listExpiredGuests(KHACH_CHUA_DUNG_GIO)) {
+      if (!(await store.deleteUser(u.id))) continue;
+      const ly_do = u.het_han ? `hết ${KHACH_PHUT} phút sử dụng (hạn ${gioVN(u.het_han)})` : `tạo quá ${KHACH_CHUA_DUNG_GIO} giờ chưa đăng nhập`;
+      await store.addLog({ username: 'he-thong', ho_ten: 'Hệ thống', hanh_dong: 'Xóa', doi_tuong: 'Tài khoản khách', noi_dung: `Tự xóa ${u.username} (${u.full_name}) – ${ly_do}` });
+      console.log(`[KHÁCH] Tự xóa ${u.username} – ${ly_do}`);
+    }
+  } catch (e) { console.error('Lỗi dọn tài khoản khách:', e.message); } finally { donKhachChay = false; }
+}
 const { LOAI_DOANH_THU, calcLine, summarize, sortRevenue, tienVeLabel, sortTienVe, summarizeTienVe } = require('./lib/revenue');
 
 const app = express();
@@ -157,6 +174,11 @@ api.post('/auth/login', wrap(async (req, res) => {
     return bad(res, 'Sai tên đăng nhập hoặc mật khẩu', 401);
   }
   if (!user.active) return bad(res, 'Tài khoản đã bị khóa. Liên hệ quản trị viên', 403);
+  if (khachHetHan(user)) {
+    audit.log(req, 'Đăng nhập sai', 'Tài khoản khách', `Đăng nhập khi đã hết ${KHACH_PHUT} phút sử dụng`, { username: user.username, ho_ten: user.full_name, user_id: user.id });
+    donKhach();
+    return bad(res, `Tài khoản khách đã hết thời gian sử dụng (${KHACH_PHUT} phút)`, 403);
+  }
   auth.loginOk(ip);
   auth.loginOk('u:' + username);
   console.log(`[ĐĂNG NHẬP] ${new Date().toISOString()} ${user.username} từ IP ${ip}`);
@@ -164,6 +186,11 @@ api.post('/auth/login', wrap(async (req, res) => {
     { user_id: user.id, username: user.username, ho_ten: user.full_name });
   await auth.startSession(req, res, user.id);
   await store.touchLogin(user.id);
+  if (user.khach) {
+    const han = await store.startGuestClock(user.id, KHACH_PHUT);
+    if (!user.het_han && han) audit.log(req, 'Đăng nhập', 'Tài khoản khách', `Đăng nhập lần đầu – bắt đầu tính ${KHACH_PHUT} phút, hết hạn lúc ${gioVN(han)}`,
+      { user_id: user.id, username: user.username, ho_ten: user.full_name });
+  }
   res.json({ ok: true });
 }));
 
@@ -183,6 +210,13 @@ api.post('/auth/away', wrap(async (req, res) => {
 
 // Từ đây trở xuống: bắt buộc đăng nhập
 api.use(auth.requireAuth);
+// Khách hết hạn: đăng xuất ngay, xóa tài khoản
+api.use(wrap(async (req, res, next) => {
+  if (!khachHetHan(req.user)) return next();
+  await auth.endSession(req, res);
+  donKhach();
+  return bad(res, `Tài khoản khách đã hết thời gian sử dụng (${KHACH_PHUT} phút)`, 401);
+}));
 // IT (Kỹ thuật hệ thống): chỉ vào phần kỹ thuật – không đọc / ghi số liệu dự án, báo cáo tài chính
 const IT_DUOC_VAO = /^\/(meta|auth\/|users(\/|$)|nhat-ky|lien-he$|settings$)/;
 api.use((req, res, next) => (req.user?.role === 'it' && !IT_DUOC_VAO.test(req.path) ? bad(res, 'Vai trò Kỹ thuật hệ thống không xem số liệu dự án', 403) : next()));
@@ -218,6 +252,7 @@ api.get('/nhat-ky', quyen('nhat_ky'), wrap(async (req, res) => {
 api.get('/auth/me', (req, res) => res.json(req.user));
 
 api.post('/auth/change-password', wrap(async (req, res) => {
+  if (req.user.khach) return bad(res, 'Tài khoản khách không đổi được mật khẩu', 403);
   const { current_password, new_password } = req.body || {};
   const hash = await store.getPasswordHash(req.user.id);
   if (!(await auth.verifyPassword(current_password || '', hash))) return bad(res, 'Mật khẩu hiện tại không đúng');
@@ -323,11 +358,29 @@ users.post('/', wrap(async (req, res) => {
   res.status(201).json({ id });
 }));
 
+// Tạo tài khoản khách: Chỉ xem, tên + mật khẩu tự sinh (chỉ hiện 1 lần), dùng KHACH_PHUT phút từ lần đăng nhập đầu
+users.post('/khach', wrap(async (req, res) => {
+  const ghi = String(req.body?.ghi_chu || '').replace(/[<>]/g, '').trim().slice(0, 60);
+  const rnd = (set, n) => Array.from(crypto.randomBytes(n), (b) => set[b % set.length]).join('');
+  const LO = 'abcdefghjkmnpqrstuvwxyz', UP = 'ABCDEFGHJKMNPQRSTUVWXYZ', SO = '23456789', DB = '@#$%&*!?';
+  const pw = [...rnd(UP, 3) + rnd(LO, 4) + rnd(SO, 3) + rnd(DB, 2)];
+  for (let i = pw.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [pw[i], pw[j]] = [pw[j], pw[i]]; } // trộn thứ tự
+  const password = pw.join(''), password_hash = await auth.hashPassword(password);
+  let id = null, username = '';
+  for (let i = 0; i < 5 && !id; i++) { // trùng tên (rất hiếm) thì sinh lại
+    username = 'khach-' + rnd(LO + SO, 6);
+    try { id = await store.createUser({ username, full_name: ghi ? `Khách – ${ghi}` : 'Khách', role: 'viewer', active: true, khach: true, password_hash }); } catch (e) { if (i === 4) throw e; }
+  }
+  audit.log(req, 'Thêm', 'Tài khoản khách', `${username} (${ghi ? `Khách – ${ghi}` : 'Khách'}, Chỉ xem) – dùng ${KHACH_PHUT} phút từ lần đăng nhập đầu; chưa đăng nhập sau ${KHACH_CHUA_DUNG_GIO} giờ thì tự xóa`);
+  res.status(201).json({ id, username, password, phut: KHACH_PHUT, chua_dung_gio: KHACH_CHUA_DUNG_GIO });
+}));
+
 users.put('/:id', wrap(async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) return bad(res, 'ID không hợp lệ');
   const target = await store.getUserById(id);
   if (!target) return bad(res, 'Không tìm thấy tài khoản', 404);
+  if (target.khach) return bad(res, 'Tài khoản khách không sửa được – chỉ xóa hoặc tạo tài khoản khách mới');
   const { data, errors } = validateUser(req.body || {}, false, target.username);
   if (errors.length) return bad(res, errors);
   if (laIT(req) && (target.role === 'admin' || data.role === 'admin')) return bad(res, 'Kỹ thuật hệ thống không được sửa tài khoản Quản trị hoặc cấp quyền Quản trị', 403);
@@ -1109,6 +1162,7 @@ app.listen(PORT, '0.0.0.0', () => console.log(`Server chạy tại cổng ${PORT
       dbState.ready = true;
       dbState.error = null;
       audit.startPrune();
+      donKhach(); setInterval(donKhach, 60e3).unref(); // dọn tài khoản khách hết hạn mỗi phút
       console.log(`Đã kết nối CSDL (${store.kind}) sau ${dbState.attempts} lần thử`);
       return;
     } catch (e) {

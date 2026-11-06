@@ -1,6 +1,17 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Tài khoản khách (dùng 1 lần)": "Guest account (single use)",
+"Ghi chú (tên khách, mục đích – không bắt buộc)": "Note (guest name, purpose – optional)",
+"+ Tạo tài khoản khách": "+ Create guest account",
+"Sao chép thông tin gửi khách": "Copy details for the guest",
+"Đã sao chép ✓": "Copied ✓",
+"Khách · chưa đăng nhập": "Guest · not signed in yet",
+"Khách · hết hạn": "Guest · expired",
+"Mật khẩu chỉ hiện 1 lần": "The password is shown only once",
+"Vai trò Chỉ xem: chỉ xem Báo cáo, không xuất, không sửa, không đổi mật khẩu. Dùng được": "View-only role: reports only, no export, no editing, no password change. Usable for",
+"30 phút tính từ lần đăng nhập đầu": "30 minutes from the first sign-in",
+", hết giờ tự đăng xuất và tự xóa tài khoản; tạo mà quá 24 giờ chưa đăng nhập cũng tự xóa. Mọi bước (tạo, đăng nhập, xóa) ghi vào Nhật ký hoạt động.": ", then it is signed out and deleted automatically; an account not used within 24 hours is also deleted. Every step (create, sign-in, delete) is recorded in the Activity log.",
 "Tỷ đồng": "VND bn",
 "Kế hoạch lúc ký hợp đồng": "Plan at contract signing",
 "Thực": "Actual",
@@ -1200,6 +1211,18 @@ window.BKS_EN = {
 "Xem": "View"
 },
 "patterns": [
+[
+"Khách · còn {} phút",
+"Guest · {} min left"
+],
+[
+"– hãy sao chép gửi khách ngay. Dùng {} phút từ lần đăng nhập đầu; quá {} giờ chưa đăng nhập thì tự xóa.",
+"– copy and send it to the guest now. Valid {} min from the first sign-in; deleted if not used within {} hours."
+],
+[
+"Tài khoản khách – chỉ xem báo cáo · còn {} · hết giờ tự đăng xuất và xóa tài khoản",
+"Guest account – view reports only · {} left · signed out and deleted when time is up"
+],
 [
 "Doanh thu · TĐ{}",
 "Revenue · M{}"
