@@ -40,7 +40,7 @@ Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm so
   3. Tăng phiên bản, lưu `staging` (Railway tự chạy lại), báo 3 ý.
 - **Lưu ý báo người dùng:** quay về chỉ đổi MÃ (giao diện, công thức); **dữ liệu đã nhập không quay lại** (kho dữ liệu chỉ thêm, bản cũ vẫn đọc được).
   Nếu cần bỏ dữ liệu nhập sai → sửa / xóa trên web, hoặc báo để Claude hỗ trợ riêng.
-- KHÔNG xóa nhánh `phien-*`, `chot-*`, `backup-*`, `quanlytaichinh06112026` (bản lưu của sếp).
+- KHÔNG xóa nhánh `phien-*`, `chot-*`, `backup-*`, `quanlytaichinh06112026` (bản lưu của sếp), `qltc-tu061126` (bản lưu).
 
 ## Lỗi
 - **Lỗi lớn** (dữ liệu, công thức tiền, phân quyền, cấu trúc kho dữ liệu): **dừng lại, báo người dùng trước**.
