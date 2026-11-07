@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## Quyết định người dùng 07/11/2026 – Đánh giá hoàn thành
+- Mốc: đúng 90% = **Tốt**, đúng 70% = **Chưa đạt** (xác nhận). "GTGT" trong yêu cầu = **GTHT** (Giá trị hoàn thành).
+- **Giữ** công thức hiện tại: % hoàn thành mục I = Thực chi ÷ Chi phí dự kiến (cost to cost); khung Đánh giá hoàn thành:
+  GTHT = Dòng chi ÷ CP TĐ3 × DT TĐ3, % HT = Dòng thu ÷ GTHT.
+
 ## V28.07.11.26 — Đổi tên khung thành "Đánh giá hoàn thành" (bỏ chữ "thu tiền")
 
 ## V27.07.11.26 — Thay Bản đồ bằng "Đánh giá hoàn thành – thu tiền"
