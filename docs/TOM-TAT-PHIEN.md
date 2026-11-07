@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V28.07.11.26 — Đổi tên khung thành "Đánh giá hoàn thành" (bỏ chữ "thu tiền")
+
 ## V27.07.11.26 — Thay Bản đồ bằng "Đánh giá hoàn thành – thu tiền"
 - Bỏ bản đồ (khung `bMapSection` không còn gọi; `public/map.js` giữ nguyên, không dùng). Khung mới `bHtSection` (report.js):
   - **GTHT** = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 (TĐ3 theo mục I/IV; chưa QT = TĐ2). **% HT** = Dòng thu ÷ GTHT. Dòng thu/chi như mục II.

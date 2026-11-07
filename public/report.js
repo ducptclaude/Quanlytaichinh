@@ -673,7 +673,7 @@ document.addEventListener('click', (e) => {
   const a = 'itd' in b.dataset ? 'itd' : 'itd3', n = b.dataset[a];
   BST.i_td = Number(n); bSave(); renderKeepPos(`[data-${a}="${n}"]`);
 });
-// Đánh giá hoàn thành – thu tiền (thay khung Bản đồ, 07/11/2026)
+// Đánh giá hoàn thành (thay khung Bản đồ, 07/11/2026)
 //  GTHT (giá trị hoàn thành) = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 (TĐ3: dự án chưa QT lấy theo TĐ2 – như mục I/IV)
 //  % hoàn thành = Dòng thu ÷ GTHT · Xếp loại: ≥120% Rất tốt · ≥90% Tốt · >70% Đạt · ≤70% Chưa đạt
 const HT_XL = [[1.2, 'Rất tốt', 'xl-rt', '≥ 120%'], [0.9, 'Tốt', 'xl-t', '90% – 120%'], [0.7000001, 'Đạt', 'xl-d', '70% – 90%'], [-Infinity, 'Chưa đạt', 'xl-cd', '≤ 70%']];
@@ -703,7 +703,7 @@ function bHtSection(list, v) {
   };
   const cnt = (name) => R.filter((r) => r.xl && r.xl[1] === name).length;
   return `<section class="card b-sec ht-sec no-print-break">
-    <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành – thu tiền</h3><p>Giá trị hoàn thành = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 · % hoàn thành = Dòng thu ÷ Giá trị hoàn thành</p></div>
+    <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành</h3><p>Giá trị hoàn thành = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 · % hoàn thành = Dòng thu ÷ Giá trị hoàn thành</p></div>
       <div class="th-tags"><span>TĐ3 mới nhất</span><span>${v === 'gt' ? 'Trước VAT' : 'Sau VAT'}</span><span>Đơn vị: ${TYD()}</span></div></div>
     <div class="ht-w">
       <div class="ht-l"><div class="table-wrap"><table class="b-table ht-table">

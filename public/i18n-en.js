@@ -1264,7 +1264,8 @@ window.BKS_EN = {
 "Chưa có chi phí TĐ3 / dòng chi": "No M3 cost / expenditure yet",
 "⚠ Cần thu tiền về": "⚠ Collections needed",
 "các HĐ chủ đầu tư": "Employer contracts",
-"dự án": "projects"
+"dự án": "projects",
+"Đánh giá hoàn thành": "Completion assessment"
 },
 "patterns": [
 [
