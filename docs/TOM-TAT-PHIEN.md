@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V24.07.11.26 — Báo cáo: mọi bảng theo dự án tự co cột
+- Máy tính: mọi bảng `#b-report .th-table` (mục I, II, III…) chuyển từ chia cột cố định sang tự co theo nội dung; tiêu đề 1 dòng
+  (VD "Còn lại (thu − chi)"), cột số / STT / Mã / Tình trạng gọn, Tên dự án giãn. Đã thử: 3 bảng không còn tiêu đề 2 dòng, không tràn.
+
 ## V23.07.11.26 — Mục I: cột Hoàn thành (cost to cost), thứ tự cột, bảng gọn
 - Thứ tự: STT | Mã DA | Tên dự án | Tình trạng | **Hoàn thành** | Doanh thu | Chi phí | Lợi nhuận | ± LN so TĐ trước | Tỷ lệ LN.
 - **Hoàn thành (tạm, người dùng chốt 07/11)** = cost to cost = Thực chi (như mục II, cùng cơ sở VAT, lũy kế đến kỳ) ÷ Chi phí dự kiến của TĐ đang chọn;

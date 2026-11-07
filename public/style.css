@@ -2929,3 +2929,11 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
   #b-report .th-t1 td.num, #b-report .th-t1 th.num { width: 1% !important; }
 }
 @media (min-width: 901px) { #b-report .th-t1 thead th.num { white-space: nowrap; } }
+/* Mọi bảng tổng hợp theo dự án ở Báo cáo (mục I, II, III…): tự co cột theo nội dung, tiêu đề 1 dòng */
+@media (min-width: 901px) {
+  #b-report .th-table:not(.iv-table) { table-layout: auto !important; }
+  #b-report .th-table:not(.iv-table) thead th { white-space: nowrap; }
+  #b-report .th-table:not(.iv-table) th.num, #b-report .th-table:not(.iv-table) td.num,
+  #b-report .th-table:not(.iv-table) .th-stt, #b-report .th-table:not(.iv-table) .th-ma, #b-report .th-table:not(.iv-table) .th-tt2 { width: 1% !important; white-space: nowrap; }
+  #b-report .th-table:not(.iv-table) td.th-name, #b-report .th-table:not(.iv-table) th:nth-child(3) { width: auto !important; max-width: none !important; white-space: normal; overflow: visible; text-overflow: clip; }
+}
