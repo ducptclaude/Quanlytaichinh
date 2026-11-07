@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V35.07.11.26 – Báo cáo giao diện tối: viền khung dịu
+- Viền khung đổi từ xanh neon phát sáng (chói) sang trắng mờ + bóng tối nhẹ → khung nổi khối, không chói. Giữ vạch màu trên đầu 3 thẻ số.
+
 ## V34.07.11.26 – Báo cáo giao diện tối: nền khung xám khói
 - Nền các khung Báo cáo (đầu báo cáo, mục lớn, tiêu đề mục, thẻ số, bảng, khung tổng hợp) đổi từ xanh navy sang xám khói; giữ viền neon + bóng. Giao diện sáng không đổi.
 

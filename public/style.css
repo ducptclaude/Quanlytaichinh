@@ -3066,3 +3066,23 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 :root[data-theme="dark"] #b-report .pc-tile,
 :root[data-theme="dark"] #b-report .b-cash,
 :root[data-theme="dark"] #b-report .ht-box { background: var(--smoke-2) !important; }
+/* Báo cáo – giao diện tối: viền khung đổi từ xanh neon (chói) sang trắng mờ, bóng tối nhẹ để khung nổi khối mà không chói */
+:root[data-theme="dark"] #b-report .card.b-sec,
+:root[data-theme="dark"] #b-report .th-sec {
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 12px 28px -14px rgba(0,0,0,.75) !important; }
+:root[data-theme="dark"] #b-report .th-sec::before { opacity: .35; }
+:root[data-theme="dark"] .b-head,
+:root[data-theme="dark"] #b-report .th-head,
+:root[data-theme="dark"] #b-report .f-card,
+:root[data-theme="dark"] #b-report .tt-k,
+:root[data-theme="dark"] #b-report .pc-tile,
+:root[data-theme="dark"] #b-report .b-cash,
+:root[data-theme="dark"] #b-report .ht-box {
+  border-color: rgba(255,255,255,.20) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 10px 22px -12px rgba(0,0,0,.8) !important; }
+:root[data-theme="dark"] #b-report .table-wrap { border: 1px solid rgba(255,255,255,.18) !important; box-shadow: 0 10px 22px -14px rgba(0,0,0,.8) !important; }
+:root[data-theme="dark"] .b-head:hover, :root[data-theme="dark"] #b-report .f-card:hover, :root[data-theme="dark"] #b-report .tt-k:hover, :root[data-theme="dark"] #b-report .pc-tile:hover {
+  border-color: rgba(255,255,255,.32) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.09) inset, 0 16px 30px -12px rgba(0,0,0,.85) !important; }
+:root[data-theme="dark"] #b-report .f-card { border-top: 3px solid color-mix(in srgb, var(--f-ac) 75%, #2a2e34) !important; }
