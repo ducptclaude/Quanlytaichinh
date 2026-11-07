@@ -248,26 +248,42 @@ const TTD = {
   phai_chi: { t: 'Còn phải chi', f: 'Còn phải chi = Kế hoạch chi − Thực chi. Kế hoạch chi = chi phí đã ghi nhận + giá trị HT/QT HĐ đầu vào (sau VAT), nên phần lớn là thầu phụ còn phải trả.', cols: [['kh_chi', 'Kế hoạch chi'], ['chi', 'Thực chi'], ['phai_chi', 'Còn phải chi']], go: 'cost' },
   kh_con: { t: 'Còn lại khi hoàn tất theo kế hoạch', f: 'Còn lại khi hoàn tất = Kế hoạch thu − Kế hoạch chi (nếu thu, chi đúng kế hoạch theo HĐ)', cols: [['kh_thu', 'Kế hoạch thu'], ['kh_chi', 'Kế hoạch chi'], ['kh_con', 'Còn lại khi hoàn tất']], go: 'revenue' },
 };
+// Tỷ lệ quy đổi tiền thật (sau VAT) về trước VAT của 1 dự án – giống mục II: thu theo doanh thu, chi theo chi phí
+function bVatR(d) {
+  const dtSv = d.du_kien.doanh_thu.sv, cpGt = d.du_kien.chi_phi.gt, cpSv = d.du_kien.chi_phi.sv;
+  return { rT: dtSv ? d.du_kien.doanh_thu.gt / dtSv : 1 / 1.1, rC: cpSv ? cpGt / cpSv : 1 };
+}
+const bQ01 = (x, r) => (r === 1 ? x : Math.round((x * r) / 1e8) * 1e8); // làm tròn 0,1 tỷ như mục II
 // pid: chỉ 1 công trình (bấm từ thẻ công trình, lũy kế đến hiện tại – giống số trên thẻ)
-function bThucDrill(key, pid = 0) {
+// sec2: mở từ mục II -> cùng kỳ "lũy kế đến" và cùng cơ sở VAT (Trước VAT: quy đổi theo tỷ lệ từng dự án)
+function bThucDrill(key, pid = 0, sec2 = false) {
   const cfg = TTD[key];
   if (!cfg) return;
   const list = pid ? BC.du_an.filter((d) => d.id === pid) : bScope().list;
   if (!list.length) return;
   const P = bPeriod(list);
-  const to = pid || P.to >= bNowYm() ? bNowYm() : P.to;
-  const rows = list.map((d) => { const x = bThuc(d, to); return { d, ...x, kh_con: x.kh_thu - x.kh_chi }; });
+  const to = (pid && !sec2) || P.to >= bNowYm() ? bNowYm() : P.to;
+  const gt = sec2 && BST.vat === 'gt' && ['thu', 'chi', 'con'].includes(key);
+  const rows = list.map((d) => {
+    const x = bThuc(d, to);
+    if (gt) { // trước VAT: thu, chi quy đổi + làm tròn như ô mục II; thành phần chi chia theo cùng tỷ lệ
+      const { rT, rC } = bVatR(d);
+      x.thu = bQ01(x.thu, rT); x.chi = bQ01(x.chi, rC); x.cp = Math.round(x.cp * rC); x.tp = x.chi - x.cp; x.con = x.thu - x.chi;
+    }
+    return { d, ...x, kh_con: x.kh_thu - x.kh_chi };
+  });
+  const sc = (d, k) => (gt ? bVatR(d)[k] : 1); // hệ số quy đổi cho từng dòng chi tiết
   const main = cfg.cols[cfg.cols.length - 1][0];
   rows.sort((a, b) => Math.abs(b[main]) - Math.abs(a[main]));
   const tot = Object.fromEntries(cfg.cols.map(([k]) => [k, rows.reduce((s2, x) => s2 + x[k], 0)]));
   const cell = (v) => `<td class="num ${v < 0 ? 'neg' : ''}">${bn(v)}</td>`;
   const inRange = (ngay) => (!ngay ? to >= bNowYm() : String(ngay).slice(0, 7) <= to);
   let lines = '';
-  if (cfg.lines === 'kh' || cfg.lines === 'chi') lines = bDrillCost(cfg.lines, list, inRange, to >= bNowYm());
+  if (cfg.lines === 'kh' || cfg.lines === 'chi') lines = bDrillCost(cfg.lines, list, inRange, to >= bNowYm(), (d) => sc(d, 'rC'));
   else if (cfg.lines) {
     const loai = cfg.lines === 'vay' ? 'Không (tiền vay nhận về)' : 'Không (trả nợ gốc)';
     const L = list.flatMap((d) => (cfg.lines !== 'tv' ? d.chi_tiet.chi_phi.filter((r) => r.tinh_cp === loai).map((r) => ({ d, ngay: r.ngay, a: r.doi_tac, b: r.noi_dung, v: r.sau_vat }))
-      : d.chi_tiet.tien_ve.map((r) => ({ d, ngay: r.ngay, a: r.hd, b: r.loai, v: r.so_tien }))).filter((x) => inRange(x.ngay)))
+      : d.chi_tiet.tien_ve.map((r) => ({ d, ngay: r.ngay, a: r.hd, b: r.loai, v: Math.round(r.so_tien * sc(d, 'rT')) }))).filter((x) => inRange(x.ngay)))
       .sort((a, b) => String(b.ngay || '').localeCompare(String(a.ngay || '')));
     lines = `<h4>${{ goc: 'Các lần trả nợ gốc', vay: 'Các lần nhận tiền vay', tv: 'Các lần tiền về' }[cfg.lines]} (${L.length})</h4>
       <div class="table-wrap tt-dl"><table class="b-table"><thead><tr><th>Ngày</th><th>Công trình</th><th>${cfg.lines === 'tv' ? 'Hợp đồng' : 'Ngân hàng'}</th><th>Nội dung</th><th class="num">Số tiền</th></tr></thead>
@@ -278,7 +294,7 @@ function bThucDrill(key, pid = 0) {
   dlg.innerHTML = `<div class="stack">
     <div class="tt-dlg-h"><h3>${cfg.t}</h3><button type="button" class="pc-x" data-x title="Đóng">×</button></div>
     <div class="tt-formula">${cfg.f}</div>
-    <p class="muted small">${cfg.lines === 'kh' ? 'Theo hợp đồng' : `Lũy kế đến hết ${ymTxt(to)}`} · đồng, sau VAT · ${pid ? `<b>${esc(list[0].ma_du_an)}</b> ${esc(list[0].ten_du_an)}` : `${list.length} công trình`} · bấm <b>Mở</b> để tới tab ${cfg.go === 'cost' ? 'Chi phí' : 'Doanh thu'} của công trình</p>
+    <p class="muted small">${cfg.lines === 'kh' ? 'Theo hợp đồng' : `Lũy kế đến hết ${ymTxt(to)}`} · ${gt ? 'đồng, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án; số tổng mỗi dự án làm tròn 0,1 tỷ như mục II)' : 'đồng, sau VAT'} · ${pid ? `<b>${esc(list[0].ma_du_an)}</b> ${esc(list[0].ten_du_an)}` : `${list.length} công trình`} · bấm <b>Mở</b> để tới tab ${cfg.go === 'cost' ? 'Chi phí' : 'Doanh thu'} của công trình</p>
     <div class="table-wrap"><table class="b-table"><thead><tr><th>Công trình</th>${cfg.cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}<th></th></tr></thead>
       <tbody>${rows.map((x) => `<tr><td><b>${esc(x.d.ma_du_an)}</b> <span class="muted small">${esc(x.d.ten_du_an)}</span></td>${cfg.cols.map(([k]) => cell(x[k])).join('')}
         <td><button type="button" class="sm" data-tgo="${cfg.go}" data-id="${x.d.id}">Mở</button></td></tr>`).join('')}</tbody>
@@ -297,19 +313,19 @@ function bThucDrill(key, pid = 0) {
 }
 
 // Chi tiết cấu thành CP kế hoạch ('kh') / CP thực chi ('chi'): chi phí theo nhóm + từng HĐ đầu vào
-function bDrillCost(kind, list, inRange, toNow) {
+function bDrillCost(kind, list, inRange, toNow, f = () => 1) {
   const many = list.length > 1;
   const grp = new Map(); // khối › nhóm -> số tiền
   const addG = (khoi, nhom, v) => { const k = khoi + '|' + nhom; grp.set(k, (grp.get(k) || 0) + v); };
   for (const d of list) {
     if (kind === 'kh') d.nhom.filter((n) => n.code !== 'thau_phu' && n.sv).forEach((n) => addG(d.khoi.find((k) => k.code === n.khoi)?.ten || '', n.code === 'tc_tra_no' ? 'Lãi vay ngân hàng' : n.ten, n.sv));
-    else d.chi_tiet.chi_phi.filter((r) => r.tinh_cp === 'Có' && inRange(r.ngay)).forEach((r) => addG(r.khoi, r.nhom === 'Vay và trả nợ ngân hàng' ? 'Lãi vay ngân hàng' : r.nhom, r.sau_vat));
+    else d.chi_tiet.chi_phi.filter((r) => r.tinh_cp === 'Có' && inRange(r.ngay)).forEach((r) => addG(r.khoi, r.nhom === 'Vay và trả nợ ngân hàng' ? 'Lãi vay ngân hàng' : r.nhom, Math.round(r.sau_vat * f(d))));
   }
   const kOrd = (ten) => list[0].khoi.findIndex((k) => k.ten === ten) >>> 0; // B1 → B2 → B3 (không rõ khối: cuối)
   const gRows = [...grp].map(([k, v]) => ({ k: k.split('|'), v }))
     .sort((a, b) => kOrd(a.k[0]) - kOrd(b.k[0]) || b.v - a.v);
   const gTot = gRows.reduce((s2, x) => s2 + x.v, 0);
-  const tps = list.flatMap((d) => d.chi_tiet.thau_phu.map((c) => ({ d, ...c })))
+  const tps = list.flatMap((d) => d.chi_tiet.thau_phu.map((c) => { const k = f(d); return k === 1 ? { d, ...c } : { d, ...c, qt_sv: Math.round(c.qt_sv * k), da_tt: Math.round(c.da_tt * k), con_lai: Math.round(c.con_lai * k) }; }))
     .sort((a, b) => (kind === 'kh' ? b.qt_sv - a.qt_sv : b.da_tt - a.da_tt));
   const tTot = (f) => tps.reduce((s2, c) => s2 + c[f], 0);
   const head = (t, n) => `<h4>${t}${n !== undefined ? ` (${n})` : ''}</h4>`;
@@ -519,12 +535,12 @@ function bTongHopHtml(list, v, P) {
   // ttd: số bấm được -> bảng chi tiết (dòng thu: các lần tiền về; dòng chi: chi phí theo nhóm + đã trả HĐ đầu vào)
   const card = (k, title, val, lines, unit = 'tỷ', ttd = '') => `<div class="f-card f-${k}" title="${unit === '%' ? '' : bn(val) + ' đ'}">
       <div class="f-body"><div class="f-title">${title}</div>
-        ${ttd ? `<button type="button" class="tt-link f-val ${val < 0 ? 'neg' : ''}" data-ttd="${ttd}" title="Bấm để xem bảng chi tiết">${bTy(val)} <small>${TY()}</small> <span class="tt-go" aria-hidden="true">›</span></button>`
+        ${ttd ? `<button type="button" class="tt-link f-val ${val < 0 ? 'neg' : ''}" data-ttd="${ttd}" data-tts="1" title="Bấm để xem bảng chi tiết">${bTy(val)} <small>${TY()}</small> <span class="tt-go" aria-hidden="true">›</span></button>`
     : `<div class="f-val ${val < 0 ? 'neg' : ''}">${unit === '%' ? bpct(val, 1) : `${bTy(val)} <small>${TY()}</small>`}</div>`}
         <div class="f-lines">${lines.filter(Boolean).map((x) => `<div>${x}</div>`).join('')}</div></div></div>`;
   // Cột dự án tách riêng: STT | Mã DA | Tên dự án | Tình trạng
   // Số trong bảng mục II bấm được -> bảng chi tiết của dự án đó (pid) hoặc tất cả (dòng tổng)
-  const tlk = (key, val, pid = 0) => `<button type="button" class="tt-link tt-sm ${val < 0 ? 'neg' : ''}" data-ttd="${key}"${pid ? ` data-ttp="${pid}"` : ''} title="Bấm để xem bảng chi tiết">${bTy(val)}</button>`;
+  const tlk = (key, val, pid = 0) => `<button type="button" class="tt-link tt-sm ${val < 0 ? 'neg' : ''}" data-ttd="${key}" data-tts="1"${pid ? ` data-ttp="${pid}"` : ''} title="Bấm để xem bảng chi tiết">${bTy(val)}</button>`;
   const prj = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma"><b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}">${esc(x.d.ten_du_an)}</td><td class="th-tt2"><span class="st st-${slug(x.d.trang_thai)} th-st">${esc(x.d.trang_thai)}</span></td>`;
   // Cột Hoàn thành = thanh mức đạt (tách từ ô tỷ lệ), cột tỷ lệ % bên phải
   const dTo = to === bNowYm() ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : `${lastDay(to)}/${to.slice(5)}/${to.slice(0, 4)}`;
@@ -1983,7 +1999,7 @@ $('#b-report').addEventListener('click', (e) => {
   const go = e.target.dataset.bgo;
   if (go) { e.preventDefault(); revProjectId = Number(e.target.dataset.id); showTab(go); }
   const ttd = e.target.closest('[data-ttd]');
-  if (ttd) return bThucDrill(ttd.dataset.ttd, Number(ttd.dataset.ttp) || 0);
+  if (ttd) return bThucDrill(ttd.dataset.ttd, Number(ttd.dataset.ttp) || 0, ttd.dataset.tts === '1');
 });
 let bResize;
 window.addEventListener('resize', () => { clearTimeout(bResize); bResize = setTimeout(() => { if (BC && !$('#tab-report').hidden) bDrawCharts(bScope().list, BST.vat, bScope().one); }, 200); });

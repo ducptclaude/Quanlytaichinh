@@ -1216,84 +1216,16 @@ window.BKS_EN = {
 },
 "patterns": [
 [
-"Khách · còn {} phút",
-"Guest · {} min left"
-],
-[
-"– hãy sao chép gửi khách ngay. Dùng {} phút từ lần đăng nhập đầu, chỉ trên 1 thiết bị; quá {} giờ chưa đăng nhập thì tự xóa.",
-"– copy and send it to the guest now. Valid {} min from the first sign-in, on one device only; deleted if not used within {} hours."
-],
-[
-"Tài khoản khách – chỉ xem báo cáo · còn {} · hết giờ tự đăng xuất và xóa tài khoản",
-"Guest account – view reports only · {} left · signed out and deleted when time is up"
-],
-[
-"Doanh thu · TĐ{}",
-"Revenue · M{}"
-],
-[
-"Chi phí · TĐ{}",
-"Cost · M{}"
-],
-[
-"Lợi nhuận · TĐ{}",
-"Profit · M{}"
-],
-[
-"Mục I · TĐ{}",
-"Section I · M{}"
-],
-[
-"Kế hoạch – Thực – Còn lại · TĐ{}",
-"Plan – Actual – Remaining · M{}"
-],
-[
-"Thực: doanh thu = dòng thu, chi phí = dòng chi · Còn lại = Kế hoạch − Thực · đơn vị {}",
-"Actual: revenue = collections, cost = expenditure · Remaining = Plan − Actual · unit {}"
-],
-[
-"Doanh thu TĐ{}",
-"Revenue M{}"
-],
-[
-"Chi phí TĐ{}",
-"Cost M{}"
-],
-[
-"doanh thu TĐ{}",
-"of M{} revenue"
-],
-[
-"chi phí TĐ{}",
-"of M{} cost"
-],
-[
-"Doanh thu, chi phí dự kiến TĐ{} (mục I) trừ dòng thu, dòng chi thực tế (mục II)",
-"Planned revenue, cost at M{} (section I) minus actual collections, expenditure (section II)"
-],
-[
-"Từ mục I (TĐ{}) và II",
-"From sections I (M{}) and II"
-],
-[
-"Còn phải thu = Doanh thu TĐ{} (mục I) − Dòng thu (mục II) · Còn phải chi = Chi phí TĐ{} (mục I) − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. Đổi thời điểm ở mục I (TĐ1 / TĐ2 / TĐ3) thì mục III tự lấy theo.",
-"Receivable = Revenue M{} (section I) − Collections (section II) · Remaining to pay = Cost M{} (section I) − Expenditure (section II) · Balance = Receivable − Remaining to pay. Changing the milestone in section I (M1 / M2 / M3) updates section III."
-],
-[
-"Theo TĐ{} − dòng thu, dòng chi",
-"Per M{} − collections, expenditure"
-],
-[
-"Doanh thu TĐ{} − dòng thu · chi phí TĐ{} − dòng chi",
-"Revenue M{} − collections · cost M{} − expenditure"
-],
-[
 "Đơn vị: {}, sau VAT · Thực chi = chi phí đã chi + thanh toán HĐ đầu vào (gồm tạm ứng); không gồm tiền vay nhận về ({} {}) và trả nợ gốc vay ({} {}) vì đó là vay – trả nợ, không phải doanh thu / chi phí · Còn lại âm = đang bỏ tiền ra nhiều hơn tiền thu về · Kế hoạch theo hợp đồng chỉ để so sánh, không phải tiền thật.",
 "Unit: {}, after VAT · Expenditure = costs paid + procurement contract payments (incl. advances); excl. loan proceeds ({} {}) and principal repayments ({} {}) since these are borrowing – repayment, not revenue / cost · Negative balance = spending more than collected · Plan per contract is for comparison only, not real cash."
 ],
 [
 "TĐ1 theo HĐ gốc · TĐ2 HĐ + phụ lục · TĐ3 quyết toán (dự án chưa quyết toán tạm tính theo TĐ2). Chi phí = HĐ đầu vào + chi phí khác đã ghi nhận. Dòng tiền không gồm tiền vay, trả nợ gốc. Số làm tròn 0,01 tỷ; tổng cộng tính từ số đã làm tròn. Nguồn: {} · {}.",
 "M1 per original contract · M2 contract + addenda · M3 final account (unsettled projects provisional per M2). Cost = procurement contracts + other recorded costs. Cash flow excl. loans, principal repayments. Figures rounded to 0.01 bn; totals computed from rounded figures. Source: {} · {}."
+],
+[
+"Còn phải thu = Doanh thu TĐ{} (mục I) − Dòng thu (mục II) · Còn phải chi = Chi phí TĐ{} (mục I) − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. Đổi thời điểm ở mục I (TĐ1 / TĐ2 / TĐ3) thì mục III tự lấy theo.",
+"Receivable = Revenue M{} (section I) − Collections (section II) · Remaining to pay = Cost M{} (section I) − Expenditure (section II) · Balance = Receivable − Remaining to pay. Changing the milestone in section I (M1 / M2 / M3) updates section III."
 ],
 [
 "Sẽ xóa vĩnh viễn kèm toàn bộ dữ liệu: {} dòng HĐ/PL, {} nghiệm thu/QT, {} tiền về, {} HĐ đầu vào – thầu phụ, vật tư, MMTB, nhân công ({} thanh toán), {} chi phí, {} thời điểm TĐ. Không hoàn tác được.",
@@ -1312,6 +1244,10 @@ window.BKS_EN = {
 "Created {} projects · {} Employer contracts · {} addenda · {} certified/final rows · {} collection rows · {} subcontracts · {} subcontract payments · {} cost rows · {} milestones ({} seconds). See the Projects tab."
 ],
 [
+"Lũy kế đến hết {} · đồng, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án; số tổng mỗi dự án làm tròn 0,1 tỷ như mục II) · {} công trình · bấm",
+"Cumulative to end of {} · VND, before VAT (converted by each project's before / after VAT ratio; project totals rounded to 0.1 bn as in section II) · {} projects · click"
+],
+[
 "Đơn vị: {}, sau VAT · Kế hoạch = giá trị HĐ + phụ lục (HĐ đã quyết toán lấy theo quyết toán) · Thực thu = tiền đã về tài khoản, lũy kế đến hiện tại",
 "Unit: {}, after VAT · Plan = contract + addenda value (settled contracts per final account) · Collections = cash received in the account, cumulative to date"
 ],
@@ -1320,8 +1256,16 @@ window.BKS_EN = {
 "Active sessions (not signed out, not idle for more than {} minutes). Force sign-out: that device must sign in again; the action is logged."
 ],
 [
+"Lũy kế đến hết {} · đồng, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án; số tổng mỗi dự án làm tròn 0,1 tỷ như mục II) ·",
+"Cumulative to end of {} · VND, before VAT (converted by each project's before / after VAT ratio; project totals rounded to 0.1 bn as in section II) ·"
+],
+[
 "Sẽ xóa tất cả dữ liệu sau:\n• {} dòng HĐ/PL – giá trị HĐ {} đ, HT/QT {} đ\n• {} dòng thanh toán – {} đ\nThao tác này không hoàn tác được.",
 "All the following data will be deleted:\n• {} contract/addendum rows – contract value {} VND, certified/final {} VND\n• {} payment rows – {} VND\nThis action cannot be undone."
+],
+[
+"– hãy sao chép gửi khách ngay. Dùng {} phút từ lần đăng nhập đầu, chỉ trên 1 thiết bị; quá {} giờ chưa đăng nhập thì tự xóa.",
+"– copy and send it to the guest now. Valid {} min from the first sign-in, on one device only; deleted if not used within {} hours."
 ],
 [
 "Nguồn: {} · {} · Số liệu lấy tự động từ các tab Doanh thu, Chi phí, Thầu phụ, Tiền về tại thời điểm lập báo cáo.",
@@ -1368,8 +1312,16 @@ window.BKS_EN = {
 "{}\nActual – settled ({} projects): {} {}\nProvisional per M2 – unsettled ({} projects): {} {}\nTotal: {} VND"
 ],
 [
+"Thực: doanh thu = dòng thu, chi phí = dòng chi · Còn lại = Kế hoạch − Thực · đơn vị {}",
+"Actual: revenue = collections, cost = expenditure · Remaining = Plan − Actual · unit {}"
+],
+[
 "Không xóa được \"{}\": đang được {} tham chiếu. Chọn \"Xóa toàn bộ hợp đồng\" để xóa kèm.",
 "Cannot delete \"{}\": referenced by {}. Choose \"Delete entire contract\" to delete together."
+],
+[
+"Tài khoản khách – chỉ xem báo cáo · còn {} · hết giờ tự đăng xuất và xóa tài khoản",
+"Guest account – view reports only · {} left · signed out and deleted when time is up"
 ],
 [
 "} · Đơn vị: tỷ đồng, {} · Số thực tế theo dữ liệu hệ thống, dòng tiền lũy kế đến {}",
@@ -1378,6 +1330,10 @@ window.BKS_EN = {
 [
 "DT-CP dự kiến {} đ · BH/Khác {} đ · Ghi chú: {} | Trước: DT-CP dự kiến {} đ · BH {} đ · {}",
 "Forecast Rev.–Cost {} VND · Retention/Other {} VND · Notes: {} | Before: Forecast Rev.–Cost {} VND · Retention {} VND · {}"
+],
+[
+"Doanh thu, chi phí dự kiến TĐ{} (mục I) trừ dòng thu, dòng chi thực tế (mục II)",
+"Planned revenue, cost at M{} (section I) minus actual collections, expenditure (section II)"
 ],
 [
 "Không đổi được loại của \"{}\" vì đang có dòng HT/QT hoặc Tiền về gắn vào HĐ này",
@@ -1466,6 +1422,10 @@ window.BKS_EN = {
 [
 "Trực tiếp · Gián tiếp · Tài chính – {} dòng chi phí",
 "Direct · Indirect · Finance – {} cost rows"
+],
+[
+"Doanh thu TĐ{} − dòng thu · chi phí TĐ{} − dòng chi",
+"Revenue M{} − collections · cost M{} − expenditure"
 ],
 [
 "{} dòng HĐ/PL, HĐ {}đ, HT/QT {}đ, {} dòng thanh toán {}đ",
@@ -1560,6 +1520,10 @@ window.BKS_EN = {
 "M{} date must not be before M{} date ({})"
 ],
 [
+"Excel mẫu trình ký (DT–CP) · {} dự án",
+"Sign-off Excel template (Rev.–Cost) · {} projects"
+],
+[
 "Doanh thu – Chi phí – Lợi nhuận ({})",
 "Revenue – Cost – Profit ({})"
 ],
@@ -1632,8 +1596,8 @@ window.BKS_EN = {
 "Connected to database ({}) after {} attempts"
 ],
 [
-"Excel mẫu trình ký (DT–CP) · {} dự án",
-"Sign-off Excel template (Rev.–Cost) · {} projects"
+"Kế hoạch – Thực – Còn lại · TĐ{}",
+"Plan – Actual – Remaining · M{}"
 ],
 [
 "Đang có {} dự án mẫu (DEMO-...).",
@@ -1666,6 +1630,10 @@ window.BKS_EN = {
 [
 "{} · Báo cáo tổng quan dự án · {}",
 "{} · Project overview report · {}"
+],
+[
+"Theo TĐ{} − dòng thu, dòng chi",
+"Per M{} − collections, expenditure"
 ],
 [
 "Đăng xuất tất cả phiên của {}?",
@@ -1856,6 +1824,10 @@ window.BKS_EN = {
 "Delete row \"{}\" of {} ({})?"
 ],
 [
+"Từ mục I (TĐ{}) và II",
+"From sections I (M{}) and II"
+],
+[
 "Số liệu nhập tay · {}",
 "Manually entered figures · {}"
 ],
@@ -1930,6 +1902,10 @@ window.BKS_EN = {
 [
 "{}/{} HĐ đã quyết toán{}",
 "{}/{} contracts settled{}"
+],
+[
+"Khách · còn {} phút",
+"Guest · {} min left"
 ],
 [
 "Doanh thu {} (đồng)",
@@ -2028,6 +2004,14 @@ window.BKS_EN = {
 "Equal to {} of revenue"
 ],
 [
+"Doanh thu · TĐ{}",
+"Revenue · M{}"
+],
+[
+"Lợi nhuận · TĐ{}",
+"Profit · M{}"
+],
+[
 "LN mới nhất · {}",
 "Latest profit · {}"
 ],
@@ -2078,6 +2062,18 @@ window.BKS_EN = {
 [
 "· để trống = {}",
 "· blank = {}"
+],
+[
+"Chi phí · TĐ{}",
+"Cost · M{}"
+],
+[
+"Doanh thu TĐ{}",
+"Revenue M{}"
+],
+[
+"doanh thu TĐ{}",
+"of M{} revenue"
 ],
 [
 "CP trong kỳ {}",
@@ -2178,6 +2174,18 @@ window.BKS_EN = {
 [
 "HT {} · lệch {}{}",
 "Certified {} · diff. {}{}"
+],
+[
+"Mục I · TĐ{}",
+"Section I · M{}"
+],
+[
+"Chi phí TĐ{}",
+"Cost M{}"
+],
+[
+"chi phí TĐ{}",
+"of M{} cost"
 ],
 [
 "Lợi nhuận {}",

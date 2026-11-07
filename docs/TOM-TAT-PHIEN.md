@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.07.11.26 — Bảng chi tiết mục II theo nút Trước / Sau VAT
+- Mở từ mục II (`data-tts="1"`): cùng kỳ "lũy kế đến" với mục II (kể cả bấm 1 dự án) và cùng cơ sở VAT.
+- Trước VAT: Dòng thu × tỷ lệ DT trước/sau VAT, Dòng chi × tỷ lệ CP trước/sau VAT của từng dự án (`bVatR`), số tổng mỗi dự án làm tròn 0,1 tỷ (`bQ01`)
+  như ô mục II; từng dòng tiền về / chi phí / HĐ đầu vào quy đổi cùng tỷ lệ. Mở từ thẻ công trình: giữ như cũ (sau VAT, đến hiện tại).
+- Kiểm tra: 12/12 trường hợp (thu, chi, còn lại × tổng / 1 dự án × trước / sau VAT) số bảng chi tiết khớp số trên ô.
+
 ## V01.07.11.26 — Mục II Dòng tiền thực tế: bấm số xem bảng chi tiết
 - Ô lớn Dòng thu / Dòng chi / Còn lại và từng ô trong bảng dự án (cả dòng Tổng cộng) bấm được → mở bảng chi tiết sẵn có (`bThucDrill`):
   Dòng thu = từng lần tiền về; Dòng chi = chi phí theo nhóm + đã trả từng HĐ đầu vào; Còn lại = thu − chi theo công trình.
