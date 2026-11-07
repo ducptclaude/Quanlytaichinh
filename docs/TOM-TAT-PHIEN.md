@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.07.11.26 — Cửa sổ Dòng chi: tự gộp nhóm, thu gọn, tổng luôn hiện
+- Bảng HĐ đầu vào: tự gộp theo HĐ CĐT + Mua lẻ, mặc định thu gọn (chỉ 1 nhóm thì mở sẵn); nút ▸/▾ từng nhóm + "Mở tất cả".
+- Bảng khối → nhóm: chỉ hiện dòng khối (kèm số nhóm), bấm ▸ mở nhóm + hạng mục; "Mở tất cả".
+- Bỏ giới hạn chiều cao bảng trong cửa sổ → TỔNG HĐ ĐẦU VÀO / TỔNG GỒM MUA LẺ / Tổng chi phí luôn thấy.
+
 ## V09.07.11.26 — Cửa sổ Dòng chi dùng đúng bảng tab Nhập liệu → Chi phí
 - Bấm Dòng chi (mục II, thẻ công trình…) → `bCostLive` lấy dữ liệu đúng nguồn tab Chi phí (`/api/du-an/:id/chi-phi` hoặc `/api/chi-phi-tong`)
   và hiện 2 bảng chỉ xem: 1. Hợp đồng đầu vào (gộp theo HĐ CĐT, Mua lẻ, TỔNG HĐ ĐẦU VÀO / TỔNG GỒM MUA LẺ) · 2. Chi phí theo khối → nhóm → hạng mục.

@@ -1217,7 +1217,8 @@ window.BKS_EN = {
 "2. Chi phí theo khối → nhóm": "2. Costs by block → group",
 "Hai bảng dưới lấy trực tiếp từ": "The two tables below come directly from",
 "Nhập liệu → Chi phí": "Data entry → Cost",
-"· lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.": "· cumulative to date · after VAT · unit per the Unit box."
+"· lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.": "· cumulative to date · after VAT · unit per the Unit box.",
+"Mở / thu gọn": "Expand / collapse"
 },
 "patterns": [
 [
@@ -2331,6 +2332,10 @@ window.BKS_EN = {
 [
 "▼ Giảm {}",
 "▼ Down {}"
+],
+[
+"({} nhóm)",
+"({} groups)"
 ],
 [
 "({} đợt)",

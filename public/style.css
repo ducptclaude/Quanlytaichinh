@@ -2859,3 +2859,10 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 :root[data-theme="dark"] #b-report .b-cash-i b.neg { color: #f08a8e; text-shadow: 0 0 6px rgba(255,90,96,.2); }
 :root[data-theme="dark"] #b-report .b-cash-u { color: #a7b5ca; }
 .tt-dlg { width: min(1240px, calc(100vw - 24px)) !important; max-width: none; } /* đủ chỗ cho bảng HĐ đầu vào như tab Chi phí */
+/* Cửa sổ Dòng chi: bảng thu gọn theo nhóm; dòng tổng luôn thấy (không giới hạn chiều cao bảng) */
+.tt-live-wrap .tt-dl { max-height: none !important; }
+.tt-live-wrap .tt-h4 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tt-live-wrap .grp-toggle { margin-right: 6px; }
+.tt-live-wrap .tt-c-khoi td { background: var(--bg-f3f7fc); }
+.tt-live-wrap tfoot td { font-weight: 800; }
+:root[data-theme="dark"] .tt-live-wrap .tt-c-khoi td { background: rgba(255,255,255,.04); }

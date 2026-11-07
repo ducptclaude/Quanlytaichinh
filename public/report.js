@@ -330,7 +330,7 @@ async function bCostLive(box, list) {
   const G = new Map();
   for (const c of tps) { const k = c.hd_cdt_id && order.has(c.hd_cdt_id) ? c.hd_cdt_id : 0; if (!G.has(k)) G.set(k, []); G.get(k).push(c); }
   const groups = [...G].sort((a, b) => (a[0] ? order.get(a[0]) : 1e6) - (b[0] ? order.get(b[0]) : 1e6));
-  const row = (c, no) => `<tr class="tv-child"><td class="num muted">${no}</td>
+  const row = (c, no, g) => `<tr class="tv-child" data-g="${g}"${openAll ? '' : ' hidden'}><td class="num muted">${no}</td>
     <td class="indent tp-hd"><div class="tp-l1">${daTag(c)}<span class="tp-kind tp-k-${c.nhom || 'thau_phu'}">${TP_NGAN[c.nhom || 'thau_phu']}</span><b>${esc(c.so_ma)}</b></div>
       <div class="tp-l2">${(([cls, lab, tip]) => `<span class="tp-st ${cls}" title="${tip}">${lab}</span>`)(TP_TT[tpTT(c)])}<span>${c.so_pl ? `${c.so_pl} phụ lục` : 'Không phụ lục'}</span></div></td>
     <td class="c-dt tp-dt">${esc(c.doi_tac || '')}</td>
@@ -338,21 +338,24 @@ async function bCostLive(box, list) {
     <td class="num strong ${c.con_lai < 0 ? 'neg' : ''}">${mtr(c.con_lai)}</td>
     <td class="c-note tp-note">${c.hang_muc ? `<span class="tp-hm">${esc(c.hang_muc)}</span>` : ''}${c.ghi_chu ? ` <small class="muted">${esc(c.ghi_chu)}</small>` : ''}</td></tr>`;
   const le = LE_NHOM.map((k) => ({ k, rows: items.filter((r) => r.nhom === k) })).filter((x) => x.rows.length);
+  const openAll = groups.length + (le.length ? 1 : 0) <= 1; // chỉ 1 nhóm thì mở sẵn, nhiều nhóm thì thu gọn
+  const tg = (g) => `<button type="button" class="grp-toggle" data-tg="${g}" title="Mở / thu gọn">${openAll ? '▾' : '▸'}</button>`;
   const leTot = le.reduce((a, x) => a + sum(x.rows, 'sau_vat'), 0);
   const body1 = groups.map(([k, rows], gi) => `<tr class="tv-head-row ${k ? '' : 'tv-sub-warn'}"><td class="num">${gi + 1}</td>
-      <td colspan="2">${k ? `<span class="kind-tag kind-hd">HĐ CĐT</span> <b>${esc(cdtName(k).replace(/^HĐ\s+/, ''))}</b>` : '<span class="st st-tam-tinh">Chưa gắn HĐ CĐT</span>'}
+      <td colspan="2">${tg('tp' + gi)}${k ? `<span class="kind-tag kind-hd">HĐ CĐT</span> <b>${esc(cdtName(k).replace(/^HĐ\s+/, ''))}</b>` : '<span class="st st-tam-tinh">Chưa gắn HĐ CĐT</span>'}
         <span class="muted small">(${rows.length} HĐ · ${rows.filter(tpDaQt).length} đã QT)</span></td>
       <td class="num strong">${mtr(sum(rows, 'hd_sau_vat'))}</td><td class="num strong">${mtr(sum(rows, 'qt_sau_vat'))}</td><td class="num strong">${mtr(sum(rows, 'da_tt'))}</td>
-      <td class="num tv-head-sum">${mtr(sum(rows, 'con_lai'))}</td><td></td></tr>` + rows.map((c, i) => row(c, `${gi + 1}.${i + 1}`)).join('')).join('')
-    + (le.length ? `<tr class="tv-head-row tp-le-head"><td class="num">${groups.length + 1}</td><td colspan="2"><span class="kind-tag tp-le-tag">Mua lẻ</span> <b>Không có hợp đồng</b>
+      <td class="num tv-head-sum">${mtr(sum(rows, 'con_lai'))}</td><td></td></tr>` + rows.map((c, i) => row(c, `${gi + 1}.${i + 1}`, 'tp' + gi)).join('')).join('')
+    + (le.length ? `<tr class="tv-head-row tp-le-head"><td class="num">${groups.length + 1}</td><td colspan="2">${tg('le')}<span class="kind-tag tp-le-tag">Mua lẻ</span> <b>Không có hợp đồng</b>
         <span class="muted small">(${le.reduce((a, x) => a + x.rows.length, 0)} dòng chi phí)</span></td>
       <td class="num strong">${mtr(leTot)}</td><td class="num strong">${mtr(leTot)}</td><td class="num strong">${mtr(leTot)}</td><td class="num tv-head-sum">${mtr(0)}</td><td></td></tr>`
-      + le.map((x, i) => `<tr class="tv-child tp-le-row"><td class="num muted">${groups.length + 1}.${i + 1}</td>
+      + le.map((x, i) => `<tr class="tv-child tp-le-row" data-g="le"${openAll ? '' : ' hidden'}><td class="num muted">${groups.length + 1}.${i + 1}</td>
         <td class="indent tp-hd"><div class="tp-l1"><span class="tp-kind tp-k-${x.k}">${TP_NGAN[x.k]}</span><b>Mua lẻ</b></div><div class="tp-l2"><span>${x.rows.length} dòng chứng từ</span></div></td>
         <td class="c-dt tp-dt muted">Nhiều đối tác</td><td class="num">${mtr(sum(x.rows, 'sau_vat'))}</td><td class="num">${mtr(sum(x.rows, 'sau_vat'))}</td><td class="num">${mtr(sum(x.rows, 'sau_vat'))}</td>
         <td class="num muted">${mtr(0)}</td><td class="c-note tp-note">Đã chi theo chứng từ</td></tr>`).join('') : '');
   const T1 = { hd: sum(tps, 'hd_sau_vat'), qt: sum(tps, 'qt_sau_vat'), tt: sum(tps, 'da_tt'), cl: sum(tps, 'con_lai') };
-  const tbl1 = `<h4>1. Hợp đồng đầu vào (${tps.length} HĐ)</h4>
+  const allBtn = (t) => `<button type="button" class="sm tt-all" data-tall="${t}">Mở tất cả</button>`;
+  const tbl1 = `<h4 class="tt-h4">1. Hợp đồng đầu vào (${tps.length} HĐ) ${openAll ? '' : allBtn('tp')}</h4>
     <div class="table-wrap tt-dl"><table class="tp-table tt-cost-tp"><thead><tr><th>#</th><th>Hợp đồng</th><th>Đối tác</th><th class="num">Giá trị HĐ</th><th class="num">Giá trị HT/QT</th><th class="num">Đã thanh toán</th><th class="num">Còn lại</th><th>Hạng mục / Ghi chú</th></tr></thead>
     <tbody>${body1 || '<tr><td colspan="8" class="empty">Chưa có hợp đồng đầu vào</td></tr>'}</tbody>
     <tfoot><tr><td></td><td colspan="2">TỔNG HĐ ĐẦU VÀO (${tps.length} HĐ)</td><td class="num">${mtr(T1.hd)}</td><td class="num">${mtr(T1.qt)}</td><td class="num">${mtr(T1.tt)}</td><td class="num ${T1.cl < 0 ? 'neg' : ''}">${mtr(T1.cl)}</td><td></td></tr>
@@ -365,17 +368,30 @@ async function bCostLive(box, list) {
   const body2 = KH.map((k) => {
     const tk = tong.theo_khoi?.[k.code]; if (!tk || !tk.so_dong) return '';
     const nh = NH.filter((x) => x.khoi === k.code && tong.theo_nhom?.[x.code]?.so_dong);
-    return `<tr class="tt-c-khoi"><td></td><td><b>${esc(k.ten)}</b></td><td class="num strong">${dvm(tk.gia_tri)}</td><td class="num strong">${dvm(tk.sau_vat)}</td><td class="num">${pct(tk.sau_vat)}</td></tr>`
+    return `<tr class="tt-c-khoi"><td></td><td><button type="button" class="grp-toggle" data-tg="k-${k.code}" title="Mở / thu gọn">▸</button><b>${esc(k.ten)}</b> <span class="muted small">(${nh.length} nhóm)</span></td><td class="num strong">${dvm(tk.gia_tri)}</td><td class="num strong">${dvm(tk.sau_vat)}</td><td class="num">${pct(tk.sau_vat)}</td></tr>`
       + nh.map((x) => { const t = tong.theo_nhom[x.code]; n2++;
-        return `<tr><td class="num">${n2}</td><td class="indent-1"><b>${esc(x.ten)}</b> <span class="muted small">(${t.so_dong} dòng)</span></td><td class="num">${dvm(t.gia_tri)}</td><td class="num">${dvm(t.sau_vat)}</td><td class="num">${pct(t.sau_vat)}</td></tr>`
-          + (x.sub || []).filter((sc) => t.sub?.[sc.code]?.so_dong).map((sc) => `<tr><td></td><td class="indent-2 muted"><span class="tree">└</span>${esc(sc.ten)}</td><td class="num">${dvm(t.sub[sc.code].gia_tri)}</td><td class="num">${dvm(t.sub[sc.code].sau_vat)}</td><td></td></tr>`).join(''); }).join('');
+        return `<tr data-g="k-${k.code}" hidden><td class="num">${n2}</td><td class="indent-1"><b>${esc(x.ten)}</b> <span class="muted small">(${t.so_dong} dòng)</span></td><td class="num">${dvm(t.gia_tri)}</td><td class="num">${dvm(t.sau_vat)}</td><td class="num">${pct(t.sau_vat)}</td></tr>`
+          + (x.sub || []).filter((sc) => t.sub?.[sc.code]?.so_dong).map((sc) => `<tr data-g="k-${k.code}" hidden><td></td><td class="indent-2 muted"><span class="tree">└</span>${esc(sc.ten)}</td><td class="num">${dvm(t.sub[sc.code].gia_tri)}</td><td class="num">${dvm(t.sub[sc.code].sau_vat)}</td><td></td></tr>`).join(''); }).join('');
   }).join('');
-  const tbl2 = `<h4>2. Chi phí theo khối → nhóm</h4>
+  const tbl2 = `<h4 class="tt-h4">2. Chi phí theo khối → nhóm ${allBtn('k')}</h4>
     <div class="table-wrap tt-dl"><table class="b-table tt-cost-tree"><thead><tr><th>#</th><th>Khối / Nhóm chi phí</th><th class="num">Trước VAT</th><th class="num">Sau VAT</th><th class="num">Tỷ trọng</th></tr></thead>
     <tbody>${body2 || '<tr><td colspan="5" class="empty">Chưa có chi phí</td></tr>'}</tbody>
     <tfoot><tr><td></td><td>Tổng chi phí</td><td class="num">${dvm(tong.gia_tri)}</td><td class="num">${dvm(tong.sau_vat)}</td><td class="num">100%</td></tr></tfoot></table></div>
     ${tong.ngoai_cp?.so_dong ? `<p class="muted small">Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}</p>` : ''}`;
-  box.outerHTML = `<p class="muted small tt-live-note">Hai bảng dưới lấy trực tiếp từ <b>Nhập liệu → Chi phí</b>${one ? '' : ` (${list.length} công trình)`} · lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.</p>${tbl1}${tbl2}`;
+  const host = box.parentNode;
+  box.outerHTML = `<div class="tt-live-wrap"><p class="muted small tt-live-note">Hai bảng dưới lấy trực tiếp từ <b>Nhập liệu → Chi phí</b>${one ? '' : ` (${list.length} công trình)`} · lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.</p>${tbl1}${tbl2}</div>`;
+  const W = host.querySelector('.tt-live-wrap');
+  const setG = (g, on) => { W.querySelectorAll(`[data-g="${g}"]`).forEach((r) => { r.hidden = !on; }); const b = W.querySelector(`[data-tg="${g}"]`); if (b) b.textContent = on ? '▾' : '▸'; };
+  W.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-tg]');
+    if (t) return setG(t.dataset.tg, t.textContent === '▸');
+    const a = e.target.closest('[data-tall]');
+    if (a) {
+      const on = a.textContent === 'Mở tất cả';
+      W.querySelectorAll(`[data-tg^="${a.dataset.tall === 'k' ? 'k-' : ''}"]`).forEach((b) => { const g = b.dataset.tg; if ((a.dataset.tall === 'k') === g.startsWith('k-')) setG(g, on); });
+      a.textContent = on ? 'Thu gọn tất cả' : 'Mở tất cả';
+    }
+  });
 }
 
 // Chi tiết cấu thành CP kế hoạch ('kh') / CP thực chi ('chi'): chi phí theo nhóm + từng HĐ đầu vào
