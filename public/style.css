@@ -2858,3 +2858,4 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 :root[data-theme="dark"] #b-report .b-cash-i.con b { font-size: 21px; color: #6fd6c4; text-shadow: 0 0 7px rgba(46,230,200,.22); }
 :root[data-theme="dark"] #b-report .b-cash-i b.neg { color: #f08a8e; text-shadow: 0 0 6px rgba(255,90,96,.2); }
 :root[data-theme="dark"] #b-report .b-cash-u { color: #a7b5ca; }
+.tt-dlg { width: min(1240px, calc(100vw - 24px)) !important; max-width: none; } /* đủ chỗ cho bảng HĐ đầu vào như tab Chi phí */

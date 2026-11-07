@@ -1212,7 +1212,12 @@ window.BKS_EN = {
 "Bấm vào số Dòng thu / Dòng chi / Còn lại (ô lớn hoặc từng dự án) để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.": "Click a Collections / Expenditure / Balance figure (large tile or per project) to view the detail table: each collection, costs by group, payments on each procurement contract.",
 "Bấm vào số": "Click a",
 "để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.": "figure to view the detail table: each collection, costs by group, payments on each procurement contract.",
-"(ô lớn hoặc từng dự án)": "(large tile or per project)"
+"(ô lớn hoặc từng dự án)": "(large tile or per project)",
+"Đang tải bảng chi phí từ tab Nhập liệu → Chi phí…": "Loading the cost tables from Data entry → Cost…",
+"2. Chi phí theo khối → nhóm": "2. Costs by block → group",
+"Hai bảng dưới lấy trực tiếp từ": "The two tables below come directly from",
+"Nhập liệu → Chi phí": "Data entry → Cost",
+"· lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.": "· cumulative to date · after VAT · unit per the Unit box."
 },
 "patterns": [
 [
@@ -1370,6 +1375,10 @@ window.BKS_EN = {
 [
 "HĐ (TĐ1) – Điều chỉnh (TĐ2) – Quyết toán (TĐ3) · tự tính theo dữ liệu {}",
 "Contract (M1) – Variation (M2) – Final account (M3) · auto-calculated from data {}"
+],
+[
+"({} công trình) · lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.",
+"({} projects) · cumulative to date · after VAT · unit per the Unit box."
 ],
 [
 "Khoảng thời gian dài hơn {} ngày – chọn một tháng/quý để xem theo ngày",
@@ -1632,6 +1641,10 @@ window.BKS_EN = {
 "{} · Project overview report · {}"
 ],
 [
+"Không tải được bảng chi phí: {}",
+"Could not load the cost tables: {}"
+],
+[
 "Theo TĐ{} − dòng thu, dòng chi",
 "Per M{} − collections, expenditure"
 ],
@@ -1706,6 +1719,10 @@ window.BKS_EN = {
 [
 "Cập nhật lần {} trong ngày {}",
 "Update no. {} on {}"
+],
+[
+"1. Hợp đồng đầu vào ({} HĐ)",
+"1. Procurement contracts ({} contracts)"
 ],
 [
 "Danh sách dự án ({} dự án)",

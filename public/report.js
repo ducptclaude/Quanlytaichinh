@@ -279,7 +279,8 @@ function bThucDrill(key, pid = 0, sec2 = false) {
   const cell = (v) => `<td class="num ${v < 0 ? 'neg' : ''}">${bn(v)}</td>`;
   const inRange = (ngay) => (!ngay ? to >= bNowYm() : String(ngay).slice(0, 7) <= to);
   let lines = '';
-  if (cfg.lines === 'kh' || cfg.lines === 'chi') lines = bDrillCost(cfg.lines, list, inRange, to >= bNowYm(), (d) => sc(d, 'rC'));
+  if (cfg.lines === 'chi') lines = '<div class="tt-live muted small">Đang tải bảng chi phí từ tab Nhập liệu → Chi phí…</div>'; // thay bằng đúng bảng tab Chi phí
+  else if (cfg.lines === 'kh') lines = bDrillCost(cfg.lines, list, inRange, to >= bNowYm(), (d) => sc(d, 'rC'));
   else if (cfg.lines) {
     const loai = cfg.lines === 'vay' ? 'Không (tiền vay nhận về)' : 'Không (trả nợ gốc)';
     const L = list.flatMap((d) => (cfg.lines !== 'tv' ? d.chi_tiet.chi_phi.filter((r) => r.tinh_cp === loai).map((r) => ({ d, ngay: r.ngay, a: r.doi_tac, b: r.noi_dung, v: r.sau_vat }))
@@ -310,6 +311,71 @@ function bThucDrill(key, pid = 0, sec2 = false) {
   });
   dlg.addEventListener('close', () => dlg.remove());
   dlg.showModal();
+  if (cfg.lines === 'chi') bCostLive(dlg.querySelector('.tt-live'), list).catch((e) => { const b = dlg.querySelector('.tt-live'); if (b) b.textContent = 'Không tải được bảng chi phí: ' + e.message; });
+}
+
+// Dòng chi: đúng 2 bảng của tab Nhập liệu → Chi phí (chỉ xem), cùng nguồn số liệu với tab đó (sau VAT, lũy kế đến hiện tại)
+async function bCostLive(box, list) {
+  if (!box) return;
+  const ids = new Set(list.map((d) => d.id));
+  const one = list.length === 1;
+  const D = await api(one ? `/api/du-an/${list[0].id}/chi-phi` : '/api/chi-phi-tong');
+  const tps = one ? D.thau_phu : D.thau_phu.filter((c) => ids.has(c.du_an_id));
+  const items = one ? D.items : D.items.filter((r) => ids.has(r.du_an_id));
+  const cdtName = (id) => (D.hd_cdt || []).find((h) => h.id === id)?.so_hieu || '';
+  const daTag = (x) => (!one && x.ma_du_an ? `<span class="c-da">${esc(x.ma_du_an)}</span>` : '');
+  const sum = (rows, f) => rows.reduce((a, c) => a + (c[f] || 0), 0);
+  // Bảng 1: Hợp đồng đầu vào (gộp theo HĐ chủ đầu tư) + Mua lẻ
+  const order = new Map((D.hd_cdt || []).map((h, i) => [h.id, i]));
+  const G = new Map();
+  for (const c of tps) { const k = c.hd_cdt_id && order.has(c.hd_cdt_id) ? c.hd_cdt_id : 0; if (!G.has(k)) G.set(k, []); G.get(k).push(c); }
+  const groups = [...G].sort((a, b) => (a[0] ? order.get(a[0]) : 1e6) - (b[0] ? order.get(b[0]) : 1e6));
+  const row = (c, no) => `<tr class="tv-child"><td class="num muted">${no}</td>
+    <td class="indent tp-hd"><div class="tp-l1">${daTag(c)}<span class="tp-kind tp-k-${c.nhom || 'thau_phu'}">${TP_NGAN[c.nhom || 'thau_phu']}</span><b>${esc(c.so_ma)}</b></div>
+      <div class="tp-l2">${(([cls, lab, tip]) => `<span class="tp-st ${cls}" title="${tip}">${lab}</span>`)(TP_TT[tpTT(c)])}<span>${c.so_pl ? `${c.so_pl} phụ lục` : 'Không phụ lục'}</span></div></td>
+    <td class="c-dt tp-dt">${esc(c.doi_tac || '')}</td>
+    <td class="num">${mtr(c.hd_sau_vat)}</td><td class="num">${mtr(c.qt_sau_vat)}</td><td class="num">${mtr(c.da_tt)}</td>
+    <td class="num strong ${c.con_lai < 0 ? 'neg' : ''}">${mtr(c.con_lai)}</td>
+    <td class="c-note tp-note">${c.hang_muc ? `<span class="tp-hm">${esc(c.hang_muc)}</span>` : ''}${c.ghi_chu ? ` <small class="muted">${esc(c.ghi_chu)}</small>` : ''}</td></tr>`;
+  const le = LE_NHOM.map((k) => ({ k, rows: items.filter((r) => r.nhom === k) })).filter((x) => x.rows.length);
+  const leTot = le.reduce((a, x) => a + sum(x.rows, 'sau_vat'), 0);
+  const body1 = groups.map(([k, rows], gi) => `<tr class="tv-head-row ${k ? '' : 'tv-sub-warn'}"><td class="num">${gi + 1}</td>
+      <td colspan="2">${k ? `<span class="kind-tag kind-hd">HĐ CĐT</span> <b>${esc(cdtName(k).replace(/^HĐ\s+/, ''))}</b>` : '<span class="st st-tam-tinh">Chưa gắn HĐ CĐT</span>'}
+        <span class="muted small">(${rows.length} HĐ · ${rows.filter(tpDaQt).length} đã QT)</span></td>
+      <td class="num strong">${mtr(sum(rows, 'hd_sau_vat'))}</td><td class="num strong">${mtr(sum(rows, 'qt_sau_vat'))}</td><td class="num strong">${mtr(sum(rows, 'da_tt'))}</td>
+      <td class="num tv-head-sum">${mtr(sum(rows, 'con_lai'))}</td><td></td></tr>` + rows.map((c, i) => row(c, `${gi + 1}.${i + 1}`)).join('')).join('')
+    + (le.length ? `<tr class="tv-head-row tp-le-head"><td class="num">${groups.length + 1}</td><td colspan="2"><span class="kind-tag tp-le-tag">Mua lẻ</span> <b>Không có hợp đồng</b>
+        <span class="muted small">(${le.reduce((a, x) => a + x.rows.length, 0)} dòng chi phí)</span></td>
+      <td class="num strong">${mtr(leTot)}</td><td class="num strong">${mtr(leTot)}</td><td class="num strong">${mtr(leTot)}</td><td class="num tv-head-sum">${mtr(0)}</td><td></td></tr>`
+      + le.map((x, i) => `<tr class="tv-child tp-le-row"><td class="num muted">${groups.length + 1}.${i + 1}</td>
+        <td class="indent tp-hd"><div class="tp-l1"><span class="tp-kind tp-k-${x.k}">${TP_NGAN[x.k]}</span><b>Mua lẻ</b></div><div class="tp-l2"><span>${x.rows.length} dòng chứng từ</span></div></td>
+        <td class="c-dt tp-dt muted">Nhiều đối tác</td><td class="num">${mtr(sum(x.rows, 'sau_vat'))}</td><td class="num">${mtr(sum(x.rows, 'sau_vat'))}</td><td class="num">${mtr(sum(x.rows, 'sau_vat'))}</td>
+        <td class="num muted">${mtr(0)}</td><td class="c-note tp-note">Đã chi theo chứng từ</td></tr>`).join('') : '');
+  const T1 = { hd: sum(tps, 'hd_sau_vat'), qt: sum(tps, 'qt_sau_vat'), tt: sum(tps, 'da_tt'), cl: sum(tps, 'con_lai') };
+  const tbl1 = `<h4>1. Hợp đồng đầu vào (${tps.length} HĐ)</h4>
+    <div class="table-wrap tt-dl"><table class="tp-table tt-cost-tp"><thead><tr><th>#</th><th>Hợp đồng</th><th>Đối tác</th><th class="num">Giá trị HĐ</th><th class="num">Giá trị HT/QT</th><th class="num">Đã thanh toán</th><th class="num">Còn lại</th><th>Hạng mục / Ghi chú</th></tr></thead>
+    <tbody>${body1 || '<tr><td colspan="8" class="empty">Chưa có hợp đồng đầu vào</td></tr>'}</tbody>
+    <tfoot><tr><td></td><td colspan="2">TỔNG HĐ ĐẦU VÀO (${tps.length} HĐ)</td><td class="num">${mtr(T1.hd)}</td><td class="num">${mtr(T1.qt)}</td><td class="num">${mtr(T1.tt)}</td><td class="num ${T1.cl < 0 ? 'neg' : ''}">${mtr(T1.cl)}</td><td></td></tr>
+    ${leTot ? `<tr class="tp-grand"><td></td><td colspan="2">TỔNG GỒM MUA LẺ</td><td class="num">${mtr(T1.hd + leTot)}</td><td class="num">${mtr(T1.qt + leTot)}</td><td class="num">${mtr(T1.tt + leTot)}</td><td class="num">${mtr(T1.cl)}</td><td></td></tr>` : ''}</tfoot></table></div>`;
+  // Bảng 2: Chi phí theo khối → nhóm → hạng mục (số tổng như tab Chi phí: gồm HĐ đầu vào theo HT/QT, không gồm trả nợ gốc / tiền vay)
+  const tong = D.tong;
+  const NH = META.nhom_chi_phi || [], KH = META.khoi_chi_phi || [];
+  const pct = (v) => (tong.sau_vat ? ((v / tong.sau_vat) * 100).toFixed(1) + '%' : '—');
+  let n2 = 0;
+  const body2 = KH.map((k) => {
+    const tk = tong.theo_khoi?.[k.code]; if (!tk || !tk.so_dong) return '';
+    const nh = NH.filter((x) => x.khoi === k.code && tong.theo_nhom?.[x.code]?.so_dong);
+    return `<tr class="tt-c-khoi"><td></td><td><b>${esc(k.ten)}</b></td><td class="num strong">${dvm(tk.gia_tri)}</td><td class="num strong">${dvm(tk.sau_vat)}</td><td class="num">${pct(tk.sau_vat)}</td></tr>`
+      + nh.map((x) => { const t = tong.theo_nhom[x.code]; n2++;
+        return `<tr><td class="num">${n2}</td><td class="indent-1"><b>${esc(x.ten)}</b> <span class="muted small">(${t.so_dong} dòng)</span></td><td class="num">${dvm(t.gia_tri)}</td><td class="num">${dvm(t.sau_vat)}</td><td class="num">${pct(t.sau_vat)}</td></tr>`
+          + (x.sub || []).filter((sc) => t.sub?.[sc.code]?.so_dong).map((sc) => `<tr><td></td><td class="indent-2 muted"><span class="tree">└</span>${esc(sc.ten)}</td><td class="num">${dvm(t.sub[sc.code].gia_tri)}</td><td class="num">${dvm(t.sub[sc.code].sau_vat)}</td><td></td></tr>`).join(''); }).join('');
+  }).join('');
+  const tbl2 = `<h4>2. Chi phí theo khối → nhóm</h4>
+    <div class="table-wrap tt-dl"><table class="b-table tt-cost-tree"><thead><tr><th>#</th><th>Khối / Nhóm chi phí</th><th class="num">Trước VAT</th><th class="num">Sau VAT</th><th class="num">Tỷ trọng</th></tr></thead>
+    <tbody>${body2 || '<tr><td colspan="5" class="empty">Chưa có chi phí</td></tr>'}</tbody>
+    <tfoot><tr><td></td><td>Tổng chi phí</td><td class="num">${dvm(tong.gia_tri)}</td><td class="num">${dvm(tong.sau_vat)}</td><td class="num">100%</td></tr></tfoot></table></div>
+    ${tong.ngoai_cp?.so_dong ? `<p class="muted small">Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}</p>` : ''}`;
+  box.outerHTML = `<p class="muted small tt-live-note">Hai bảng dưới lấy trực tiếp từ <b>Nhập liệu → Chi phí</b>${one ? '' : ` (${list.length} công trình)`} · lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.</p>${tbl1}${tbl2}`;
 }
 
 // Chi tiết cấu thành CP kế hoạch ('kh') / CP thực chi ('chi'): chi phí theo nhóm + từng HĐ đầu vào

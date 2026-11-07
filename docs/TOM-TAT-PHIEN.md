@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.07.11.26 — Cửa sổ Dòng chi dùng đúng bảng tab Nhập liệu → Chi phí
+- Bấm Dòng chi (mục II, thẻ công trình…) → `bCostLive` lấy dữ liệu đúng nguồn tab Chi phí (`/api/du-an/:id/chi-phi` hoặc `/api/chi-phi-tong`)
+  và hiện 2 bảng chỉ xem: 1. Hợp đồng đầu vào (gộp theo HĐ CĐT, Mua lẻ, TỔNG HĐ ĐẦU VÀO / TỔNG GỒM MUA LẺ) · 2. Chi phí theo khối → nhóm → hạng mục.
+- Hai bảng này: sau VAT, lũy kế đến hiện tại (như tab Chi phí). Bảng tóm tắt theo công trình phía trên vẫn theo nút Trước / Sau VAT và kỳ báo cáo.
+- Kiểm tra: DEMO-01 47 HĐ, tổng CP sau VAT 83.703.146.260 = tab Chi phí. Điểm khôi phục: `phien-07.11.26-08h51`.
+
 ## V08.07.11.26 — Giảm sáng khối tóm tắt
 - Người dùng: sáng quá, chói → dịu màu số (#8fb0e8 / #e3ab76 / #6fd6c4), ánh sáng quanh chữ giảm còn ~0,2, Còn lại 21px.
 
