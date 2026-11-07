@@ -516,11 +516,15 @@ function bTongHopHtml(list, v, P) {
   const vt = v === 'gt' ? 'trước VAT' : 'sau VAT';
   const ty = (x) => `<span class="${x < 0 ? 'neg' : ''}">${bTy(x)}</span>`;
   const meter = (a, b, color) => `<span class="f-meter"><i style="width:${b > 0 ? Math.max(0, Math.min(100, (a / b) * 100)) : 0}%;background:${a < 0 ? '#d92d35' : color}"></i></span>`;
-  const card = (k, title, val, lines, unit = 'tỷ') => `<div class="f-card f-${k}" title="${unit === '%' ? '' : bn(val) + ' đ'}">
+  // ttd: số bấm được -> bảng chi tiết (dòng thu: các lần tiền về; dòng chi: chi phí theo nhóm + đã trả HĐ đầu vào)
+  const card = (k, title, val, lines, unit = 'tỷ', ttd = '') => `<div class="f-card f-${k}" title="${unit === '%' ? '' : bn(val) + ' đ'}">
       <div class="f-body"><div class="f-title">${title}</div>
-        <div class="f-val ${val < 0 ? 'neg' : ''}">${unit === '%' ? bpct(val, 1) : `${bTy(val)} <small>${TY()}</small>`}</div>
+        ${ttd ? `<button type="button" class="tt-link f-val ${val < 0 ? 'neg' : ''}" data-ttd="${ttd}" title="Bấm để xem bảng chi tiết">${bTy(val)} <small>${TY()}</small> <span class="tt-go" aria-hidden="true">›</span></button>`
+    : `<div class="f-val ${val < 0 ? 'neg' : ''}">${unit === '%' ? bpct(val, 1) : `${bTy(val)} <small>${TY()}</small>`}</div>`}
         <div class="f-lines">${lines.filter(Boolean).map((x) => `<div>${x}</div>`).join('')}</div></div></div>`;
   // Cột dự án tách riêng: STT | Mã DA | Tên dự án | Tình trạng
+  // Số trong bảng mục II bấm được -> bảng chi tiết của dự án đó (pid) hoặc tất cả (dòng tổng)
+  const tlk = (key, val, pid = 0) => `<button type="button" class="tt-link tt-sm ${val < 0 ? 'neg' : ''}" data-ttd="${key}"${pid ? ` data-ttp="${pid}"` : ''} title="Bấm để xem bảng chi tiết">${bTy(val)}</button>`;
   const prj = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma"><b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}">${esc(x.d.ten_du_an)}</td><td class="th-tt2"><span class="st st-${slug(x.d.trang_thai)} th-st">${esc(x.d.trang_thai)}</span></td>`;
   // Cột Hoàn thành = thanh mức đạt (tách từ ô tỷ lệ), cột tỷ lệ % bên phải
   const dTo = to === bNowYm() ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : `${lastDay(to)}/${to.slice(5)}/${to.slice(0, 4)}`;
@@ -574,16 +578,17 @@ function bTongHopHtml(list, v, P) {
 
     ${thHead('II', 'Dòng tiền thực tế', 'Tiền thật đã thu về và đã chi ra của dự án', [`Lũy kế đến ${dTo}`, vt[0].toUpperCase() + vt.slice(1)])}
     <div class="f-grid th-grid3">
-      ${card('dt', 'Dòng thu', T.thu, ['Tạm ứng + thanh toán + QT', `Đạt <b>${bpct(T.thu, T.hd_sv)}</b> DT hợp đồng`])}
-      ${card('cp', 'Dòng chi', T.chi, ['Chi phí đã chi + đã trả HĐ đầu vào', `Bằng <b>${bpct(T.chi, T.thu)}</b> dòng thu`])}
-      ${card('ln', 'Còn lại (thu − chi)', T.con, [T.con < 0 ? 'Đang chi nhiều hơn thu' : 'Tiền dự án đang có', 'Không gồm tiền vay, trả nợ gốc'])}
+      ${card('dt', 'Dòng thu', T.thu, ['Tạm ứng + thanh toán + QT', `Đạt <b>${bpct(T.thu, T.hd_sv)}</b> DT hợp đồng`], 'tỷ', 'thu')}
+      ${card('cp', 'Dòng chi', T.chi, ['Chi phí đã chi + đã trả HĐ đầu vào', `Bằng <b>${bpct(T.chi, T.thu)}</b> dòng thu`], 'tỷ', 'chi')}
+      ${card('ln', 'Còn lại (thu − chi)', T.con, [T.con < 0 ? 'Đang chi nhiều hơn thu' : 'Tiền dự án đang có', 'Không gồm tiền vay, trả nợ gốc'], 'tỷ', 'con')}
     </div>
     <div class="table-wrap"><table class="b-table th-table">
       ${hd(['Dòng thu', 'Dòng chi', 'Còn lại (Thu − Chi)'])}
-      <tbody>${rows.map((x, i) => `<tr>${prj(x, i)}<td class="num">${bTy(x.thu)}</td><td class="num">${bTy(x.chi)}</td>
-        <td class="num strong ${x.con < 0 ? 'neg' : 'pos'}">${bTy(x.con)}</td></tr>`).join('')}</tbody>
-      ${foot([bTy(T.thu), bTy(T.chi), ty(T.con)])}
+      <tbody>${rows.map((x, i) => `<tr>${prj(x, i)}<td class="num">${tlk('thu', x.thu, x.d.id)}</td><td class="num">${tlk('chi', x.chi, x.d.id)}</td>
+        <td class="num strong ${x.con < 0 ? 'neg' : 'pos'}">${tlk('con', x.con, x.d.id)}</td></tr>`).join('')}</tbody>
+      ${foot([tlk('thu', T.thu), tlk('chi', T.chi), tlk('con', T.con)])}
     </table></div>
+    <p class="muted small f-note tt-hint no-print">Bấm vào số <b>Dòng thu</b> / <b>Dòng chi</b> / <b>Còn lại</b> (ô lớn hoặc từng dự án) để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.</p>
     ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án, làm tròn tới 0,1 tỷ.</p>' : ''}
 
     ${thHead('III', 'Dòng tiền còn lại phải thu – chi', `Doanh thu, chi phí dự kiến TĐ${k3} (mục I) trừ dòng thu, dòng chi thực tế (mục II)`, [`Từ mục I (TĐ${k3}) và II`, vt[0].toUpperCase() + vt.slice(1)])}

@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.07.11.26 — Mục II Dòng tiền thực tế: bấm số xem bảng chi tiết
+- Ô lớn Dòng thu / Dòng chi / Còn lại và từng ô trong bảng dự án (cả dòng Tổng cộng) bấm được → mở bảng chi tiết sẵn có (`bThucDrill`):
+  Dòng thu = từng lần tiền về; Dòng chi = chi phí theo nhóm + đã trả từng HĐ đầu vào; Còn lại = thu − chi theo công trình.
+  Bấm ô của 1 dự án → chỉ dự án đó. Nút "Mở" trong bảng chi tiết tới tab nhập liệu của công trình.
+- Lưu ý: bảng chi tiết hiện số đồng, sau VAT (mục II có thể đang xem trước VAT). Có câu hướng dẫn dưới bảng; thêm câu dịch English.
+- Điểm khôi phục trước khi sửa: `phien-07.11.26-08h01` (V30.06.11.26).
+
 ## V30.06.11.26 — Dashboard PDF cân đối: căn giữa, kín bề ngang, Danh mục + Bản đồ cạnh nhau
 - `dpPrint()`: bố cục in cố định (không theo màn hình): 2 nhóm chỉ số / hàng, 4 khối I–IV một hàng, biểu đồ 3 cột, Danh mục (3 phần) + Bản đồ (1 phần) cạnh nhau,
   bản đồ cao bằng bảng; bỏ giới hạn bề rộng, căn giữa; thử bề rộng 1300 / 1450 / 1600 / 1800px × A4 dọc / ngang, chọn cách chữ to nhất mà vừa 1 trang.

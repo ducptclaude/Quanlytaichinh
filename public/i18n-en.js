@@ -1207,7 +1207,12 @@ window.BKS_EN = {
 "Đăng nhập – Quản trị tài chính": "Sign in – Financial Management",
 "Thu": "Collections",
 "Chi": "Expenditure",
-"Xem": "View"
+"Xem": "View",
+"Bấm để xem bảng chi tiết": "Click to view the detail table",
+"Bấm vào số Dòng thu / Dòng chi / Còn lại (ô lớn hoặc từng dự án) để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.": "Click a Collections / Expenditure / Balance figure (large tile or per project) to view the detail table: each collection, costs by group, payments on each procurement contract.",
+"Bấm vào số": "Click a",
+"để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.": "figure to view the detail table: each collection, costs by group, payments on each procurement contract.",
+"(ô lớn hoặc từng dự án)": "(large tile or per project)"
 },
 "patterns": [
 [

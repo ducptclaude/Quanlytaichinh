@@ -2781,3 +2781,10 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
   body.dbp-on #b-report .db, body.dbp-on #b-report .db * { break-inside: auto !important; break-after: auto !important; break-before: auto !important; }
   body.dbp-on #b-report .db-blk:hover, body.dbp-on #b-report .db-kpi:hover { transform: none !important; }
 }
+
+/* Mục II: số Dòng thu / Dòng chi / Còn lại bấm được -> bảng chi tiết */
+.f-card .tt-link.f-val { display: block; text-align: left; margin: 6px 0 0; font-family: inherit; font-size: 30px; letter-spacing: -.3px; font-weight: 800; line-height: 1.2; color: var(--fg-navy); white-space: nowrap; font-variant-numeric: tabular-nums; text-decoration: underline dotted; text-decoration-thickness: 2px; text-underline-offset: 7px; text-decoration-color: rgba(15,163,163,.55); }
+.f-card .tt-link.f-val:hover { text-decoration-style: solid; }
+.tt-go { display: inline-block; margin-left: 4px; font-size: .55em; font-weight: 700; color: var(--teal, #0fa3a3); vertical-align: middle; }
+.th-table .tt-link.tt-sm { font-weight: inherit; color: inherit; font-size: inherit; text-decoration: underline dotted; text-underline-offset: 3px; text-decoration-color: rgba(15,163,163,.6); }
+@media print { .f-card .tt-link.f-val { font-size: 15px; } .f-card .tt-link.f-val, .th-table .tt-link.tt-sm { text-decoration: none; } .tt-go { display: none; } }
