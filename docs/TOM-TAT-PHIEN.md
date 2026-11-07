@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V19.07.11.26 — Bảng nhập Số dư đầu kỳ; khung tóm tắt gọn
+- Bấm Số dư đầu kỳ → bảng nhập riêng (`bSddkDlg`): dòng Số dư chung (công ty) + từng dự án trong phạm vi đang xem (xem 1 dự án → chỉ dự án đó + chung);
+  ô nhập tự thêm dấu chấm, được âm; dòng Tổng cộng cập nhật khi gõ; Lưu chỉ gửi dòng thay đổi. Thay hộp nhập mặc định của trình duyệt.
+- Khung tóm tắt: bỏ chú thích cách tính, chỉ còn "đơn vị · trước/sau VAT"; bỏ đường kẻ dưới dòng Số dư cho gọn như ban đầu.
+
 ## V18.07.11.26 — Báo cáo: Số dư đầu kỳ
 - Khung tóm tắt cạnh tiêu đề báo cáo: **Số dư đầu kỳ** (nhập tay) → **Thực thu**, **Thực chi** (bấm mở bảng chi tiết như mục II)
   → **Còn lại = (Thực thu − Thực chi) + Số dư đầu kỳ**.

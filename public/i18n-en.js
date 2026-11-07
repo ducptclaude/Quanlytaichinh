@@ -1232,7 +1232,13 @@ window.BKS_EN = {
 "Số dư đầu kỳ": "Opening balance",
 "Nhập tay bởi Quản trị / Kế toán": "Entered manually by Admin / Accountant",
 "Bấm để nhập số dư đầu kỳ chung (công ty); tổng = số chung + số dư từng dự án": "Click to enter the company opening balance; total = company + each project's balance",
-"Số dư đầu kỳ phải là số nguyên (đồng)": "Opening balance must be an integer (VND)"
+"Số dư đầu kỳ phải là số nguyên (đồng)": "Opening balance must be an integer (VND)",
+"Số dư chung (công ty)": "Company opening balance",
+"Số dư đầu kỳ (đồng)": "Opening balance (VND)",
+"Chung": "Company",
+"Tiền thật đang có lúc bắt đầu theo dõi (đồng, được nhập số âm, để trống = 0). Báo cáo:": "Actual cash on hand when tracking starts (VND, negative allowed, blank = 0). Report:",
+"Còn lại = Thực thu − Thực chi + Số dư đầu kỳ": "Balance = Actual collections − Actual expenditure + Opening balance",
+". Xem tất cả dự án = số chung + tổng số dư từng dự án.": ". All projects = company balance + sum of project balances."
 },
 "patterns": [
 [
@@ -2110,6 +2116,10 @@ window.BKS_EN = {
 [
 "· để trống = {}",
 "· blank = {}"
+],
+[
+"Số dư đầu kỳ {}",
+"Opening balance {}"
 ],
 [
 "Chi phí · TĐ{}",

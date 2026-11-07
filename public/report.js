@@ -346,6 +346,53 @@ function bThucDrill(key, pid = 0, sec2 = false) {
   if (cfg.lines === 'chi') bCostLive(dlg.querySelector('.tt-live'), list).catch((e) => { const b = dlg.querySelector('.tt-live'); if (b) b.textContent = 'Không tải được bảng chi phí: ' + e.message; });
 }
 
+// Bảng nhập Số dư đầu kỳ: số chung (công ty) + từng dự án trong phạm vi đang xem; focusId: dòng được chọn sẵn (0 = chung)
+function bSddkDlg(focusId = 0) {
+  const SD = BC.so_du_dau_ky || { chung: 0, du_an: {} };
+  const list = focusId ? BC.du_an.filter((d) => d.id === focusId) : bScope().list;
+  const rows = [{ id: 0, ma: 'Chung', ten: 'Số dư chung (công ty)', v: Number(SD.chung) || 0 },
+    ...list.map((d) => ({ id: d.id, ma: d.ma_du_an, ten: d.ten_du_an, v: Number(SD.du_an[d.id]) || 0 }))];
+  const f = (n) => (n ? (n < 0 ? '-' : '') + Math.abs(n).toLocaleString('vi-VN') : '');
+  const num = (t) => { const neg = /^\s*-/.test(t); const d = String(t).replace(/[^\d]/g, ''); return d ? (neg ? -1 : 1) * Number(d) : 0; };
+  const dlg = document.createElement('dialog');
+  dlg.className = 'pass-dlg sddk-dlg';
+  dlg.innerHTML = `<form method="dialog" class="stack">
+    <div class="tt-dlg-h"><h3>Số dư đầu kỳ</h3><button type="button" class="pc-x" data-x title="Đóng">×</button></div>
+    <p class="muted small">Tiền thật đang có lúc bắt đầu theo dõi (đồng, được nhập số âm, để trống = 0). Báo cáo: <b>Còn lại = Thực thu − Thực chi + Số dư đầu kỳ</b>.
+      Xem tất cả dự án = số chung + tổng số dư từng dự án.</p>
+    <div class="table-wrap"><table class="b-table sddk-table"><thead><tr><th>Mã</th><th>Tên</th><th class="num">Số dư đầu kỳ (đồng)</th></tr></thead>
+      <tbody>${rows.map((r) => `<tr class="${r.id ? '' : 'sddk-chung'}"><td><b>${esc(r.ma)}</b></td><td>${esc(r.ten)}</td>
+        <td class="num"><input class="sddk-in" data-id="${r.id}" inputmode="numeric" autocomplete="off" value="${f(r.v)}" placeholder="0" aria-label="Số dư đầu kỳ ${esc(r.ma)}"></td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="2">Tổng cộng</td><td class="num sddk-tot"></td></tr></tfoot></table></div>
+    <div class="msg sddk-msg" role="alert"></div>
+    <div class="actions"><button type="submit" class="primary" value="save">Lưu</button><button type="button" data-x>Hủy</button></div>
+  </form>`;
+  document.body.appendChild(dlg);
+  const ins = [...dlg.querySelectorAll('.sddk-in')];
+  const tot = () => { dlg.querySelector('.sddk-tot').textContent = (ins.reduce((a, i) => a + num(i.value), 0)).toLocaleString('vi-VN'); };
+  ins.forEach((i) => i.addEventListener('input', () => { // tự thêm dấu chấm hàng nghìn
+    const n = num(i.value); const neg = /^\s*-/.test(i.value);
+    i.value = n ? f(n) : neg ? '-' : ''; tot();
+  }));
+  tot();
+  const close = () => { dlg.close(); dlg.remove(); };
+  dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('[data-x]')) close(); });
+  dlg.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = dlg.querySelector('button[type=submit]'); btn.disabled = true;
+    try {
+      let o = BC.so_du_dau_ky;
+      for (const i of ins) {
+        const id = Number(i.dataset.id), v = num(i.value), cu = rows.find((r) => r.id === id).v;
+        if (v !== cu) o = await api('/api/so-du-dau-ky', { method: 'PUT', body: JSON.stringify({ du_an_id: id, so_tien: v }) });
+      }
+      BC.so_du_dau_ky = o; close(); renderReport();
+    } catch (err) { dlg.querySelector('.sddk-msg').textContent = err.message; btn.disabled = false; }
+  });
+  dlg.showModal();
+  (ins.find((i) => Number(i.dataset.id) === focusId) || ins[0]).focus();
+}
+
 // Dòng chi: đúng 2 bảng của tab Nhập liệu → Chi phí (chỉ xem), cùng nguồn số liệu với tab đó (sau VAT, lũy kế đến hiện tại)
 async function bCostLive(box, list) {
   if (!box) return;
@@ -1348,7 +1395,7 @@ function renderReport() {
         ${it('sd', 'Số dư đầu kỳ', sd, canSd ? `data-sddk="${one1 ? one1.id : 0}"` : '', canSd ? (one1 ? `Bấm để nhập số dư đầu kỳ của ${esc(one1.ma_du_an)}` : 'Bấm để nhập số dư đầu kỳ chung (công ty); tổng = số chung + số dư từng dự án') : 'Nhập tay bởi Quản trị / Kế toán')}
         ${it('thu', 'Thực thu', C.thu, 'data-ttd="thu" data-tts="1"', 'Bấm để xem bảng chi tiết')}${it('chi', 'Thực chi', C.chi, 'data-ttd="chi" data-tts="1"', 'Bấm để xem bảng chi tiết')}
         ${it('con', 'Còn lại (thu − chi)', con)}
-        <div class="b-cash-u">${TYD()} · ${vt} · lũy kế đến hôm nay · Còn lại = thu − chi + số dư đầu kỳ</div></div>`;
+        <div class="b-cash-u">${TYD()} · ${vt}</div></div>`;
     })()}
   </div>
 
@@ -2124,17 +2171,7 @@ $('#b-report').addEventListener('click', (e) => {
   const ttd = e.target.closest('[data-ttd]');
   if (ttd) return bThucDrill(ttd.dataset.ttd, Number(ttd.dataset.ttp) || 0, ttd.dataset.tts === '1');
   const sdk = e.target.closest('[data-sddk]');
-  if (sdk) { // nhập số dư đầu kỳ (đồng): 0 = chung, id = dự án
-    const id = Number(sdk.dataset.sddk) || 0, SD = BC.so_du_dau_ky || { chung: 0, du_an: {} };
-    const cur = id ? Number(SD.du_an[id]) || 0 : Number(SD.chung) || 0;
-    const ten = id ? (BC.du_an.find((d) => d.id === id)?.ma_du_an || '') : 'chung (công ty)';
-    const v = prompt(`Số dư đầu kỳ ${ten} (đồng, được nhập số âm). Để trống = 0`, cur ? String(cur) : '');
-    if (v === null) return;
-    const n = Number(String(v).trim().replace(/[.\s,]/g, '') || 0);
-    if (!Number.isSafeInteger(n)) return alert('Số dư đầu kỳ phải là số nguyên (đồng)');
-    api('/api/so-du-dau-ky', { method: 'PUT', body: JSON.stringify({ du_an_id: id, so_tien: n }) })
-      .then((o) => { BC.so_du_dau_ky = o; renderReport(); }).catch((err) => alert(err.message));
-  }
+  if (sdk) return bSddkDlg(Number(sdk.dataset.sddk) || 0);
 });
 let bResize;
 window.addEventListener('resize', () => { clearTimeout(bResize); bResize = setTimeout(() => { if (BC && !$('#tab-report').hidden) bDrawCharts(bScope().list, BST.vat, bScope().one); }, 200); });
