@@ -3092,3 +3092,17 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 :root[data-theme="dark"] #b-report .th-sec { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0; border-radius: 0; }
 :root[data-theme="dark"] #b-report .th-sec::before { display: none; }
 :root[data-theme="dark"] #b-report .th-sec + .th-sec { margin-top: 34px; }
+/* Báo cáo – giao diện tối theo mẫu "xanh đêm": khung ngoài #0f1631, khối trong #151d3e, viền mảnh rất mờ, bóng phẳng (không phát sáng) */
+:root[data-theme="dark"] { --smoke-1: #0f1631; --smoke-2: #151d3e; }
+:root[data-theme="dark"] #b-report .card.b-sec { border: 1px solid rgba(255,255,255,.07) !important; box-shadow: 0 8px 24px -16px rgba(0,0,0,.8) !important; }
+:root[data-theme="dark"] .b-head,
+:root[data-theme="dark"] #b-report .th-head,
+:root[data-theme="dark"] #b-report .f-card,
+:root[data-theme="dark"] #b-report .tt-k,
+:root[data-theme="dark"] #b-report .pc-tile,
+:root[data-theme="dark"] #b-report .b-cash,
+:root[data-theme="dark"] #b-report .ht-box,
+:root[data-theme="dark"] #b-report .table-wrap { border-color: rgba(255,255,255,.08) !important; box-shadow: 0 6px 18px -12px rgba(0,0,0,.7) !important; }
+:root[data-theme="dark"] .b-head:hover, :root[data-theme="dark"] #b-report .f-card:hover, :root[data-theme="dark"] #b-report .tt-k:hover, :root[data-theme="dark"] #b-report .pc-tile:hover {
+  border-color: rgba(130,140,255,.28) !important; box-shadow: 0 10px 24px -12px rgba(0,0,0,.8) !important; }
+:root[data-theme="dark"] #b-report .f-card { border-top: 3px solid color-mix(in srgb, var(--f-ac) 80%, #151d3e) !important; }
