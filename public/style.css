@@ -3054,3 +3054,15 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 @media (max-width: 700px) { .ht-r { grid-template-columns: 1fr; } }
 /* Đánh giá hoàn thành: bỏ khoảng trống trên tiêu đề (tiêu đề là phần tử đầu khung) */
 .ht-sec > .th-head:first-child { margin-top: 0; }
+/* Báo cáo – giao diện tối: nền các khung đổi sang XÁM KHÓI (thay xanh navy), giữ viền neon + bóng */
+:root[data-theme="dark"] { --smoke-1: rgba(58,62,68,.55); --smoke-2: rgba(84,89,97,.50); }
+:root[data-theme="dark"] #b-report .card.b-sec,
+:root[data-theme="dark"] #b-report .th-sec { background: var(--smoke-1) !important; }
+:root[data-theme="dark"] .b-head,
+:root[data-theme="dark"] #b-report .th-head,
+:root[data-theme="dark"] #b-report .f-card,
+:root[data-theme="dark"] #b-report .tt-k,
+:root[data-theme="dark"] #b-report .table-wrap,
+:root[data-theme="dark"] #b-report .pc-tile,
+:root[data-theme="dark"] #b-report .b-cash,
+:root[data-theme="dark"] #b-report .ht-box { background: var(--smoke-2) !important; }

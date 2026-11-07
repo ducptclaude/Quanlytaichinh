@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V34.07.11.26 – Báo cáo giao diện tối: nền khung xám khói
+- Nền các khung Báo cáo (đầu báo cáo, mục lớn, tiêu đề mục, thẻ số, bảng, khung tổng hợp) đổi từ xanh navy sang xám khói; giữ viền neon + bóng. Giao diện sáng không đổi.
+
 ## V33.07.11.26 – Đánh giá hoàn thành: bỏ khoảng trống trên tiêu đề
 - Tiêu đề khung sát lề trên như các mục khác (bỏ khoảng cách 30px thừa).
 
