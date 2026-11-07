@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V14.07.11.26 — Cửa sổ chi tiết: thống nhất đơn vị
+- Mọi bảng trong cửa sổ Thực thu / Dòng chi (bảng tóm tắt, các lần tiền về, HĐ đầu vào, khối → nhóm, CP kế hoạch) dùng cùng 1 đơn vị
+  theo ô "Đơn vị" (`mtr` – mặc định triệu đồng như tab Chi phí; rê chuột xem số đồng). Ghi chú đầu cửa sổ ghi tên đơn vị đang dùng.
+
 ## V13.07.11.26 — Cửa sổ Thực thu: Doanh thu – Thực thu – Còn lại; tiền về gộp theo HĐ, có tổng
 - Bảng trên (cửa sổ "thu"): **Doanh thu dự kiến (TĐ1 – ban đầu)** | Thực thu | **Còn lại phải thu** = DT − thực thu.
   DT TĐ1 như mục I: đã chốt lấy số chốt, chưa chốt `bSysMoc(d,1)`; Sau VAT quy đổi theo VAT HĐ gốc, làm tròn 0,1 tỷ. DEMO-01: 103,233 / 113,60 tỷ = mục I.

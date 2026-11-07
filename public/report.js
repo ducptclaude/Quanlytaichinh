@@ -292,7 +292,7 @@ function bThucDrill(key, pid = 0, sec2 = false) {
   const main = cols[cols.length - 1][0];
   rows.sort((a, b) => Math.abs(b[main]) - Math.abs(a[main]));
   const tot = Object.fromEntries(cols.map(([k]) => [k, rows.reduce((s2, x) => s2 + x[k], 0)]));
-  const cell = (v) => `<td class="num ${v < 0 ? 'neg' : ''}">${bn(v)}</td>`;
+  const cell = (v) => `<td class="num ${v < 0 ? 'neg' : ''}">${mtr(v)}</td>`;
   const inRange = (ngay) => (!ngay ? to >= bNowYm() : String(ngay).slice(0, 7) <= to);
   let lines = '';
   if (cfg.lines === 'chi') lines = '<div class="tt-live muted small">Đang tải bảng chi phí từ tab Nhập liệu → Chi phí…</div>'; // thay bằng đúng bảng tab Chi phí
@@ -303,26 +303,26 @@ function bThucDrill(key, pid = 0, sec2 = false) {
       : d.chi_tiet.tien_ve.map((r) => ({ d, ngay: r.ngay, a: r.hd, b: r.loai, v: Math.round(r.so_tien * sc(d, 'rT')) }))).filter((x) => inRange(x.ngay)))
       .sort((a, b) => String(b.ngay || '').localeCompare(String(a.ngay || '')));
     const tot = L.reduce((a, x) => a + (x.v || 0), 0);
-    const r1 = (x, g) => `<tr${g ? ` data-tvg="${g}" hidden` : ''}><td>${dmy(x.ngay) || '<span class="muted">chưa có ngày</span>'}</td><td><b>${esc(x.d.ma_du_an)}</b></td><td>${esc(x.a || '')}</td><td>${esc(x.b || '')}</td><td class="num">${bn(x.v)}</td></tr>`;
+    const r1 = (x, g) => `<tr${g ? ` data-tvg="${g}" hidden` : ''}><td>${dmy(x.ngay) || '<span class="muted">chưa có ngày</span>'}</td><td><b>${esc(x.d.ma_du_an)}</b></td><td>${esc(x.a || '')}</td><td>${esc(x.b || '')}</td><td class="num">${mtr(x.v)}</td></tr>`;
     let body;
     if (cfg.lines === 'tv') { // gộp theo hợp đồng (công trình + HĐ), mặc định thu gọn
       const G = new Map();
       for (const x of L) { const k = x.d.ma_du_an + '|' + (x.a || ''); if (!G.has(k)) G.set(k, []); G.get(k).push(x); }
       body = [...G].map(([k, rows], gi) => `<tr class="tv-head-row"><td colspan="2"><button type="button" class="grp-toggle" data-tvt="g${gi}" title="Mở / thu gọn">▸</button><b>${esc(rows[0].d.ma_du_an)}</b></td>
-        <td><b>${esc(rows[0].a || 'Chưa chọn HĐ')}</b></td><td class="muted small">${rows.length} lần tiền về</td><td class="num strong">${bn(rows.reduce((a, x) => a + (x.v || 0), 0))}</td></tr>`
+        <td><b>${esc(rows[0].a || 'Chưa chọn HĐ')}</b></td><td class="muted small">${rows.length} lần tiền về</td><td class="num strong">${mtr(rows.reduce((a, x) => a + (x.v || 0), 0))}</td></tr>`
         + rows.map((x) => r1(x, 'g' + gi)).join('')).join('');
     } else body = L.slice(0, 300).map((x) => r1(x)).join('');
     lines = `<h4 class="tt-h4">${{ goc: 'Các lần trả nợ gốc', vay: 'Các lần nhận tiền vay', tv: 'Các lần tiền về' }[cfg.lines]} (${L.length})${cfg.lines === 'tv' && L.length ? ' <button type="button" class="sm tt-all" data-tvall>Mở tất cả</button>' : ''}</h4>
       <div class="table-wrap tt-dl tt-tv"><table class="b-table"><thead><tr><th>Ngày</th><th>Công trình</th><th>${cfg.lines === 'tv' ? 'Hợp đồng' : 'Ngân hàng'}</th><th>Nội dung</th><th class="num">Số tiền</th></tr></thead>
       <tbody>${body || '<tr><td colspan="5" class="empty">Chưa có dòng nào</td></tr>'}</tbody>
-      <tfoot><tr><td colspan="4">Tổng cộng (${L.length} lần)</td><td class="num">${bn(tot)}</td></tr></tfoot></table></div>`;
+      <tfoot><tr><td colspan="4">Tổng cộng (${L.length} lần)</td><td class="num">${mtr(tot)}</td></tr></tfoot></table></div>`;
   }
   const dlg = document.createElement('dialog');
   dlg.className = 'pass-dlg tt-dlg';
   dlg.innerHTML = `<div class="stack">
     <div class="tt-dlg-h"><h3>${cfg.t}</h3><button type="button" class="pc-x" data-x title="Đóng">×</button></div>
     <div class="tt-formula">${cfg.f}</div>
-    <p class="muted small">${cfg.lines === 'kh' ? 'Theo hợp đồng' : `Lũy kế đến hết ${ymTxt(to)}`} · ${gt ? 'đồng, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án; số tổng mỗi dự án làm tròn 0,1 tỷ như mục II)' : 'đồng, sau VAT'} · ${pid ? `<b>${esc(list[0].ma_du_an)}</b> ${esc(list[0].ten_du_an)}` : `${list.length} công trình`} · bấm <b>Mở</b> để tới tab ${cfg.go === 'cost' ? 'Chi phí' : 'Doanh thu'} của công trình</p>
+    <p class="muted small">${cfg.lines === 'kh' ? 'Theo hợp đồng' : `Lũy kế đến hết ${ymTxt(to)}`} · ${dvU('trieu').ten}, ${gt ? 'trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án; số tổng mỗi dự án làm tròn 0,1 tỷ như mục II)' : 'sau VAT'} · ${pid ? `<b>${esc(list[0].ma_du_an)}</b> ${esc(list[0].ten_du_an)}` : `${list.length} công trình`} · bấm <b>Mở</b> để tới tab ${cfg.go === 'cost' ? 'Chi phí' : 'Doanh thu'} của công trình</p>
     <div class="table-wrap"><table class="b-table"><thead><tr><th>Công trình</th>${cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}<th></th></tr></thead>
       <tbody>${rows.map((x) => `<tr><td><b>${esc(x.d.ma_du_an)}</b> <span class="muted small">${esc(x.d.ten_du_an)}</span></td>${cols.map(([k]) => cell(x[k])).join('')}
         <td><button type="button" class="sm" data-tgo="${cfg.go}" data-id="${x.d.id}">Mở</button></td></tr>`).join('')}</tbody>
@@ -400,16 +400,16 @@ async function bCostLive(box, list) {
   const body2 = KH.map((k) => {
     const tk = tong.theo_khoi?.[k.code]; if (!tk || !tk.so_dong) return '';
     const nh = NH.filter((x) => x.khoi === k.code && tong.theo_nhom?.[x.code]?.so_dong);
-    return `<tr class="tt-c-khoi"><td></td><td><button type="button" class="grp-toggle" data-tg="k-${k.code}" title="Mở / thu gọn">▸</button><b>${esc(k.ten)}</b> <span class="muted small">(${nh.length} nhóm)</span></td><td class="num strong">${dvm(tk.gia_tri)}</td><td class="num strong">${dvm(tk.sau_vat)}</td><td class="num">${pct(tk.sau_vat)}</td></tr>`
+    return `<tr class="tt-c-khoi"><td></td><td><button type="button" class="grp-toggle" data-tg="k-${k.code}" title="Mở / thu gọn">▸</button><b>${esc(k.ten)}</b> <span class="muted small">(${nh.length} nhóm)</span></td><td class="num strong">${mtr(tk.gia_tri)}</td><td class="num strong">${mtr(tk.sau_vat)}</td><td class="num">${pct(tk.sau_vat)}</td></tr>`
       + nh.map((x) => { const t = tong.theo_nhom[x.code]; n2++;
-        return `<tr data-g="k-${k.code}" hidden><td class="num">${n2}</td><td class="indent-1"><b>${esc(x.ten)}</b> <span class="muted small">(${t.so_dong} dòng)</span></td><td class="num">${dvm(t.gia_tri)}</td><td class="num">${dvm(t.sau_vat)}</td><td class="num">${pct(t.sau_vat)}</td></tr>`
-          + (x.sub || []).filter((sc) => t.sub?.[sc.code]?.so_dong).map((sc) => `<tr data-g="k-${k.code}" hidden><td></td><td class="indent-2 muted"><span class="tree">└</span>${esc(sc.ten)}</td><td class="num">${dvm(t.sub[sc.code].gia_tri)}</td><td class="num">${dvm(t.sub[sc.code].sau_vat)}</td><td></td></tr>`).join(''); }).join('');
+        return `<tr data-g="k-${k.code}" hidden><td class="num">${n2}</td><td class="indent-1"><b>${esc(x.ten)}</b> <span class="muted small">(${t.so_dong} dòng)</span></td><td class="num">${mtr(t.gia_tri)}</td><td class="num">${mtr(t.sau_vat)}</td><td class="num">${pct(t.sau_vat)}</td></tr>`
+          + (x.sub || []).filter((sc) => t.sub?.[sc.code]?.so_dong).map((sc) => `<tr data-g="k-${k.code}" hidden><td></td><td class="indent-2 muted"><span class="tree">└</span>${esc(sc.ten)}</td><td class="num">${mtr(t.sub[sc.code].gia_tri)}</td><td class="num">${mtr(t.sub[sc.code].sau_vat)}</td><td></td></tr>`).join(''); }).join('');
   }).join('');
   const tbl2 = `<h4 class="tt-h4">2. Chi phí theo khối → nhóm ${allBtn('k')}</h4>
     <div class="table-wrap tt-dl"><table class="b-table tt-cost-tree"><thead><tr><th>#</th><th>Khối / Nhóm chi phí</th><th class="num">Trước VAT</th><th class="num">Sau VAT</th><th class="num">Tỷ trọng</th></tr></thead>
     <tbody>${body2 || '<tr><td colspan="5" class="empty">Chưa có chi phí</td></tr>'}</tbody>
-    <tfoot><tr><td></td><td>Tổng chi phí</td><td class="num">${dvm(tong.gia_tri)}</td><td class="num">${dvm(tong.sau_vat)}</td><td class="num">100%</td></tr></tfoot></table></div>
-    ${tong.ngoai_cp?.so_dong ? `<p class="muted small">Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}</p>` : ''}`;
+    <tfoot><tr><td></td><td>Tổng chi phí</td><td class="num">${mtr(tong.gia_tri)}</td><td class="num">${mtr(tong.sau_vat)}</td><td class="num">100%</td></tr></tfoot></table></div>
+    ${tong.ngoai_cp?.so_dong ? `<p class="muted small">Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat, 'trieu')}</p>` : ''}`;
   const host = box.parentNode;
   box.outerHTML = `<div class="tt-live-wrap"><p class="muted small tt-live-note">Hai bảng dưới lấy trực tiếp từ <b>Nhập liệu → Chi phí</b>${one ? '' : ` (${list.length} công trình)`} · lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.</p>${tbl1}${tbl2}</div>`;
   const W = host.querySelector('.tt-live-wrap');
@@ -445,16 +445,16 @@ function bDrillCost(kind, list, inRange, toNow, f = () => 1) {
   const head = (t, n) => `<h4>${t}${n !== undefined ? ` (${n})` : ''}</h4>`;
   const cpTbl = `${head(kind === 'kh' ? 'Chi phí khác đã ghi nhận – theo nhóm' : 'Chi phí đã chi – theo nhóm')}
     <div class="table-wrap tt-dl"><table class="b-table"><thead><tr><th>Khối</th><th>Nhóm chi phí</th><th class="num">Số tiền</th></tr></thead>
-    <tbody>${gRows.map((x) => `<tr><td class="muted small">${esc(x.k[0])}</td><td>${esc(x.k[1])}</td><td class="num">${bn(x.v)}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">Chưa có chi phí</td></tr>'}</tbody>
-    <tfoot><tr><td colspan="2">Cộng</td><td class="num">${bn(gTot)}</td></tr></tfoot></table></div>`;
+    <tbody>${gRows.map((x) => `<tr><td class="muted small">${esc(x.k[0])}</td><td>${esc(x.k[1])}</td><td class="num">${mtr(x.v)}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">Chưa có chi phí</td></tr>'}</tbody>
+    <tfoot><tr><td colspan="2">Cộng</td><td class="num">${mtr(gTot)}</td></tr></tfoot></table></div>`;
   if (kind === 'chi' && !toNow) return cpTbl + '<p class="muted small">Chi tiết đã trả từng HĐ đầu vào chỉ có khi xem lũy kế đến hiện tại.</p>';
   const tpTbl = `${head(kind === 'kh' ? 'HĐ đầu vào theo HĐ/QT' : 'Đã trả HĐ đầu vào – từng hợp đồng', tps.length)}
     <div class="table-wrap tt-dl"><table class="b-table"><thead><tr>${many ? '<th>Công trình</th>' : ''}<th>HĐ chủ đầu tư</th><th>Số HĐ</th><th>Đối tác</th>
       <th class="num">HT/QT${kind === 'kh' ? ' (kế hoạch)' : ''}</th>${kind === 'chi' ? '<th class="num">Đã trả</th><th class="num">Còn phải trả</th>' : ''}<th>Trạng thái</th></tr></thead>
     <tbody>${tps.slice(0, 300).map((c) => `<tr>${many ? `<td><b>${esc(c.d.ma_du_an)}</b></td>` : ''}<td class="muted small">${esc(c.hd_cdt)}</td><td><b>${esc(c.so_ma)}</b></td><td>${esc(c.doi_tac || '')}</td>
-      <td class="num">${bn(c.qt_sv)}</td>${kind === 'chi' ? `<td class="num strong">${bn(c.da_tt)}</td><td class="num ${c.con_lai < 0 ? 'neg' : ''}">${bn(c.con_lai)}</td>` : ''}<td class="small">${esc(c.trang_thai)}</td></tr>`).join('')
+      <td class="num">${mtr(c.qt_sv)}</td>${kind === 'chi' ? `<td class="num strong">${mtr(c.da_tt)}</td><td class="num ${c.con_lai < 0 ? 'neg' : ''}">${mtr(c.con_lai)}</td>` : ''}<td class="small">${esc(c.trang_thai)}</td></tr>`).join('')
       || `<tr><td colspan="${many ? 8 : 7}" class="empty">Chưa có HĐ đầu vào</td></tr>`}</tbody>
-    <tfoot><tr><td colspan="${many ? 4 : 3}">Cộng</td><td class="num">${bn(tTot('qt_sv'))}</td>${kind === 'chi' ? `<td class="num">${bn(tTot('da_tt'))}</td><td class="num">${bn(tTot('con_lai'))}</td>` : ''}<td></td></tr></tfoot></table></div>`;
+    <tfoot><tr><td colspan="${many ? 4 : 3}">Cộng</td><td class="num">${mtr(tTot('qt_sv'))}</td>${kind === 'chi' ? `<td class="num">${mtr(tTot('da_tt'))}</td><td class="num">${mtr(tTot('con_lai'))}</td>` : ''}<td></td></tr></tfoot></table></div>`;
   return kind === 'kh' ? tpTbl + cpTbl : cpTbl + tpTbl;
 }
 
