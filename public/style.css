@@ -3086,3 +3086,5 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
   border-color: rgba(255,255,255,.32) !important;
   box-shadow: 0 1px 0 rgba(255,255,255,.09) inset, 0 16px 30px -12px rgba(0,0,0,.85) !important; }
 :root[data-theme="dark"] #b-report .f-card { border-top: 3px solid color-mix(in srgb, var(--f-ac) 75%, #2a2e34) !important; }
+/* Báo cáo – giao diện tối: nền khung XANH THAN ĐẬM (thay xám khói) – khung ngoài trầm hơn, khối bên trong sáng hơn một bậc */
+:root[data-theme="dark"] { --smoke-1: rgba(24,34,48,.82); --smoke-2: #1e2a3a; }
