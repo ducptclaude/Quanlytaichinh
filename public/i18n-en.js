@@ -1218,7 +1218,9 @@ window.BKS_EN = {
 "Hai bảng dưới lấy trực tiếp từ": "The two tables below come directly from",
 "Nhập liệu → Chi phí": "Data entry → Cost",
 "· lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.": "· cumulative to date · after VAT · unit per the Unit box.",
-"Mở / thu gọn": "Expand / collapse"
+"Mở / thu gọn": "Expand / collapse",
+"Chi phí dự kiến (TĐ1 – ban đầu)": "Forecast cost (M1 – initial)",
+"Còn lại phải chi": "Remaining to pay"
 },
 "patterns": [
 [

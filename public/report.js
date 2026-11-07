@@ -270,12 +270,20 @@ function bThucDrill(key, pid = 0, sec2 = false) {
       const { rT, rC } = bVatR(d);
       x.thu = bQ01(x.thu, rT); x.chi = bQ01(x.chi, rC); x.cp = Math.round(x.cp * rC); x.tp = x.chi - x.cp; x.con = x.thu - x.chi;
     }
+    if (key === 'chi') { // Chi phí dự kiến ban đầu = chi phí TĐ1 (như mục I): đã chốt lấy số chốt, chưa chốt hệ thống tự tính theo HĐ gốc
+      const td1 = (d.thoi_diem || []).find((t) => t.td === 1);
+      const c1 = td1 ? Number(td1.cp) || 0 : bSysMoc(d, 1).cp; // trước VAT
+      const cpGt = d.du_kien.chi_phi.gt, cpSv = d.du_kien.chi_phi.sv;
+      x.cp1 = gt ? Math.round(c1) : Math.round((c1 * (cpGt ? cpSv / cpGt : 1.1)) / 1e8) * 1e8; // sau VAT: quy đổi, làm tròn 0,1 tỷ như mục I
+      x.con_chi = x.cp1 - x.chi;
+    }
     return { d, ...x, kh_con: x.kh_thu - x.kh_chi };
   });
+  const cols = key === 'chi' ? [['cp1', 'Chi phí dự kiến (TĐ1 – ban đầu)'], ['chi', 'Thực chi'], ['con_chi', 'Còn lại phải chi']] : cfg.cols;
   const sc = (d, k) => (gt ? bVatR(d)[k] : 1); // hệ số quy đổi cho từng dòng chi tiết
-  const main = cfg.cols[cfg.cols.length - 1][0];
+  const main = cols[cols.length - 1][0];
   rows.sort((a, b) => Math.abs(b[main]) - Math.abs(a[main]));
-  const tot = Object.fromEntries(cfg.cols.map(([k]) => [k, rows.reduce((s2, x) => s2 + x[k], 0)]));
+  const tot = Object.fromEntries(cols.map(([k]) => [k, rows.reduce((s2, x) => s2 + x[k], 0)]));
   const cell = (v) => `<td class="num ${v < 0 ? 'neg' : ''}">${bn(v)}</td>`;
   const inRange = (ngay) => (!ngay ? to >= bNowYm() : String(ngay).slice(0, 7) <= to);
   let lines = '';
@@ -296,10 +304,10 @@ function bThucDrill(key, pid = 0, sec2 = false) {
     <div class="tt-dlg-h"><h3>${cfg.t}</h3><button type="button" class="pc-x" data-x title="Đóng">×</button></div>
     <div class="tt-formula">${cfg.f}</div>
     <p class="muted small">${cfg.lines === 'kh' ? 'Theo hợp đồng' : `Lũy kế đến hết ${ymTxt(to)}`} · ${gt ? 'đồng, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án; số tổng mỗi dự án làm tròn 0,1 tỷ như mục II)' : 'đồng, sau VAT'} · ${pid ? `<b>${esc(list[0].ma_du_an)}</b> ${esc(list[0].ten_du_an)}` : `${list.length} công trình`} · bấm <b>Mở</b> để tới tab ${cfg.go === 'cost' ? 'Chi phí' : 'Doanh thu'} của công trình</p>
-    <div class="table-wrap"><table class="b-table"><thead><tr><th>Công trình</th>${cfg.cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}<th></th></tr></thead>
-      <tbody>${rows.map((x) => `<tr><td><b>${esc(x.d.ma_du_an)}</b> <span class="muted small">${esc(x.d.ten_du_an)}</span></td>${cfg.cols.map(([k]) => cell(x[k])).join('')}
+    <div class="table-wrap"><table class="b-table"><thead><tr><th>Công trình</th>${cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}<th></th></tr></thead>
+      <tbody>${rows.map((x) => `<tr><td><b>${esc(x.d.ma_du_an)}</b> <span class="muted small">${esc(x.d.ten_du_an)}</span></td>${cols.map(([k]) => cell(x[k])).join('')}
         <td><button type="button" class="sm" data-tgo="${cfg.go}" data-id="${x.d.id}">Mở</button></td></tr>`).join('')}</tbody>
-      <tfoot><tr><td>Tổng cộng</td>${cfg.cols.map(([k]) => cell(tot[k])).join('')}<td></td></tr></tfoot></table></div>
+      <tfoot><tr><td>Tổng cộng</td>${cols.map(([k]) => cell(tot[k])).join('')}<td></td></tr></tfoot></table></div>
     ${lines}
   </div>`;
   document.body.appendChild(dlg);
