@@ -1223,7 +1223,10 @@ window.BKS_EN = {
 "Còn lại phải chi": "Remaining to pay",
 "Doanh thu dự kiến (TĐ1 – ban đầu)": "Forecast revenue (M1 – initial)",
 "Còn lại phải thu": "Remaining receivable",
-"Chưa có dòng nào": "No rows yet"
+"Chưa có dòng nào": "No rows yet",
+"Tiến độ (ngày)": "Duration (days)",
+"= ngày kết thúc − ngày bắt đầu": "= end date − start date",
+"Nhập đủ ngày bắt đầu và ngày kết thúc": "Enter both start and end dates"
 },
 "patterns": [
 [
@@ -2409,6 +2412,10 @@ window.BKS_EN = {
 [
 "Tổng {}",
 "Total {}"
+],
+[
+"{} ngày",
+"{} days"
 ],
 [
 "Năm {}",

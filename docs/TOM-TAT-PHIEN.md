@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V15.07.11.26 — Biểu mẫu Thêm dự án: 9 ô, Tiến độ (ngày)
+- Thứ tự ô: Mã dự án · Tên dự án · Chủ đầu tư · Loại công trình · Địa điểm · Trạng thái · **Tiến độ (ngày)** · Ngày bắt đầu · Ngày kết thúc.
+- Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu, tự tính khi nhập (`pDays` trong `public/app.js`), chỉ hiện, không lưu; âm thì đỏ.
+- Ẩn khỏi biểu mẫu nhưng GIỮ giá trị khi sửa (ô ẩn vẫn gửi đi): Khu vực, Vị trí (tọa độ), Tiến độ (%) – vẫn dùng cho bản đồ, doanh thu theo khu vực,
+  tiến độ bình quân. Đã thử: sửa DEMO-01 → tọa độ 11.0632, 106.7952 / khu vực / tiến độ 58% giữ nguyên.
+- Lưu ý: dự án mới không nhập được tọa độ / tiến độ % → không hiện trên bản đồ, tiến độ % = 0. Điểm khôi phục: `phien-07.11.26-10h30`.
+
 ## V14.07.11.26 — Cửa sổ chi tiết: thống nhất đơn vị
 - Mọi bảng trong cửa sổ Thực thu / Dòng chi (bảng tóm tắt, các lần tiền về, HĐ đầu vào, khối → nhóm, CP kế hoạch) dùng cùng 1 đơn vị
   theo ô "Đơn vị" (`mtr` – mặc định triệu đồng như tab Chi phí; rê chuột xem số đồng). Ghi chú đầu cửa sổ ghi tên đơn vị đang dùng.

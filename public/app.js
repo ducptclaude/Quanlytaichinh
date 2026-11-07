@@ -251,6 +251,7 @@ function resetProjectForm() {
   pForm.reset();
   pForm.elements.id.value = '';
   $('#p-form-title').textContent = 'Thêm dự án';
+  pDays();
 }
 
 pForm?.addEventListener('submit', async (e) => {
@@ -276,6 +277,16 @@ pForm?.addEventListener('submit', async (e) => {
   }
 });
 $('#p-map-pick')?.addEventListener('click', () => mapPicker(pForm.elements.toa_do));
+// Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu (tự tính, chỉ hiện)
+function pDays() {
+  const o = $('#p-days'); if (!o || !pForm) return;
+  const a = pForm.elements.ngay_bat_dau?.value, b = pForm.elements.ngay_ket_thuc?.value;
+  if (!a || !b) { o.textContent = '—'; o.title = 'Nhập đủ ngày bắt đầu và ngày kết thúc'; return; }
+  const n = Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+  o.textContent = Number.isFinite(n) ? `${n.toLocaleString('vi-VN')} ngày` : '—';
+  o.classList.toggle('neg', n < 0); o.title = n < 0 ? 'Ngày kết thúc trước ngày bắt đầu' : '';
+}
+pForm?.addEventListener('input', pDays); pForm?.addEventListener('change', pDays);
 $('#p-cancel')?.addEventListener('click', () => { resetProjectForm(); showMsg($('#p-msg'), ''); });
 $('#p-search').addEventListener('input', renderProjects);
 
@@ -293,6 +304,7 @@ $('#p-tbody').addEventListener('click', async (e) => {
     for (const [k, v] of Object.entries(r)) if (pForm.elements[k]) pForm.elements[k].value = v ?? '';
     pForm.elements.toa_do.value = r.vi_do != null && r.kinh_do != null ? mapFmt(Number(r.vi_do), Number(r.kinh_do)) : '';
     $('#p-form-title').textContent = 'Sửa dự án ' + r.ma_du_an;
+    pDays();
     pForm.scrollIntoView({ behavior: 'smooth' });
   }
   if (del) { // xóa dự án = xóa toàn bộ dữ liệu liên quan -> hiện số dòng bị xóa và bắt buộc Passcode

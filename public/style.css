@@ -2867,3 +2867,6 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 .tt-live-wrap tfoot td { font-weight: 800; }
 :root[data-theme="dark"] .tt-live-wrap .tt-c-khoi td { background: rgba(255,255,255,.04); }
 .tt-tv { max-height: none !important; } .tt-tv tfoot td { font-weight: 800; }
+/* Ô Tiến độ (ngày) tự tính ở biểu mẫu dự án */
+.p-days { display: block; padding: 10px 12px; border-radius: 10px; border: 1px dashed var(--border); background: var(--bg-f8fafc); font-weight: 700; color: var(--fg-navy); font-variant-numeric: tabular-nums; }
+.p-days.neg { color: var(--danger); }
