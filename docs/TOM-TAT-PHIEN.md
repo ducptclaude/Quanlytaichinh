@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.07.11.26 — Dashboard tối: giữ viền ngoài từng vùng
+- Người dùng yêu cầu giữ outline ngoài của từng vùng: `.db-flow`, `.db-kg` có lại viền mảnh `rgba(255,255,255,.12)`, nền vẫn trong suốt; khối bên trong giữ neon.
+
 ## V03.07.11.26 — Dashboard tối: nền khung trong suốt, khối nổi neon
 - Chỉ giao diện tối: khung `.db-flow` (4 khối I–IV) và `.db-kg` (2 cụm trên cùng) nền trong suốt 100%, bỏ viền/bóng.
 - Các khối `.db-blk`, `.db-kpi`, `.db-card`, bảng Kế hoạch – Thực – Còn lại: nền kính, nổi lên 3px, viền + bóng neon nhẹ theo màu khối
