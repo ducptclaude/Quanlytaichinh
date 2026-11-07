@@ -3052,3 +3052,5 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
   .ht-r > .ht-box { grid-row: auto !important; grid-column: auto !important; }
 }
 @media (max-width: 700px) { .ht-r { grid-template-columns: 1fr; } }
+/* Đánh giá hoàn thành: bỏ khoảng trống trên tiêu đề (tiêu đề là phần tử đầu khung) */
+.ht-sec > .th-head:first-child { margin-top: 0; }

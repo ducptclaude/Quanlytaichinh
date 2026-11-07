@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V33.07.11.26 – Đánh giá hoàn thành: bỏ khoảng trống trên tiêu đề
+- Tiêu đề khung sát lề trên như các mục khác (bỏ khoảng cách 30px thừa).
+
 ## V32.07.11.26 – Đánh giá hoàn thành: tách khung tổng hợp
 - Tách thành 2 khung riêng, đối xứng, cao bằng nhau: "Tổng hợp đánh giá" | "Cơ cấu đánh giá" (điện thoại: xếp dọc).
 
