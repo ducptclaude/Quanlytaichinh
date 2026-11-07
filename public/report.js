@@ -1393,7 +1393,7 @@ function renderReport() {
         ? `<button type="button" class="tt-link b-cash-v ${x < 0 ? 'neg' : ''}" ${attr} title="${tip}">${bTy(x)}</button>` : `<b class="${x < 0 ? 'neg' : ''}">${bTy(x)}</b>`}</div>`;
       return `<div class="b-cash" title="Lũy kế · ${vt} · không gồm tiền vay, trả nợ gốc">
         ${it('sd', 'Số dư đầu kỳ', sd, canSd ? `data-sddk="${one1 ? one1.id : 0}"` : '', canSd ? (one1 ? `Bấm để nhập số dư đầu kỳ của ${esc(one1.ma_du_an)}` : 'Bấm để nhập số dư đầu kỳ chung (công ty); tổng = số chung + số dư từng dự án') : 'Nhập tay bởi Quản trị / Kế toán')}
-        ${it('thu', 'Thực thu', C.thu, 'data-ttd="thu" data-tts="1"', 'Bấm để xem bảng chi tiết')}${it('chi', 'Thực chi', C.chi, 'data-ttd="chi" data-tts="1"', 'Bấm để xem bảng chi tiết')}
+        ${it('thu', 'Thực thu', C.thu)}${it('chi', 'Thực chi', C.chi)}
         ${it('con', 'Còn lại (thu − chi)', con)}
         <div class="b-cash-u">${TYD()} · ${vt}</div></div>`;
     })()}

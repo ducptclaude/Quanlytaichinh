@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V21.07.11.26 — Khung tóm tắt: Thực thu / Thực chi không dẫn số
+- Bỏ liên kết (bấm mở bảng chi tiết) ở Thực thu, Thực chi trong khung tóm tắt cạnh tiêu đề báo cáo; chỉ Số dư đầu kỳ bấm được để nhập.
+  Bảng chi tiết vẫn mở được từ mục II Dòng tiền thực tế.
+
 ## V20.07.11.26 — Bảng nhập Số dư: ô nhập chuẩn
 - Ô nhập cỡ chữ 14px như phần Nhập liệu (trước đó bị kế thừa chữ to → số bị cắt), cột 240px, hiện đủ 1.000.000.000.000.
 - Cửa sổ rộng tới 720px (điện thoại: gần hết màn hình), tiêu đề màu xanh hệ thống (không dùng màu đỏ của hộp passcode).
