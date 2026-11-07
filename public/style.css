@@ -2975,3 +2975,41 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
   #b-report .b-detail table.b-table:not(.th-table) { font-size: 11.5px; }
   #b-report .b-detail table.b-table:not(.th-table) td:first-child { min-width: 150px; }
 }
+
+/* Đánh giá hoàn thành – thu tiền (thay khung Bản đồ): trái = bảng từng dự án, phải = tổng hợp + cơ cấu đánh giá */
+.ht-w { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; margin-top: 12px; }
+@media (max-width: 1100px) { .ht-w { grid-template-columns: 1fr; } }
+.ht-r { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-fbf8f3, #fbf8f3); }
+.ht-sum th { text-align: left; font-weight: 600; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 13px; background: transparent; }
+.ht-sum td { font-size: 15px; } .ht-sum .ht-big { font-size: 20px; }
+.ht-pt { font-size: 12.5px; font-weight: 800; color: var(--fg-navy); margin-top: 4px; }
+.ht-scale td { padding: 5px 8px; font-size: 12.5px; }
+.xl { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.xl-rt { background: #dcfce7; color: #166534; } .xl-t { background: #e0f2fe; color: #075985; }
+.xl-d { background: #fef9c3; color: #854d0e; } .xl-cd { background: #fee2e2; color: #b91c1c; }
+.ht-table td, .ht-table th { vertical-align: middle; }
+@media (min-width: 901px) { .ht-table th, .ht-table td { white-space: nowrap; } .ht-table .ht-name, .ht-table .ht-fix { white-space: normal; } .ht-table .ht-fix { min-width: 240px; } }
+.ht-table tr.ht-bad td { background: rgba(217,45,53,.05); }
+.ht-warn { font-size: 12.5px; line-height: 1.45; color: #b91c1c; }
+.ht-warn .ht-go { margin-left: 6px; padding: 2px 8px; font-size: 11.5px; }
+:root[data-theme="dark"] .ht-r { background: rgba(255,255,255,.04); border-color: rgba(95,212,200,.22); }
+:root[data-theme="dark"] .xl-rt { background: rgba(34,197,94,.18); color: #86efac; } :root[data-theme="dark"] .xl-t { background: rgba(56,189,248,.18); color: #7dd3fc; }
+:root[data-theme="dark"] .xl-d { background: rgba(234,179,8,.18); color: #fde047; } :root[data-theme="dark"] .xl-cd { background: rgba(239,68,68,.2); color: #fca5a5; }
+:root[data-theme="dark"] .ht-warn { color: #fca5a5; } :root[data-theme="dark"] .ht-table tr.ht-bad td { background: rgba(239,68,68,.07); }
+@media print { .ht-go { display: none; } }
+@media (min-width: 901px) {
+  .ht-l .table-wrap { overflow-x: auto; }
+  .ht-table { table-layout: auto; width: 100%; }
+  .ht-table .ht-name { min-width: 190px; }
+  .ht-table td.ht-fix { min-width: 0; width: 26%; max-width: 300px; white-space: normal; }
+  .ht-table th:nth-child(7), .ht-table td:nth-child(7) { white-space: nowrap; }
+}
+.ht-w { grid-template-columns: minmax(0, 1fr) 280px; }
+@media (min-width: 901px) {
+  .ht-table th, .ht-table td { padding-left: 7px; padding-right: 7px; }
+  .ht-table .ht-name { min-width: 160px; }
+  .ht-table td.ht-fix { width: auto; max-width: none; min-width: 220px; }
+}
+.ht-sum th, .ht-sum td { padding: 7px 8px; }
+.ht-table td.ht-fix .ht-warn { overflow-wrap: anywhere; }
+@media (min-width: 901px) { .ht-table thead th:nth-child(7) { white-space: normal !important; min-width: 80px; } }

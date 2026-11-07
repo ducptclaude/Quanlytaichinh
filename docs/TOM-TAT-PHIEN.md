@@ -2,6 +2,17 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V27.07.11.26 — Thay Bản đồ bằng "Đánh giá hoàn thành – thu tiền"
+- Bỏ bản đồ (khung `bMapSection` không còn gọi; `public/map.js` giữ nguyên, không dùng). Khung mới `bHtSection` (report.js):
+  - **GTHT** = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 (TĐ3 theo mục I/IV; chưa QT = TĐ2). **% HT** = Dòng thu ÷ GTHT. Dòng thu/chi như mục II.
+  - Xếp loại (người dùng chốt): ≥120% Rất tốt · ≥90% Tốt · >70% Đạt · ≤70% Chưa đạt (`HT_XL`).
+  - Trái: STT | Mã DA | Tên | DT TĐ3 | GTHT | TL % HT | Tiêu chuẩn đánh giá | Xếp loại | Khắc phục.
+    Chưa đạt: "⚠ Cần thu tiền về thêm X (để đạt 70%) từ <2 HĐ CĐT còn phải thu lớn nhất>" + nút **Đi tới HĐ ›** (mở tab Doanh thu của dự án);
+    Đạt: "Theo dõi, đẩy nhanh thu tiền"; Tốt / Rất tốt: trống.
+  - Phải: Giá trị hoàn thành, Tiền về, % Hoàn thành, Xếp loại (tổng) + bảng cơ cấu đánh giá kèm số dự án mỗi loại.
+- Kiểm tra: DEMO-01 GTHT 72,27 = 52,20 ÷ 76,74 × 106,25; 85,8% Đạt. Giả lập 1 dự án thu thấp → Chưa đạt, cảnh báo + nút mở đúng dự án.
+- Người dùng báo sẽ đổi % hoàn thành sau. Điểm khôi phục: `phien-07.11.26-13h51`.
+
 ## V26.07.11.26 — Báo cáo: cân lề, cân dòng mọi bảng
 - Mọi ô tiêu đề / dữ liệu trong Báo cáo căn giữa theo chiều dọc (ô tiêu đề cao 2 tầng ở mục III, "Chỉ tiêu" mục IV không còn dồn đáy).
 - Phân tích chi tiết (`.b-detail`, bảng số đồng đầy đủ 11–14 cột): chữ 11,5px, khoảng cách gọn, tiêu đề dài được xuống dòng,

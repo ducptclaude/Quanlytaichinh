@@ -50,7 +50,7 @@ window.BKS_EN = {
 "TĐ2": "M2",
 "TĐ3": "M3",
 "Xóa": "Delete",
-"Đạt": "Achieved",
+"Đạt": "Satisfactory",
 "Bằng": "Equal to",
 "Cộng": "Total",
 "Khác": "Other",
@@ -1241,7 +1241,30 @@ window.BKS_EN = {
 ". Xem tất cả dự án = số chung + tổng số dư từng dự án.": ". All projects = company balance + sum of project balances.",
 "Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.": "Projects without locked M1: use the original Employer contract, subcontracts per original contract and other costs recorded in the system. After-VAT view: revenue converted at the original contract VAT, cost at the project cost VAT ratio, rounded to 0.1 bn. Completion column: provisional % complete by cost (cost to cost) = Actual expenditure ÷ Forecast cost.",
 "Thu (tiền về)": "Collections",
-"Chi (tiền ra)": "Expenditure"
+"Chi (tiền ra)": "Expenditure",
+"Đánh giá hoàn thành – thu tiền": "Completion – collection assessment",
+"Giá trị hoàn thành = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 · % hoàn thành = Dòng thu ÷ Giá trị hoàn thành": "Completed value = Expenditure ÷ M3 cost × M3 revenue · % complete = Collections ÷ Completed value",
+"TĐ3 mới nhất": "Latest M3",
+"DT TĐ3": "Revenue M3",
+"GTHT": "Completed value",
+"TL % HT": "% complete",
+"Tiêu chuẩn đánh giá": "Criteria",
+"Xếp loại": "Rating",
+"Khắc phục": "Remedy",
+"Giá trị hoàn thành": "Completed value",
+"Tiền về (dòng thu)": "Collections",
+"% Hoàn thành": "% Complete",
+"Xếp loại đánh giá": "Rating",
+"Cơ cấu đánh giá": "Rating scale",
+"Rất tốt": "Excellent",
+"Tốt": "Good",
+"Chưa đạt": "Unsatisfactory",
+"Theo dõi, đẩy nhanh thu tiền": "Monitor, speed up collections",
+"Đi tới HĐ ›": "Go to contract ›",
+"Chưa có chi phí TĐ3 / dòng chi": "No M3 cost / expenditure yet",
+"⚠ Cần thu tiền về": "⚠ Collections needed",
+"các HĐ chủ đầu tư": "Employer contracts",
+"dự án": "projects"
 },
 "patterns": [
 [
@@ -2021,6 +2044,10 @@ window.BKS_EN = {
 "Grand total ({} entries)"
 ],
 [
+"(còn phải thu {} {})",
+"(receivable {} {})"
+],
+[
 "({} dòng chi phí)",
 "({} cost rows)"
 ],
@@ -2063,6 +2090,10 @@ window.BKS_EN = {
 [
 "Bằng {} doanh thu",
 "Equal to {} of revenue"
+],
+[
+"(còn phải thu {})",
+"(receivable {})"
 ],
 [
 "Doanh thu · TĐ{}",
@@ -2299,6 +2330,10 @@ window.BKS_EN = {
 [
 "· lúc ký {}",
 "· at signing {}"
+],
+[
+"thêm {} {} từ",
+"{} {} more from"
 ],
 [
 "Chi phí {}",

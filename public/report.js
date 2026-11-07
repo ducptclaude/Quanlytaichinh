@@ -673,6 +673,59 @@ document.addEventListener('click', (e) => {
   const a = 'itd' in b.dataset ? 'itd' : 'itd3', n = b.dataset[a];
   BST.i_td = Number(n); bSave(); renderKeepPos(`[data-${a}="${n}"]`);
 });
+// Đánh giá hoàn thành – thu tiền (thay khung Bản đồ, 07/11/2026)
+//  GTHT (giá trị hoàn thành) = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 (TĐ3: dự án chưa QT lấy theo TĐ2 – như mục I/IV)
+//  % hoàn thành = Dòng thu ÷ GTHT · Xếp loại: ≥120% Rất tốt · ≥90% Tốt · >70% Đạt · ≤70% Chưa đạt
+const HT_XL = [[1.2, 'Rất tốt', 'xl-rt', '≥ 120%'], [0.9, 'Tốt', 'xl-t', '90% – 120%'], [0.7000001, 'Đạt', 'xl-d', '70% – 90%'], [-Infinity, 'Chưa đạt', 'xl-cd', '≤ 70%']];
+const htXl = (p) => (p == null ? null : HT_XL.find(([m]) => p >= m));
+function bHtSection(list, v) {
+  if (!list.length) return '';
+  const P = bPeriod(list);
+  const { rows } = bTongHopData(list, v, P);
+  const R = bMuc3Data(list, v, rows, 3).R.map((r) => {
+    const gtht = r.cp > 0 ? Math.round((r.chi / r.cp) * r.dt) : 0;
+    const p = gtht > 0 ? r.thu / gtht : null;
+    return { ...r, gtht, p, xl: htXl(p) };
+  });
+  const T = R.reduce((a, r) => ({ dt: a.dt + r.dt, gtht: a.gtht + r.gtht, thu: a.thu + r.thu }), { dt: 0, gtht: 0, thu: 0 });
+  const pT = T.gtht > 0 ? T.thu / T.gtht : null, xT = htXl(pT);
+  const pc = (p) => (p == null ? '—' : `${(p * 100).toFixed(1).replace('.', ',')}%`);
+  const badge = (x) => (x ? `<span class="xl ${x[2]}">${x[1]}</span>` : '<span class="muted">—</span>');
+  const fix = (r) => {
+    if (!r.xl) return '<span class="muted small">Chưa có chi phí TĐ3 / dòng chi</span>';
+    if (r.xl[1] === 'Chưa đạt') {
+      const can = Math.max(0, Math.round(r.gtht * 0.7 - r.thu)); // cần thu thêm để đạt 70%
+      const hds = (r.x.d.hds || []).filter((h) => h.phai_thu > 0).sort((a, b) => b.phai_thu - a.phai_thu).slice(0, 2);
+      return `<div class="ht-warn">⚠ Cần thu tiền về${can ? ` thêm <b>${bTy(can)}</b> ${TY()}` : ''} từ ${hds.length ? hds.map((h) => `<b title="Còn phải thu ${bTy(h.phai_thu)} ${TY()}">${esc(h.so_ma)}</b>`).join(', ') : 'các HĐ chủ đầu tư'}
+        <button type="button" class="sm ht-go" data-bgo="revenue" data-id="${r.x.d.id}" title="Mở tab Doanh thu của ${esc(r.x.d.ma_du_an)} – mục Tiền về">Đi tới HĐ ›</button></div>`;
+    }
+    return r.xl[1] === 'Đạt' ? '<span class="muted small">Theo dõi, đẩy nhanh thu tiền</span>' : '';
+  };
+  const cnt = (name) => R.filter((r) => r.xl && r.xl[1] === name).length;
+  return `<section class="card b-sec ht-sec no-print-break">
+    <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành – thu tiền</h3><p>Giá trị hoàn thành = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 · % hoàn thành = Dòng thu ÷ Giá trị hoàn thành</p></div>
+      <div class="th-tags"><span>TĐ3 mới nhất</span><span>${v === 'gt' ? 'Trước VAT' : 'Sau VAT'}</span><span>Đơn vị: ${TYD()}</span></div></div>
+    <div class="ht-w">
+      <div class="ht-l"><div class="table-wrap"><table class="b-table ht-table">
+        <thead><tr><th class="num">STT</th><th>Mã DA</th><th>Tên dự án</th><th class="num">DT TĐ3</th><th class="num">GTHT</th><th class="num">TL % HT</th><th>Tiêu chuẩn đánh giá</th><th>Xếp loại</th><th>Khắc phục</th></tr></thead>
+        <tbody>${R.map((r, i) => `<tr class="${r.xl && r.xl[1] === 'Chưa đạt' ? 'ht-bad' : ''}"><td class="num">${i + 1}</td><td><b>${esc(r.x.d.ma_du_an)}</b></td><td class="ht-name">${esc(r.x.d.ten_du_an)}</td>
+          <td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.gtht)}</td><td class="num"><b>${pc(r.p)}</b></td><td class="muted">${r.xl ? r.xl[3] : '—'}</td><td>${badge(r.xl)}</td><td class="ht-fix">${fix(r)}</td></tr>`).join('')}</tbody>
+        <tfoot><tr><td></td><td colspan="2">Tổng cộng (${R.length} dự án)</td><td class="num">${bTy(T.dt)}</td><td class="num">${bTy(T.gtht)}</td><td class="num">${pc(pT)}</td><td>${xT ? xT[3] : ''}</td><td>${badge(xT)}</td><td></td></tr></tfoot>
+      </table></div></div>
+      <div class="ht-r">
+        <table class="b-table ht-sum"><tbody>
+          <tr><th>Giá trị hoàn thành</th><td class="num"><b>${bTy(T.gtht)}</b></td></tr>
+          <tr><th>Tiền về (dòng thu)</th><td class="num"><b>${bTy(T.thu)}</b></td></tr>
+          <tr><th>% Hoàn thành</th><td class="num"><b class="ht-big">${pc(pT)}</b></td></tr>
+          <tr><th>Xếp loại đánh giá</th><td class="num">${badge(xT)}</td></tr>
+        </tbody></table>
+        <div class="ht-pt">Cơ cấu đánh giá</div>
+        <table class="b-table ht-scale"><tbody>${HT_XL.map(([, n, c, t]) => `<tr><td>${badge([0, n, c])}</td><td class="muted">${t}</td><td class="num"><b>${cnt(n)}</b> <span class="muted small">dự án</span></td></tr>`).join('')}</tbody></table>
+        <div class="muted small">Đơn vị: ${TYD()} · ${v === 'gt' ? 'trước' : 'sau'} VAT</div>
+      </div>
+    </div>
+  </section>`;
+}
 // Mục III – Dòng tiền còn lại phải thu – chi (theo TĐ k; mặc định TĐ đang chọn ở mục I)
 //  DT, CP: cùng số mục I (TĐ1 = số chốt TĐ1 / hệ thống; TĐ2, TĐ3 = mục IV) · Dòng thu, dòng chi: mục II (lũy kế, theo nút VAT)
 function bMuc3Data(list, v, rows, k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1) {
@@ -1409,7 +1462,7 @@ function renderReport() {
 
   ${bFinHtml(list, v)}
 
-  ${typeof bMapSection === 'function' ? bMapSection(list, v) : ''}
+  ${bHtSection(list, v)}
 
   ${bPcSection(list, v)}
 
