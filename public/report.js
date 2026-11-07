@@ -687,6 +687,9 @@ function bHtSection(list, v) {
     const p = gtht > 0 ? r.thu / gtht : null;
     return { ...r, gtht, p, xl: htXl(p) };
   });
+  // Ưu tiên xử lý: Chưa đạt lên đầu → Đạt → Tốt → Rất tốt → chưa đủ số liệu; cùng loại thì % thấp hơn đứng trước
+  const uu = (r) => (r.xl ? HT_XL.indexOf(r.xl) : -1); // Chưa đạt = 3 (cao nhất) … Rất tốt = 0; chưa đủ số liệu = -1 (cuối)
+  R.sort((a, b) => uu(b) - uu(a) || (a.p ?? 9) - (b.p ?? 9));
   const T = R.reduce((a, r) => ({ dt: a.dt + r.dt, gtht: a.gtht + r.gtht, thu: a.thu + r.thu }), { dt: 0, gtht: 0, thu: 0 });
   const pT = T.gtht > 0 ? T.thu / T.gtht : null, xT = htXl(pT);
   const pc = (p) => (p == null ? '—' : `${(p * 100).toFixed(1).replace('.', ',')}%`);
@@ -706,7 +709,7 @@ function bHtSection(list, v) {
     <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành</h3><p>Giá trị hoàn thành = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 · % hoàn thành = Dòng thu ÷ Giá trị hoàn thành</p></div>
       <div class="th-tags"><span>TĐ3 mới nhất</span><span>${v === 'gt' ? 'Trước VAT' : 'Sau VAT'}</span><span>Đơn vị: ${TYD()}</span></div></div>
     <div class="ht-w">
-      <div class="ht-l"><div class="table-wrap"><table class="b-table ht-table">
+      <div class="ht-l"><div class="table-wrap ${R.length > 8 ? 'ht-scroll' : ''}"><table class="b-table ht-table">
         <thead><tr><th class="num">STT</th><th>Mã DA</th><th>Tên dự án</th><th class="num">DT TĐ3</th><th class="num">GTHT</th><th class="num">TL % HT</th><th>Tiêu chuẩn đánh giá</th><th>Xếp loại</th><th>Khắc phục</th></tr></thead>
         <tbody>${R.map((r, i) => `<tr class="${r.xl && r.xl[1] === 'Chưa đạt' ? 'ht-bad' : ''}"><td class="num">${i + 1}</td><td><b>${esc(r.x.d.ma_du_an)}</b></td><td class="ht-name">${esc(r.x.d.ten_du_an)}</td>
           <td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.gtht)}</td><td class="num"><b>${pc(r.p)}</b></td><td class="muted">${r.xl ? r.xl[3] : '—'}</td><td>${badge(r.xl)}</td><td class="ht-fix">${fix(r)}</td></tr>`).join('')}</tbody>

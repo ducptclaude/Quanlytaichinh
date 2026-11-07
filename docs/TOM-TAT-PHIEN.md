@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V29.07.11.26 — Đánh giá hoàn thành: ưu tiên Chưa đạt, cuộn khi nhiều dự án
+- Thứ tự: Chưa đạt → Đạt → Tốt → Rất tốt → chưa đủ số liệu; cùng loại thì % HT thấp đứng trước. STT đánh lại theo thứ tự này.
+- > 8 dự án: bảng trái cuộn trong khung (cao 520px), dòng tiêu đề + Tổng cộng đứng yên (sticky). In / PDF: in đủ, không cuộn.
+
 ## Quyết định người dùng 07/11/2026 – Đánh giá hoàn thành
 - Mốc: đúng 90% = **Tốt**, đúng 70% = **Chưa đạt** (xác nhận). "GTGT" trong yêu cầu = **GTHT** (Giá trị hoàn thành).
 - **Giữ** công thức hiện tại: % hoàn thành mục I = Thực chi ÷ Chi phí dự kiến (cost to cost); khung Đánh giá hoàn thành:

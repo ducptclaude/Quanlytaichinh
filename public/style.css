@@ -3013,3 +3013,9 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 .ht-sum th, .ht-sum td { padding: 7px 8px; }
 .ht-table td.ht-fix .ht-warn { overflow-wrap: anywhere; }
 @media (min-width: 901px) { .ht-table thead th:nth-child(7) { white-space: normal !important; min-width: 80px; } }
+/* Đánh giá hoàn thành: nhiều dự án (> 8) → cuộn trong khung, tiêu đề + tổng cộng đứng yên */
+.ht-l .table-wrap.ht-scroll { max-height: 520px; overflow: auto; }
+.ht-scroll .ht-table thead th { position: sticky; top: 0; z-index: 2; background: var(--bg-f6f1e9, #f6f1e9); }
+.ht-scroll .ht-table tfoot td { position: sticky; bottom: 0; z-index: 2; background: var(--bg-f3ece1, #f3ece1); }
+:root[data-theme="dark"] .ht-scroll .ht-table thead th, :root[data-theme="dark"] .ht-scroll .ht-table tfoot td { background: #172234; }
+@media print { .ht-l .table-wrap.ht-scroll { max-height: none; overflow: visible; } .ht-scroll .ht-table thead th, .ht-scroll .ht-table tfoot td { position: static; } }
