@@ -3088,3 +3088,7 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 :root[data-theme="dark"] #b-report .f-card { border-top: 3px solid color-mix(in srgb, var(--f-ac) 75%, #2a2e34) !important; }
 /* Báo cáo – giao diện tối: nền khung XANH THAN ĐẬM (thay xám khói) – khung ngoài trầm hơn, khối bên trong sáng hơn một bậc */
 :root[data-theme="dark"] { --smoke-1: rgba(24,34,48,.82); --smoke-2: #1e2a3a; }
+/* Báo cáo – giao diện tối: bỏ khung viền ngoài của từng mục I–IV (chỉ giữ khung lớn "Bảng tổng hợp" + các khối bên trong) */
+:root[data-theme="dark"] #b-report .th-sec { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0; border-radius: 0; }
+:root[data-theme="dark"] #b-report .th-sec::before { display: none; }
+:root[data-theme="dark"] #b-report .th-sec + .th-sec { margin-top: 34px; }
