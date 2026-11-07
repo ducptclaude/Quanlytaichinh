@@ -6,7 +6,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|
-| **chot-07.11.26** | V02.07.11.26 | (mới nhất) | 07/11/2026 | Mục II: bấm Dòng thu / Dòng chi xem bảng chi tiết, theo nút Trước / Sau VAT |
+| **chot-07.11.26** | V03.07.11.26 | (mới nhất) | 07/11/2026 | Mục II bấm xem chi tiết theo VAT; Dashboard tối nền trong suốt, khối neon |
 | phien-07.11.26-08h01 | V30.06.11.26 | `f012cd5` | 07/11/2026 | Trước khi sửa ngày 07/11 |
 | **chot-06.11.26** | V30.06.11.26 | (mới nhất) | 06/11/2026 | Lấy lại mã V14.06.11.26 (từ phien-06.11.26-15h01) |
 | phien-06.11.26-15h09 | V15.06.11.26 | `ff6c74c` | 06/11/2026 | Bản mã V10 (trước khi lấy lại V14) |

@@ -2788,3 +2788,29 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 .tt-go { display: inline-block; margin-left: 4px; font-size: .55em; font-weight: 700; color: var(--teal, #0fa3a3); vertical-align: middle; }
 .th-table .tt-link.tt-sm { font-weight: inherit; color: inherit; font-size: inherit; text-decoration: underline dotted; text-underline-offset: 3px; text-decoration-color: rgba(15,163,163,.6); }
 @media print { .f-card .tt-link.f-val { font-size: 15px; } .f-card .tt-link.f-val, .th-table .tt-link.tt-sm { text-decoration: none; } .tt-go { display: none; } }
+
+/* =====================================================================
+   DASHBOARD – GIAO DIỆN TỐI: khung nền phía sau trong suốt hoàn toàn, các khối nổi lên + viền sáng neon nhẹ
+   ===================================================================== */
+:root[data-theme="dark"] .db-flow,
+:root[data-theme="dark"] .db-kg { background: transparent !important; background-image: none !important; border-color: transparent !important; box-shadow: none !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+:root[data-theme="dark"] .db-kg { padding-left: 2px; padding-right: 2px; }
+:root[data-theme="dark"] .db-blk,
+:root[data-theme="dark"] .db-kpi,
+:root[data-theme="dark"] .db-card,
+:root[data-theme="dark"] .db-kg2 .table-wrap {
+  --neon: color-mix(in srgb, var(--db-k, var(--db-c, #2cc4bd)) 55%, #5fd4c8);
+  background: rgba(255,255,255,.055) !important; background-image: none !important;
+  border: 1px solid color-mix(in srgb, var(--neon) 35%, transparent) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 0 8px -1px color-mix(in srgb, var(--neon) 45%, transparent), 0 10px 22px -12px rgba(0,0,0,.7) !important;
+  transform: translateY(-3px); transition: transform .18s, box-shadow .18s;
+  -webkit-backdrop-filter: blur(12px) saturate(140%); backdrop-filter: blur(12px) saturate(140%); }
+:root[data-theme="dark"] .db-blk { border-top: 3px solid var(--db-k) !important; }
+:root[data-theme="dark"] .db-kg2 .table-wrap { border-radius: 14px; overflow: hidden; }
+:root[data-theme="dark"] .db-blk:hover, :root[data-theme="dark"] .db-kpi:hover, :root[data-theme="dark"] .db-card:hover, :root[data-theme="dark"] .db-kg2 .table-wrap:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 0 14px 0 color-mix(in srgb, var(--neon) 55%, transparent), 0 14px 28px -12px rgba(0,0,0,.75) !important; }
+:root[data-theme="dark"] .db-blk.b2 { --db-k: #5b8def; } /* khối II: navy quá tối trên nền tối -> xanh dương sáng */
+:root[data-theme="dark"] .db-mx thead th, :root[data-theme="dark"] .db-mx .db-mx-con, :root[data-theme="dark"] .db-mx thead th:last-child { background: transparent; }
+:root[data-theme="dark"] .db-mx .db-mx-con, :root[data-theme="dark"] .db-mx thead th:last-child { background: rgba(224,123,57,.10); }
+@media (prefers-reduced-motion: reduce) { :root[data-theme="dark"] .db-blk, :root[data-theme="dark"] .db-kpi, :root[data-theme="dark"] .db-card { transition: none; } }

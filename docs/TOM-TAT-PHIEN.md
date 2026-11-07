@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.07.11.26 — Dashboard tối: nền khung trong suốt, khối nổi neon
+- Chỉ giao diện tối: khung `.db-flow` (4 khối I–IV) và `.db-kg` (2 cụm trên cùng) nền trong suốt 100%, bỏ viền/bóng.
+- Các khối `.db-blk`, `.db-kpi`, `.db-card`, bảng Kế hoạch – Thực – Còn lại: nền kính, nổi lên 3px, viền + bóng neon nhẹ theo màu khối
+  (rê chuột nổi thêm); khối II đổi màu nhấn sang xanh dương sáng cho rõ trên nền tối. Giao diện sáng, in / PDF không đổi.
+- Điểm khôi phục trước khi sửa: `phien-07.11.26-08h09`.
+
 ## V02.07.11.26 — Bảng chi tiết mục II theo nút Trước / Sau VAT
 - Mở từ mục II (`data-tts="1"`): cùng kỳ "lũy kế đến" với mục II (kể cả bấm 1 dự án) và cùng cơ sở VAT.
 - Trước VAT: Dòng thu × tỷ lệ DT trước/sau VAT, Dòng chi × tỷ lệ CP trước/sau VAT của từng dự án (`bVatR`), số tổng mỗi dự án làm tròn 0,1 tỷ (`bQ01`)
