@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.07.11.26 — Báo cáo tối: cùng kiểu Dashboard
+- Vùng bao ngoài (`#b-report .card.b-sec`, `.th-sec`): nền trong suốt + viền xanh ngọc ánh neon nhẹ.
+- Khối bên trong (`.b-head`, `.th-head`, `.f-card`, `.tt-k`, `.table-wrap`, `.pc-tile`): nền kính, nổi 3px, viền + bóng neon theo màu khối.
+- Chỉ giao diện tối; giao diện sáng và in / PDF không đổi.
+
 ## V05.07.11.26 — Dashboard tối: viền vùng có ánh neon
 - Viền ngoài `.db-flow`, `.db-kg`: xanh ngọc mảnh + ánh neon nhẹ (ngoài + trong), đồng bộ với các khối; nền vùng vẫn trong suốt.
 

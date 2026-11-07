@@ -2816,3 +2816,31 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 :root[data-theme="dark"] .db-mx thead th, :root[data-theme="dark"] .db-mx .db-mx-con, :root[data-theme="dark"] .db-mx thead th:last-child { background: transparent; }
 :root[data-theme="dark"] .db-mx .db-mx-con, :root[data-theme="dark"] .db-mx thead th:last-child { background: rgba(224,123,57,.10); }
 @media (prefers-reduced-motion: reduce) { :root[data-theme="dark"] .db-blk, :root[data-theme="dark"] .db-kpi, :root[data-theme="dark"] .db-card { transition: none; } }
+
+/* =====================================================================
+   BÁO CÁO – GIAO DIỆN TỐI (giống Dashboard): vùng bao ngoài nền trong suốt + viền neon mảnh; khối bên trong nổi lên, viền neon nhẹ
+   ===================================================================== */
+:root[data-theme="dark"] #b-report .card.b-sec,
+:root[data-theme="dark"] #b-report .th-sec {
+  background: transparent !important; background-image: none !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1px solid rgba(95,212,200,.28) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.02), 0 0 9px -1px rgba(44,196,189,.38), inset 0 0 12px -8px rgba(44,196,189,.30) !important; }
+:root[data-theme="dark"] #b-report .th-sec::before { opacity: .55; }
+:root[data-theme="dark"] .b-head,
+:root[data-theme="dark"] #b-report .th-head,
+:root[data-theme="dark"] #b-report .f-card,
+:root[data-theme="dark"] #b-report .tt-k,
+:root[data-theme="dark"] #b-report .table-wrap,
+:root[data-theme="dark"] #b-report .pc-tile {
+  --neon: color-mix(in srgb, var(--f-ac, var(--sec, var(--pc, #2cc4bd))) 55%, #5fd4c8);
+  background: rgba(255,255,255,.055) !important; background-image: none !important;
+  border-color: color-mix(in srgb, var(--neon) 35%, transparent) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 0 8px -1px color-mix(in srgb, var(--neon) 45%, transparent), 0 10px 22px -12px rgba(0,0,0,.7) !important;
+  transform: translateY(-3px); transition: transform .18s, box-shadow .18s;
+  -webkit-backdrop-filter: blur(12px) saturate(140%); backdrop-filter: blur(12px) saturate(140%); }
+:root[data-theme="dark"] #b-report .f-card { border-top: 3px solid var(--f-ac) !important; }
+:root[data-theme="dark"] #b-report .table-wrap { border: 1px solid color-mix(in srgb, var(--neon) 35%, transparent) !important; border-radius: 12px; }
+:root[data-theme="dark"] .b-head:hover, :root[data-theme="dark"] #b-report .f-card:hover, :root[data-theme="dark"] #b-report .tt-k:hover, :root[data-theme="dark"] #b-report .pc-tile:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 0 14px 0 color-mix(in srgb, var(--neon) 55%, transparent), 0 14px 28px -12px rgba(0,0,0,.75) !important; }
+@media (prefers-reduced-motion: reduce) { :root[data-theme="dark"] #b-report .f-card, :root[data-theme="dark"] #b-report .tt-k, :root[data-theme="dark"] #b-report .pc-tile, :root[data-theme="dark"] .b-head { transition: none; } }
