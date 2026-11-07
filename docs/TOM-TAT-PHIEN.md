@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.07.11.26 — Cửa sổ Thực thu: Doanh thu – Thực thu – Còn lại; tiền về gộp theo HĐ, có tổng
+- Bảng trên (cửa sổ "thu"): **Doanh thu dự kiến (TĐ1 – ban đầu)** | Thực thu | **Còn lại phải thu** = DT − thực thu.
+  DT TĐ1 như mục I: đã chốt lấy số chốt, chưa chốt `bSysMoc(d,1)`; Sau VAT quy đổi theo VAT HĐ gốc, làm tròn 0,1 tỷ. DEMO-01: 103,233 / 113,60 tỷ = mục I.
+- Bảng "Các lần tiền về": gộp theo công trình + hợp đồng, mặc định thu gọn (▸ / Mở tất cả), mỗi HĐ có tổng; dòng **Tổng cộng (n lần)**.
+  Bảng vay / trả nợ gốc cũng có dòng Tổng cộng.
+- Lưu ý: xem Trước VAT, Thực thu bảng trên làm tròn 0,1 tỷ (như mục II), tổng bảng dưới là số quy đổi chưa làm tròn → chênh vài chục triệu.
+
 ## V12.07.11.26 — Cửa sổ Dòng chi: luôn thu gọn nhóm
 - Bảng HĐ đầu vào luôn thu gọn theo nhóm HĐ CĐT, kể cả khi chỉ có 1 nhóm (trước đây 1 nhóm thì tự mở dòng con 1.1).
 

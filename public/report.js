@@ -270,6 +270,13 @@ function bThucDrill(key, pid = 0, sec2 = false) {
       const { rT, rC } = bVatR(d);
       x.thu = bQ01(x.thu, rT); x.chi = bQ01(x.chi, rC); x.cp = Math.round(x.cp * rC); x.tp = x.chi - x.cp; x.con = x.thu - x.chi;
     }
+    if (key === 'thu') { // Doanh thu dự kiến ban đầu = doanh thu TĐ1 (như mục I): đã chốt lấy số chốt, chưa chốt hệ thống tự tính theo HĐ gốc
+      const td1 = (d.thoi_diem || []).find((t) => t.td === 1);
+      const d1 = td1 ? Number(td1.dt) || 0 : bSysMoc(d, 1).dt; // trước VAT
+      const goc = d.moc?.dt?.goc;
+      x.dt1 = gt ? Math.round(d1) : Math.round((d1 * (goc?.gt ? goc.sv / goc.gt : 1.1)) / 1e8) * 1e8; // sau VAT: quy đổi theo VAT HĐ gốc, làm tròn 0,1 tỷ
+      x.con_thu = x.dt1 - x.thu;
+    }
     if (key === 'chi') { // Chi phí dự kiến ban đầu = chi phí TĐ1 (như mục I): đã chốt lấy số chốt, chưa chốt hệ thống tự tính theo HĐ gốc
       const td1 = (d.thoi_diem || []).find((t) => t.td === 1);
       const c1 = td1 ? Number(td1.cp) || 0 : bSysMoc(d, 1).cp; // trước VAT
@@ -279,7 +286,8 @@ function bThucDrill(key, pid = 0, sec2 = false) {
     }
     return { d, ...x, kh_con: x.kh_thu - x.kh_chi };
   });
-  const cols = key === 'chi' ? [['cp1', 'Chi phí dự kiến (TĐ1 – ban đầu)'], ['chi', 'Thực chi'], ['con_chi', 'Còn lại phải chi']] : cfg.cols;
+  const cols = key === 'chi' ? [['cp1', 'Chi phí dự kiến (TĐ1 – ban đầu)'], ['chi', 'Thực chi'], ['con_chi', 'Còn lại phải chi']]
+    : key === 'thu' ? [['dt1', 'Doanh thu dự kiến (TĐ1 – ban đầu)'], ['thu', 'Thực thu'], ['con_thu', 'Còn lại phải thu']] : cfg.cols;
   const sc = (d, k) => (gt ? bVatR(d)[k] : 1); // hệ số quy đổi cho từng dòng chi tiết
   const main = cols[cols.length - 1][0];
   rows.sort((a, b) => Math.abs(b[main]) - Math.abs(a[main]));
@@ -294,9 +302,20 @@ function bThucDrill(key, pid = 0, sec2 = false) {
     const L = list.flatMap((d) => (cfg.lines !== 'tv' ? d.chi_tiet.chi_phi.filter((r) => r.tinh_cp === loai).map((r) => ({ d, ngay: r.ngay, a: r.doi_tac, b: r.noi_dung, v: r.sau_vat }))
       : d.chi_tiet.tien_ve.map((r) => ({ d, ngay: r.ngay, a: r.hd, b: r.loai, v: Math.round(r.so_tien * sc(d, 'rT')) }))).filter((x) => inRange(x.ngay)))
       .sort((a, b) => String(b.ngay || '').localeCompare(String(a.ngay || '')));
-    lines = `<h4>${{ goc: 'Các lần trả nợ gốc', vay: 'Các lần nhận tiền vay', tv: 'Các lần tiền về' }[cfg.lines]} (${L.length})</h4>
-      <div class="table-wrap tt-dl"><table class="b-table"><thead><tr><th>Ngày</th><th>Công trình</th><th>${cfg.lines === 'tv' ? 'Hợp đồng' : 'Ngân hàng'}</th><th>Nội dung</th><th class="num">Số tiền</th></tr></thead>
-      <tbody>${L.slice(0, 300).map((x) => `<tr><td>${dmy(x.ngay) || '<span class="muted">chưa có ngày</span>'}</td><td><b>${esc(x.d.ma_du_an)}</b></td><td>${esc(x.a || '')}</td><td>${esc(x.b || '')}</td><td class="num">${bn(x.v)}</td></tr>`).join('')}</tbody></table></div>`;
+    const tot = L.reduce((a, x) => a + (x.v || 0), 0);
+    const r1 = (x, g) => `<tr${g ? ` data-tvg="${g}" hidden` : ''}><td>${dmy(x.ngay) || '<span class="muted">chưa có ngày</span>'}</td><td><b>${esc(x.d.ma_du_an)}</b></td><td>${esc(x.a || '')}</td><td>${esc(x.b || '')}</td><td class="num">${bn(x.v)}</td></tr>`;
+    let body;
+    if (cfg.lines === 'tv') { // gộp theo hợp đồng (công trình + HĐ), mặc định thu gọn
+      const G = new Map();
+      for (const x of L) { const k = x.d.ma_du_an + '|' + (x.a || ''); if (!G.has(k)) G.set(k, []); G.get(k).push(x); }
+      body = [...G].map(([k, rows], gi) => `<tr class="tv-head-row"><td colspan="2"><button type="button" class="grp-toggle" data-tvt="g${gi}" title="Mở / thu gọn">▸</button><b>${esc(rows[0].d.ma_du_an)}</b></td>
+        <td><b>${esc(rows[0].a || 'Chưa chọn HĐ')}</b></td><td class="muted small">${rows.length} lần tiền về</td><td class="num strong">${bn(rows.reduce((a, x) => a + (x.v || 0), 0))}</td></tr>`
+        + rows.map((x) => r1(x, 'g' + gi)).join('')).join('');
+    } else body = L.slice(0, 300).map((x) => r1(x)).join('');
+    lines = `<h4 class="tt-h4">${{ goc: 'Các lần trả nợ gốc', vay: 'Các lần nhận tiền vay', tv: 'Các lần tiền về' }[cfg.lines]} (${L.length})${cfg.lines === 'tv' && L.length ? ' <button type="button" class="sm tt-all" data-tvall>Mở tất cả</button>' : ''}</h4>
+      <div class="table-wrap tt-dl tt-tv"><table class="b-table"><thead><tr><th>Ngày</th><th>Công trình</th><th>${cfg.lines === 'tv' ? 'Hợp đồng' : 'Ngân hàng'}</th><th>Nội dung</th><th class="num">Số tiền</th></tr></thead>
+      <tbody>${body || '<tr><td colspan="5" class="empty">Chưa có dòng nào</td></tr>'}</tbody>
+      <tfoot><tr><td colspan="4">Tổng cộng (${L.length} lần)</td><td class="num">${bn(tot)}</td></tr></tfoot></table></div>`;
   }
   const dlg = document.createElement('dialog');
   dlg.className = 'pass-dlg tt-dlg';
@@ -314,6 +333,11 @@ function bThucDrill(key, pid = 0, sec2 = false) {
   const close = () => { dlg.close(); dlg.remove(); };
   dlg.addEventListener('click', (e) => {
     if (e.target === dlg || e.target.closest('[data-x]')) return close();
+    const tvt = e.target.closest('[data-tvt]');
+    if (tvt) { const on = tvt.textContent === '▸'; tvt.textContent = on ? '▾' : '▸'; dlg.querySelectorAll(`[data-tvg="${tvt.dataset.tvt}"]`).forEach((r) => { r.hidden = !on; }); return; }
+    const tva = e.target.closest('[data-tvall]');
+    if (tva) { const on = tva.textContent === 'Mở tất cả'; tva.textContent = on ? 'Thu gọn tất cả' : 'Mở tất cả';
+      dlg.querySelectorAll('[data-tvt]').forEach((b) => { b.textContent = on ? '▾' : '▸'; }); dlg.querySelectorAll('[data-tvg]').forEach((r) => { r.hidden = !on; }); return; }
     const g = e.target.closest('[data-tgo]');
     if (g) { close(); bPcClose(); revProjectId = Number(g.dataset.id); showTab(g.dataset.tgo); }
   });

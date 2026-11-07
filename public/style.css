@@ -2866,3 +2866,4 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 .tt-live-wrap .tt-c-khoi td { background: var(--bg-f3f7fc); }
 .tt-live-wrap tfoot td { font-weight: 800; }
 :root[data-theme="dark"] .tt-live-wrap .tt-c-khoi td { background: rgba(255,255,255,.04); }
+.tt-tv { max-height: none !important; } .tt-tv tfoot td { font-weight: 800; }

@@ -1220,7 +1220,10 @@ window.BKS_EN = {
 "· lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.": "· cumulative to date · after VAT · unit per the Unit box.",
 "Mở / thu gọn": "Expand / collapse",
 "Chi phí dự kiến (TĐ1 – ban đầu)": "Forecast cost (M1 – initial)",
-"Còn lại phải chi": "Remaining to pay"
+"Còn lại phải chi": "Remaining to pay",
+"Doanh thu dự kiến (TĐ1 – ban đầu)": "Forecast revenue (M1 – initial)",
+"Còn lại phải thu": "Remaining receivable",
+"Chưa có dòng nào": "No rows yet"
 },
 "patterns": [
 [
@@ -1980,6 +1983,10 @@ window.BKS_EN = {
 "Period {} · unit {} ({})"
 ],
 [
+"Tổng cộng ({} lần)",
+"Grand total ({} entries)"
+],
+[
 "({} dòng chi phí)",
 "({} cost rows)"
 ],
@@ -2138,6 +2145,10 @@ window.BKS_EN = {
 [
 "· so với {} – {}",
 "· vs. {} – {}"
+],
+[
+"{} lần tiền về",
+"{} collections"
 ],
 [
 "(gốc {}, giảm",
