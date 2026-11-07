@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.07.11.26 — Dashboard tối: viền vùng có ánh neon
+- Viền ngoài `.db-flow`, `.db-kg`: xanh ngọc mảnh + ánh neon nhẹ (ngoài + trong), đồng bộ với các khối; nền vùng vẫn trong suốt.
+
 ## V04.07.11.26 — Dashboard tối: giữ viền ngoài từng vùng
 - Người dùng yêu cầu giữ outline ngoài của từng vùng: `.db-flow`, `.db-kg` có lại viền mảnh `rgba(255,255,255,.12)`, nền vẫn trong suốt; khối bên trong giữ neon.
 

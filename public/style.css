@@ -2793,8 +2793,10 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
    DASHBOARD – GIAO DIỆN TỐI: khung nền phía sau trong suốt hoàn toàn, các khối nổi lên + viền sáng neon nhẹ
    ===================================================================== */
 :root[data-theme="dark"] .db-flow,
-:root[data-theme="dark"] .db-kg { background: transparent !important; background-image: none !important; border: 1px solid rgba(255,255,255,.12) !important; box-shadow: none !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
-/* giữ đường viền ngoài mảnh của từng vùng (nền vẫn trong suốt) */
+:root[data-theme="dark"] .db-kg { background: transparent !important; background-image: none !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1px solid rgba(95,212,200,.28) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.02), 0 0 9px -1px rgba(44,196,189,.38), inset 0 0 12px -8px rgba(44,196,189,.30) !important; }
+/* viền ngoài từng vùng: mảnh, ánh neon nhẹ như các khối (nền vẫn trong suốt) */
 :root[data-theme="dark"] .db-blk,
 :root[data-theme="dark"] .db-kpi,
 :root[data-theme="dark"] .db-card,
