@@ -3042,3 +3042,13 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
   .ht-r > .ht-pt, .ht-r > .ht-scale, .ht-r > .small { grid-column: 2; }
 }
 @media (max-width: 700px) { .ht-r { display: flex; } }
+/* Đánh giá hoàn thành – tách 2 khung riêng: Tổng hợp đánh giá | Cơ cấu đánh giá (đối xứng, cao bằng nhau) */
+.ht-r, :root[data-theme="dark"] .ht-r { display: flex; flex-direction: column; gap: 14px; padding: 0; border: 0; background: none; }
+.ht-box { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-fbf8f3, #fbf8f3); }
+.ht-box > .small { margin-top: auto; }
+:root[data-theme="dark"] .ht-box { background: rgba(255,255,255,.04); border-color: rgba(95,212,200,.22); }
+@media (max-width: 1499px) {
+  .ht-r { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+  .ht-r > .ht-box { grid-row: auto !important; grid-column: auto !important; }
+}
+@media (max-width: 700px) { .ht-r { grid-template-columns: 1fr; } }

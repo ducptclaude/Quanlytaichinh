@@ -1256,6 +1256,7 @@ window.BKS_EN = {
 "% Hoàn thành": "% Complete",
 "Xếp loại đánh giá": "Rating",
 "Cơ cấu đánh giá": "Rating scale",
+"Tổng hợp đánh giá": "Assessment summary",
 "Rất tốt": "Excellent",
 "Tốt": "Good",
 "Chưa đạt": "Unsatisfactory",

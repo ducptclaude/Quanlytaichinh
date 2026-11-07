@@ -720,16 +720,17 @@ function bHtSection(list, v) {
         <tfoot><tr><td></td><td colspan="2">Tổng cộng (${R.length} dự án)</td><td class="num">${bTy(T.dt)}</td><td class="num">${bTy(T.gtht)}</td><td class="num">${pc(hT)}</td><td class="num">${bTy(T.thu)}</td><td class="num">${pc(pT)}</td><td>${xT ? xT[3] : ''}</td><td>${badge(xT)}</td><td></td></tr></tfoot>
       </table></div></div>
       <div class="ht-r">
+        <div class="ht-box"><div class="ht-pt">Tổng hợp đánh giá</div>
         <table class="b-table ht-sum"><tbody>
           <tr><th>TL % hoàn thành</th><td class="num"><b>${pc(hT)}</b></td></tr>
           <tr><th>Giá trị hoàn thành</th><td class="num"><b>${bTy(T.gtht)}</b></td></tr>
           <tr><th>Tiền về (dòng thu)</th><td class="num"><b>${bTy(T.thu)}</b></td></tr>
           <tr><th>% Tiền về</th><td class="num"><b class="ht-big">${pc(pT)}</b></td></tr>
           <tr><th>Xếp loại đánh giá</th><td class="num">${badge(xT)}</td></tr>
-        </tbody></table>
-        <div class="ht-pt">Cơ cấu đánh giá</div>
+        </tbody></table></div>
+        <div class="ht-box"><div class="ht-pt">Cơ cấu đánh giá</div>
         <table class="b-table ht-scale"><tbody>${HT_XL.map(([, n, c, t]) => `<tr><td>${badge([0, n, c])}</td><td class="muted">${t}</td><td class="num"><b>${cnt(n)}</b> <span class="muted small">dự án</span></td></tr>`).join('')}</tbody></table>
-        <div class="muted small">Đơn vị: ${TYD()} · ${v === 'gt' ? 'trước' : 'sau'} VAT</div>
+        <div class="muted small">Đơn vị: ${TYD()} · ${v === 'gt' ? 'trước' : 'sau'} VAT</div></div>
       </div>
     </div>
   </section>`;
