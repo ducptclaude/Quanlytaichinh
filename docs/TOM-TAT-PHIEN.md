@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V31.07.11.26 – Đánh giá hoàn thành: sửa cột theo đúng định nghĩa
+- Cột: STT | Mã DA | Tên | DT TĐ3 | GTHT | TL % HT | Tiền về | % Tiền về | Tiêu chuẩn | Xếp loại | Giải pháp.
+- TL % HT = Thực chi ÷ CP TĐ3 · GTHT = TL % HT × DT TĐ3 · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về.
+- Khung tổng hợp thêm TL % hoàn thành; màn hình < 1500px chuyển xuống dưới bảng.
+
 ## V30.07.11.26 – Đánh giá hoàn thành: thông báo dự án Chưa đạt
 - Bảng giữ thứ tự A–Z theo mã dự án; dự án **Chưa đạt** hiện thành khung thông báo đỏ phía trên bảng (thấp nhất trước), kèm số cần thu thêm + nút "Đi tới HĐ".
 - Hơn 8 dự án → bảng thành trang cuộn (giữ tiêu đề / tổng cộng).

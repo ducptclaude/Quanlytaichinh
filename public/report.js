@@ -683,15 +683,17 @@ function bHtSection(list, v) {
   const P = bPeriod(list);
   const { rows } = bTongHopData(list, v, P);
   const R = bMuc3Data(list, v, rows, 3).R.map((r) => {
-    const gtht = r.cp > 0 ? Math.round((r.chi / r.cp) * r.dt) : 0;
+    // TL % HT = Thực chi ÷ Chi phí TĐ3 · GTHT = TL % HT × DT TĐ3 · % Tiền về = Tiền về ÷ GTHT (xếp loại theo % tiền về)
+    const ht = r.cp > 0 ? r.chi / r.cp : null;
+    const gtht = ht != null ? Math.round(ht * r.dt) : 0;
     const p = gtht > 0 ? r.thu / gtht : null;
-    return { ...r, gtht, p, xl: htXl(p) };
+    return { ...r, ht, gtht, p, xl: htXl(p) };
   });
   // Bảng giữ thứ tự A–Z theo mã dự án; dự án Chưa đạt được đẩy lên thành khung thông báo phía trên bảng
   R.sort((a, b) => bNat(a.x.d.ma_du_an, b.x.d.ma_du_an));
   const bad = R.filter((r) => r.xl && r.xl[1] === 'Chưa đạt').sort((a, b) => a.p - b.p);
   const T = R.reduce((a, r) => ({ dt: a.dt + r.dt, gtht: a.gtht + r.gtht, thu: a.thu + r.thu }), { dt: 0, gtht: 0, thu: 0 });
-  const pT = T.gtht > 0 ? T.thu / T.gtht : null, xT = htXl(pT);
+  const hT = T.dt > 0 ? T.gtht / T.dt : null, pT = T.gtht > 0 ? T.thu / T.gtht : null, xT = htXl(pT);
   const pc = (p) => (p == null ? '—' : `${(p * 100).toFixed(1).replace('.', ',')}%`);
   const badge = (x) => (x ? `<span class="xl ${x[2]}">${x[1]}</span>` : '<span class="muted">—</span>');
   const fix = (r) => {
@@ -706,22 +708,23 @@ function bHtSection(list, v) {
   };
   const cnt = (name) => R.filter((r) => r.xl && r.xl[1] === name).length;
   return `<section class="card b-sec ht-sec no-print-break">
-    <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành</h3><p>Giá trị hoàn thành = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 · % hoàn thành = Dòng thu ÷ Giá trị hoàn thành</p></div>
+    <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành</h3><p>TL % HT = Thực chi ÷ Chi phí TĐ3 · GTHT = TL % HT × Doanh thu TĐ3 · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về</p></div>
       <div class="th-tags"><span>TĐ3 mới nhất</span><span>${v === 'gt' ? 'Trước VAT' : 'Sau VAT'}</span><span>Đơn vị: ${TYD()}</span></div></div>
     ${bad.length ? `<div class="ht-alert" role="alert"><div class="ht-alert-h">⚠ ${bad.length} dự án <b>Chưa đạt</b> – cần xử lý sớm</div>
-      ${bad.map((r) => `<div class="ht-alert-r"><b>${esc(r.x.d.ma_du_an)}</b> <span class="muted">${esc(r.x.d.ten_du_an)}</span> · <b class="neg">${pc(r.p)}</b> · ${fix(r).replace(/^<div class="ht-warn">⚠ /, '<span class="ht-warn">').replace(/<\/div>$/, '</span>')}</div>`).join('')}</div>` : ''}
+      ${bad.map((r) => `<div class="ht-alert-r"><b>${esc(r.x.d.ma_du_an)}</b> <span class="muted">${esc(r.x.d.ten_du_an)}</span> · Tiền về <b class="neg">${pc(r.p)}</b> · ${fix(r).replace(/^<div class="ht-warn">⚠ /, '<span class="ht-warn">').replace(/<\/div>$/, '</span>')}</div>`).join('')}</div>` : ''}
     <div class="ht-w">
       <div class="ht-l"><div class="table-wrap ${R.length > 8 ? 'ht-scroll' : ''}"><table class="b-table ht-table">
-        <thead><tr><th class="num">STT</th><th>Mã DA</th><th>Tên dự án</th><th class="num">DT TĐ3</th><th class="num">GTHT</th><th class="num">TL % HT</th><th>Tiêu chuẩn đánh giá</th><th>Xếp loại</th><th>Khắc phục</th></tr></thead>
+        <thead><tr><th class="num">STT</th><th>Mã DA</th><th>Tên dự án</th><th class="num">DT TĐ3</th><th class="num">GTHT</th><th class="num">TL % HT</th><th class="num">Tiền về</th><th class="num">% Tiền về</th><th>Tiêu chuẩn đánh giá</th><th>Xếp loại</th><th>Giải pháp</th></tr></thead>
         <tbody>${R.map((r, i) => `<tr class="${r.xl && r.xl[1] === 'Chưa đạt' ? 'ht-bad' : ''}"><td class="num">${i + 1}</td><td><b>${esc(r.x.d.ma_du_an)}</b></td><td class="ht-name">${esc(r.x.d.ten_du_an)}</td>
-          <td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.gtht)}</td><td class="num"><b>${pc(r.p)}</b></td><td class="muted">${r.xl ? r.xl[3] : '—'}</td><td>${badge(r.xl)}</td><td class="ht-fix">${fix(r)}</td></tr>`).join('')}</tbody>
-        <tfoot><tr><td></td><td colspan="2">Tổng cộng (${R.length} dự án)</td><td class="num">${bTy(T.dt)}</td><td class="num">${bTy(T.gtht)}</td><td class="num">${pc(pT)}</td><td>${xT ? xT[3] : ''}</td><td>${badge(xT)}</td><td></td></tr></tfoot>
+          <td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.gtht)}</td><td class="num">${pc(r.ht)}</td><td class="num">${bTy(r.thu)}</td><td class="num"><b>${pc(r.p)}</b></td><td class="muted">${r.xl ? r.xl[3] : '—'}</td><td>${badge(r.xl)}</td><td class="ht-fix">${fix(r)}</td></tr>`).join('')}</tbody>
+        <tfoot><tr><td></td><td colspan="2">Tổng cộng (${R.length} dự án)</td><td class="num">${bTy(T.dt)}</td><td class="num">${bTy(T.gtht)}</td><td class="num">${pc(hT)}</td><td class="num">${bTy(T.thu)}</td><td class="num">${pc(pT)}</td><td>${xT ? xT[3] : ''}</td><td>${badge(xT)}</td><td></td></tr></tfoot>
       </table></div></div>
       <div class="ht-r">
         <table class="b-table ht-sum"><tbody>
+          <tr><th>TL % hoàn thành</th><td class="num"><b>${pc(hT)}</b></td></tr>
           <tr><th>Giá trị hoàn thành</th><td class="num"><b>${bTy(T.gtht)}</b></td></tr>
           <tr><th>Tiền về (dòng thu)</th><td class="num"><b>${bTy(T.thu)}</b></td></tr>
-          <tr><th>% Hoàn thành</th><td class="num"><b class="ht-big">${pc(pT)}</b></td></tr>
+          <tr><th>% Tiền về</th><td class="num"><b class="ht-big">${pc(pT)}</b></td></tr>
           <tr><th>Xếp loại đánh giá</th><td class="num">${badge(xT)}</td></tr>
         </tbody></table>
         <div class="ht-pt">Cơ cấu đánh giá</div>

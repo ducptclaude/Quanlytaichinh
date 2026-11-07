@@ -1266,7 +1266,11 @@ window.BKS_EN = {
 "các HĐ chủ đầu tư": "Employer contracts",
 "dự án": "projects",
 "Đánh giá hoàn thành": "Completion assessment",
-"– cần xử lý sớm": "– need action soon"
+"– cần xử lý sớm": "– need action soon",
+"TL % HT = Thực chi ÷ Chi phí TĐ3 · GTHT = TL % HT × Doanh thu TĐ3 · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về": "% complete = Actual expenditure ÷ M3 cost · CV = % complete × M3 revenue · % Collections = Collections ÷ CV · Rated by % collections",
+"Giải pháp": "Action",
+"% Tiền về": "% Collections",
+"TL % hoàn thành": "% complete"
 },
 "patterns": [
 [
