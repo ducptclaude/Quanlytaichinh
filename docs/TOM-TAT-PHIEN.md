@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V26.07.11.26 — Báo cáo: cân lề, cân dòng mọi bảng
+- Mọi ô tiêu đề / dữ liệu trong Báo cáo căn giữa theo chiều dọc (ô tiêu đề cao 2 tầng ở mục III, "Chỉ tiêu" mục IV không còn dồn đáy).
+- Phân tích chi tiết (`.b-detail`, bảng số đồng đầy đủ 11–14 cột): chữ 11,5px, khoảng cách gọn, tiêu đề dài được xuống dòng,
+  tên dự án xuống dòng → không còn phải kéo ngang. Máy kiểm tra 30 bảng (1366px): 0 lệch dọc, 0 tràn.
+
 ## V25.07.11.26 — Mục III: tách nhóm Thu / Chi
 - Bảng mục III (`.th-t3`) có dòng tiêu đề nhóm: **Thu (tiền về)** = Doanh thu TĐ – Dòng thu – Còn phải thu (nền xanh nhạt),
   **Chi (tiền ra)** = Chi phí TĐ – Dòng chi – Còn phải chi (nền cam nhạt), **Còn lại (thu − chi)** riêng; vạch đậm ngăn giữa các nhóm.
