@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V22.07.11.26 — Mục III: tên ô gọn
+- "Dòng thu còn lại phải thu" → **Còn lại phải thu**; "Dòng chi còn lại phải chi" → **Còn lại phải chi** (bỏ lặp chữ).
+
 ## V21.07.11.26 — Khung tóm tắt: Thực thu / Thực chi không dẫn số
 - Bỏ liên kết (bấm mở bảng chi tiết) ở Thực thu, Thực chi trong khung tóm tắt cạnh tiêu đề báo cáo; chỉ Số dư đầu kỳ bấm được để nhập.
   Bảng chi tiết vẫn mở được từ mục II Dòng tiền thực tế.

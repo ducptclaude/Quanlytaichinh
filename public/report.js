@@ -772,8 +772,8 @@ function bTongHopHtml(list, v, P) {
     <div class="i-tdbar"><div class="i-tdseg" role="group" aria-label="Chọn thời điểm">${[[1, 'Ký HĐ'], [2, 'Điều chỉnh'], [3, 'Quyết toán']].map(([n, t]) =>
       `<button type="button" data-itd3="${n}" class="${n === k3 ? 'on' : ''}"><b>TĐ${n}</b> ${t}</button>`).join('')}</div><span class="muted small">Cùng thời điểm với mục I – đổi ở đây hoặc mục I đều được</span></div>
     <div class="f-grid th-grid3">
-      ${card('dt', 'Dòng thu còn lại phải thu', T3.pt, [`Doanh thu TĐ${k3} <b>${bTy(T3.dt)}</b> − Dòng thu <b>${bTy(T3.thu)}</b>`, `Đã thu <b>${bpct(T3.thu, T3.dt)}</b> doanh thu TĐ${k3}`])}
-      ${card('cp', 'Dòng chi còn lại phải chi', T3.pc, [`Chi phí TĐ${k3} <b>${bTy(T3.cp)}</b> − Dòng chi <b>${bTy(T3.chi)}</b>`, `Đã chi <b>${bpct(T3.chi, T3.cp)}</b> chi phí TĐ${k3}`])}
+      ${card('dt', 'Còn lại phải thu', T3.pt, [`Doanh thu TĐ${k3} <b>${bTy(T3.dt)}</b> − Dòng thu <b>${bTy(T3.thu)}</b>`, `Đã thu <b>${bpct(T3.thu, T3.dt)}</b> doanh thu TĐ${k3}`])}
+      ${card('cp', 'Còn lại phải chi', T3.pc, [`Chi phí TĐ${k3} <b>${bTy(T3.cp)}</b> − Dòng chi <b>${bTy(T3.chi)}</b>`, `Đã chi <b>${bpct(T3.chi, T3.cp)}</b> chi phí TĐ${k3}`])}
       ${card('ln', 'Còn lại (thu − chi)', T3.con, ['Còn phải thu − Còn phải chi', T3.con < 0 ? 'Phần còn phải chi lớn hơn phần còn phải thu' : 'Tiền dự án còn dư khi thu – chi hết'])}
     </div>
     <div class="table-wrap"><table class="b-table th-table">
