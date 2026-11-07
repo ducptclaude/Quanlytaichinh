@@ -1265,7 +1265,8 @@ window.BKS_EN = {
 "⚠ Cần thu tiền về": "⚠ Collections needed",
 "các HĐ chủ đầu tư": "Employer contracts",
 "dự án": "projects",
-"Đánh giá hoàn thành": "Completion assessment"
+"Đánh giá hoàn thành": "Completion assessment",
+"– cần xử lý sớm": "– need action soon"
 },
 "patterns": [
 [
@@ -2379,6 +2380,10 @@ window.BKS_EN = {
 [
 "Phiên ({})",
 "Sessions ({})"
+],
+[
+"⚠ {} dự án",
+"⚠ {} projects"
 ],
 [
 "({} dòng)",

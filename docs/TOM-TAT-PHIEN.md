@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V30.07.11.26 – Đánh giá hoàn thành: thông báo dự án Chưa đạt
+- Bảng giữ thứ tự A–Z theo mã dự án; dự án **Chưa đạt** hiện thành khung thông báo đỏ phía trên bảng (thấp nhất trước), kèm số cần thu thêm + nút "Đi tới HĐ".
+- Hơn 8 dự án → bảng thành trang cuộn (giữ tiêu đề / tổng cộng).
+
 ## V29.07.11.26 — Đánh giá hoàn thành: ưu tiên Chưa đạt, cuộn khi nhiều dự án
 - Thứ tự: Chưa đạt → Đạt → Tốt → Rất tốt → chưa đủ số liệu; cùng loại thì % HT thấp đứng trước. STT đánh lại theo thứ tự này.
 - > 8 dự án: bảng trái cuộn trong khung (cao 520px), dòng tiêu đề + Tổng cộng đứng yên (sticky). In / PDF: in đủ, không cuộn.

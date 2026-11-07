@@ -687,9 +687,9 @@ function bHtSection(list, v) {
     const p = gtht > 0 ? r.thu / gtht : null;
     return { ...r, gtht, p, xl: htXl(p) };
   });
-  // Ưu tiên xử lý: Chưa đạt lên đầu → Đạt → Tốt → Rất tốt → chưa đủ số liệu; cùng loại thì % thấp hơn đứng trước
-  const uu = (r) => (r.xl ? HT_XL.indexOf(r.xl) : -1); // Chưa đạt = 3 (cao nhất) … Rất tốt = 0; chưa đủ số liệu = -1 (cuối)
-  R.sort((a, b) => uu(b) - uu(a) || (a.p ?? 9) - (b.p ?? 9));
+  // Bảng giữ thứ tự A–Z theo mã dự án; dự án Chưa đạt được đẩy lên thành khung thông báo phía trên bảng
+  R.sort((a, b) => bNat(a.x.d.ma_du_an, b.x.d.ma_du_an));
+  const bad = R.filter((r) => r.xl && r.xl[1] === 'Chưa đạt').sort((a, b) => a.p - b.p);
   const T = R.reduce((a, r) => ({ dt: a.dt + r.dt, gtht: a.gtht + r.gtht, thu: a.thu + r.thu }), { dt: 0, gtht: 0, thu: 0 });
   const pT = T.gtht > 0 ? T.thu / T.gtht : null, xT = htXl(pT);
   const pc = (p) => (p == null ? '—' : `${(p * 100).toFixed(1).replace('.', ',')}%`);
@@ -708,6 +708,8 @@ function bHtSection(list, v) {
   return `<section class="card b-sec ht-sec no-print-break">
     <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành</h3><p>Giá trị hoàn thành = Dòng chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 · % hoàn thành = Dòng thu ÷ Giá trị hoàn thành</p></div>
       <div class="th-tags"><span>TĐ3 mới nhất</span><span>${v === 'gt' ? 'Trước VAT' : 'Sau VAT'}</span><span>Đơn vị: ${TYD()}</span></div></div>
+    ${bad.length ? `<div class="ht-alert" role="alert"><div class="ht-alert-h">⚠ ${bad.length} dự án <b>Chưa đạt</b> – cần xử lý sớm</div>
+      ${bad.map((r) => `<div class="ht-alert-r"><b>${esc(r.x.d.ma_du_an)}</b> <span class="muted">${esc(r.x.d.ten_du_an)}</span> · <b class="neg">${pc(r.p)}</b> · ${fix(r).replace(/^<div class="ht-warn">⚠ /, '<span class="ht-warn">').replace(/<\/div>$/, '</span>')}</div>`).join('')}</div>` : ''}
     <div class="ht-w">
       <div class="ht-l"><div class="table-wrap ${R.length > 8 ? 'ht-scroll' : ''}"><table class="b-table ht-table">
         <thead><tr><th class="num">STT</th><th>Mã DA</th><th>Tên dự án</th><th class="num">DT TĐ3</th><th class="num">GTHT</th><th class="num">TL % HT</th><th>Tiêu chuẩn đánh giá</th><th>Xếp loại</th><th>Khắc phục</th></tr></thead>
