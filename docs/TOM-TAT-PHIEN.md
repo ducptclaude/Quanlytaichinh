@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V17.07.11.26 — Danh sách dự án: cân đối cột
+- Máy tính (>900px): cột Mã, Trạng thái, Tiến độ (ngày, căn giữa), Thời gian, Cập nhật, nút co vừa nội dung (width 1%, không xuống dòng);
+  Tên dự án 34%, Chủ đầu tư 26%. Bỏ dòng chú thích loại công trình · địa điểm dưới tên.
+- Sửa lỗi: ô nút Sửa / Xóa dùng `display: grid` nên tách khỏi cột, đè lên cột Cập nhật → trả về `table-cell`. Điện thoại giữ dạng thẻ.
+
 ## V16.07.11.26 — Danh sách dự án: cột mới
 - Cột: Mã dự án | Tên dự án | Chủ đầu tư | Trạng thái | Tiến độ (ngày) | Thời gian | Cập nhật | Sửa / Xóa.
 - Bỏ cột Doanh thu, Chi phí, Lợi nhuận, Tiến độ %; bỏ nút "Doanh thu", "Chi phí" trên từng dòng. Bấm mã / tên dự án → báo cáo công trình.

@@ -175,7 +175,7 @@ function renderProjects() {
     ? rows.map((r) => `
       <tr>
         <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình"><b class="p-ma">${esc(r.ma_du_an)}</b></a></td>
-        <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình">${esc(r.ten_du_an)}</a>${r.loai_cong_trinh || r.dia_diem ? `<div class="muted small">${esc([r.loai_cong_trinh, r.dia_diem].filter(Boolean).join(' · '))}</div>` : ''}</td>
+        <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình">${esc(r.ten_du_an)}</a></td>
         <td>${esc(r.chu_dau_tu)}</td>
         <td><span class="st st-${slug(r.trang_thai)}">${esc(r.trang_thai)}</span></td>
         <td class="num">${days(r)}</td>
