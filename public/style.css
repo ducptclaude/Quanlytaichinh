@@ -3114,3 +3114,5 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 :root[data-theme="dark"] #b-report .th-sec + .th-sec { margin-top: 26px; }
 @media (max-width: 640px) { :root[data-theme="dark"] #b-report .th-sec { padding: 12px 10px 14px; border-radius: 14px; } }
 :root[data-theme="dark"] #b-report .th-sec { border-color: rgba(140,155,255,.16) !important; }
+/* Báo cáo – giao diện tối: khung mục I–IV giữ viền, bỏ nền (trong suốt) */
+:root[data-theme="dark"] #b-report .th-sec { background: transparent !important; box-shadow: none !important; }

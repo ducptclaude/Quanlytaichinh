@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V40.07.11.26 – Báo cáo giao diện tối: khung mục I–IV bỏ nền
+- Khung từng mục I–IV giữ viền mảnh + vạch màu, bỏ nền (trong suốt, lộ nền khung lớn).
+
 ## V39.07.11.26 – Báo cáo giao diện tối: mục I–IV thành khung riêng
 - Mỗi mục I–IV có khung riêng (nền #121a37, viền mảnh ánh tím, vạch màu mục bên trái), cách nhau 26px.
 
