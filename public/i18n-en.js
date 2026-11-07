@@ -1239,7 +1239,9 @@ window.BKS_EN = {
 "Tiền thật đang có lúc bắt đầu theo dõi (đồng, được nhập số âm, để trống = 0). Báo cáo:": "Actual cash on hand when tracking starts (VND, negative allowed, blank = 0). Report:",
 "Còn lại = Thực thu − Thực chi + Số dư đầu kỳ": "Balance = Actual collections − Actual expenditure + Opening balance",
 ". Xem tất cả dự án = số chung + tổng số dư từng dự án.": ". All projects = company balance + sum of project balances.",
-"Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.": "Projects without locked M1: use the original Employer contract, subcontracts per original contract and other costs recorded in the system. After-VAT view: revenue converted at the original contract VAT, cost at the project cost VAT ratio, rounded to 0.1 bn. Completion column: provisional % complete by cost (cost to cost) = Actual expenditure ÷ Forecast cost."
+"Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.": "Projects without locked M1: use the original Employer contract, subcontracts per original contract and other costs recorded in the system. After-VAT view: revenue converted at the original contract VAT, cost at the project cost VAT ratio, rounded to 0.1 bn. Completion column: provisional % complete by cost (cost to cost) = Actual expenditure ÷ Forecast cost.",
+"Thu (tiền về)": "Collections",
+"Chi (tiền ra)": "Expenditure"
 },
 "patterns": [
 [
@@ -2187,6 +2189,10 @@ window.BKS_EN = {
 "{} collections"
 ],
 [
+"Doanh thu TĐ{}",
+"Revenue M{}"
+],
+[
 "(gốc {}, giảm",
 "(original {}, decrease"
 ],
@@ -2277,6 +2283,10 @@ window.BKS_EN = {
 [
 "(HĐ + {} PL)",
 "(Contract + {} add.)"
+],
+[
+"Chi phí TĐ{}",
+"Cost M{}"
 ],
 [
 "+ Chốt TĐ{}",

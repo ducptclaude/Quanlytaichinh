@@ -780,12 +780,16 @@ function bTongHopHtml(list, v, P) {
       ${card('cp', 'Còn lại phải chi', T3.pc, [`Chi phí TĐ${k3} <b>${bTy(T3.cp)}</b> − Dòng chi <b>${bTy(T3.chi)}</b>`, `Đã chi <b>${bpct(T3.chi, T3.cp)}</b> chi phí TĐ${k3}`])}
       ${card('ln', 'Còn lại (thu − chi)', T3.con, ['Còn phải thu − Còn phải chi', T3.con < 0 ? 'Phần còn phải chi lớn hơn phần còn phải thu' : 'Tiền dự án còn dư khi thu – chi hết'])}
     </div>
-    <div class="table-wrap"><table class="b-table th-table">
-      ${hd([`Doanh thu TĐ${k3}`, 'Dòng thu', 'Còn phải thu', `Chi phí TĐ${k3}`, 'Dòng chi', 'Còn phải chi', 'Còn lại (thu − chi)'])}
-      <tbody>${R3.map((r, i) => `<tr>${prj(r.x, i)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.thu)}</td><td class="num"><b>${ty(r.pt)}</b></td>
-        <td class="num">${bTy(r.cp)}</td><td class="num">${bTy(r.chi)}</td><td class="num"><b>${ty(r.pc)}</b></td>
-        <td class="num strong ${r.con < 0 ? 'neg' : 'pos'}">${bTy(r.con)}</td></tr>`).join('')}</tbody>
-      ${foot([bTy(T3.dt), bTy(T3.thu), ty(T3.pt), bTy(T3.cp), bTy(T3.chi), ty(T3.pc), ty(T3.con)])}
+    <div class="table-wrap"><table class="b-table th-table th-t3">
+      <thead><tr class="t3-grp"><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">Tên dự án</th><th rowspan="2">Tình trạng</th>
+        <th colspan="3" class="g-thu">Thu (tiền về)</th><th colspan="3" class="g-chi">Chi (tiền ra)</th><th rowspan="2" class="num g-con">Còn lại (thu − chi)</th></tr>
+        <tr class="t3-sub"><th class="num c-thu g1">Doanh thu TĐ${k3}</th><th class="num c-thu">Dòng thu</th><th class="num c-thu">Còn phải thu</th>
+        <th class="num c-chi g1">Chi phí TĐ${k3}</th><th class="num c-chi">Dòng chi</th><th class="num c-chi">Còn phải chi</th></tr></thead>
+      <tbody>${R3.map((r, i) => `<tr>${prj(r.x, i)}<td class="num c-thu g1">${bTy(r.dt)}</td><td class="num c-thu">${bTy(r.thu)}</td><td class="num c-thu"><b>${ty(r.pt)}</b></td>
+        <td class="num c-chi g1">${bTy(r.cp)}</td><td class="num c-chi">${bTy(r.chi)}</td><td class="num c-chi"><b>${ty(r.pc)}</b></td>
+        <td class="num strong g-con ${r.con < 0 ? 'neg' : 'pos'}">${bTy(r.con)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td></td><td colspan="3">Tổng cộng (${R3.length} dự án)</td><td class="num c-thu g1">${bTy(T3.dt)}</td><td class="num c-thu">${bTy(T3.thu)}</td><td class="num c-thu">${ty(T3.pt)}</td>
+        <td class="num c-chi g1">${bTy(T3.cp)}</td><td class="num c-chi">${bTy(T3.chi)}</td><td class="num c-chi">${ty(T3.pc)}</td><td class="num g-con">${ty(T3.con)}</td></tr></tfoot>
     </table></div>
     <p class="muted small f-note">Còn phải thu = Doanh thu TĐ${k3} (mục I) − Dòng thu (mục II) · Còn phải chi = Chi phí TĐ${k3} (mục I) − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. Đổi thời điểm ở mục I (TĐ1 / TĐ2 / TĐ3) thì mục III tự lấy theo.</p>
     ${bMuc4Html(list, v)}`;

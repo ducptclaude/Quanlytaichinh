@@ -2937,3 +2937,23 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
   #b-report .th-table:not(.iv-table) .th-stt, #b-report .th-table:not(.iv-table) .th-ma, #b-report .th-table:not(.iv-table) .th-tt2 { width: 1% !important; white-space: nowrap; }
   #b-report .th-table:not(.iv-table) td.th-name, #b-report .th-table:not(.iv-table) th:nth-child(3) { width: auto !important; max-width: none !important; white-space: normal; overflow: visible; text-overflow: clip; }
 }
+/* Mục III: tách rõ nhóm THU (xanh) – CHI (cam) – Còn lại */
+.th-t3 { --t3-thu: rgba(44,95,163,.07); --t3-chi: rgba(194,122,62,.08); --t3-thu-h: rgba(44,95,163,.14); --t3-chi-h: rgba(194,122,62,.16); }
+.th-t3 thead tr.t3-grp th.g-thu, .th-t3 thead tr.t3-grp th.g-chi { text-align: center; letter-spacing: .6px; border-bottom: 2px solid; }
+.th-t3 thead tr.t3-grp th.g-thu { background: var(--t3-thu-h); color: #2c5fa3; border-bottom-color: #2c5fa3; }
+.th-t3 thead tr.t3-grp th.g-chi { background: var(--t3-chi-h); color: #b5672a; border-bottom-color: #c27a3e; }
+.th-t3 .c-thu { background: var(--t3-thu); }
+.th-t3 .c-chi { background: var(--t3-chi); }
+.th-t3 .g1, .th-t3 .g-con { border-left: 2px solid rgba(100,116,139,.35) !important; }
+.th-t3 thead tr.t3-grp th.g-chi { border-left: 2px solid rgba(100,116,139,.35); }
+.th-t3 thead tr.t3-grp th.g-con { vertical-align: middle; }
+.th-t3 thead th[rowspan] { vertical-align: middle; }
+:root[data-theme="dark"] .th-t3 { --t3-thu: rgba(91,141,239,.08); --t3-chi: rgba(240,163,90,.08); --t3-thu-h: rgba(91,141,239,.18); --t3-chi-h: rgba(240,163,90,.18); }
+:root[data-theme="dark"] .th-t3 thead tr.t3-grp th.g-thu { color: #8fb0e8; border-bottom-color: #5b8def; }
+:root[data-theme="dark"] .th-t3 thead tr.t3-grp th.g-chi { color: #e3ab76; border-bottom-color: #e39a55; }
+:root[data-theme="dark"] .th-t3 .g1, :root[data-theme="dark"] .th-t3 .g-con, :root[data-theme="dark"] .th-t3 thead tr.t3-grp th.g-chi { border-left-color: rgba(255,255,255,.18) !important; }
+#b-report .th-t3 thead th { white-space: nowrap !important; }
+#b-report .th-t3 thead tr.t3-grp th.g-thu { color: #2c5fa3; background: var(--t3-thu-h); }
+#b-report .th-t3 thead tr.t3-grp th.g-chi { color: #b5672a; background: var(--t3-chi-h); }
+:root[data-theme="dark"] #b-report .th-t3 thead tr.t3-grp th.g-thu { color: #8fb0e8; }
+:root[data-theme="dark"] #b-report .th-t3 thead tr.t3-grp th.g-chi { color: #e3ab76; }

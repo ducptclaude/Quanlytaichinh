@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V25.07.11.26 — Mục III: tách nhóm Thu / Chi
+- Bảng mục III (`.th-t3`) có dòng tiêu đề nhóm: **Thu (tiền về)** = Doanh thu TĐ – Dòng thu – Còn phải thu (nền xanh nhạt),
+  **Chi (tiền ra)** = Chi phí TĐ – Dòng chi – Còn phải chi (nền cam nhạt), **Còn lại (thu − chi)** riêng; vạch đậm ngăn giữa các nhóm.
+- Tiêu đề 1 dòng; màu nhóm có cả giao diện sáng / tối. Số liệu không đổi.
+
 ## V24.07.11.26 — Báo cáo: mọi bảng theo dự án tự co cột
 - Máy tính: mọi bảng `#b-report .th-table` (mục I, II, III…) chuyển từ chia cột cố định sang tự co theo nội dung; tiêu đề 1 dòng
   (VD "Còn lại (thu − chi)"), cột số / STT / Mã / Tình trạng gọn, Tên dự án giãn. Đã thử: 3 bảng không còn tiêu đề 2 dòng, không tràn.
