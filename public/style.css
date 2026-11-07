@@ -3106,3 +3106,11 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 :root[data-theme="dark"] .b-head:hover, :root[data-theme="dark"] #b-report .f-card:hover, :root[data-theme="dark"] #b-report .tt-k:hover, :root[data-theme="dark"] #b-report .pc-tile:hover {
   border-color: rgba(130,140,255,.28) !important; box-shadow: 0 10px 24px -12px rgba(0,0,0,.8) !important; }
 :root[data-theme="dark"] #b-report .f-card { border-top: 3px solid color-mix(in srgb, var(--f-ac) 80%, #151d3e) !important; }
+/* Báo cáo – giao diện tối: mỗi mục I–IV là 1 khung riêng (tông xanh đêm, viền mảnh, vạch màu mục bên trái) */
+:root[data-theme="dark"] #b-report .th-sec {
+  background: #121a37 !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 18px;
+  padding: 16px 18px 18px; box-shadow: 0 8px 22px -16px rgba(0,0,0,.85) !important; }
+:root[data-theme="dark"] #b-report .th-sec::before { display: block; opacity: .7; }
+:root[data-theme="dark"] #b-report .th-sec + .th-sec { margin-top: 26px; }
+@media (max-width: 640px) { :root[data-theme="dark"] #b-report .th-sec { padding: 12px 10px 14px; border-radius: 14px; } }
+:root[data-theme="dark"] #b-report .th-sec { border-color: rgba(140,155,255,.16) !important; }
