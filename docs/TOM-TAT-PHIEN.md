@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.07.11.26 — Báo cáo tối: tóm tắt Dòng thu / Thực chi / Còn lại nổi bật
+- Khối `.b-cash` (bên phải tiêu đề báo cáo), chỉ giao diện tối: khung kính viền neon; số to hơn, sáng theo màu dòng
+  (Dòng thu xanh dương, Thực chi cam, Còn lại xanh ngọc 23px) có ánh sáng nhẹ; số âm đỏ. Phải gắn `#b-report` vì quy tắc gốc có `#b-report`.
+
 ## V06.07.11.26 — Báo cáo tối: cùng kiểu Dashboard
 - Vùng bao ngoài (`#b-report .card.b-sec`, `.th-sec`): nền trong suốt + viền xanh ngọc ánh neon nhẹ.
 - Khối bên trong (`.b-head`, `.th-head`, `.f-card`, `.tt-k`, `.table-wrap`, `.pc-tile`): nền kính, nổi 3px, viền + bóng neon theo màu khối.
