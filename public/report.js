@@ -1336,10 +1336,19 @@ function renderReport() {
       <div class="b-meta">Phạm vi: <b>${esc(scope)}</b> · Đơn vị: VNĐ (${vt} trừ khi ghi khác) · Lập lúc ${lap.toLocaleString('vi-VN')} · Người lập: ${esc(BC.nguoi_lap)} · ${esc(BC.phien_ban)}</div>
     </div></div>    ${(() => { // Dòng tiền lũy kế đến hôm nay (= mục II khi xem Toàn bộ thời gian): thu − chi, không gồm vay / trả gốc
       const { T: C } = bTongHopData(list, v, { to: '9999-12' });
-      const it = (k, lab, x) => `<div class="b-cash-i ${k}"><span><i></i>${lab}</span><b class="${x < 0 ? 'neg' : ''}">${bTy(x)}</b></div>`;
+      // Số dư đầu kỳ (nhập tay): xem 1 dự án = số dư dự án đó; xem nhiều dự án = số dư chung + tổng số dư các dự án
+      const SD = BC.so_du_dau_ky || { chung: 0, du_an: {} };
+      const one1 = list.length === 1 && bScope().one ? list[0] : null;
+      const sd = one1 ? Number(SD.du_an[one1.id]) || 0 : (Number(SD.chung) || 0) + list.reduce((a, d) => a + (Number(SD.du_an[d.id]) || 0), 0);
+      const canSd = ['admin', 'ke_toan'].includes(ME.role);
+      const con = C.thu - C.chi + sd;
+      const it = (k, lab, x, attr = '', tip = '') => `<div class="b-cash-i ${k}"><span><i></i>${lab}</span>${attr
+        ? `<button type="button" class="tt-link b-cash-v ${x < 0 ? 'neg' : ''}" ${attr} title="${tip}">${bTy(x)}</button>` : `<b class="${x < 0 ? 'neg' : ''}">${bTy(x)}</b>`}</div>`;
       return `<div class="b-cash" title="Lũy kế · ${vt} · không gồm tiền vay, trả nợ gốc">
-        ${it('thu', 'Dòng thu', C.thu)}${it('chi', 'Thực chi', C.chi)}${it('con', 'Còn lại (thu − chi)', C.con)}
-        <div class="b-cash-u">${TYD()} · ${vt} · lũy kế đến hôm nay</div></div>`;
+        ${it('sd', 'Số dư đầu kỳ', sd, canSd ? `data-sddk="${one1 ? one1.id : 0}"` : '', canSd ? (one1 ? `Bấm để nhập số dư đầu kỳ của ${esc(one1.ma_du_an)}` : 'Bấm để nhập số dư đầu kỳ chung (công ty); tổng = số chung + số dư từng dự án') : 'Nhập tay bởi Quản trị / Kế toán')}
+        ${it('thu', 'Thực thu', C.thu, 'data-ttd="thu" data-tts="1"', 'Bấm để xem bảng chi tiết')}${it('chi', 'Thực chi', C.chi, 'data-ttd="chi" data-tts="1"', 'Bấm để xem bảng chi tiết')}
+        ${it('con', 'Còn lại (thu − chi)', con)}
+        <div class="b-cash-u">${TYD()} · ${vt} · lũy kế đến hôm nay · Còn lại = thu − chi + số dư đầu kỳ</div></div>`;
     })()}
   </div>
 
@@ -2114,6 +2123,18 @@ $('#b-report').addEventListener('click', (e) => {
   if (go) { e.preventDefault(); revProjectId = Number(e.target.dataset.id); showTab(go); }
   const ttd = e.target.closest('[data-ttd]');
   if (ttd) return bThucDrill(ttd.dataset.ttd, Number(ttd.dataset.ttp) || 0, ttd.dataset.tts === '1');
+  const sdk = e.target.closest('[data-sddk]');
+  if (sdk) { // nhập số dư đầu kỳ (đồng): 0 = chung, id = dự án
+    const id = Number(sdk.dataset.sddk) || 0, SD = BC.so_du_dau_ky || { chung: 0, du_an: {} };
+    const cur = id ? Number(SD.du_an[id]) || 0 : Number(SD.chung) || 0;
+    const ten = id ? (BC.du_an.find((d) => d.id === id)?.ma_du_an || '') : 'chung (công ty)';
+    const v = prompt(`Số dư đầu kỳ ${ten} (đồng, được nhập số âm). Để trống = 0`, cur ? String(cur) : '');
+    if (v === null) return;
+    const n = Number(String(v).trim().replace(/[.\s,]/g, '') || 0);
+    if (!Number.isSafeInteger(n)) return alert('Số dư đầu kỳ phải là số nguyên (đồng)');
+    api('/api/so-du-dau-ky', { method: 'PUT', body: JSON.stringify({ du_an_id: id, so_tien: n }) })
+      .then((o) => { BC.so_du_dau_ky = o; renderReport(); }).catch((err) => alert(err.message));
+  }
 });
 let bResize;
 window.addEventListener('resize', () => { clearTimeout(bResize); bResize = setTimeout(() => { if (BC && !$('#tab-report').hidden) bDrawCharts(bScope().list, BST.vat, bScope().one); }, 200); });

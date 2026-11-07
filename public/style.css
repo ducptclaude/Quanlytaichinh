@@ -2886,3 +2886,16 @@ body.chi-xem .b-wlink { cursor: default; pointer-events: none; text-decoration: 
 #p-tbody td.row-actions { display: table-cell; text-align: right; position: static; background: transparent; box-shadow: none; }
 #p-tbody td.row-actions button { margin: 0 2px; }
 }
+
+/* Khung tóm tắt báo cáo: Số dư đầu kỳ (nhập tay) + số bấm được */
+.b-cash-i.sd i { background: #7e5aa6; }
+.b-cash-v { font: inherit; font-size: 16px; font-weight: 700; color: var(--fg-navy); text-decoration: underline dotted; text-underline-offset: 4px; text-decoration-color: rgba(15,163,163,.6); }
+#b-report .b-cash-i .b-cash-v { color: var(--cfb-navy); }
+.b-cash-i.sd { border-bottom: 1px dashed var(--bd-cdd8e5); margin-bottom: 3px; padding-bottom: 5px; }
+:root[data-theme="dark"] #b-report .b-cash-i .b-cash-v { font-size: 18px; font-weight: 800; color: #8fb0e8; text-shadow: 0 0 6px rgba(91,141,239,.22); }
+:root[data-theme="dark"] #b-report .b-cash-i.chi .b-cash-v { color: #e3ab76; text-shadow: 0 0 6px rgba(240,163,90,.20); }
+:root[data-theme="dark"] #b-report .b-cash-i.sd .b-cash-v, :root[data-theme="dark"] #b-report .b-cash-i.sd b { color: #b9a3e8; text-shadow: 0 0 6px rgba(126,90,166,.25); }
+:root[data-theme="dark"] #b-report .b-cash-i.sd i { background: #9b7fd1; box-shadow: 0 0 3px rgba(155,127,209,.6); }
+:root[data-theme="dark"] #b-report .b-cash-i.sd { border-bottom-color: rgba(255,255,255,.12); }
+@media print { .b-cash-v { text-decoration: none; } }
+#b-report .b-cash-i.sd i { background: #7e5aa6; } /* chấm Số dư đầu kỳ: tím, khác Thực thu */

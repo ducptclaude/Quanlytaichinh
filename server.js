@@ -591,10 +591,33 @@ async function reportProjects({ withCost = false } = {}) {
   for (const d of du_an) d.thoi_diem = tds.filter((t) => t.du_an_id === d.id).map(({ du_an_id, ...t }) => t);
   return du_an;
 }
+// Số dư đầu kỳ (nhập tay, đồng): 1 số chung của công ty + số từng dự án – lưu trong Cài đặt (không đổi cấu trúc kho dữ liệu)
+const SDDK_KEY = 'so_du_dau_ky';
+const sddkOf = (s) => { try { const o = JSON.parse(s[SDDK_KEY] || '{}'); return { chung: Number(o.chung) || 0, du_an: o.du_an && typeof o.du_an === 'object' ? o.du_an : {} }; } catch { return { chung: 0, du_an: {} }; } };
+api.put('/so-du-dau-ky', auth.requireRole('admin', 'ke_toan'), wrap(async (req, res) => {
+  const id = Number(req.body?.du_an_id) || 0; // 0 = số dư chung
+  const raw = req.body?.so_tien;
+  const v = raw === '' || raw === null || raw === undefined ? 0 : Number(raw);
+  if (!Number.isSafeInteger(v) || Math.abs(v) > 1e15) return bad(res, 'Số dư đầu kỳ phải là số nguyên (đồng)');
+  const s = await store.getSettings();
+  const o = sddkOf(s);
+  let ten = 'Số dư chung (công ty)';
+  if (id) {
+    const p = (await store.listProjects()).find((x) => x.id === id);
+    if (!p) return bad(res, 'Không tìm thấy dự án', 404);
+    ten = `${p.ma_du_an} – ${p.ten_du_an}`;
+  }
+  const cu = id ? Number(o.du_an[id]) || 0 : o.chung;
+  if (id) { if (v) o.du_an[id] = v; else delete o.du_an[id]; } else o.chung = v;
+  await store.saveSettings({ [SDDK_KEY]: JSON.stringify(o) });
+  audit.log(req, 'Sửa', 'Số dư đầu kỳ', `${ten}: ${cu.toLocaleString('vi-VN')} → ${v.toLocaleString('vi-VN')} đ`);
+  res.json(o);
+}));
 api.get('/bao-cao', wrap(async (req, res) => {
   const du_an = await reportProjects();
   const s = await store.getSettings();
   res.json({
+    so_du_dau_ky: sddkOf(s),
     lap_luc: new Date().toISOString(), nguoi_lap: req.user.full_name || req.user.username,
     ten_cong_ty: s.ten_cong_ty, ten_he_thong: s.ten_he_thong, phien_ban: PHIEN_BAN.ma, cong_ty: congTy(s.ten_cong_ty),
     khoi: KHOI_CHI_PHI.map((k) => ({ code: k.code, ten: k.ten })), du_an,

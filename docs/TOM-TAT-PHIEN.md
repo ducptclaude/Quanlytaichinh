@@ -2,6 +2,15 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V18.07.11.26 — Báo cáo: Số dư đầu kỳ
+- Khung tóm tắt cạnh tiêu đề báo cáo: **Số dư đầu kỳ** (nhập tay) → **Thực thu**, **Thực chi** (bấm mở bảng chi tiết như mục II)
+  → **Còn lại = (Thực thu − Thực chi) + Số dư đầu kỳ**.
+- 2 loại số dư (người dùng chốt): **chung (công ty)** + **từng dự án**. Xem 1 dự án = số dư dự án đó; xem nhiều / tất cả = chung + tổng số dư các dự án.
+  Bấm số dư: phạm vi tất cả → nhập số chung; phạm vi 1 dự án → nhập số của dự án. Đơn vị nhập: đồng, được âm, trống = 0.
+- Lưu ở Cài đặt, khóa `so_du_dau_ky` = JSON {chung, du_an: {id: số}} (KHÔNG đổi cấu trúc kho dữ liệu). API `PUT /api/so-du-dau-ky`
+  (Quản trị + Kế toán; Chỉ xem bị chặn), ghi nhật ký trước → sau; `/api/bao-cao` trả `so_du_dau_ky`.
+- Số dư là tiền thật, không quy đổi VAT. Dashboard chưa có số dư (chỉ khung tiêu đề báo cáo). Điểm khôi phục: `phien-07.11.26-10h44`.
+
 ## V17.07.11.26 — Danh sách dự án: cân đối cột
 - Máy tính (>900px): cột Mã, Trạng thái, Tiến độ (ngày, căn giữa), Thời gian, Cập nhật, nút co vừa nội dung (width 1%, không xuống dòng);
   Tên dự án 34%, Chủ đầu tư 26%. Bỏ dòng chú thích loại công trình · địa điểm dưới tên.

@@ -1228,7 +1228,11 @@ window.BKS_EN = {
 "= ngày kết thúc − ngày bắt đầu": "= end date − start date",
 "Nhập đủ ngày bắt đầu và ngày kết thúc": "Enter both start and end dates",
 "Bấm mã / tên dự án để xem báo cáo chi tiết · Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu": "Click a project code / name for the detailed report · Duration (days) = end date − start date",
-"Mã dự án": "Project code"
+"Mã dự án": "Project code",
+"Số dư đầu kỳ": "Opening balance",
+"Nhập tay bởi Quản trị / Kế toán": "Entered manually by Admin / Accountant",
+"Bấm để nhập số dư đầu kỳ chung (công ty); tổng = số chung + số dư từng dự án": "Click to enter the company opening balance; total = company + each project's balance",
+"Số dư đầu kỳ phải là số nguyên (đồng)": "Opening balance must be an integer (VND)"
 },
 "patterns": [
 [
@@ -1404,6 +1408,10 @@ window.BKS_EN = {
 "· Unit: VND ({} unless stated otherwise) · Generated at {} · Prepared by: {} · {}"
 ],
 [
+"{} · {} · lũy kế đến hôm nay · Còn lại = thu − chi + số dư đầu kỳ",
+"{} · {} · cumulative to today · Balance = collections − expenditure + opening balance"
+],
+[
 "Đơn vị: tỷ đồng ({}; tiền về, phải thu, phải trả sau VAT)",
 "Unit: bn VND ({}; collections, receivable, payable after VAT)"
 ],
@@ -1422,6 +1430,10 @@ window.BKS_EN = {
 [
 "Đơn vị: đồng, {} (tiền về, phải thu, đã trả: sau VAT)",
 "Unit: VND, {} (collections, receivable, paid: after VAT)"
+],
+[
+"Số dư đầu kỳ {} (đồng, được nhập số âm). Để trống = 0",
+"Opening balance {} (VND, negative allowed). Leave blank = 0"
 ],
 [
 "Nhập sai Passcode quá nhiều lần. Thử lại sau {} phút",
@@ -1654,6 +1666,10 @@ window.BKS_EN = {
 [
 "Không tải được bảng chi phí: {}",
 "Could not load the cost tables: {}"
+],
+[
+"Bấm để nhập số dư đầu kỳ của {}",
+"Click to enter the opening balance of {}"
 ],
 [
 "Theo TĐ{} − dòng thu, dòng chi",
