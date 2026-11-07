@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.07.11.26 — Cửa sổ Dòng chi: luôn thu gọn nhóm
+- Bảng HĐ đầu vào luôn thu gọn theo nhóm HĐ CĐT, kể cả khi chỉ có 1 nhóm (trước đây 1 nhóm thì tự mở dòng con 1.1).
+
 ## V11.07.11.26 — Cửa sổ Dòng chi: Chi phí dự kiến – Thực chi – Còn lại phải chi
 - Bảng tóm tắt theo công trình (cửa sổ "chi") đổi 3 cột: **Chi phí dự kiến (TĐ1 – ban đầu)** | Thực chi | **Còn lại phải chi** = dự kiến − thực chi.
 - Chi phí dự kiến = chi phí TĐ1 như mục I: đã chốt TĐ1 lấy số chốt, chưa chốt `bSysMoc(d, 1)`; Trước VAT giữ nguyên,

@@ -346,7 +346,7 @@ async function bCostLive(box, list) {
     <td class="num strong ${c.con_lai < 0 ? 'neg' : ''}">${mtr(c.con_lai)}</td>
     <td class="c-note tp-note">${c.hang_muc ? `<span class="tp-hm">${esc(c.hang_muc)}</span>` : ''}${c.ghi_chu ? ` <small class="muted">${esc(c.ghi_chu)}</small>` : ''}</td></tr>`;
   const le = LE_NHOM.map((k) => ({ k, rows: items.filter((r) => r.nhom === k) })).filter((x) => x.rows.length);
-  const openAll = groups.length + (le.length ? 1 : 0) <= 1; // chỉ 1 nhóm thì mở sẵn, nhiều nhóm thì thu gọn
+  const openAll = false; // luôn thu gọn theo nhóm (kể cả chỉ 1 nhóm) – bấm ▸ để mở dòng con
   const tg = (g) => `<button type="button" class="grp-toggle" data-tg="${g}" title="Mở / thu gọn">${openAll ? '▾' : '▸'}</button>`;
   const leTot = le.reduce((a, x) => a + sum(x.rows, 'sau_vat'), 0);
   const body1 = groups.map(([k, rows], gi) => `<tr class="tv-head-row ${k ? '' : 'tv-sub-warn'}"><td class="num">${gi + 1}</td>
