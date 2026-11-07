@@ -1226,7 +1226,9 @@ window.BKS_EN = {
 "Chưa có dòng nào": "No rows yet",
 "Tiến độ (ngày)": "Duration (days)",
 "= ngày kết thúc − ngày bắt đầu": "= end date − start date",
-"Nhập đủ ngày bắt đầu và ngày kết thúc": "Enter both start and end dates"
+"Nhập đủ ngày bắt đầu và ngày kết thúc": "Enter both start and end dates",
+"Bấm mã / tên dự án để xem báo cáo chi tiết · Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu": "Click a project code / name for the detailed report · Duration (days) = end date − start date",
+"Mã dự án": "Project code"
 },
 "patterns": [
 [

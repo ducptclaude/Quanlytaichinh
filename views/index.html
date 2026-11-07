@@ -103,7 +103,7 @@
       <div class="card">
         <div class="toolbar">
           <h2>Danh sách dự án</h2>
-          <span class="muted small p-note">Doanh thu · Chi phí · Lợi nhuận: số thực hiện, trước VAT — bấm tên dự án để xem báo cáo chi tiết</span>
+          <span class="muted small p-note">Bấm mã / tên dự án để xem báo cáo chi tiết · Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu</span>
           <input id="p-search" type="search" placeholder="Tìm mã, tên, chủ đầu tư...">
           <button id="p-csv">Xuất CSV</button>
         </div>
@@ -111,9 +111,8 @@
           <table>
             <thead>
               <tr>
-                <th>Mã / Tên dự án</th><th>Chủ đầu tư</th>
-                <th class="num">Doanh thu</th><th class="num">Chi phí</th><th class="num">Lợi nhuận</th>
-                <th>Tiến độ</th><th>Trạng thái</th><th>Thời gian</th><th>Cập nhật</th><th></th>
+                <th>Mã dự án</th><th>Tên dự án</th><th>Chủ đầu tư</th>
+                <th>Trạng thái</th><th class="num">Tiến độ (ngày)</th><th>Thời gian</th><th>Cập nhật</th><th></th>
               </tr>
             </thead>
             <tbody id="p-tbody"></tbody>

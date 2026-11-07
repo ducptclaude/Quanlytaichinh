@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V16.07.11.26 — Danh sách dự án: cột mới
+- Cột: Mã dự án | Tên dự án | Chủ đầu tư | Trạng thái | Tiến độ (ngày) | Thời gian | Cập nhật | Sửa / Xóa.
+- Bỏ cột Doanh thu, Chi phí, Lợi nhuận, Tiến độ %; bỏ nút "Doanh thu", "Chi phí" trên từng dòng. Bấm mã / tên dự án → báo cáo công trình.
+- Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu (trống 1 trong 2 ngày → "—"). Xuất CSV giữ nguyên các cột cũ.
+
 ## V15.07.11.26 — Biểu mẫu Thêm dự án: 9 ô, Tiến độ (ngày)
 - Thứ tự ô: Mã dự án · Tên dự án · Chủ đầu tư · Loại công trình · Địa điểm · Trạng thái · **Tiến độ (ngày)** · Ngày bắt đầu · Ngày kết thúc.
 - Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu, tự tính khi nhập (`pDays` trong `public/app.js`), chỉ hiện, không lưu; âm thì đỏ.

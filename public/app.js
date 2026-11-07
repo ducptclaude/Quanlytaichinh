@@ -166,35 +166,26 @@ async function loadProjects() {
 function renderProjects() {
   const q = slug($('#p-search').value.trim());
   const rows = q ? projects.filter((r) => slug(`${r.ma_du_an} ${r.ten_du_an} ${r.chu_dau_tu}`).includes(q)) : projects;
-  const by = dashById();
-  const v = DSTATE.vat;
-  const money = (n) => `<span class="${n < 0 ? 'neg' : ''}">${fmt.format(n)}</span>`;
-
-  const cols = 10;
+  const cols = 8;
+  // Tiến độ (ngày) = ngày kết thúc − ngày bắt đầu (như biểu mẫu dự án)
+  const days = (r) => { if (!r.ngay_bat_dau || !r.ngay_ket_thuc) return '<span class="muted">—</span>';
+    const n = Math.round((Date.parse(String(r.ngay_ket_thuc).slice(0, 10)) - Date.parse(String(r.ngay_bat_dau).slice(0, 10))) / 86400000);
+    return Number.isFinite(n) ? `<b class="${n < 0 ? 'neg' : ''}">${n.toLocaleString('vi-VN')}</b> <span class="muted small">ngày</span>` : '<span class="muted">—</span>'; };
   $('#p-tbody').innerHTML = rows.length
-    ? rows.map((r) => {
-      const d = by.get(r.id);
-      const dt = d ? lopOf(d).doanh_thu[v] : 0;
-      const cp = d ? lopOf(d).chi_phi[v] : 0;
-      return `
+    ? rows.map((r) => `
       <tr>
-        <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình"><b class="p-ma">${esc(r.ma_du_an)}</b><div>${esc(r.ten_du_an)}</div></a>${r.loai_cong_trinh || r.dia_diem ? `<div class="muted small">${esc([r.loai_cong_trinh, r.dia_diem].filter(Boolean).join(' · '))}</div>` : ''}</td>
+        <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình"><b class="p-ma">${esc(r.ma_du_an)}</b></a></td>
+        <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình">${esc(r.ten_du_an)}</a>${r.loai_cong_trinh || r.dia_diem ? `<div class="muted small">${esc([r.loai_cong_trinh, r.dia_diem].filter(Boolean).join(' · '))}</div>` : ''}</td>
         <td>${esc(r.chu_dau_tu)}</td>
-        <td class="num">${dvm(dt)}</td>
-        <td class="num">${dvm(cp)}</td>
-        <td class="num">${dvm(dt - cp)}</td>
-        <td><span class="bar"><i style="width:${Math.min(100, Number(r.tien_do) || 0)}%"></i></span>${r.tien_do}%</td>
         <td><span class="st st-${slug(r.trang_thai)}">${esc(r.trang_thai)}</span></td>
+        <td class="num">${days(r)}</td>
         <td class="small">${dmy(r.ngay_bat_dau)}${r.ngay_ket_thuc ? '<br>→ ' + dmy(r.ngay_ket_thuc) : ''}</td>
         <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
         <td class="row-actions">
-          <button data-rev="${r.id}" title="Xem / nhập doanh thu">Doanh thu</button>
-          <button data-cost="${r.id}" title="Xem / nhập chi phí">Chi phí</button>
           ${can('hd') ? `<button data-edit="${r.id}">Sửa</button>
           ${can('xoa_da') ? `<button class="danger" data-del="${r.id}">Xóa</button>` : ''}` : ''}
         </td>
-      </tr>`;
-    }).join('')
+      </tr>`).join('')
     : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
 }
 
