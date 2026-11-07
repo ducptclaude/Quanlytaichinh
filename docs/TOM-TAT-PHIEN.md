@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.07.11.26 — Giảm sáng khối tóm tắt
+- Người dùng: sáng quá, chói → dịu màu số (#8fb0e8 / #e3ab76 / #6fd6c4), ánh sáng quanh chữ giảm còn ~0,2, Còn lại 21px.
+
 ## V07.07.11.26 — Báo cáo tối: tóm tắt Dòng thu / Thực chi / Còn lại nổi bật
 - Khối `.b-cash` (bên phải tiêu đề báo cáo), chỉ giao diện tối: khung kính viền neon; số to hơn, sáng theo màu dòng
   (Dòng thu xanh dương, Thực chi cam, Còn lại xanh ngọc 23px) có ánh sáng nhẹ; số âm đỏ. Phải gắn `#b-report` vì quy tắc gốc có `#b-report`.
