@@ -1412,7 +1412,7 @@ async function saveCost() {
       const so = e.so_tp.value.trim(), nhom = e.nhom.value;
       await api(`/api/du-an/${revProjectId}/thau-phu`, { method: 'POST', body: JSON.stringify({
         nhom, so_ma: so, doi_tac: e.doi_tac.value, hang_muc: e.hang_muc?.value || '', ghi_chu: e.ghi_chu.value, hd_cdt_id: e.hd_cdt.value,
-        hd: { ngay, gia_tri: parseMoney(e.gia_tri.value), vat: e.vat.value },
+        hd: { ngay, gia_tri: parseMoney(e.gia_tri.value), vat: e.vat.value, td: e.td?.value || 1 },
       }) });
       costOpen.add(nhom); moKhoiCua(nhom);
       tpOpen.add(Number(e.hd_cdt.value) || 0); // mở nhóm HĐ CĐT vừa thêm
@@ -1931,6 +1931,9 @@ function renderTpDlg() {
   const inp = (name, val, attrs = '', ok = edit) => `<input data-f="${name}" value="${esc(val ?? '')}" ${attrs} ${ok ? '' : 'disabled'}>`;
   const nextPl = 'PL' + String(Math.max(0, ...c.lines.map((l) => (l.ma_loai === 'HĐ' ? 0 : Number(l.ma_loai.slice(2)))), ...tpDrafts.lines.map((d) => Number(d.ma_loai.slice(2)))) + 1).padStart(2, '0');
 
+  // Thuộc thời điểm: TĐ1 ký HĐ / TĐ2 phát sinh / TĐ3 quyết toán (trống = mặc định: HĐ gốc -> TĐ1, phụ lục -> TĐ2)
+  const tdSel = (l, ok) => { const cur = [1, 2, 3].includes(Number(l.td)) ? Number(l.td) : l.ma_loai === 'HĐ' ? 1 : 2;
+    return `<select data-f="td" class="tp-td" title="Thời điểm phát sinh HĐ / phụ lục này: TĐ1 ký HĐ · TĐ2 phát sinh · TĐ3 quyết toán" ${ok ? '' : 'disabled'}>${[1, 2, 3].map((n) => `<option value="${n}" ${n === cur ? 'selected' : ''}>TĐ${n}</option>`).join('')}</select>`; };
   const lineRow = (l, draft) => {
     const qtStr = l.gia_tri_qt === null || l.gia_tri_qt === undefined ? '' : money(l.gia_tri_qt);
     const gtStr = draft ? '' : money(l.gia_tri);
@@ -1938,6 +1941,7 @@ function renderTpDlg() {
     const qtSau = draft ? 0 : l.qt_sau_vat;
     return `<tr data-k="${draft ? 'dl' + l.key : 'l' + l.id}" class="${draft ? 'tv-draft' : l.ma_loai === 'HĐ' ? 'tp-hd-row' : 'tp-pl-row'}">
       <td>${l.ma_loai === 'HĐ' ? '' : '<span class="tree">└</span>'}<span class="kind-tag ${l.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${l.ma_loai}</span> <b>${esc(c.so_ma)}</b>${draft ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</td>
+      <td>${tdSel(l, editL)}</td>
       <td>${inp('ngay', draft ? '' : isoToDmy(l.ngay), 'class="date-dmy"', editL)}</td>
       <td>${inp('gia_tri', gtStr, 'class="money num" placeholder="0"', editL)}</td>
       <td>${inp('vat', draft ? '' : l.vat || '', 'type="number" min="0" max="100" step="1" class="vat-in" placeholder="0"', editL)}</td>
@@ -1989,10 +1993,10 @@ function renderTpDlg() {
 
     <h4>Giá trị HĐ / PL</h4>
     <div class="table-wrap"><table class="tp-dtl">
-      <thead><tr><th>Số HĐ/PL</th><th>Ngày</th><th class="num">Giá trị HĐ/PL<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">HĐ/PL<br><span class="muted small">sau VAT</span></th>
+      <thead><tr><th>Số HĐ/PL</th><th title="Thời điểm phát sinh: TĐ1 ký HĐ · TĐ2 phát sinh · TĐ3 quyết toán">Thuộc TĐ</th><th>Ngày</th><th class="num">Giá trị HĐ/PL<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">HĐ/PL<br><span class="muted small">sau VAT</span></th>
         <th class="num">Giá trị HT/QT<br><span class="muted small">trước VAT</span></th><th class="num">HT/QT<br><span class="muted small">sau VAT</span></th><th>Ghi chú</th><th></th></tr></thead>
       <tbody>${c.lines.map((l) => lineRow(l, false)).join('')}${tpDrafts.lines.map((d) => lineRow(d, true)).join('')}</tbody>
-      <tfoot><tr><td colspan="2">TỔNG</td><td class="num tp-sum-mo" title="Tổng giá trị HĐ/PL trước VAT">${money(c.lines.reduce((t, l) => t + (Number(l.gia_tri) || 0), 0))}</td><td></td>
+      <tfoot><tr><td colspan="3">TỔNG</td><td class="num tp-sum-mo" title="Tổng giá trị HĐ/PL trước VAT">${money(c.lines.reduce((t, l) => t + (Number(l.gia_tri) || 0), 0))}</td><td></td>
         <td class="num">${money(c.hd_sau_vat)}</td><td class="num tp-sum-mo" title="Tổng giá trị HT/QT trước VAT">${money(c.qt_gia_tri)}</td>
         <td class="num">${money(c.qt_sau_vat)}</td><td colspan="2"></td></tr></tfoot>
     </table></div>
@@ -2097,7 +2101,7 @@ async function onTpDlgClick(e) {
     if (k.startsWith('l') || k.startsWith('dl')) {
       const draft = k.startsWith('dl');
       const cur = draft ? tpDrafts.lines.find((d) => 'dl' + d.key === k) : c.lines.find((l) => 'l' + l.id === k);
-      const body = { ma_loai: cur.ma_loai, ngay, gia_tri: parseMoney(v('gia_tri')), vat: v('vat'), gia_tri_qt: parseMoney(v('gia_tri_qt')), ghi_chu: v('ghi_chu') };
+      const body = { ma_loai: cur.ma_loai, td: v('td'), ngay, gia_tri: parseMoney(v('gia_tri')), vat: v('vat'), gia_tri_qt: parseMoney(v('gia_tri_qt')), ghi_chu: v('ghi_chu') };
       if (await call(draft ? `/api/thau-phu/${c.id}/hd-pl` : `/api/tp-hd-pl/${cur.id}`, draft ? 'POST' : 'PUT', body)) {
         if (draft) tpDrafts.lines = tpDrafts.lines.filter((d) => d !== cur);
         await after(`Đã lưu ${cur.ma_loai}`);

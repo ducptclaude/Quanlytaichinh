@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V42.07.11.26 – Chi phí: ô "Thuộc thời điểm" cho HĐ / PL đầu vào
+- Kho dữ liệu: thêm cột `td` (1/2/3, trống = mặc định) vào `tp_hd_pl` (chỉ THÊM cột).
+- Nhập liệu: bảng HĐ/PL trong hộp HĐ thầu phụ có cột "Thuộc TĐ"; form tạo HĐ đầu vào mới có ô "Thuộc thời điểm" (mặc định TĐ1).
+- Công thức (lib/report.js `tdOf`, `sumTd`): TĐ1 = dòng thuộc TĐ1 · TĐ2 = dòng thuộc TĐ1 + TĐ2 · TĐ3 giữ nguyên (QT / chưa QT lấy giá trị HĐ). Mặc định: HĐ gốc → TĐ1, PL → TĐ2 (số cũ không đổi).
+- Mục IV cột TĐ2 thêm nhóm "HĐ mới" (HĐ đầu vào ký thêm ở TĐ2). Doanh thu (HĐ CĐT) chưa áp dụng – chờ người dùng quyết.
+- Kiểm tra: kịch bản 1 TP ở TĐ1 → +3 TP & PL01 ở TĐ2 → +TP & PL02 ở TĐ3 cho TĐ1 100 / TĐ2 260 / TĐ3 305 (đúng); tester 4.575 kiểm tra 0 lỗi.
+
 ## V41.07.11.26 – Báo cáo giao diện tối: bỏ nền khung lớn bao ngoài
 - Sửa lại V40: bỏ nền + viền của khung lớn "Bảng tổng hợp" phía sau các mục; từng mục I–IV giữ khung riêng có nền xanh đêm.
 

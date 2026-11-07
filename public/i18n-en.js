@@ -1271,7 +1271,15 @@ window.BKS_EN = {
 "TL % HT = Thực chi ÷ Chi phí TĐ3 · GTHT = TL % HT × Doanh thu TĐ3 · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về": "% complete = Actual expenditure ÷ M3 cost · CV = % complete × M3 revenue · % Collections = Collections ÷ CV · Rated by % collections",
 "Giải pháp": "Action",
 "% Tiền về": "% Collections",
-"TL % hoàn thành": "% complete"
+"TL % hoàn thành": "% complete",
+"Thuộc TĐ": "Stage",
+"Thuộc thời điểm": "Stage",
+"TĐ1 – Ký HĐ": "M1 – Contract signed",
+"TĐ2 – Phát sinh": "M2 – Variations",
+"HĐ mới": "New contract",
+"Thời điểm phát sinh: TĐ1 ký HĐ · TĐ2 phát sinh · TĐ3 quyết toán": "Stage: M1 contract signed · M2 variations · M3 final account",
+"Thời điểm phát sinh HĐ / phụ lục này: TĐ1 ký HĐ · TĐ2 phát sinh · TĐ3 quyết toán": "Stage of this contract / addendum: M1 contract signed · M2 variations · M3 final account",
+"Thời điểm ký HĐ đầu vào này: TĐ1 ký HĐ với chủ đầu tư · TĐ2 phát sinh thêm · TĐ3 giai đoạn quyết toán": "Stage of this procurement contract: M1 Employer contract signed · M2 variations · M3 final account stage"
 },
 "patterns": [
 [

@@ -3119,3 +3119,4 @@ dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24p
 /* Sửa lại theo ý người dùng: BỎ NỀN + VIỀN KHUNG LỚN bao ngoài các mục I–IV; từng mục I–IV giữ khung riêng có nền */
 :root[data-theme="dark"] #b-report .card.b-sec:has(.th-sec) { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
 :root[data-theme="dark"] #b-report .th-sec { background: #121a37 !important; box-shadow: 0 8px 22px -16px rgba(0,0,0,.85) !important; }
+.tp-dtl select.tp-td { padding: 5px 6px; font-size: 13px; min-width: 68px; background: var(--bg-ffffff); }
