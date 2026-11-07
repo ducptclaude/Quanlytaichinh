@@ -732,6 +732,10 @@ function bTongHopHtml(list, v, P) {
       const nDoi = R.filter(doi).length;
       const chiDoi = k > 1 && BST.i_doi;
       const RR = chiDoi ? R.filter(doi) : R;
+      // % hoàn thành (tạm, cost-to-cost) = Thực chi (mục II, cùng cơ sở VAT) ÷ Chi phí dự kiến của TĐ đang chọn
+      const htPct = (chi, cp) => (cp > 0 ? `${((chi / cp) * 100).toFixed(1).replace('.', ',')}%` : '—');
+      const htCell = (chi, cp) => { const p = cp > 0 ? chi / cp : 0;
+        return `<td class="th-ht" title="Cost to cost: Thực chi ${bTy(chi)} ÷ Chi phí dự kiến ${bTy(cp)} ${TY()}"><span class="ht-wrap">${meter(Math.min(p, 1), 1, p > 1 ? '#d92d35' : BCOL.dk)}<b class="ht-pct ${p > 1 ? 'neg' : ''}">${htPct(chi, cp)}</b></span></td>`; };
       const dCell = (r) => { if (!doi(r)) return '<td class="num i-dc"><span class="i-dl eq">—</span></td>';
         const d = (r.dt - r.cp) - (r.b.dt - r.b.cp);
         const tip = `So với TĐ${k - 1}: DT ${r.dt - r.b.dt >= 0 ? '+' : '−'}${bTy(Math.abs(r.dt - r.b.dt))} · CP ${r.cp - r.b.cp >= 0 ? '+' : '−'}${bTy(Math.abs(r.cp - r.b.cp))} · LN ${d >= 0 ? '+' : '−'}${bTy(Math.abs(d))} ${TY()}`;
@@ -743,14 +747,14 @@ function bTongHopHtml(list, v, P) {
       ${card('cp', `Chi phí ${TEN[2]}`, TT.cp, k === 1 ? [`Bằng <b>${bpct(TT.cp, TT.dt)}</b> doanh thu`, 'Dự toán chi phí khi ký HĐ'] : [sub('cp', false), `Bằng <b>${bpct(TT.cp, TT.dt)}</b> doanh thu`])}
       ${card('ln', `Lợi nhuận ${TEN[2]}`, TT.ln, [`Tỷ suất <b>${bpct(TT.ln, TT.dt)}</b>${k > 1 ? ` · TĐ${k - 1} ${bpct(P0.ln, P0.dt)}` : ''}`, k > 1 ? sub('ln', true) : `Bình quân <b>${rows.length ? bTy(TT.ln / rows.length) : '0'}</b> ${TY()} / dự án`])}
     </div>
-    <div class="table-wrap"><table class="b-table th-table">
-      ${hd(['Doanh thu', 'Chi phí', 'Lợi nhuận', '± LN so TĐ trước', 'Hoàn thành', 'Tỷ lệ LN'])}
-      <tbody>${RR.map((r, i) => `<tr>${prj(r.x, i)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
-        <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}<td class="th-ht">${meter(r.dt ? r.ln / r.dt : 0, 0.3, BCOL.dk)}</td>
+    <div class="table-wrap"><table class="b-table th-table th-t1">
+      ${hd(['Hoàn thành', 'Doanh thu', 'Chi phí', 'Lợi nhuận', '± LN so TĐ trước', 'Tỷ lệ LN'])}
+      <tbody>${RR.map((r, i) => `<tr>${prj(r.x, i)}${htCell(r.x.chi, r.cp)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
+        <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
         <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}${k === 1 && !r.x.td1 ? '<sup class="th-tt" title="Chưa chốt TĐ1: lấy HĐ gốc và chi phí trên hệ thống">*</sup>' : ''}</b></td></tr>`).join('')}</tbody>
-      ${foot([bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', '', bpct(TT.ln, TT.dt)])}
+      ${foot([htPct(RR.reduce((a, r) => a + r.x.chi, 0), RR.reduce((a, r) => a + r.cp, 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', bpct(TT.ln, TT.dt)])}
     </table></div>
-    ${k === 1 ? `<p class="muted small f-note">Số dự kiến theo TĐ1 đã chốt (Doanh thu, Chi phí khi ký HĐ – nhập ở bảng TĐ của từng dự án). <b>(*)</b> Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: thanh đầy = tỷ suất LN 30%.</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = hợp đồng gốc + phụ lục tăng / giảm với CĐT; chi phí = thầu phụ theo HĐ + PL và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán; dự án / hợp đồng chưa quyết toán tạm tính theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: thanh đầy = tỷ suất LN 30%.</p>`}`;
+    ${k === 1 ? `<p class="muted small f-note">Số dự kiến theo TĐ1 đã chốt (Doanh thu, Chi phí khi ký HĐ – nhập ở bảng TĐ của từng dự án). <b>(*)</b> Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = hợp đồng gốc + phụ lục tăng / giảm với CĐT; chi phí = thầu phụ theo HĐ + PL và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán; dự án / hợp đồng chưa quyết toán tạm tính theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.</p>`}`;
     })()}
 
     ${thHead('II', 'Dòng tiền thực tế', 'Tiền thật đã thu về và đã chi ra của dự án', [`Lũy kế đến ${dTo}`, vt[0].toUpperCase() + vt.slice(1)])}

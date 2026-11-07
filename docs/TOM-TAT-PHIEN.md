@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V23.07.11.26 — Mục I: cột Hoàn thành (cost to cost), thứ tự cột, bảng gọn
+- Thứ tự: STT | Mã DA | Tên dự án | Tình trạng | **Hoàn thành** | Doanh thu | Chi phí | Lợi nhuận | ± LN so TĐ trước | Tỷ lệ LN.
+- **Hoàn thành (tạm, người dùng chốt 07/11)** = cost to cost = Thực chi (như mục II, cùng cơ sở VAT, lũy kế đến kỳ) ÷ Chi phí dự kiến của TĐ đang chọn;
+  thanh + số %, > 100% đỏ; dòng tổng = Σ thực chi ÷ Σ chi phí. (Trước đây thanh = tỷ suất LN so với 30%.) Người dùng báo sẽ đổi cách tính sau.
+- Bảng `.th-t1` tự co cột theo nội dung (bỏ chia cột cố định ở màn hình lớn), Tên dự án hiện đủ, cột Hoàn thành 190px. Điểm khôi phục: `phien-07.11.26-13h16`.
+
 ## V22.07.11.26 — Mục III: tên ô gọn
 - "Dòng thu còn lại phải thu" → **Còn lại phải thu**; "Dòng chi còn lại phải chi" → **Còn lại phải chi** (bỏ lặp chữ).
 

@@ -2910,3 +2910,22 @@ dialog.sddk-dlg { width: min(720px, calc(100vw - 24px)); max-height: calc(100vh 
 :root[data-theme="dark"] .sddk-table tr.sddk-chung td { background: rgba(255,255,255,.04); }
 dialog.sddk-dlg { max-width: none !important; width: min(720px, calc(100vw - 24px)) !important; }
 .sddk-dlg h3 { color: var(--fg-navy) !important; }
+
+/* Mục I: bảng gọn – cột ngắn co theo nội dung, Tên dự án giãn; Hoàn thành = thanh + % */
+@media (min-width: 901px) {
+  .th-t1 th, .th-t1 td { white-space: nowrap; width: 1%; }
+  .th-t1 th:nth-child(3), .th-t1 td:nth-child(3) { width: auto; white-space: normal; min-width: 160px; }
+  .th-t1 td.th-ht, .th-t1 th.th-ht { min-width: 175px; }
+}
+.th-t1 .ht-wrap { display: inline-flex; align-items: center; gap: 8px; width: 100%; }
+.th-t1 .ht-wrap .f-meter { flex: 1 1 80px; min-width: 70px; }
+.th-t1 .ht-pct { font-size: 12px; font-variant-numeric: tabular-nums; min-width: 54px; flex: none; text-align: right; padding-right: 2px; }
+@media (min-width: 901px) { .th-t1 th.th-ht, .th-t1 td.th-ht { width: 190px !important; min-width: 190px; } }
+.th-t1 .ht-wrap .f-meter { flex: 0 0 96px; width: 96px; min-width: 0; }
+.th-t1 td.th-ht { overflow: visible; }
+@media (min-width: 901px) {
+  #b-report table.th-t1 { table-layout: auto !important; }
+  #b-report .th-t1 .th-name, #b-report .th-t1 td:nth-child(3) { max-width: none !important; width: auto !important; overflow: visible; text-overflow: clip; white-space: normal; }
+  #b-report .th-t1 td.num, #b-report .th-t1 th.num { width: 1% !important; }
+}
+@media (min-width: 901px) { #b-report .th-t1 thead th.num { white-space: nowrap; } }

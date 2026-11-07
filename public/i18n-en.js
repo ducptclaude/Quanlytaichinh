@@ -1238,7 +1238,8 @@ window.BKS_EN = {
 "Chung": "Company",
 "Tiền thật đang có lúc bắt đầu theo dõi (đồng, được nhập số âm, để trống = 0). Báo cáo:": "Actual cash on hand when tracking starts (VND, negative allowed, blank = 0). Report:",
 "Còn lại = Thực thu − Thực chi + Số dư đầu kỳ": "Balance = Actual collections − Actual expenditure + Opening balance",
-". Xem tất cả dự án = số chung + tổng số dư từng dự án.": ". All projects = company balance + sum of project balances."
+". Xem tất cả dự án = số chung + tổng số dư từng dự án.": ". All projects = company balance + sum of project balances.",
+"Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.": "Projects without locked M1: use the original Employer contract, subcontracts per original contract and other costs recorded in the system. After-VAT view: revenue converted at the original contract VAT, cost at the project cost VAT ratio, rounded to 0.1 bn. Completion column: provisional % complete by cost (cost to cost) = Actual expenditure ÷ Forecast cost."
 },
 "patterns": [
 [
@@ -1260,6 +1261,10 @@ window.BKS_EN = {
 [
 "Đơn vị: {}, sau VAT · Thực chi = chi phí đã chi + tiền đã trả HĐ đầu vào (gồm tạm ứng), lũy kế đến hiện tại · nhận tiền vay {} {}, trả nợ gốc {} {} không tính vào chi phí",
 "Unit: {}, after VAT · Expenditure = costs paid + payments on procurement contracts (incl. advances), cumulative to date · loan proceeds {} {}, principal repaid {} {} not counted as cost"
+],
+[
+"{} Mũi tên: tăng / giảm so với TĐ{} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.",
+"{} Arrows: increase / decrease vs. M{} (green = favourable, red = unfavourable). Completion column: provisional % complete by cost (cost to cost) = Actual expenditure ÷ Forecast cost."
 ],
 [
 "Đơn vị: {}, sau VAT · thanh xanh đậm = kế hoạch (DT HĐ − giá trị thầu phụ HT/QT); thanh xanh ngọc = thực (tiền về − đã trả HĐ đầu vào) · HĐ xếp theo số hiệu",
@@ -1296,10 +1301,6 @@ window.BKS_EN = {
 [
 "Nguồn: {} · {} · Số liệu lấy tự động từ các tab Doanh thu, Chi phí, Thầu phụ, Tiền về tại thời điểm lập báo cáo.",
 "Source: {} · {} · Figures are pulled automatically from the Revenue, Cost, Subcontractor and Collection tabs at the time of reporting."
-],
-[
-"{} Mũi tên: tăng / giảm so với TĐ{} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: thanh đầy = tỷ suất LN 30%.",
-"{} Arrows: increase / decrease vs. M{} (green = favourable, red = unfavourable). Completion column: full bar = 30% profit margin."
 ],
 [
 "{} HĐ đầu vào (thầu phụ, vật tư…) đang gắn HĐ này sẽ KHÔNG bị xóa, chỉ chuyển về nhóm \"Chưa gắn HĐ CĐT\"",
@@ -1488,6 +1489,10 @@ window.BKS_EN = {
 [
 "Thêm {} cho {} – nhập giá trị rồi bấm Thêm dòng",
 "Add {} for {} – enter the value then click Add row"
+],
+[
+"Cost to cost: Thực chi {} ÷ Chi phí dự kiến {} {}",
+"Cost to cost: Actual expenditure {} ÷ Forecast cost {} {}"
 ],
 [
 "Dự kiến và thực hiện · Đơn vị: tỷ đồng ({})",
