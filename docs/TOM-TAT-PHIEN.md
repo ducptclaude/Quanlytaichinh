@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V20.07.11.26 — Bảng nhập Số dư: ô nhập chuẩn
+- Ô nhập cỡ chữ 14px như phần Nhập liệu (trước đó bị kế thừa chữ to → số bị cắt), cột 240px, hiện đủ 1.000.000.000.000.
+- Cửa sổ rộng tới 720px (điện thoại: gần hết màn hình), tiêu đề màu xanh hệ thống (không dùng màu đỏ của hộp passcode).
+
 ## V19.07.11.26 — Bảng nhập Số dư đầu kỳ; khung tóm tắt gọn
 - Bấm Số dư đầu kỳ → bảng nhập riêng (`bSddkDlg`): dòng Số dư chung (công ty) + từng dự án trong phạm vi đang xem (xem 1 dự án → chỉ dự án đó + chung);
   ô nhập tự thêm dấu chấm, được âm; dòng Tổng cộng cập nhật khi gõ; Lưu chỉ gửi dòng thay đổi. Thay hộp nhập mặc định của trình duyệt.
