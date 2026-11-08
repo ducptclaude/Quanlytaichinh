@@ -34,7 +34,8 @@ let users = [];
   if (!can('hd') && !can('tien')) { const g = $('[data-grp="nhap"] [data-grp-toggle]'); if (g) g.innerHTML = 'Dữ liệu <span class="caret">▾</span>'; }
   if (!can('xuat')) document.body.classList.add('no-xuat');
   if (ME.role === 'viewer') document.body.classList.add('chi-xem');
-  if (ME.khach) khachInit(); // tài khoản khách: đồng hồ đếm ngược, không có mục Cá nhân // ẩn liên kết sang trang nhập liệu – xem style.css // Chỉ xem: chặn in (Ctrl+P) – xem style.css
+  if (ME.khach) khachInit();
+  if (can('nop')) duyetInit(); // tab Duyệt: số hồ sơ, thông báo, nhãn trên dòng số liệu // tài khoản khách: đồng hồ đếm ngược, không có mục Cá nhân // ẩn liên kết sang trang nhập liệu – xem style.css // Chỉ xem: chặn in (Ctrl+P) – xem style.css
   document.body.classList.add('roles-ready'); // đến đây mới hiện các mục theo quyền (tránh nhấp nháy tab quản trị)
 
   const stSel = $('#p-form [name=trang_thai]');
@@ -59,7 +60,7 @@ function applyBranding(s) {
 // =====================================================================
 // Tab
 // =====================================================================
-const loaders = { projects: loadProjects, revenue: loadRevenueTab, cost: loadCostTab, users: () => (can('tai_khoan') ? loadUsers() : Promise.resolve()).then(() => loadLogs()), settings: loadSettings, profile: async () => {}, contact: loadContact, report: () => { BST.chi_tiet = false; return loadReport(); } }; // mỗi lần vào tab Báo cáo: chi tiết ẩn
+const loaders = { duyet: () => loadDuyet(), projects: loadProjects, revenue: loadRevenueTab, cost: loadCostTab, users: () => (can('tai_khoan') ? loadUsers() : Promise.resolve()).then(() => loadLogs()), settings: loadSettings, profile: async () => {}, contact: loadContact, report: () => { BST.chi_tiet = false; return loadReport(); } }; // mỗi lần vào tab Báo cáo: chi tiết ẩn
 
 const NHAP_LIEU = ['projects', 'revenue', 'cost'];
 // Menu Xuất: chọn xong một mục thì đóng menu
@@ -2585,3 +2586,129 @@ function khachInit() {
   };
   const t = setInterval(tick, 1000); tick();
 }
+
+// =====================================================================
+// PHÊ DUYỆT – Quản trị / Lãnh đạo duyệt mọi lần thêm / sửa / xóa số liệu; người nhập xem hồ sơ của mình
+// Số trên tab + chuông: người duyệt = số chờ duyệt; người nhập = số bị từ chối (7 ngày). Kiểm tra mỗi 30 giây.
+// =====================================================================
+const DY = { tt: 'cho', q: '', trang: 0, mine: false, rows: [], la: false, dem: null, nhan: new Map() };
+const DY_TT = { cho: ['Chờ duyệt', 'st-chuan-bi'], duyet: ['Đã duyệt', 'st-hoan-thanh'], tu_choi: ['Bị từ chối', 'st-tam-dung'] };
+function duyetInit() {
+  DY.la = can('duyet');
+  $('#dy-tab-txt').textContent = DY.la ? 'Duyệt' : 'Hồ sơ của tôi';
+  if (!DY.la) {
+    $('#dy-title').textContent = 'Hồ sơ số liệu của tôi';
+    $('#dy-sub').textContent = 'Các lần thêm / sửa / xóa số liệu bạn đã nhập và kết quả duyệt. Hồ sơ bị từ chối: sửa lại dòng số liệu đó, hệ thống tự gửi duyệt lại.';
+    $('#dy-act').hidden = true; $('#dy-mine-wrap').hidden = true; $('#dy-all').hidden = true;
+  }
+  dyPoll(); setInterval(dyPoll, 30000);
+  new MutationObserver(() => { clearTimeout(DY.t); DY.t = setTimeout(dyGanNhan, 120); }).observe($('main'), { childList: true, subtree: true });
+}
+async function dyPoll() {
+  try {
+    const d = await api('/api/duyet/dem', AUTO);
+    const so = DY.la ? d.cho : d.cua_toi_tu_choi, cu = DY.dem;
+    const b = $('#dy-dem');
+    b.hidden = !so; b.textContent = so > 99 ? '99+' : so;
+    b.title = DY.la ? `${so} hồ sơ chờ duyệt` : `${so} hồ sơ của bạn bị từ chối (7 ngày)`;
+    if ($('#dy-n-cho')) $('#dy-n-cho').textContent = DY.la ? (d.cho ? `(${d.cho})` : '') : (d.cua_toi_cho ? `(${d.cua_toi_cho})` : '');
+    document.title = document.title.replace(/^\(\d+\+?\) /, '') ;
+    if (so) document.title = `(${so}) ` + document.title;
+    const note = $('#dy-bc-note');
+    if (note) { const n = DY.la ? d.cho : d.cua_toi_cho; note.hidden = !n;
+      note.innerHTML = n ? `⏳ Có <b>${n}</b> thay đổi số liệu ${DY.la ? '' : 'của bạn '}đang chờ duyệt – đã tính vào báo cáo. <button type="button" class="sm" data-tab-go="duyet">Mở tab ${DY.la ? 'Duyệt' : 'Hồ sơ của tôi'}</button>` : ''; }
+    if (cu !== null && so > cu) dyToast(DY.la ? `🔔 Có ${so - cu} hồ sơ mới chờ duyệt (tổng ${so})` : `⚠ Có ${so - cu} hồ sơ của bạn bị từ chối – mở "Hồ sơ của tôi" xem lý do`);
+    if (cu !== so) { DY.nhanLuc = 0; if (!$('#tab-duyet').hidden) loadDuyet(true); }
+    DY.dem = so;
+    if (Date.now() - (DY.nhanLuc || 0) > 25000) { DY.nhanLuc = Date.now(); DY.nhan = new Map((await api('/api/duyet/nhan', AUTO)).map((x) => [x.loai + ':' + x.ban_ghi_id, x])); dyGanNhan(true); }
+  } catch {}
+}
+function dyToast(msg) {
+  document.querySelectorAll('.dy-toast').forEach((x) => x.remove()); // chỉ giữ thông báo mới nhất, không chồng nhau
+  const t = document.createElement('div');
+  t.className = 'dy-toast'; t.innerHTML = `${esc(msg)} <button type="button" class="sm" data-tab-go="duyet">Xem</button>`;
+  document.body.appendChild(t); setTimeout(() => t.classList.add('on'), 20); setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 400); }, 9000);
+}
+document.addEventListener('click', (e) => { const g = e.target.closest('[data-tab-go]'); if (g) { e.preventDefault(); g.closest('.dy-toast')?.remove(); showTab(g.dataset.tabGo); } });
+// Nhãn "Chờ duyệt" / "Bị từ chối" trên dòng doanh thu, chi phí, HĐ thầu phụ ở trang nhập liệu
+const DY_SEL = [['tr[data-rid]', 'doanh_thu', 'rid'], ['tr[data-cid]', 'chi_phi', 'cid'], ['tr[data-tpid]', 'thau_phu', 'tpid']];
+function dyGanNhan(lai = false) {
+  if (!DY.nhan) return;
+  for (const [sel, loai, k] of DY_SEL) {
+    document.querySelectorAll(`main ${sel}`).forEach((tr) => {
+      const x = DY.nhan.get(loai + ':' + tr.dataset[k]);
+      const old = tr.querySelector('.dy-nhan');
+      if (old && (lai || !x || old.dataset.tt !== x.trang_thai)) old.remove();
+      if (!x || tr.querySelector('.dy-nhan')) return;
+      const td = tr.cells[1] || tr.cells[0]; if (!td) return;
+      const sp = document.createElement('span');
+      sp.className = `dy-nhan ${x.trang_thai}`; sp.dataset.tt = x.trang_thai;
+      sp.textContent = x.trang_thai === 'cho' ? 'Chờ duyệt' : 'Bị từ chối';
+      if (x.ly_do) sp.title = 'Lý do: ' + x.ly_do;
+      td.appendChild(sp);
+    });
+  }
+}
+async function loadDuyet(giu = false) {
+  if (!giu) DY.trang = DY.trang || 0;
+  const qs = new URLSearchParams({ tt: DY.tt, q: DY.q, trang: DY.trang, ...(DY.mine ? { cua_toi: '1' } : {}) });
+  const r = await api('/api/duyet?' + qs, giu ? AUTO : {});
+  DY.rows = r.rows; DY.tong = r.tong;
+  const chon = DY.la && r.rows.some((x) => x.trang_thai === 'cho');
+  $('#dy-all').checked = false; $('#dy-all').disabled = !chon;
+  const tg = (d) => (d ? new Date(d).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : '');
+  $('#dy-tbody').innerHTML = r.rows.length ? r.rows.map((x) => {
+    const [ten, cls] = DY_TT[x.trang_thai] || [x.trang_thai, ''];
+    const nd = String(x.noi_dung || '').split(' | ');
+    return `<tr data-dy="${x.id}" class="dy-${x.trang_thai}">
+      <td class="dy-ck">${DY.la && x.trang_thai === 'cho' ? `<input type="checkbox" data-dyck="${x.id}" aria-label="Chọn hồ sơ">` : ''}</td>
+      <td class="muted small dy-tg">${tg(x.at)}</td>
+      <td><b>${esc(x.ho_ten_nhap || x.nguoi_nhap)}</b><div class="muted small">${esc(x.nguoi_nhap)}</div></td>
+      <td><span class="dy-hd dy-hd-${x.hanh_dong === 'Xóa' ? 'xoa' : x.hanh_dong === 'Thêm' ? 'them' : 'sua'}">${esc(x.hanh_dong)}</span></td>
+      <td>${esc(x.doi_tuong)}${x.du_an ? `<div><b>${esc(x.du_an)}</b></div>` : ''}</td>
+      <td class="dy-nd"><div>${esc(nd[0])}</div>${nd.slice(1).map((d) => `<div class="dy-diff">${esc(d)}</div>`).join('')}</td>
+      <td><span class="st ${cls}">${ten}</span>${x.trang_thai !== 'cho' ? `<div class="muted small">${esc(x.nguoi_duyet)}${x.duyet_luc ? ' · ' + tg(x.duyet_luc) : ''}</div>` : ''}${x.ly_do ? `<div class="small dy-lydo">${esc(x.ly_do)}</div>` : ''}</td>
+      <td class="dy-btns">${DY.la && x.trang_thai === 'cho' ? `<button type="button" class="sm primary" data-dyok="${x.id}">Duyệt</button><button type="button" class="sm danger" data-dyno="${x.id}">Từ chối</button>` : ''}</td>
+    </tr>`; }).join('') : `<tr><td colspan="8" class="empty">${DY.tt === 'cho' ? (DY.la ? 'Không có hồ sơ chờ duyệt 🎉' : 'Bạn không có hồ sơ đang chờ duyệt') : 'Không có hồ sơ'}</td></tr>`;
+  const so = Math.max(1, Math.ceil(r.tong / r.moi_trang));
+  $('#dy-page').textContent = `${r.tong} hồ sơ · trang ${DY.trang + 1}/${so}`;
+  $('#dy-prev').disabled = DY.trang <= 0; $('#dy-next').disabled = DY.trang + 1 >= so;
+  dyChon();
+}
+function dyChon() {
+  const n = $$('#dy-tbody [data-dyck]:checked').length;
+  $('#dy-ok').disabled = !n; $('#dy-no').disabled = !n;
+  $('#dy-ok').textContent = n ? `✓ Duyệt ${n} mục đã chọn` : '✓ Duyệt mục đã chọn';
+  $('#dy-no').textContent = n ? `✕ Từ chối ${n} mục đã chọn` : '✕ Từ chối mục đã chọn';
+}
+async function dyXuLy(ids, hd) {
+  let ly_do = '';
+  if (hd === 'tu_choi') {
+    ly_do = prompt(`Lý do từ chối ${ids.length} hồ sơ (người nhập sẽ thấy lý do này):`, '');
+    if (ly_do === null) return;
+    if (!ly_do.trim()) return alert('Từ chối cần ghi lý do');
+  }
+  try {
+    const r = await api('/api/duyet/xu-ly', { method: 'POST', body: JSON.stringify({ ids, hanh_dong: hd, ly_do }) });
+    dyToast(`${hd === 'duyet' ? '✓ Đã duyệt' : '✕ Đã từ chối'} ${r.so} hồ sơ`);
+    DY.nhanLuc = 0; await loadDuyet(); dyPoll();
+  } catch (err) { alert(err.message); }
+}
+$('#tab-duyet')?.addEventListener('click', (e) => {
+  const t = e.target.closest('#dy-tt button[data-tt]');
+  if (t) { DY.tt = t.dataset.tt; DY.trang = 0; $$('#dy-tt button').forEach((b) => b.classList.toggle('on', b === t)); return loadDuyet(); }
+  if (e.target.id === 'dy-prev') { DY.trang = Math.max(0, DY.trang - 1); return loadDuyet(); }
+  if (e.target.id === 'dy-next') { DY.trang++; return loadDuyet(); }
+  const ok = e.target.closest('[data-dyok]'); if (ok) return dyXuLy([Number(ok.dataset.dyok)], 'duyet');
+  const no = e.target.closest('[data-dyno]'); if (no) return dyXuLy([Number(no.dataset.dyno)], 'tu_choi');
+  if (e.target.id === 'dy-ok' || e.target.id === 'dy-no') {
+    const ids = $$('#dy-tbody [data-dyck]:checked').map((x) => Number(x.dataset.dyck));
+    if (ids.length) dyXuLy(ids, e.target.id === 'dy-ok' ? 'duyet' : 'tu_choi');
+  }
+});
+$('#tab-duyet')?.addEventListener('change', (e) => {
+  if (e.target.id === 'dy-all') { $$('#dy-tbody [data-dyck]').forEach((x) => { x.checked = e.target.checked; }); return dyChon(); }
+  if (e.target.id === 'dy-mine') { DY.mine = e.target.checked; DY.trang = 0; return loadDuyet(); }
+  if (e.target.matches('[data-dyck]')) dyChon();
+});
+$('#dy-q')?.addEventListener('input', (e) => { clearTimeout(DY.tq); DY.tq = setTimeout(() => { DY.q = e.target.value.trim(); DY.trang = 0; loadDuyet(); }, 300); });

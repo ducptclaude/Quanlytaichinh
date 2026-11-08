@@ -24,6 +24,7 @@
     <!-- Menu: Báo cáo (mặc định) · Nhập liệu ▾ (Dự án, Doanh thu, Chi phí) · Quản trị ▾ (Tài khoản, Cài đặt) · tên người dùng ▾ (Cá nhân, Liên hệ, Đăng xuất) -->
     <nav id="tabs" class="tabs">
       <button data-tab="report" data-role="admin lanh_dao bks qs ke_toan editor viewer">Báo cáo</button>
+      <button data-tab="duyet" data-role="admin lanh_dao editor qs ke_toan" title="Phê duyệt số liệu nhập"><span id="dy-tab-txt">Duyệt</span><span id="dy-dem" class="dy-dem" hidden></span></button>
       <div class="tab-grp" data-role="admin editor qs ke_toan lanh_dao bks" data-grp="nhap">
         <button type="button" class="tab-grp-btn" data-grp-toggle aria-expanded="false" aria-haspopup="true">Nhập liệu <span class="caret">▾</span></button>
         <div class="tab-menu" role="menu">
@@ -327,6 +328,30 @@
       </div>
     </section>
 
+    <!-- ================= PHÊ DUYỆT ================= -->
+    <section id="tab-duyet" class="tab-panel" hidden>
+      <div class="card">
+        <div class="dy-head"><h2 id="dy-title">Phê duyệt số liệu</h2>
+          <span class="muted small" id="dy-sub">Mọi lần thêm / sửa / xóa dự án, doanh thu, tiền về, chi phí, thầu phụ, số liệu TĐ đều tạo 1 hồ sơ. Số liệu đã tính ngay vào báo cáo; duyệt để xác nhận.</span></div>
+        <div class="dy-bar">
+          <div class="seg" id="dy-tt" role="group" aria-label="Lọc trạng thái">
+            <button type="button" data-tt="cho" class="on">Chờ duyệt <b id="dy-n-cho"></b></button><button type="button" data-tt="duyet">Đã duyệt</button><button type="button" data-tt="tu_choi">Từ chối</button><button type="button" data-tt="">Tất cả</button>
+          </div>
+          <input id="dy-q" type="search" placeholder="Tìm dự án, người nhập, nội dung…" aria-label="Tìm hồ sơ">
+          <label class="check dy-mine" id="dy-mine-wrap"><input type="checkbox" id="dy-mine"> Chỉ hồ sơ của tôi</label>
+          <div class="dy-act" id="dy-act">
+            <button type="button" id="dy-ok" class="primary" disabled>✓ Duyệt mục đã chọn</button>
+            <button type="button" id="dy-no" class="danger" disabled>✕ Từ chối mục đã chọn</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table class="dy-table">
+          <thead><tr><th class="dy-ck"><input type="checkbox" id="dy-all" aria-label="Chọn tất cả"></th><th>Thời gian</th><th>Người nhập</th><th>Thao tác</th><th>Đối tượng · Dự án</th><th>Nội dung thay đổi</th><th>Trạng thái</th><th class="dy-btns"></th></tr></thead>
+          <tbody id="dy-tbody"></tbody>
+        </table></div>
+        <div class="dy-pg"><button type="button" id="dy-prev" class="sm">‹ Trước</button><span id="dy-page" class="muted small"></span><button type="button" id="dy-next" class="sm">Sau ›</button></div>
+      </div>
+    </section>
+
     <!-- ================= BÁO CÁO ================= -->
     <section id="tab-report" class="tab-panel" hidden>
       <div class="card no-print b-bar">
@@ -349,6 +374,7 @@
         </div>
         <div id="b-msg" class="msg" role="alert"></div>
       </div>
+      <div id="dy-bc-note" class="dy-bc-note no-print" hidden></div>
       <div id="b-report" class="report"></div>
     </section>
 

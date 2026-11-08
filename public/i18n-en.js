@@ -1,6 +1,33 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Duyệt": "Approvals",
+"Hồ sơ của tôi": "My submissions",
+"Phê duyệt số liệu": "Data approval",
+"Hồ sơ số liệu của tôi": "My data submissions",
+"Mọi lần thêm / sửa / xóa dự án, doanh thu, tiền về, chi phí, thầu phụ, số liệu TĐ đều tạo 1 hồ sơ. Số liệu đã tính ngay vào báo cáo; duyệt để xác nhận.": "Every add / edit / delete of projects, revenue, collections, costs, subcontracts and milestone data creates a submission. Figures count in reports immediately; approval confirms them.",
+"Các lần thêm / sửa / xóa số liệu bạn đã nhập và kết quả duyệt. Hồ sơ bị từ chối: sửa lại dòng số liệu đó, hệ thống tự gửi duyệt lại.": "Your data changes and their approval results. For a rejected submission, correct that data row and it is resubmitted automatically.",
+"Chờ duyệt": "Pending",
+"Đã duyệt": "Approved",
+"Từ chối": "Rejected",
+"Bị từ chối": "Rejected",
+"Tìm dự án, người nhập, nội dung…": "Search project, submitter, content…",
+"Chỉ hồ sơ của tôi": "Only my submissions",
+"✓ Duyệt mục đã chọn": "✓ Approve selected",
+"✕ Từ chối mục đã chọn": "✕ Reject selected",
+"Người nhập": "Submitted by",
+"Thao tác": "Action",
+"Đối tượng · Dự án": "Item · Project",
+"Nội dung thay đổi": "Change details",
+"‹ Trước": "‹ Prev",
+"Sau ›": "Next ›",
+"Không có hồ sơ chờ duyệt 🎉": "Nothing pending 🎉",
+"Bạn không có hồ sơ đang chờ duyệt": "You have no pending submissions",
+"Không có hồ sơ": "No submissions",
+"Phê duyệt": "Approval",
+"Thời điểm (TĐ)": "Milestone (M)",
+"DT-CP dự kiến · BH/Khác": "Planned rev.–cost · Insurance/Other",
+"Tự duyệt (người nhập có quyền duyệt)": "Self-approved (submitter is an approver)",
 "Tài khoản khách (dùng 1 lần)": "Guest account (single use)",
 "Ghi chú (tên khách, mục đích – không bắt buộc)": "Note (guest name, purpose – optional)",
 "+ Tạo tài khoản khách": "+ Create guest account",
@@ -1282,6 +1309,50 @@ window.BKS_EN = {
 "Thời điểm ký HĐ đầu vào này: TĐ1 ký HĐ với chủ đầu tư · TĐ2 phát sinh thêm · TĐ3 giai đoạn quyết toán": "Stage of this procurement contract: M1 Employer contract signed · M2 variations · M3 final account stage"
 },
 "patterns": [
+[
+"{} hồ sơ · trang {}/{}",
+"{} submissions · page {}/{}"
+],
+[
+"✓ Duyệt {} mục đã chọn",
+"✓ Approve {} selected"
+],
+[
+"✕ Từ chối {} mục đã chọn",
+"✕ Reject {} selected"
+],
+[
+"🔔 Có {} hồ sơ mới chờ duyệt (tổng {})",
+"🔔 {} new submissions pending (total {})"
+],
+[
+"⚠ Có {} hồ sơ của bạn bị từ chối – mở \"Hồ sơ của tôi\" xem lý do",
+"⚠ {} of your submissions were rejected – open \"My submissions\" for the reason"
+],
+[
+"✓ Đã duyệt {} hồ sơ",
+"✓ Approved {} submissions"
+],
+[
+"✕ Đã từ chối {} hồ sơ",
+"✕ Rejected {} submissions"
+],
+[
+"⏳ Có {} thay đổi số liệu đang chờ duyệt – đã tính vào báo cáo.",
+"⏳ {} data changes pending approval – already included in the report."
+],
+[
+"⏳ Có {} thay đổi số liệu của bạn đang chờ duyệt – đã tính vào báo cáo.",
+"⏳ {} of your data changes are pending approval – already included in the report."
+],
+[
+"Mở tab {}",
+"Open {}"
+],
+[
+"Lý do: {}",
+"Reason: {}"
+],
 [
 "Đơn vị: {}, sau VAT · Thực chi = chi phí đã chi + thanh toán HĐ đầu vào (gồm tạm ứng); không gồm tiền vay nhận về ({} {}) và trả nợ gốc vay ({} {}) vì đó là vay – trả nợ, không phải doanh thu / chi phí · Còn lại âm = đang bỏ tiền ra nhiều hơn tiền thu về · Kế hoạch theo hợp đồng chỉ để so sánh, không phải tiền thật.",
 "Unit: {}, after VAT · Expenditure = costs paid + procurement contract payments (incl. advances); excl. loan proceeds ({} {}) and principal repayments ({} {}) since these are borrowing – repayment, not revenue / cost · Negative balance = spending more than collected · Plan per contract is for comparison only, not real cash."

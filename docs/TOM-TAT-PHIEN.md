@@ -2,6 +2,18 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.08.11.26 — Tab Duyệt: phê duyệt số liệu nhập (Quản trị + Lãnh đạo), thông báo, lịch sử
+- Người dùng chọn: số liệu chưa duyệt VẪN tính vào báo cáo (gắn nhãn) · duyệt cả Thêm / Sửa / Xóa · từ chối = giữ dòng + lý do · Quản trị / Lãnh đạo nhập = tự duyệt.
+- Kho dữ liệu: THÊM bảng `duyet` (hồ sơ: thao tác, đối tượng, dự án, nội dung trước → sau, người nhập, trạng thái cho / duyet / tu_choi, người duyệt, lúc, lý do).
+- Tạo hồ sơ tự động từ nhật ký (`lib/audit.js` `onGhi`) cho: dự án, doanh thu, tiền về, chi phí, thầu phụ, HĐ/PL thầu phụ, thanh toán thầu phụ,
+  số liệu TĐ (chốt / xóa – mới ghi nhật ký), DT-CP dự kiến · BH/Khác (mới ghi nhật ký). Không tạo cho tài khoản, cài đặt, ảnh, dữ liệu mẫu.
+- Quyền (`QUYEN.duyet` = admin, lanh_dao; `QUYEN.nop` = admin, lanh_dao, editor, qs, ke_toan). API: `GET /api/duyet/dem`, `GET /api/duyet`, `GET /api/duyet/nhan`, `POST /api/duyet/xu-ly`.
+- Giao diện: tab **Duyệt** (người duyệt) / **Hồ sơ của tôi** (người nhập) – lọc Chờ / Đã duyệt / Từ chối / Tất cả, tìm kiếm, chọn nhiều duyệt / từ chối (bắt buộc lý do), trang 50 dòng.
+  Số đỏ trên tab + (N) trên tên cửa sổ + thông báo nổi khi có hồ sơ mới (kiểm tra 30 giây); dòng nhắc ở Báo cáo; nhãn "Chờ duyệt" / "Bị từ chối" (rê chuột xem lý do) trên dòng doanh thu, chi phí, HĐ thầu phụ.
+  Mỗi lần duyệt / từ chối ghi Nhật ký hoạt động (hành động "Duyệt" / "Từ chối").
+- Kiểm tra: bộ nhớ tạm + PostgreSQL (nâng cấp từ kho cũ): QS / KT sửa → chờ; QS không tự duyệt được (403); từ chối thiếu lý do bị chặn; duyệt / từ chối, số đếm, nhãn, nhật ký đúng;
+  Chỉ xem không vào được; máy tính + iPhone 13 không tràn; tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-08.11.26-12h27`.
+
 ## V42.07.11.26 – Chi phí: ô "Thuộc thời điểm" cho HĐ / PL đầu vào
 - Kho dữ liệu: thêm cột `td` (1/2/3, trống = mặc định) vào `tp_hd_pl` (chỉ THÊM cột).
 - Nhập liệu: bảng HĐ/PL trong hộp HĐ thầu phụ có cột "Thuộc TĐ"; form tạo HĐ đầu vào mới có ô "Thuộc thời điểm" (mặc định TĐ1).

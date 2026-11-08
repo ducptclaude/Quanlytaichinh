@@ -236,7 +236,49 @@ api.use((req, res, next) => (req.user?.role === 'it' && !IT_DUOC_VAO.test(req.pa
 const CHI_XEM_DUOC_GHI = /^\/auth\/(logout|away|change-password)$/;
 api.use((req, res, next) => (req.user?.role === 'viewer' && !['GET', 'HEAD'].includes(req.method) && !CHI_XEM_DUOC_GHI.test(req.path)
   ? bad(res, 'Vai trò Chỉ xem không được thay đổi hoặc xuất dữ liệu', 403) : next()));
+// Phê duyệt: mọi lần thêm / sửa / xóa số liệu (trừ tài khoản, cài đặt, ảnh…) tạo 1 hồ sơ. Quản trị / Lãnh đạo nhập -> tự duyệt.
+// Số liệu tính ngay vào báo cáo (không chờ duyệt); bị từ chối thì giữ dòng + lý do để người nhập sửa lại (lần sửa sau tạo hồ sơ mới).
+const KHONG_DUYET = new Set(['Tài khoản', 'Cài đặt', 'Liên hệ', 'Mục tiêu năm', 'Dữ liệu mẫu', 'Cá nhân', 'Ảnh công trình']);
+audit.onGhi(({ req, hanh_dong, doi_tuong, kind, ban_ghi_id, du_an, noi_dung }) => {
+  if (!req.user || KHONG_DUYET.has(doi_tuong)) return;
+  const tu = QUYEN.duyet.includes(req.user.role);
+  store.addDuyet({ hanh_dong, doi_tuong, loai: kind || '', ban_ghi_id, du_an, noi_dung, nguoi_nhap_id: req.user.id, nguoi_nhap: req.user.username, ho_ten_nhap: req.user.full_name || '',
+    ...(tu ? { trang_thai: 'duyet', nguoi_duyet_id: req.user.id, nguoi_duyet: req.user.full_name || req.user.username, ly_do: 'Tự duyệt (người nhập có quyền duyệt)' } : {}) })
+    .catch((e) => console.error('Lỗi tạo hồ sơ duyệt:', e.message));
+});
 api.use(audit.middleware); // ghi nhật ký mọi thao tác thêm / sửa / xóa
+
+// ---------- Phê duyệt ----------
+const laDuyet = (req) => QUYEN.duyet.includes(req.user.role);
+// Số hồ sơ để hiện chuông / số trên tab: người duyệt = số chờ duyệt; người nhập = số của mình bị từ chối trong 7 ngày, số đang chờ
+api.get('/duyet/dem', quyen('nop'), wrap(async (req, res) => {
+  const out = { la_duyet: laDuyet(req), cua_toi_cho: await store.countDuyet('cho', req.user.id), cua_toi_tu_choi: await store.countDuyet('tu_choi', req.user.id, 7) };
+  if (out.la_duyet) out.cho = await store.countDuyet('cho');
+  res.json(out);
+}));
+// Danh sách: ?tt=cho|duyet|tu_choi (trống = tất cả) &q= &trang= ; người nhập chỉ xem hồ sơ của mình
+api.get('/duyet', quyen('nop'), wrap(async (req, res) => {
+  const tt = ['cho', 'duyet', 'tu_choi'].includes(req.query.tt) ? req.query.tt : '';
+  const trang = Math.max(0, Math.min(1000, Number(req.query.trang) || 0)), LIM = 50;
+  const r = await store.listDuyet({ tt, q: String(req.query.q || '').trim().slice(0, 100), nguoi_nhap_id: laDuyet(req) && req.query.cua_toi !== '1' ? null : req.user.id, limit: LIM, offset: trang * LIM });
+  res.json({ ...r, trang, moi_trang: LIM, la_duyet: laDuyet(req) });
+}));
+// Nhãn "Chờ duyệt" / "Bị từ chối" trên các dòng số liệu ở trang nhập liệu
+api.get('/duyet/nhan', quyen('nop'), wrap(async (_req, res) => res.json(await store.nhanDuyet())));
+// Duyệt / từ chối: { ids: [..], hanh_dong: 'duyet' | 'tu_choi', ly_do }
+api.post('/duyet/xu-ly', quyen('duyet'), wrap(async (req, res) => {
+  const ids = [...new Set((Array.isArray(req.body?.ids) ? req.body.ids : []).map(Number).filter((x) => Number.isInteger(x) && x > 0))].slice(0, 1000);
+  const hd = req.body?.hanh_dong === 'tu_choi' ? 'tu_choi' : req.body?.hanh_dong === 'duyet' ? 'duyet' : null;
+  const ly_do = String(req.body?.ly_do || '').replace(/[<>]/g, '').trim().slice(0, 500);
+  if (!ids.length || !hd) return bad(res, 'Chưa chọn hồ sơ hoặc thao tác không hợp lệ');
+  if (hd === 'tu_choi' && !ly_do) return bad(res, 'Từ chối cần ghi lý do');
+  const xong = await store.xuLyDuyet(ids, { trang_thai: hd, nguoi_duyet_id: req.user.id, nguoi_duyet: req.user.full_name || req.user.username, ly_do });
+  for (const r of xong.slice(0, 200)) {
+    audit.log(req, hd === 'duyet' ? 'Duyệt' : 'Từ chối', 'Phê duyệt', `${r.hanh_dong} ${r.doi_tuong}${r.du_an ? ' · ' + r.du_an : ''} (người nhập ${r.ho_ten_nhap || r.nguoi_nhap})${ly_do ? ' | Lý do: ' + ly_do : ''}`);
+  }
+  if (xong.length > 200) audit.log(req, hd === 'duyet' ? 'Duyệt' : 'Từ chối', 'Phê duyệt', `… và ${xong.length - 200} hồ sơ khác`);
+  res.json({ ok: true, so: xong.length });
+}));
 
 // ---------- Nhật ký hoạt động ----------
 const SU_KIEN = { xuat_excel: 'Excel', xuat_pptx: 'PowerPoint', in_pdf: 'In / PDF', xuat_csv: 'CSV' };

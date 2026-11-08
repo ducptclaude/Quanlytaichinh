@@ -89,6 +89,8 @@ Tổng hợp toàn bộ số liệu liên kết (API `GET /api/bao-cao`, `lib/re
 
 **Tài khoản khách (dùng 1 lần):** Quản trị / IT tạo ở trang Tài khoản; vai Chỉ xem, không đổi mật khẩu; dùng 30 phút tính từ lần đăng nhập đầu, chỉ trên 1 thiết bị (thiết bị đăng nhập đầu; đăng nhập lại không giới hạn), hết hạn tự đăng xuất + tự xóa (chưa đăng nhập sau 24 giờ cũng tự xóa); mọi bước ghi Nhật ký hoạt động.
 
+**Phê duyệt (tab Duyệt):** mọi lần thêm / sửa / xóa số liệu dự án – doanh thu – tiền về – chi phí – thầu phụ – TĐ tạo 1 hồ sơ. Quản trị, Lãnh đạo duyệt / từ chối (bắt buộc lý do), xem lịch sử; người nhập (QS, Kế toán, Nhập liệu) xem "Hồ sơ của tôi". Số liệu tính ngay vào báo cáo; Quản trị / Lãnh đạo nhập thì tự duyệt.
+
 ### Quy tắc mật khẩu
 Áp dụng khi khởi tạo, tạo tài khoản, đặt lại và đổi mật khẩu. Máy chủ kiểm tra bắt buộc; giao diện hiện danh sách điều kiện ✓/✗ ngay khi gõ.
 - Tối thiểu 8 ký tự (tối đa 128), không có khoảng trắng
