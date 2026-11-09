@@ -591,7 +591,7 @@ async function loadRevenueTab() {
 $('#r-project').addEventListener('change', (e) => {
   revAll = e.target.value === 'all';
   try { localStorage.setItem('revAll', revAll ? '1' : ''); } catch {}
-  if (!revAll) revProjectId = Number(e.target.value);
+  if (!revAll) { revProjectId = Number(e.target.value); costAll = false; try { localStorage.setItem('costAll', ''); } catch {} if (can('bao_cao')) baoCaoTheoDuAn(revProjectId); } // đồng bộ Chi phí + Báo cáo
   loadRevenue().catch((err) => alert(err.message));
 });
 
@@ -1271,7 +1271,7 @@ async function loadCostTab() {
 $('#c-project').addEventListener('change', (e) => {
   costAll = e.target.value === 'all'; // "Tất cả dự án": chỉ xem, không đổi dự án đang chọn của tab Doanh thu
   try { localStorage.setItem('costAll', costAll ? '1' : ''); } catch {}
-  if (!costAll) revProjectId = Number(e.target.value);
+  if (!costAll) { revProjectId = Number(e.target.value); revAll = false; try { localStorage.setItem('revAll', ''); } catch {} if (can('bao_cao')) baoCaoTheoDuAn(revProjectId); } // đồng bộ Doanh thu + Báo cáo
   if (cForm?.isConnected) resetCostForm();
   loadCost().catch((err) => alert(err.message));
 });

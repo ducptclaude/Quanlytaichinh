@@ -1704,6 +1704,7 @@ const BUILDING = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const canEditPc = () => can('hd') || can('tien'); // quyền chi tiết: can(k) – app.js
 
 function openProjectReport(id) {
+  dongBoDuAn(id);
   BST.project = String(id);
   bSave();
   pcScrollTo = id;
@@ -2223,10 +2224,24 @@ function bTdMoiNhat(d) {
   const he = m.da_qt ? 3 : (m.dt_ps || 0) !== (m.dt_goc || 0) || (m.tp_ps || 0) !== (m.tp_goc || 0) ? 2 : 1;
   return Math.max(chot, he);
 }
+// Đồng bộ dự án đang làm việc giữa Báo cáo và Nhập liệu (Doanh thu / Chi phí) – tránh nhập nhầm dự án
+function dongBoDuAn(id) {
+  id = Number(id); if (!id) return;
+  revProjectId = id; revAll = false; costAll = false;
+  try { localStorage.setItem('revProject', id); localStorage.setItem('revAll', ''); localStorage.setItem('costAll', ''); } catch { /* chế độ riêng tư */ }
+}
+// Nhập liệu chọn dự án -> Báo cáo cũng xem dự án đó (lần mở Báo cáo sau)
+function baoCaoTheoDuAn(id) {
+  id = Number(id); if (!id) return;
+  BST.project = String(id); BST.chi_tiet = false;
+  const d = BC?.du_an?.find((x) => x.id === id);
+  if (d) BST.i_td = bTdMoiNhat(d);
+  bSave();
+}
 $('#b-project').addEventListener('change', (e) => {
   BST.project = e.target.value; BST.chi_tiet = false;
   const d = BC?.du_an?.find((x) => x.id === Number(BST.project));
-  if (d) BST.i_td = bTdMoiNhat(d); // chọn 1 dự án -> mục I tự nhảy sang TĐ mới nhất của dự án đó
+  if (d) { BST.i_td = bTdMoiNhat(d); dongBoDuAn(d.id); } // chọn 1 dự án -> mục I nhảy TĐ mới nhất + Nhập liệu chuyển sang dự án đó
   bSave(); renderReport();
 });
 $('#b-vat').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; BST.vat = b.dataset.v; bSave(); renderReport(); });

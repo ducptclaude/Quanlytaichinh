@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.09.11.26 – Đồng bộ dự án giữa Báo cáo và Nhập liệu
+- Báo cáo chọn 1 dự án ở Phạm vi -> Nhập liệu › Doanh thu / Chi phí chuyển sang đúng dự án đó (`dongBoDuAn`); bấm vào báo cáo công trình cũng vậy.
+- Nhập liệu chọn dự án (Doanh thu hoặc Chi phí) -> trang kia + Báo cáo (vai được xem) cũng theo dự án đó (`baoCaoTheoDuAn`, mục I nhảy TĐ mới nhất).
+- Chọn "Tất cả dự án" (chỉ xem tổng hợp) không đổi dự án đang nhập.
+- Kiểm tra: đồng bộ 2 chiều đúng, không lỗi trang; tester 0 LỖI.
+
 ## V08.09.11.26 – Nhập theo dòng thời gian: TĐ2 nhiều đợt (mỗi phụ lục 1 đợt), thay 3 ô TĐ của V07
 - Người dùng: "TĐ2 điều chỉnh có nhiều đợt, sắp xếp nhập khoa học, logic". Mỗi dòng HĐ / PL (doanh thu CĐT và HĐ đầu vào) chỉ nhập: Loại · **Thuộc TĐ**
   (tự gợi ý HĐ -> TĐ1, PL -> TĐ2; sửa tay: PL ký cùng HĐ -> TĐ1, HĐ ký thêm -> TĐ2, phát sinh quyết toán -> TĐ3) · Ngày · Giá trị phát sinh (+/−) · VAT.
