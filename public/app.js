@@ -383,7 +383,7 @@ const money = (n) => fmt.format(n);
 // Số tiền hiển thị theo đơn vị đang chọn (mặc định đồng); khác đồng thì rê chuột xem số đồng đầy đủ
 const dvm = (n, def = 'dong', autoD) => (dvKey(def) === 'dong' ? fmt.format(n || 0) : `<span title="${fmt.format(n || 0)} đồng">${dvNum(n, def, autoD)}</span>`);
 const dvT = (n, def = 'dong') => dvNum(n, def) + (dvKey(def) === def ? '' : ' ' + dvU(def).ngan); // cho textContent (thẻ tổng)
-const vatBadge = (vat) => (vat ? `${vat}%` : '<span class="st st-tam-tinh">Tạm tính</span>');
+const vatBadge = (vat) => (vat ? `${vat}%` : '<span class="muted" title="Chưa có VAT">0%</span>');
 
 // Dựng 2 khối (HĐ/PL và HT/QT) từ một mẫu chung
 // Doanh thu: "Tất cả dự án" = chỉ xem tổng hợp (ẩn form nhập, khóa sửa / xóa / nhập tiền về)
@@ -496,7 +496,7 @@ function updateRevPreview(f) {
   }
   const tv = calcVat(gt, vat);
   out.value = money(gt + tv);
-  note.textContent = vat ? `Tiền VAT: ${money(tv)}` : 'Tạm tính (chưa có VAT)';
+  note.textContent = vat ? `Tiền VAT: ${money(tv)}` : 'Chưa có VAT';
   note.className = 'calc-note vat-note' + (vat ? '' : ' warn');
 }
 
@@ -639,9 +639,9 @@ function renderRevenue() {
   }
   const hd = tong.hd, qt = tong.qt;
   $('#r-k-hd').textContent = dvT(hd.sau_vat);
-  $('#r-k-hd-sub').innerHTML = `${hd.so_dong} dòng${hd.tam_tinh ? ' · <span class="warn-text">có dòng tạm tính</span>' : ''}`;
+  $('#r-k-hd-sub').innerHTML = `${hd.so_dong} dòng${hd.tam_tinh ? ' · <span class="warn-text" title="HĐ chưa quyết toán">có HĐ tạm tính</span>' : ''}`;
   $('#r-k-qt').textContent = dvT(qt.sau_vat);
-  $('#r-k-qt-sub').innerHTML = `${qt.so_dong} dòng${qt.tam_tinh ? ' · <span class="warn-text">có dòng tạm tính</span>' : ''}`;
+  $('#r-k-qt-sub').innerHTML = `${qt.so_dong} dòng`;
   const tv = revData.tong_tien_ve;
   $('#r-k-tv').textContent = dvT(tv.tong);
   $('#r-k-tv-sub').textContent = `Tạm ứng ${dvT(tv.tam_ung)} · Thanh toán ${dvT(tv.thanh_toan)} · Quyết toán ${dvT(tv.quyet_toan)}`;
@@ -656,7 +656,7 @@ function renderRevenue() {
     const t = tong[loai];
     $('tfoot', card).innerHTML = `
       <tr>
-        <td></td><td colspan="2">TỔNG ${REV_LABEL[loai].short}${t.tam_tinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>
+        <td></td><td colspan="2">TỔNG ${REV_LABEL[loai].short}${t.tam_tinh ? ' <span class="st st-tam-tinh" title="Có HĐ chưa quyết toán">Có tạm tính</span>' : ''}</td>
         <td class="num">${dvm(t.gia_tri)}</td><td></td>
         <td class="num">${dvm(t.tien_vat)}</td>
         <td class="num">${dvm(t.sau_vat)}</td>
@@ -769,7 +769,7 @@ function hdRowHtml(r, stt, { child = false, head = false, toggle = '', dot = 0, 
   return `
     <tr class="${child ? 'hd-child' : 'hd-head'}" data-rid="${r.id}" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
       <td class="num muted">${stt}</td>
-      <td class="${child ? 'indent' : ''}">${toggle}${child ? '<span class="tree">└</span>' : ''}<span class="kind-tag ${r.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${esc(r.ma_loai || '')}</span> ${can('hd') ? `<b class="so-ma-pick" data-soma="${esc(r.so_ma || '')}" title="Nhấp đúp để thêm phụ lục cho ${esc(r.so_ma || '')}">${esc(r.so_ma || r.so_hieu)}</b>` : `<b>${esc(r.so_ma || r.so_hieu)}</b>`} ${tag}</td>
+      <td class="${child ? 'indent' : ''}">${toggle}${child ? '<span class="tree">└</span>' : ''}<span class="kind-tag ${r.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${esc(r.ma_loai || '')}</span> ${can('hd') ? `<b class="so-ma-pick" data-soma="${esc(r.so_ma || '')}" title="Nhấp đúp để thêm phụ lục cho ${esc(r.so_ma || '')}">${esc(r.so_ma || r.so_hieu)}</b>` : `<b>${esc(r.so_ma || r.so_hieu)}</b>`} ${tag}${!child && r.tam_tinh ? ' <span class="st st-tam-tinh" title="HĐ chưa quyết toán – giá trị tạm tính">Tạm tính</span>' : ''}</td>
       <td>${dmy(r.ngay)}</td>
       <td class="num">${child && r.gia_tri > 0 ? '+' : ''}${dvm(r.gia_tri)}${luyKe !== null ? `<div class="td-note" title="Giá trị HĐ lũy kế sau dòng này (trước VAT)">→ ${dvm(luyKe)}</div>` : ''}</td>
       <td class="num">${vatBadge(r.vat)}</td>
@@ -808,7 +808,7 @@ function hdGroupsHtml(rows) {
       html += `
         <tr class="hd-sub">
           <td></td>
-          <td colspan="2">Cộng ${esc(g.so_ma)} <span class="muted small">(${g.head ? 'HĐ + ' : ''}${g.pls.length} PL)</span>${tt ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}
+          <td colspan="2">Cộng ${esc(g.so_ma)} <span class="muted small">(${g.head ? 'HĐ + ' : ''}${g.pls.length} PL)</span>${tt ? ' <span class="st st-tam-tinh" title="HĐ chưa quyết toán – giá trị tạm tính">Tạm tính</span>' : ''}
             <div class="td-note">${[1, 2, 3].map((k) => `TĐ${k} ${dvm(k === 3 && k3Qt(g) !== null ? k3Qt(g) : members.filter((r) => revTd(r) <= k).reduce((s, r) => s + r.gia_tri, 0))}`).join(' → ')}${k3Qt(g) !== null ? ' <span class="muted">(TĐ3 = hồ sơ quyết toán ở mục 2)</span>' : ''}</div></td>
           <td class="num">${dvm(sum('gia_tri'))}</td><td></td>
           <td class="num">${dvm(sum('tien_vat'))}</td>
@@ -1432,7 +1432,7 @@ function updateCostPreview() {
   const tv = calcVat(gt, vat);
   cForm.elements.sau_vat.value = money(gt + tv);
   const noVat = NHOM().find((n) => n.code === cForm.elements.nhom.value)?.khong_vat;
-  note.textContent = vat ? `Tiền VAT: ${money(tv)}` : noVat ? 'Không chịu VAT' : 'Tạm tính (chưa có VAT)';
+  note.textContent = vat ? `Tiền VAT: ${money(tv)}` : noVat ? 'Không chịu VAT' : 'Chưa có VAT';
   note.className = 'calc-note vat-note' + (vat || noVat ? '' : ' warn');
 }
 
@@ -1533,7 +1533,7 @@ function renderCost() {
   const daTag = (r) => (costAll && r.ma_du_an ? `<span class="c-da">${esc(r.ma_du_an)}</span>` : ''); // xem tổng hợp: ghi mã dự án
   const pct = (v) => (tong.sau_vat ? ((v / tong.sau_vat) * 100).toFixed(1) + '%' : '—');
   $('#c-k-sau').textContent = dvT(tong.sau_vat);
-  $('#c-k-sub').innerHTML = `Trước VAT ${dvT(tong.gia_tri)} · VAT ${dvT(tong.tien_vat)}${tong.tam_tinh ? ' · <span class="warn-text">có tạm tính</span>' : ''}` +
+  $('#c-k-sub').innerHTML = `Trước VAT ${dvT(tong.gia_tri)} · VAT ${dvT(tong.tien_vat)}${tong.tam_tinh ? ' · <span class="warn-text" title="Có HĐ đầu vào chưa quyết toán">có HĐ tạm tính</span>' : ''}` +
     (tong.ngoai_cp.so_dong ? `<br>Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}` : '') +
     (tong.vay?.so_dong ? `<br>Không gồm tiền vay nhận về (tiền vào): ${dvT(tong.vay.sau_vat)}` : '');
   for (const k of KHOI()) {

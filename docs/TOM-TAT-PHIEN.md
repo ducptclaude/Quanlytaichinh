@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.09.11.26 – GTHT theo từng HĐ; "Tạm tính" = HĐ chưa quyết toán (không theo VAT)
+- Đánh giá hoàn thành: GTHT tính theo TỪNG HĐ CĐT: có đợt thanh toán / quyết toán -> lũy kế các đợt; chưa có đợt mà đã QT -> giá trị TĐ3; chưa QT, chưa có đợt -> TẠM TÍNH
+  cost to cost = (Thực chi ÷ CP TĐ3, tính trên số TRƯỚC VAT nên bấm Trước/Sau VAT không đổi tỷ lệ) × DT TĐ3 của HĐ. Nhãn nguồn: "theo TT/QT" / "tạm tính (cost to cost)" / "TT/QT + tạm tính".
+- Nhãn "Tạm tính" toàn hệ thống = HĐ chưa quyết toán (doanh thu: `markTamTinh` – có hồ sơ "Quyết toán" ở mục 2 hoặc tiền về loại quyết toán là đã QT; HĐ đầu vào: `!da_qt`).
+  Chi phí lẻ không còn "tạm tính". VAT 0% chỉ ghi "0%" / "Chưa có VAT"; cảnh báo báo cáo đổi thành "VAT 0% (chưa có VAT)". Dòng HĐ chưa QT ở Doanh thu mục 1 có nhãn "Tạm tính".
+- Kiểm tra: kịch bản trộn MIX-01 (HĐ có đợt 50 + HĐ tạm tính 40% × 100 + HĐ đã QT 82 = 172 tr; sau VAT 185 tr, tỷ lệ 40% giữ nguyên); mốc TĐ dữ liệu cũ không đổi;
+  duyệt 28/28; TĐ 15/15 + 12/12; tester 0 LỖI (bộ nhớ tạm + PostgreSQL).
+
 ## V10.09.11.26 – Doanh thu mục 2: thêm Đợt thanh toán / Quyết toán; GTHT theo lũy kế TT/QT, chưa có thì cost to cost
 - Doanh thu mục 2 (Giá trị Hoàn thành / Quyết toán): thanh "Thêm cho HĐ [chọn HĐ] · + Đợt thanh toán · + Quyết toán" -> điền sẵn form (tên "Đợt thanh toán n" kế tiếp / "Quyết toán", Số HĐ).
 - Báo cáo › Đánh giá hoàn thành: GTHT của dự án = tổng lũy kế các đợt thanh toán / quyết toán (mục 2) khi đã có; chưa có -> cost to cost (Thực chi ÷ CP TĐ3 × DT TĐ3).

@@ -1344,7 +1344,13 @@ window.BKS_EN = {
 "cost to cost": "cost to cost",
 "Đã có đợt thanh toán / quyết toán: Giá trị hoàn thành = tổng lũy kế các đợt; chưa có: tính theo chi phí (cost to cost)": "With payment rounds / final account: Completed value = cumulative total of rounds; otherwise cost to cost",
 "GTHT = lũy kế đợt thanh toán / quyết toán (đã có) · chưa có: Thực chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 (cost to cost) · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về": "CV = cumulative payment rounds / final account (if any) · otherwise: Actual expenditure ÷ M3 cost × M3 revenue (cost to cost) · % Collections = Collections ÷ CV · Rated by % collections",
-"Nhập giá trị quyết toán (phần còn lại sau các đợt đã nghiệm thu / thanh toán)": "Enter final account value (remaining after certified / paid rounds)"
+"Nhập giá trị quyết toán (phần còn lại sau các đợt đã nghiệm thu / thanh toán)": "Enter final account value (remaining after certified / paid rounds)",
+"Chưa có VAT": "No VAT yet",
+"có HĐ tạm tính": "has provisional contracts",
+"tạm tính (cost to cost)": "provisional (cost to cost)",
+"TT/QT + tạm tính": "payments/final + provisional",
+"HĐ chưa quyết toán – giá trị tạm tính": "Contract not yet finalised – provisional value",
+"GTHT theo từng HĐ: đã có đợt thanh toán / quyết toán = lũy kế các đợt · HĐ chưa quyết toán chưa có đợt = tạm tính cost to cost (Thực chi ÷ CP TĐ3 trước VAT × DT TĐ3) · % Tiền về = Tiền về ÷ GTHT": "CV per contract: with payment rounds / final account = cumulative rounds · unsettled contract without rounds = provisional cost to cost (Actual expenditure ÷ M3 cost excl. VAT × M3 revenue) · % Collections = Collections ÷ CV"
 },
 "patterns": [
 [
@@ -1598,6 +1604,10 @@ window.BKS_EN = {
 [
 "{} dòng HĐ/PL, HĐ {}đ, HT/QT {}đ, {} dòng thanh toán {}đ",
 "{} contract/addendum rows, contract {} VND, certified/final {} VND, {} payment rows {} VND"
+],
+[
+"{} HĐ theo đợt TT/QT + {} HĐ tạm tính cost to cost",
+"{} contracts per payment rounds + {} provisional (cost to cost)"
 ],
 [
 "Ngày lập: {} · Người lập: {} · Đơn vị: tỷ đồng ({})",
@@ -2048,8 +2058,8 @@ window.BKS_EN = {
 "Manually entered figures · {}"
 ],
 [
-"{}: VAT 0% (tạm tính)",
-"{}: VAT 0% (provisional)"
+"{}: VAT 0% (chưa có VAT)",
+"{}: VAT 0% (no VAT yet)"
 ],
 [
 "{}: chưa nhập giá trị",

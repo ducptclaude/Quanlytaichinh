@@ -83,7 +83,7 @@ function check(cond, what, detail = '') {
       const base = (daQt && q.length ? q : group).reduce((s, r) => s + sv(r.gia_tri, r.vat), 0);
       const tv = rv.tien_ve.filter((t) => t.hd_id === m.id).reduce((s, t) => s + t.so_tien, 0);
       if (tv > base) warns.push(`${tag} / HĐ ${m.so_ma}: tiền về ${fmt(tv)} > giá trị ${fmt(base)}`);
-      if (!m.vat) warns.push(`${tag} / HĐ ${m.so_ma}: VAT 0% (tạm tính)`);
+      if (!m.vat) warns.push(`${tag} / HĐ ${m.so_ma}: VAT 0% (chưa có VAT)`);
     }
     const orphanPl = hd.filter((r) => r.ma_loai !== 'HĐ' && !masters.some((m) => String(m.so_ma).toLowerCase() === String(r.so_ma).toLowerCase()));
     check(orphanPl.length === 0, `${tag}: mọi PL có HĐ gốc`, orphanPl.map((r) => r.so_hieu).join(', '));

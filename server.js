@@ -30,7 +30,7 @@ async function donKhach() { // xóa tài khoản khách hết hạn + ghi nhật
     }
   } catch (e) { console.error('Lỗi dọn tài khoản khách:', e.message); } finally { donKhachChay = false; }
 }
-const { LOAI_DOANH_THU, calcLine, summarize, sortRevenue, tienVeLabel, sortTienVe, summarizeTienVe } = require('./lib/revenue');
+const { LOAI_DOANH_THU, calcLine, markTamTinh, summarize, sortRevenue, tienVeLabel, sortTienVe, summarizeTienVe } = require('./lib/revenue');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -969,8 +969,8 @@ api.get('/du-an/:id/doanh-thu', wrap(async (req, res) => {
   if (!id) return bad(res, 'ID không hợp lệ');
   const du_an = await store.getProject(id);
   if (!du_an) return bad(res, 'Không tìm thấy công trình', 404);
-  const items = sortRevenue(await store.listRevenue(id)).map(calcLine);
   const tien_ve = sortTienVe(await store.listTienVe(id)).map((r) => ({ ...r, nhan: tienVeLabel(r) }));
+  const items = markTamTinh(sortRevenue(await store.listRevenue(id)).map(calcLine), tien_ve); // tạm tính = HĐ chưa quyết toán
   res.json({ du_an, items, tong: summarize(items), tien_ve, tong_tien_ve: summarizeTienVe(tien_ve) });
 }));
 
@@ -980,7 +980,7 @@ api.get('/doanh-thu-tong', wrap(async (_req, res) => {
   const items = [], tien_ve = [];
   for (const p of projects) {
     const [rev, tv] = await Promise.all([store.listRevenue(p.id), store.listTienVe(p.id)]);
-    for (const r of sortRevenue(rev).map(calcLine))
+    for (const r of markTamTinh(sortRevenue(rev).map(calcLine), tv))
       items.push({ ...r, du_an_id: p.id, ma_du_an: p.ma_du_an, so_ma: r.so_ma ? `${p.ma_du_an} · ${r.so_ma}` : r.so_ma, so_hieu: `${p.ma_du_an} · ${r.so_hieu}` });
     for (const t of sortTienVe(tv)) tien_ve.push({ ...t, du_an_id: p.id, ma_du_an: p.ma_du_an, nhan: `${p.ma_du_an} · ${tienVeLabel(t)}` });
   }
