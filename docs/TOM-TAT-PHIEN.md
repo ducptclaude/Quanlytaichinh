@@ -2,6 +2,18 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.09.11.26 – Duyệt TRƯỚC khi ghi: số chờ duyệt không tính vào tổng, tự hủy khi nhập sai
+- Người dùng chốt: phạm vi = Tiền (tiền về, thanh toán HĐ đầu vào, chi phí) + Giá trị HĐ (HĐ/PL/NT-QT CĐT, HĐ đầu vào + PL) + Chốt TĐ + Số dư đầu kỳ (+ DT-CP dự kiến/BH);
+  người duyệt = Quản trị + Lãnh đạo (tự nhập = tự duyệt); sửa đã duyệt -> chờ duyệt, số cũ vẫn tính, lưu lịch sử.
+- Máy chủ (`server.js` khối PHÊ DUYỆT, bảng `DUYET_TRUOC`): người nhập không có quyền duyệt -> kiểm tra quyền + dữ liệu + Passcode (xóa HĐ/PL, HĐ thầu phụ) NGAY lúc gửi,
+  lưu yêu cầu gốc vào hồ sơ (trả 202 `cho_duyet`), KHÔNG ghi vào số liệu. Duyệt -> máy chủ tự gửi lại yêu cầu gốc tới chính nó (mã nội bộ ngẫu nhiên, chỉ từ 127.0.0.1) dưới tên người nhập;
+  lỗi khi ghi -> hồ sơ vẫn chờ, ghi lý do lỗi. Từ chối / Hủy -> không ghi gì. API mới `POST /api/duyet/huy` (người nhập hoặc người duyệt; ghi nhật ký "Hủy gửi duyệt").
+- Kho dữ liệu: bảng `duyet` THÊM cột `yeu_cau` (JSONB), `so_tien`, `du_an_id`, `loi`; trạng thái mới `huy`. Hồ sơ cũ (trước bản này) cùng người tự thêm rồi tự xóa khi còn chờ -> tự đóng "Đã hủy".
+- Giao diện: thông báo "Đã gửi duyệt"; mục **Chờ duyệt** (khung vàng) trong Nhập liệu → Doanh thu / Chi phí theo dự án: số lượng, tổng tiền, nội dung, nút Hủy (người nhập) / Duyệt – Từ chối (người duyệt);
+  tab Duyệt / Hồ sơ của tôi thêm lọc "Đã hủy", nút Hủy, hiện lỗi ghi; nhãn trên dòng: "Chờ duyệt sửa / xóa". Nhật ký: Gửi duyệt / Duyệt / Từ chối / Hủy gửi duyệt.
+- Kiểm tra: 28 tình huống duyệt (bộ nhớ tạm + PostgreSQL) 0 lỗi; tester 4.545 ĐẠT 0 LỖI (cả hai kho); máy tính + iPhone 13 không tràn, không lỗi trang. Điểm khôi phục: `phien-09.11.26-08h50`.
+- Lần lưu `b51b343` thiếu mã phiên bản ở dòng mô tả (lỗi lệnh lấy mã) – mã đúng là V01.09.11.26.
+
 ## V01.08.11.26 — Tab Duyệt: phê duyệt số liệu nhập (Quản trị + Lãnh đạo), thông báo, lịch sử
 - Người dùng chọn: số liệu chưa duyệt VẪN tính vào báo cáo (gắn nhãn) · duyệt cả Thêm / Sửa / Xóa · từ chối = giữ dòng + lý do · Quản trị / Lãnh đạo nhập = tự duyệt.
 - Kho dữ liệu: THÊM bảng `duyet` (hồ sơ: thao tác, đối tượng, dự án, nội dung trước → sau, người nhập, trạng thái cho / duyet / tu_choi, người duyệt, lúc, lý do).
