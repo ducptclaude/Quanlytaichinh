@@ -2636,7 +2636,7 @@ function dyKenhMo() {
     t = setTimeout(() => { // gộp nhiều thông báo liền nhau
       DY.nhanLuc = 0; dyPoll(); dyPanel();
       if (!$('#tab-duyet').hidden) loadDuyet(true);
-      if (d.uid !== ME?.id && (d.ghi || d.loai === 'ghi')) { // số liệu vừa thay đổi ở máy khác -> tải lại trang nhập liệu đang mở
+      if (d.ghi || d.loai === 'ghi') { // số liệu vừa thay đổi (máy này hoặc máy khác, kể cả cùng tài khoản) -> tải lại trang đang mở
         const tab = ['revenue', 'cost'].find((x) => !$('#tab-' + x).hidden && !document.querySelector('#tab-' + x + ' [data-dirty]'));
         if (tab && loaders[tab]) loaders[tab]();
         if (!$('#tab-report').hidden && !document.querySelector('dialog[open]')) { // Báo cáo đang mở: tải lại số, giữ vị trí cuộn

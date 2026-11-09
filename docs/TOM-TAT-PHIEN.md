@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03 + V04.09.11.26 – Duyệt: đồng bộ tức thì cả Báo cáo, cùng tài khoản nhiều máy
+- V03: kênh báo tức thì có đệm 2 KB (đẩy qua máy chủ trung gian ngay); đo trên Railway: nhịp đến đúng từng giây (không bị giữ). Điểm thử công khai `/su-kien-thu` (3 nhịp rồi đóng, không có số liệu).
+  Báo cáo đang mở tự tải lại số khi có số liệu được duyệt / ghi (giữ vị trí cuộn).
+- V04: sửa lỗi máy cùng tài khoản (hoặc người duyệt tự bấm duyệt) bỏ qua việc tải lại số liệu -> nay mọi máy đang mở đều tải lại. Đo: duyệt ở máy khác -> Báo cáo cập nhật ~0,5 giây.
+- Kiểm tra: 28 tình huống duyệt 0 lỗi; tester 4.545 ĐẠT 0 LỖI; máy tính + iPhone 13 không tràn, không lỗi trang.
+
 ## V02.09.11.26 – Duyệt: thông báo + đồng bộ tức thì
 - Máy chủ đẩy thông báo tức thì (Server-Sent Events, `GET /api/duyet/su-kien`, hàm `dyBao`): gửi duyệt / duyệt / từ chối / hủy / người duyệt ghi số liệu -> mọi máy đang mở cập nhật ngay
   (số trên tab, thông báo nổi, mục Chờ duyệt, danh sách Duyệt; trang Doanh thu / Chi phí đang mở tự tải lại số liệu nếu không có dòng đang nhập dở). Dự phòng: kiểm tra lại mỗi 15 giây (trước 30) + khi quay lại cửa sổ.
