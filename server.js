@@ -821,7 +821,7 @@ api.put('/so-du-dau-ky', auth.requireRole('admin', 'ke_toan'), wrap(async (req, 
   audit.log(req, 'Sửa', 'Số dư đầu kỳ', `${ten}: ${cu.toLocaleString('vi-VN')} → ${v.toLocaleString('vi-VN')} đ`);
   res.json(o);
 }));
-api.get('/bao-cao', wrap(async (req, res) => {
+api.get('/bao-cao', quyen('bao_cao'), wrap(async (req, res) => {
   const du_an = await reportProjects();
   const s = await store.getSettings();
   res.json({

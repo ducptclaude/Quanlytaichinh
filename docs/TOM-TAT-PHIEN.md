@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.09.11.26 – Phân quyền: tab Báo cáo chỉ Quản trị, Lãnh đạo, Ban Kiểm soát (+ Chỉ xem / Khách)
+- `QUYEN.bao_cao` = admin, lanh_dao, bks, viewer (người dùng chọn giữ quyền xem cho Chỉ xem / Khách). Biên tập, QS, Kế toán: không thấy tab Báo cáo (gồm Dashboard),
+  không có Trợ lý số liệu, máy chủ chặn `/api/bao-cao` (403). `QUYEN.xuat` = admin, lanh_dao, bks.
+- Vai nhập liệu đăng nhập vào thẳng Nhập liệu › Doanh thu; bấm mã / tên dự án ở danh sách Dự án mở Doanh thu của dự án (thay cho báo cáo công trình).
+- Kiểm tra 7 vai (Quản trị, Lãnh đạo, BKS, Chỉ xem, Biên tập, QS, Kế toán): đúng nút, đúng trang mở, đúng 200 / 403, Trợ lý / Xuất đúng; 28 tình huống duyệt 0 lỗi; tester 0 LỖI.
+
 ## V05.09.11.26 – Điều hướng: dự án mới -> Doanh thu; Báo cáo chọn dự án -> TĐ mới nhất
 - Nhập liệu › Dự án: thêm dự án mới xong (người có quyền HĐ) tự chuyển sang Nhập liệu › Doanh thu, chọn sẵn dự án vừa tạo, báo "✓ Đã thêm dự án … – nhập HĐ / phụ lục…" (12 giây).
 - Báo cáo: chọn 1 dự án ở Phạm vi -> mục I tự nhảy sang TĐ mới nhất của dự án (`bTdMoiNhat`): lớn nhất của số TĐ đã chốt và theo hệ thống

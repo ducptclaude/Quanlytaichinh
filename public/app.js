@@ -46,7 +46,7 @@ let users = [];
   // Mặc định vào Báo cáo; người nhập liệu mở lại đúng mục đang làm dở (mục không thuộc quyền -> Báo cáo)
   let start = 'report';
   try { start = localStorage.getItem('tab') || start; } catch {}
-  const macDinh = $('.topbar [data-tab="report"]') ? 'report' : 'users'; // IT không có Báo cáo -> vào Tài khoản
+  const macDinh = $('.topbar [data-tab="report"]') ? 'report' : $('.topbar [data-tab="revenue"]') ? 'revenue' : 'users'; // nhập liệu (không có Báo cáo) -> Doanh thu · IT -> Tài khoản
   showTab($(`.topbar [data-tab="${start}"]`) ? start : macDinh);
 })();
 
@@ -78,7 +78,8 @@ if ($('#dv-pick')) {
 }
 const closeMenus = () => $$('.tab-grp.open').forEach((g) => { g.classList.remove('open'); $('[data-grp-toggle]', g).setAttribute('aria-expanded', 'false'); });
 function showTab(name) {
-  if (ME?.role === 'viewer' && !$(`.topbar [data-tab="${name}"]`)) return; // Chỉ xem: không mở trang ngoài quyền (Dự án, Doanh thu, Chi phí…) dù bấm từ liên kết nào
+  if (ME?.role === 'viewer' && !$(`.topbar [data-tab="${name}"]`)) return;
+  if (name === 'report' && !can('bao_cao')) return; // Báo cáo: chỉ Quản trị, Lãnh đạo, Ban Kiểm soát (và Chỉ xem) // Chỉ xem: không mở trang ngoài quyền (Dự án, Doanh thu, Chi phí…) dù bấm từ liên kết nào
   closeMenus();
   $$('.topbar [data-tab], #subnav [data-tab]').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   $$('.tab-grp').forEach((g) => g.classList.toggle('active', Boolean($(`[data-tab="${name}"]`, g))));
@@ -294,7 +295,13 @@ $('#p-search').addEventListener('input', renderProjects);
 
 $('#p-tbody').addEventListener('click', async (e) => {
   const brep = e.target.closest('[data-brep]')?.dataset.brep;
-  if (brep) { e.preventDefault(); return openProjectReport(Number(brep)); }
+  if (brep) {
+    e.preventDefault();
+    if (can('bao_cao')) return openProjectReport(Number(brep));
+    revProjectId = Number(brep); revAll = false; // vai nhập liệu (không xem Báo cáo): mở Doanh thu của dự án
+    try { localStorage.setItem('revProject', revProjectId); localStorage.setItem('revAll', '0'); } catch { /* bỏ qua */ }
+    return showTab('revenue');
+  }
   const { edit, del, rev, cost } = e.target.dataset;
   if (rev || cost) {
     revProjectId = Number(rev || cost);

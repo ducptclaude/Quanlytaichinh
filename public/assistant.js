@@ -467,7 +467,7 @@ function asToggle(open) {
 }
 
 function asInit() {
-  if (!ME?.role || ME.role === 'it' || $('#as-fab')) return; // IT: không có quyền xem số liệu tài chính
+  if (!ME?.role || !(META?.quyen?.bao_cao || []).includes(ME.role) || $('#as-fab')) return; // Trợ lý dùng số liệu Báo cáo: chỉ vai được xem Báo cáo
   document.body.insertAdjacentHTML('beforeend', `
     <button type="button" id="as-fab" class="as-fab no-print" aria-expanded="false" aria-controls="as-panel" title="Trợ lý số liệu"><span class="as-fab-ic">💬</span><span class="as-fab-t">Trợ lý</span></button>
     <div id="as-bd" class="as-bd no-print" hidden></div>
