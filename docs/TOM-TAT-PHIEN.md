@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.09.11.26 – Điều hướng: dự án mới -> Doanh thu; Báo cáo chọn dự án -> TĐ mới nhất
+- Nhập liệu › Dự án: thêm dự án mới xong (người có quyền HĐ) tự chuyển sang Nhập liệu › Doanh thu, chọn sẵn dự án vừa tạo, báo "✓ Đã thêm dự án … – nhập HĐ / phụ lục…" (12 giây).
+- Báo cáo: chọn 1 dự án ở Phạm vi -> mục I tự nhảy sang TĐ mới nhất của dự án (`bTdMoiNhat`): lớn nhất của số TĐ đã chốt và theo hệ thống
+  (đã quyết toán -> TĐ3; có phụ lục / phát sinh -> TĐ2; còn lại TĐ1). Chọn "Tất cả dự án" giữ TĐ đang chọn.
+- Kiểm tra: 12 dự án mẫu nhảy đúng TĐ (3 dự án đã QT -> TĐ3, còn lại TĐ2); tester 4.545 ĐẠT 0 LỖI; máy tính + iPhone 13 không tràn, không lỗi trang.
+
 ## V03 + V04.09.11.26 – Duyệt: đồng bộ tức thì cả Báo cáo, cùng tài khoản nhiều máy
 - V03: kênh báo tức thì có đệm 2 KB (đẩy qua máy chủ trung gian ngay); đo trên Railway: nhịp đến đúng từng giây (không bị giữ). Điểm thử công khai `/su-kien-thu` (3 nhịp rồi đóng, không có số liệu).
   Báo cáo đang mở tự tải lại số khi có số liệu được duyệt / ghi (giữ vị trí cuộn).

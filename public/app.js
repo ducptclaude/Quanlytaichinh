@@ -260,10 +260,20 @@ pForm?.addEventListener('submit', async (e) => {
   body.gia_tri_hd = old ? old.gia_tri_hd : 0;
   body.da_giai_ngan = old ? old.da_giai_ngan : 0;
   try {
-    await api(id ? `/api/du-an/${id}` : '/api/du-an', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) });
+    const r = await api(id ? `/api/du-an/${id}` : '/api/du-an', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) });
     showMsg($('#p-msg'), id ? 'Đã cập nhật dự án' : 'Đã thêm dự án');
     resetProjectForm();
     await loadProjects();
+    // Thêm dự án mới xong -> chuyển sang Nhập liệu › Doanh thu của dự án đó để nhập tiếp HĐ
+    if (!id && r?.id && !r.cho_duyet && can('hd')) {
+      revProjectId = Number(r.id); revAll = false;
+      try { localStorage.setItem('revProject', revProjectId); localStorage.setItem('revAll', '0'); } catch { /* chế độ riêng tư */ }
+      await showTab('revenue');
+      let m = $('#r-new-msg');
+      if (!m) { m = document.createElement('div'); m.id = 'r-new-msg'; m.className = 'msg'; m.setAttribute('role', 'status'); $('#r-project-info')?.after(m); }
+      showMsg(m, `✓ Đã thêm dự án ${body.ma_du_an || ''} – nhập HĐ / phụ lục với chủ đầu tư bên dưới`);
+      setTimeout(() => showMsg(m, ''), 12000);
+    }
   } catch (err) {
     showMsg($('#p-msg'), err.message, 'err');
   }

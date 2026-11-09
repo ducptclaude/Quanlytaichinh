@@ -2216,7 +2216,19 @@ $('#b-report').addEventListener('click', async (e) => {
 // ---------------------------------------------------------------------
 // Sự kiện
 // ---------------------------------------------------------------------
-$('#b-project').addEventListener('change', (e) => { BST.project = e.target.value; BST.chi_tiet = false; bSave(); renderReport(); });
+// TĐ mới nhất của 1 dự án: số chốt TĐ lớn nhất đã nhập, hoặc theo hệ thống (đã quyết toán -> TĐ3, có phụ lục / phát sinh -> TĐ2, còn lại TĐ1)
+function bTdMoiNhat(d) {
+  const chot = Math.max(0, ...(d.thoi_diem || []).map((t) => Number(t.td) || 0));
+  const m = d.moc || {};
+  const he = m.da_qt ? 3 : (m.dt_ps || 0) !== (m.dt_goc || 0) || (m.tp_ps || 0) !== (m.tp_goc || 0) ? 2 : 1;
+  return Math.max(chot, he);
+}
+$('#b-project').addEventListener('change', (e) => {
+  BST.project = e.target.value; BST.chi_tiet = false;
+  const d = BC?.du_an?.find((x) => x.id === Number(BST.project));
+  if (d) BST.i_td = bTdMoiNhat(d); // chọn 1 dự án -> mục I tự nhảy sang TĐ mới nhất của dự án đó
+  bSave(); renderReport();
+});
 $('#b-vat').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; BST.vat = b.dataset.v; bSave(); renderReport(); });
 $('#b-ky').addEventListener('change', (e) => { BST.ky = e.target.value; bSave(); renderReport(); });
 $('#b-ky-custom').addEventListener('change', () => { BST.tu = $('#b-tu').value; BST.den = $('#b-den').value; bSave(); renderReport(); });
