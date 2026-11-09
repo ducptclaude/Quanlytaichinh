@@ -130,6 +130,7 @@
           <select id="r-project" class="project-select" aria-label="Chọn công trình"></select>
         </div>
         <div id="r-project-info" class="muted small"></div>
+        <div class="dy-panel" id="r-dy" data-dy-nhom="revenue" hidden></div>
       </div>
 
       <div id="r-body" class="section-stack" hidden>
@@ -151,6 +152,7 @@
           <select id="c-project" class="project-select" aria-label="Chọn công trình"></select>
         </div>
         <div id="c-project-info" class="muted small"></div>
+        <div class="dy-panel" id="c-dy" data-dy-nhom="cost" hidden></div>
       </div>
 
       <div id="c-body" class="section-stack" hidden>
@@ -332,10 +334,10 @@
     <section id="tab-duyet" class="tab-panel" hidden>
       <div class="card">
         <div class="dy-head"><h2 id="dy-title">Phê duyệt số liệu</h2>
-          <span class="muted small" id="dy-sub">Mọi lần thêm / sửa / xóa dự án, doanh thu, tiền về, chi phí, thầu phụ, số liệu TĐ đều tạo 1 hồ sơ. Số liệu đã tính ngay vào báo cáo; duyệt để xác nhận.</span></div>
+          <span class="muted small" id="dy-sub">Thêm / sửa / xóa doanh thu, tiền về, chi phí, HĐ đầu vào, thanh toán, chốt TĐ, số dư đầu kỳ của người nhập liệu được giữ ở đây và CHƯA tính vào tổng. Duyệt = ghi vào số liệu; Từ chối / Hủy = không ghi.</span></div>
         <div class="dy-bar">
           <div class="seg" id="dy-tt" role="group" aria-label="Lọc trạng thái">
-            <button type="button" data-tt="cho" class="on">Chờ duyệt <b id="dy-n-cho"></b></button><button type="button" data-tt="duyet">Đã duyệt</button><button type="button" data-tt="tu_choi">Từ chối</button><button type="button" data-tt="">Tất cả</button>
+            <button type="button" data-tt="cho" class="on">Chờ duyệt <b id="dy-n-cho"></b></button><button type="button" data-tt="duyet">Đã duyệt</button><button type="button" data-tt="tu_choi">Từ chối</button><button type="button" data-tt="huy">Đã hủy</button><button type="button" data-tt="">Tất cả</button>
           </div>
           <input id="dy-q" type="search" placeholder="Tìm dự án, người nhập, nội dung…" aria-label="Tìm hồ sơ">
           <label class="check dy-mine" id="dy-mine-wrap"><input type="checkbox" id="dy-mine"> Chỉ hồ sơ của tôi</label>

@@ -10,6 +10,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | phien-07.11.26-08h01 | V30.06.11.26 | `f012cd5` | 07/11/2026 | Trước khi sửa ngày 07/11 |
 | **chot-08.11.26** | V01.08.11.26 | (lần lưu cuối ngày) | 08/11/2026 | Tab Duyệt: phê duyệt số liệu, thông báo, lịch sử |
 | phien-08.11.26-12h27 | V42.07.11.26 | `d1a75f1` | 08/11/2026 | Trước khi thêm tab Duyệt |
+| phien-09.11.26-08h50 | V01.08.11.26 | `19d5eba` | 09/11/2026 | Trước khi sửa quy trình duyệt (chờ duyệt không tính tổng, tự xóa khi chưa duyệt) |
 | **chot-06.11.26** | V30.06.11.26 | (mới nhất) | 06/11/2026 | Lấy lại mã V14.06.11.26 (từ phien-06.11.26-15h01) |
 | phien-06.11.26-15h09 | V15.06.11.26 | `ff6c74c` | 06/11/2026 | Bản mã V10 (trước khi lấy lại V14) |
 | phien-06.11.26-15h01 | V14.06.11.26 | `b024ba1` | 06/11/2026 | Trước khi quay về V10 (có Dashboard bảng Kế hoạch – Thực – Còn lại) |

@@ -1306,53 +1306,18 @@ window.BKS_EN = {
 "HĐ mới": "New contract",
 "Thời điểm phát sinh: TĐ1 ký HĐ · TĐ2 phát sinh · TĐ3 quyết toán": "Stage: M1 contract signed · M2 variations · M3 final account",
 "Thời điểm phát sinh HĐ / phụ lục này: TĐ1 ký HĐ · TĐ2 phát sinh · TĐ3 quyết toán": "Stage of this contract / addendum: M1 contract signed · M2 variations · M3 final account",
-"Thời điểm ký HĐ đầu vào này: TĐ1 ký HĐ với chủ đầu tư · TĐ2 phát sinh thêm · TĐ3 giai đoạn quyết toán": "Stage of this procurement contract: M1 Employer contract signed · M2 variations · M3 final account stage"
+"Thời điểm ký HĐ đầu vào này: TĐ1 ký HĐ với chủ đầu tư · TĐ2 phát sinh thêm · TĐ3 giai đoạn quyết toán": "Stage of this procurement contract: M1 Employer contract signed · M2 variations · M3 final account stage",
+"Đã hủy": "Cancelled",
+"Chờ duyệt xóa": "Pending deletion",
+"Chờ duyệt sửa": "Pending change",
+"CHƯA tính vào tổng – chỉ ghi vào số liệu khi Quản trị / Lãnh đạo duyệt": "NOT included in totals – recorded only after approval by Admin / Management",
+"nội dung chờ duyệt": "items pending approval",
+"Hủy nội dung chưa duyệt (nhập sai) – không ghi vào số liệu, có ghi nhật ký": "Cancel unapproved entry (entered by mistake) – nothing is recorded; logged",
+"Bản sửa / xóa đang chờ duyệt – số hiện tại (đã duyệt) vẫn được tính": "Change / deletion pending approval – the current (approved) figure still counts",
+"Thêm / sửa / xóa doanh thu, tiền về, chi phí, HĐ đầu vào, thanh toán, chốt TĐ, số dư đầu kỳ của người nhập liệu được giữ ở đây và CHƯA tính vào tổng. Duyệt = ghi vào số liệu; Từ chối / Hủy = không ghi.": "Additions / changes / deletions of revenue, collections, costs, procurement contracts, payments, milestone figures and opening balances by data-entry users are held here and NOT included in totals. Approve = record; Reject / Cancel = nothing recorded.",
+"Các lần thêm / sửa / xóa số liệu bạn đã gửi và kết quả duyệt. Số chờ duyệt CHƯA tính vào tổng. Nhập sai khi chưa duyệt: bấm Hủy (không cần duyệt, có ghi nhật ký). Bị từ chối: nhập lại.": "Your submitted additions / changes / deletions and their approval results. Pending figures are NOT included in totals. Entered by mistake and not yet approved: click Cancel (no approval needed, logged). Rejected: re-enter."
 },
 "patterns": [
-[
-"{} hồ sơ · trang {}/{}",
-"{} submissions · page {}/{}"
-],
-[
-"✓ Duyệt {} mục đã chọn",
-"✓ Approve {} selected"
-],
-[
-"✕ Từ chối {} mục đã chọn",
-"✕ Reject {} selected"
-],
-[
-"🔔 Có {} hồ sơ mới chờ duyệt (tổng {})",
-"🔔 {} new submissions pending (total {})"
-],
-[
-"⚠ Có {} hồ sơ của bạn bị từ chối – mở \"Hồ sơ của tôi\" xem lý do",
-"⚠ {} of your submissions were rejected – open \"My submissions\" for the reason"
-],
-[
-"✓ Đã duyệt {} hồ sơ",
-"✓ Approved {} submissions"
-],
-[
-"✕ Đã từ chối {} hồ sơ",
-"✕ Rejected {} submissions"
-],
-[
-"⏳ Có {} thay đổi số liệu đang chờ duyệt – đã tính vào báo cáo.",
-"⏳ {} data changes pending approval – already included in the report."
-],
-[
-"⏳ Có {} thay đổi số liệu của bạn đang chờ duyệt – đã tính vào báo cáo.",
-"⏳ {} of your data changes are pending approval – already included in the report."
-],
-[
-"Mở tab {}",
-"Open {}"
-],
-[
-"Lý do: {}",
-"Reason: {}"
-],
 [
 "Đơn vị: {}, sau VAT · Thực chi = chi phí đã chi + thanh toán HĐ đầu vào (gồm tạm ứng); không gồm tiền vay nhận về ({} {}) và trả nợ gốc vay ({} {}) vì đó là vay – trả nợ, không phải doanh thu / chi phí · Còn lại âm = đang bỏ tiền ra nhiều hơn tiền thu về · Kế hoạch theo hợp đồng chỉ để so sánh, không phải tiền thật.",
 "Unit: {}, after VAT · Expenditure = costs paid + procurement contract payments (incl. advances); excl. loan proceeds ({} {}) and principal repayments ({} {}) since these are borrowing – repayment, not revenue / cost · Negative balance = spending more than collected · Plan per contract is for comparison only, not real cash."
@@ -1510,8 +1475,16 @@ window.BKS_EN = {
 "Contract (M1) – Variation (M2) – Final account (M3) · auto-calculated from data {}"
 ],
 [
+"⏳ Có {} thay đổi số liệu của bạn đang chờ duyệt – CHƯA tính vào báo cáo.",
+"⏳ {} of your data changes pending approval – NOT included in the report."
+],
+[
 "({} công trình) · lũy kế đến hiện tại · sau VAT · đơn vị theo ô Đơn vị.",
 "({} projects) · cumulative to date · after VAT · unit per the Unit box."
+],
+[
+"⏳ Có {} thay đổi số liệu của bạn đang chờ duyệt – đã tính vào báo cáo.",
+"⏳ {} of your data changes are pending approval – already included in the report."
 ],
 [
 "Khoảng thời gian dài hơn {} ngày – chọn một tháng/quý để xem theo ngày",
@@ -1522,12 +1495,24 @@ window.BKS_EN = {
 "Forecast revenue − subcontract value under the contract · Unit: bn VND ({})"
 ],
 [
+"⏳ Có {} thay đổi số liệu đang chờ duyệt – CHƯA tính vào báo cáo.",
+"⏳ {} data changes pending approval – NOT included in the report."
+],
+[
+"⚠ Có {} hồ sơ của bạn bị từ chối – mở \"Hồ sơ của tôi\" xem lý do",
+"⚠ {} of your submissions were rejected – open \"My submissions\" for the reason"
+],
+[
 "· Đơn vị: VNĐ ({} trừ khi ghi khác) · Lập lúc {} · Người lập: {} · {}",
 "· Unit: VND ({} unless stated otherwise) · Generated at {} · Prepared by: {} · {}"
 ],
 [
 "{} · {} · lũy kế đến hôm nay · Còn lại = thu − chi + số dư đầu kỳ",
 "{} · {} · cumulative to today · Balance = collections − expenditure + opening balance"
+],
+[
+"⏳ Có {} thay đổi số liệu đang chờ duyệt – đã tính vào báo cáo.",
+"⏳ {} data changes pending approval – already included in the report."
 ],
 [
 "Đơn vị: tỷ đồng ({}; tiền về, phải thu, phải trả sau VAT)",
@@ -1718,6 +1703,14 @@ window.BKS_EN = {
 "Delete project {} – {} (passcode required) · together with {}"
 ],
 [
+"⚠ Lần duyệt trước không ghi được: {}",
+"⚠ Last approval could not be recorded: {}"
+],
+[
+"🔔 Có {} hồ sơ mới chờ duyệt (tổng {})",
+"🔔 {} new submissions pending (total {})"
+],
+[
 "Ngày TĐ{} không được sau ngày TĐ{} ({})",
 "M{} date must not be after M{} date ({})"
 ],
@@ -1822,6 +1815,10 @@ window.BKS_EN = {
 "{}: collections {} exceed contract value {}"
 ],
 [
+"Đã hủy {} nội dung chưa duyệt",
+"Cancelled {} unapproved items"
+],
+[
 "Không gồm trả nợ gốc vay: {}",
 "Excl. loan principal repayments: {}"
 ],
@@ -1914,6 +1911,10 @@ window.BKS_EN = {
 "Signed in successfully · {}"
 ],
 [
+"✕ Từ chối {} mục đã chọn",
+"✕ Reject {} selected"
+],
+[
 "Còn lại · thực chi {} DT",
 "Balance · expenditure {} of revenue"
 ],
@@ -1974,6 +1975,14 @@ window.BKS_EN = {
 "TOTAL PROCUREMENT CONTRACTS ({} contracts)"
 ],
 [
+"⏳ {} nội dung chờ duyệt",
+"⏳ {} items pending approval"
+],
+[
+"✓ Duyệt {} mục đã chọn",
+"✓ Approve {} selected"
+],
+[
 "Lợi nhuận dự kiến · {}",
 "Forecast profit · {}"
 ],
@@ -1988,6 +1997,10 @@ window.BKS_EN = {
 [
 "Xóa dòng \"{}\" của {} ({})?",
 "Delete row \"{}\" of {} ({})?"
+],
+[
+"✕ Đã từ chối {} hồ sơ",
+"✕ Rejected {} submissions"
 ],
 [
 "Từ mục I (TĐ{}) và II",
@@ -2070,6 +2083,10 @@ window.BKS_EN = {
 "{}/{} contracts settled{}"
 ],
 [
+"✓ Đã duyệt {} hồ sơ",
+"✓ Approved {} submissions"
+],
+[
 "Khách · còn {} phút",
 "Guest · {} min left"
 ],
@@ -2108,6 +2125,10 @@ window.BKS_EN = {
 [
 "Xem thêm {} dự án ▾",
 "Show {} more projects ▾"
+],
+[
+"{} hồ sơ · trang {}/{}",
+"{} submissions · page {}/{}"
 ],
 [
 "Gần đây ({} ngày):",
@@ -2468,6 +2489,14 @@ window.BKS_EN = {
 [
 "⚠ {} dự án",
 "⚠ {} projects"
+],
+[
+"Mở tab {}",
+"Open {}"
+],
+[
+"Lý do: {}",
+"Reason: {}"
 ],
 [
 "({} dòng)",

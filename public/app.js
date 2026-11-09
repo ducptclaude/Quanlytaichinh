@@ -2592,13 +2592,13 @@ function khachInit() {
 // Số trên tab + chuông: người duyệt = số chờ duyệt; người nhập = số bị từ chối (7 ngày). Kiểm tra mỗi 30 giây.
 // =====================================================================
 const DY = { tt: 'cho', q: '', trang: 0, mine: false, rows: [], la: false, dem: null, nhan: new Map() };
-const DY_TT = { cho: ['Chờ duyệt', 'st-chuan-bi'], duyet: ['Đã duyệt', 'st-hoan-thanh'], tu_choi: ['Bị từ chối', 'st-tam-dung'] };
+const DY_TT = { cho: ['Chờ duyệt', 'st-chuan-bi'], duyet: ['Đã duyệt', 'st-hoan-thanh'], tu_choi: ['Bị từ chối', 'st-tam-dung'], huy: ['Đã hủy', 'st-tam-tinh'] };
 function duyetInit() {
   DY.la = can('duyet');
   $('#dy-tab-txt').textContent = DY.la ? 'Duyệt' : 'Hồ sơ của tôi';
   if (!DY.la) {
     $('#dy-title').textContent = 'Hồ sơ số liệu của tôi';
-    $('#dy-sub').textContent = 'Các lần thêm / sửa / xóa số liệu bạn đã nhập và kết quả duyệt. Hồ sơ bị từ chối: sửa lại dòng số liệu đó, hệ thống tự gửi duyệt lại.';
+    $('#dy-sub').textContent = 'Các lần thêm / sửa / xóa số liệu bạn đã gửi và kết quả duyệt. Số chờ duyệt CHƯA tính vào tổng. Nhập sai khi chưa duyệt: bấm Hủy (không cần duyệt, có ghi nhật ký). Bị từ chối: nhập lại.';
     $('#dy-act').hidden = true; $('#dy-mine-wrap').hidden = true; $('#dy-all').hidden = true;
   }
   dyPoll(); setInterval(dyPoll, 30000);
@@ -2616,9 +2616,9 @@ async function dyPoll() {
     if (so) document.title = `(${so}) ` + document.title;
     const note = $('#dy-bc-note');
     if (note) { const n = DY.la ? d.cho : d.cua_toi_cho; note.hidden = !n;
-      note.innerHTML = n ? `⏳ Có <b>${n}</b> thay đổi số liệu ${DY.la ? '' : 'của bạn '}đang chờ duyệt – đã tính vào báo cáo. <button type="button" class="sm" data-tab-go="duyet">Mở tab ${DY.la ? 'Duyệt' : 'Hồ sơ của tôi'}</button>` : ''; }
+      note.innerHTML = n ? `⏳ Có <b>${n}</b> thay đổi số liệu ${DY.la ? '' : 'của bạn '}đang chờ duyệt – CHƯA tính vào báo cáo. <button type="button" class="sm" data-tab-go="duyet">Mở tab ${DY.la ? 'Duyệt' : 'Hồ sơ của tôi'}</button>` : ''; }
     if (cu !== null && so > cu) dyToast(DY.la ? `🔔 Có ${so - cu} hồ sơ mới chờ duyệt (tổng ${so})` : `⚠ Có ${so - cu} hồ sơ của bạn bị từ chối – mở "Hồ sơ của tôi" xem lý do`);
-    if (cu !== so) { DY.nhanLuc = 0; if (!$('#tab-duyet').hidden) loadDuyet(true); }
+    if (cu !== so) { DY.nhanLuc = 0; if (!$('#tab-duyet').hidden) loadDuyet(true); dyPanel(); }
     DY.dem = so;
     if (Date.now() - (DY.nhanLuc || 0) > 25000) { DY.nhanLuc = Date.now(); DY.nhan = new Map((await api('/api/duyet/nhan', AUTO)).map((x) => [x.loai + ':' + x.ban_ghi_id, x])); dyGanNhan(true); }
   } catch {}
@@ -2636,15 +2636,16 @@ function dyGanNhan(lai = false) {
   if (!DY.nhan) return;
   for (const [sel, loai, k] of DY_SEL) {
     document.querySelectorAll(`main ${sel}`).forEach((tr) => {
-      const x = DY.nhan.get(loai + ':' + tr.dataset[k]);
+      const x0 = DY.nhan.get(loai + ':' + tr.dataset[k]), x = x0 && x0.trang_thai === 'cho' ? x0 : null; // chỉ gắn nhãn khi đang chờ
       const old = tr.querySelector('.dy-nhan');
       if (old && (lai || !x || old.dataset.tt !== x.trang_thai)) old.remove();
       if (!x || tr.querySelector('.dy-nhan')) return;
       const td = tr.cells[1] || tr.cells[0]; if (!td) return;
       const sp = document.createElement('span');
       sp.className = `dy-nhan ${x.trang_thai}`; sp.dataset.tt = x.trang_thai;
-      sp.textContent = x.trang_thai === 'cho' ? 'Chờ duyệt' : 'Bị từ chối';
-      if (x.ly_do) sp.title = 'Lý do: ' + x.ly_do;
+      sp.textContent = x.hanh_dong === 'Xóa' ? 'Chờ duyệt xóa' : x.hanh_dong === 'Thêm' ? 'Chờ duyệt' : 'Chờ duyệt sửa';
+      sp.title = x.hanh_dong === 'Thêm' ? '' : 'Bản sửa / xóa đang chờ duyệt – số hiện tại (đã duyệt) vẫn được tính';
+
       td.appendChild(sp);
     });
   }
@@ -2666,9 +2667,9 @@ async function loadDuyet(giu = false) {
       <td><b>${esc(x.ho_ten_nhap || x.nguoi_nhap)}</b><div class="muted small">${esc(x.nguoi_nhap)}</div></td>
       <td><span class="dy-hd dy-hd-${x.hanh_dong === 'Xóa' ? 'xoa' : x.hanh_dong === 'Thêm' ? 'them' : 'sua'}">${esc(x.hanh_dong)}</span></td>
       <td>${esc(x.doi_tuong)}${x.du_an ? `<div><b>${esc(x.du_an)}</b></div>` : ''}</td>
-      <td class="dy-nd"><div>${esc(nd[0])}</div>${nd.slice(1).map((d) => `<div class="dy-diff">${esc(d)}</div>`).join('')}</td>
+      <td class="dy-nd"><div>${esc(nd[0])}</div>${nd.slice(1).map((d) => `<div class="dy-diff">${esc(d)}</div>`).join('')}${x.loi && x.trang_thai === 'cho' ? `<div class="small dy-loi">⚠ Lần duyệt trước không ghi được: ${esc(x.loi)}</div>` : ''}</td>
       <td><span class="st ${cls}">${ten}</span>${x.trang_thai !== 'cho' ? `<div class="muted small">${esc(x.nguoi_duyet)}${x.duyet_luc ? ' · ' + tg(x.duyet_luc) : ''}</div>` : ''}${x.ly_do ? `<div class="small dy-lydo">${esc(x.ly_do)}</div>` : ''}</td>
-      <td class="dy-btns">${DY.la && x.trang_thai === 'cho' ? `<button type="button" class="sm primary" data-dyok="${x.id}">Duyệt</button><button type="button" class="sm danger" data-dyno="${x.id}">Từ chối</button>` : ''}</td>
+      <td class="dy-btns">${dyNut(x)}</td>
     </tr>`; }).join('') : `<tr><td colspan="8" class="empty">${DY.tt === 'cho' ? (DY.la ? 'Không có hồ sơ chờ duyệt 🎉' : 'Bạn không có hồ sơ đang chờ duyệt') : 'Không có hồ sơ'}</td></tr>`;
   const so = Math.max(1, Math.ceil(r.tong / r.moi_trang));
   $('#dy-page').textContent = `${r.tong} hồ sơ · trang ${DY.trang + 1}/${so}`;
@@ -2691,9 +2692,60 @@ async function dyXuLy(ids, hd) {
   try {
     const r = await api('/api/duyet/xu-ly', { method: 'POST', body: JSON.stringify({ ids, hanh_dong: hd, ly_do }) });
     dyToast(`${hd === 'duyet' ? '✓ Đã duyệt' : '✕ Đã từ chối'} ${r.so} hồ sơ`);
-    DY.nhanLuc = 0; await loadDuyet(); dyPoll();
+    if (r.loi?.length) alert(`Không ghi được ${r.loi.length} hồ sơ (vẫn ở Chờ duyệt):\n- ${r.loi.join('\n- ')}`);
+    await dyLamMoi();
   } catch (err) { alert(err.message); }
 }
+// Nút trên 1 hồ sơ: người duyệt Duyệt / Từ chối; người nhập (hoặc người duyệt) Hủy khi còn chờ
+function dyNut(x) {
+  if (x.trang_thai !== 'cho') return '';
+  return (DY.la ? `<button type="button" class="sm primary" data-dyok="${x.id}">Duyệt</button><button type="button" class="sm danger" data-dyno="${x.id}">Từ chối</button>` : '')
+    + (DY.la || x.nguoi_nhap_id === ME?.id ? `<button type="button" class="sm" data-dyhuy="${x.id}" title="Hủy nội dung chưa duyệt (nhập sai) – không ghi vào số liệu, có ghi nhật ký">Hủy</button>` : '');
+}
+async function dyHuy(ids) {
+  if (!confirm(`Hủy ${ids.length} nội dung chưa duyệt? Số liệu này chưa được ghi nên hủy không ảnh hưởng tổng; việc hủy được ghi nhật ký.`)) return;
+  try { const r = await api('/api/duyet/huy', { method: 'POST', body: JSON.stringify({ ids }) }); dyToast(`Đã hủy ${r.so} nội dung chưa duyệt`); await dyLamMoi(); }
+  catch (err) { alert(err.message); }
+}
+// Sau duyệt / từ chối / hủy: vẽ lại danh sách, mục Chờ duyệt, nhãn, số trên tab và số liệu trang đang mở
+async function dyLamMoi() {
+  DY.nhanLuc = 0;
+  if (!$('#tab-duyet').hidden) await loadDuyet();
+  dyPoll(); dyPanel();
+  const tab = ['revenue', 'cost'].find((t) => !$('#tab-' + t).hidden);
+  if (tab && loaders[tab]) loaders[tab]();
+}
+// Mục "Chờ duyệt" trong Nhập liệu (Doanh thu / Chi phí): nội dung chờ của dự án đang chọn – CHƯA tính vào tổng
+const DY_NHOM = { revenue: ['doanh_thu', 'tien_ve', 'td', 'bh'], cost: ['chi_phi', 'thau_phu', 'tp_hd_pl', 'tp_thanh_toan'] };
+async function dyPanel() {
+  if (!can('nop')) return;
+  for (const el of $$('.dy-panel[data-dy-nhom]')) {
+    const tab = el.closest('.tab-panel');
+    if (!tab || tab.hidden || !revProjectId) { el.hidden = true; continue; }
+    let r;
+    try { r = await api(`/api/duyet?tt=cho&du_an=${revProjectId}`, AUTO); } catch { continue; }
+    const rows = r.rows.filter((x) => DY_NHOM[el.dataset.dyNhom].includes(x.loai));
+    el.hidden = !rows.length;
+    if (!rows.length) { el.innerHTML = ''; continue; }
+    const tong = rows.reduce((a, x) => a + (x.hanh_dong === 'Xóa' ? 0 : Number(x.so_tien) || 0), 0);
+    const tg = (d) => new Date(d).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+    const mo = el.querySelector('details')?.open ?? true;
+    el.innerHTML = `<details ${mo ? 'open' : ''}><summary><span class="dy-p-ic">⏳</span> <b>${rows.length}</b> nội dung chờ duyệt${tong ? ` · ${money(tong)} đ` : ''}
+        <span class="dy-p-note">CHƯA tính vào tổng – chỉ ghi vào số liệu khi Quản trị / Lãnh đạo duyệt</span></summary>
+      <div class="table-wrap"><table class="dy-p-table"><thead><tr><th>Thời gian</th><th>Người nhập</th><th>Thao tác</th><th>Nội dung</th><th class="num">Số tiền</th><th></th></tr></thead>
+      <tbody>${rows.map((x) => `<tr><td class="muted small">${tg(x.at)}</td><td>${esc(x.ho_ten_nhap || x.nguoi_nhap)}</td>
+        <td><span class="dy-hd dy-hd-${x.hanh_dong === 'Xóa' ? 'xoa' : x.hanh_dong === 'Thêm' ? 'them' : 'sua'}">${esc(x.hanh_dong)}</span></td>
+        <td class="dy-nd">${String(x.noi_dung || '').split(' | ').map((d, i) => `<div class="${i ? 'dy-diff' : ''}">${esc(d)}</div>`).join('')}${x.loi ? `<div class="small dy-loi">⚠ ${esc(x.loi)}</div>` : ''}</td>
+        <td class="num">${x.so_tien == null ? '' : money(x.so_tien)}</td><td class="dy-btns">${dyNut(x)}</td></tr>`).join('')}</tbody></table></div></details>`;
+  }
+}
+window.addEventListener('bks-cho-duyet', (e) => { dyToast('⏳ ' + (e.detail?.thong_bao || 'Đã gửi duyệt')); DY.nhanLuc = 0; setTimeout(() => { dyPanel(); dyPoll(); }, 300); });
+document.addEventListener('click', (e) => {
+  const h = e.target.closest('[data-dyhuy]'); if (h) { e.preventDefault(); return dyHuy([Number(h.dataset.dyhuy)]); }
+  if (e.target.closest('#tab-duyet')) return;
+  const ok = e.target.closest('.dy-panel [data-dyok]'); if (ok) return dyXuLy([Number(ok.dataset.dyok)], 'duyet');
+  const no = e.target.closest('.dy-panel [data-dyno]'); if (no) return dyXuLy([Number(no.dataset.dyno)], 'tu_choi');
+});
 $('#tab-duyet')?.addEventListener('click', (e) => {
   const t = e.target.closest('#dy-tt button[data-tt]');
   if (t) { DY.tt = t.dataset.tt; DY.trang = 0; $$('#dy-tt button').forEach((b) => b.classList.toggle('on', b === t)); return loadDuyet(); }
@@ -2712,3 +2764,7 @@ $('#tab-duyet')?.addEventListener('change', (e) => {
   if (e.target.matches('[data-dyck]')) dyChon();
 });
 $('#dy-q')?.addEventListener('input', (e) => { clearTimeout(DY.tq); DY.tq = setTimeout(() => { DY.q = e.target.value.trim(); DY.trang = 0; loadDuyet(); }, 300); });
+// Mục "Chờ duyệt" cập nhật mỗi khi tải lại số liệu Doanh thu / Chi phí (đổi dự án, lưu, xóa…)
+{ const lr = loadRevenue, lc = loadCost;
+  loadRevenue = async function (...a) { const r = await lr.apply(this, a); dyPanel(); return r; };
+  loadCost = async function (...a) { const r = await lc.apply(this, a); dyPanel(); return r; }; }

@@ -17,6 +17,8 @@ async function api(url, opts = {}) {
   if (res.status === 204) return null;
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error((body.errors || ['Lỗi ' + res.status]).join('\n'));
+  // Đã gửi duyệt (chưa ghi vào số liệu): báo cho trang biết để hiện thông báo + mục "Chờ duyệt"
+  if (res.status === 202 && body && body.cho_duyet) { try { window.dispatchEvent(new CustomEvent('bks-cho-duyet', { detail: body })); } catch { /* trình duyệt cũ */ } }
   return body;
 }
 

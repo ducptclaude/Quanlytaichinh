@@ -3161,3 +3161,16 @@ tr.dy-cho > td:first-child { box-shadow: inset 3px 0 0 #eda100; }
 :root[data-theme="dark"] .dy-lydo { color: #ffb0b3; }
 @media (max-width: 760px) { .dy-act { margin-left: 0; width: 100%; } .dy-act button { flex: 1; } .dy-nd { min-width: 0; } }
 @media print { .dy-nhan, .dy-toast { display: none !important; } }
+/* Mục "Chờ duyệt" trong Nhập liệu – nội dung chưa tính vào tổng */
+.dy-panel { margin: 10px 0 4px; border: 1px solid #f0c36d; border-left: 4px solid #e0a32e; border-radius: 12px; background: #fffaf0; }
+.dy-panel summary { cursor: pointer; padding: 10px 14px; font-size: 14px; color: #8a5a00; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.dy-panel .dy-p-note { font-size: 12px; color: #a0711a; font-weight: 500; }
+.dy-panel .table-wrap { margin: 0 10px 10px; }
+.dy-p-table td, .dy-p-table th { padding: 6px 8px; vertical-align: middle; font-size: 13px; }
+.dy-p-table .dy-nd { min-width: 240px; }
+.dy-loi { color: #b91c1c; margin-top: 3px; }
+.dy-btns button + button { margin-left: 4px; }
+.st-tam-tinh.st { opacity: .85; }
+:root[data-theme="dark"] .dy-panel { background: rgba(224,163,46,.08); border-color: rgba(240,195,109,.35); }
+:root[data-theme="dark"] .dy-panel summary { color: #f3c870; } :root[data-theme="dark"] .dy-panel .dy-p-note { color: #e2b765; }
+:root[data-theme="dark"] .dy-loi { color: #fca5a5; }

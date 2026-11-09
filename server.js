@@ -40,7 +40,17 @@ const SETUP_TOKEN = (process.env.SETUP_TOKEN || '').trim();
 app.set('trust proxy', 1); // Railway đứng sau proxy HTTPS
 app.disable('x-powered-by');
 app.use(security.headers);   // header bảo mật (CSP, HSTS, chặn iframe...)
-app.use(security.rateLimit); // giới hạn tần suất theo IP, vượt ngưỡng chặn tạm thời
+// Yêu cầu nội bộ khi DUYỆT: máy chủ tự gửi lại yêu cầu gốc của người nhập tới chính nó (chỉ từ máy này, có mã bí mật sinh lúc khởi động)
+const NOI_BO = require('crypto').randomBytes(32).toString('hex');
+app.use((req, _res, next) => {
+  const k = req.get('X-Noi-Bo');
+  const ip = req.socket?.remoteAddress || '';
+  if (k && k.length === NOI_BO.length && require('crypto').timingSafeEqual(Buffer.from(k), Buffer.from(NOI_BO)) && /^(::1|127\.0\.0\.1|::ffff:127\.0\.0\.1)$/.test(ip)) {
+    req.noiBo = Number(req.get('X-Noi-Bo-User')) || 0;
+  }
+  next();
+});
+app.use((req, res, next) => (req.noiBo !== undefined ? next() : security.rateLimit(req, res, next))); // giới hạn tần suất theo IP, vượt ngưỡng chặn tạm thời
 app.use(express.json({ limit: '1mb' }));
 
 // Trạng thái kết nối CSDL (web vẫn chạy khi CSDL lỗi để hiển thị nguyên nhân)
@@ -74,6 +84,11 @@ app.use((req, res, next) => {
   res.status(503).type('html').send(dbErrorPage());
 });
 app.use(auth.loadUser);
+// Yêu cầu nội bộ khi duyệt: chạy dưới tên người nhập (nhật ký ghi đúng người nhập)
+app.use((req, _res, next) => {
+  if (req.noiBo === undefined) return next();
+  store.getUserById(req.noiBo).then((u) => { if (u) req.user = { ...u, active: true }; next(); }).catch(next);
+});
 
 const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 const view = (name) => path.join(__dirname, 'views', name);
@@ -236,11 +251,104 @@ api.use((req, res, next) => (req.user?.role === 'it' && !IT_DUOC_VAO.test(req.pa
 const CHI_XEM_DUOC_GHI = /^\/auth\/(logout|away|change-password)$/;
 api.use((req, res, next) => (req.user?.role === 'viewer' && !['GET', 'HEAD'].includes(req.method) && !CHI_XEM_DUOC_GHI.test(req.path)
   ? bad(res, 'Vai trò Chỉ xem không được thay đổi hoặc xuất dữ liệu', 403) : next()));
-// Phê duyệt: mọi lần thêm / sửa / xóa số liệu (trừ tài khoản, cài đặt, ảnh…) tạo 1 hồ sơ. Quản trị / Lãnh đạo nhập -> tự duyệt.
-// Số liệu tính ngay vào báo cáo (không chờ duyệt); bị từ chối thì giữ dòng + lý do để người nhập sửa lại (lần sửa sau tạo hồ sơ mới).
+// ===================== PHÊ DUYỆT (V02.09.11.26) =====================
+// Tiền · giá trị hợp đồng · chốt TĐ · số dư đầu kỳ: người nhập KHÔNG có quyền duyệt -> yêu cầu được GIỮ ở hồ sơ "Chờ duyệt",
+// CHƯA ghi vào số liệu (không tính vào tổng). Quản trị / Lãnh đạo duyệt -> máy chủ ghi đúng yêu cầu gốc; từ chối / hủy -> không ghi gì.
+// Sửa / xóa nội dung đã duyệt: số cũ vẫn tính cho tới khi bản sửa / xóa được duyệt. Quản trị / Lãnh đạo nhập -> ghi ngay (tự duyệt).
+const laDuyet = (req) => QUYEN.duyet.includes(req.user.role);
+const Q_ANY = [...new Set([...QUYEN.hd, ...QUYEN.tien, ...QUYEN.ns])];
+// [phương thức, đường dẫn, đối tượng, loại bản ghi, cách tìm dự án ('p' = id dự án trong đường dẫn, 'tp' = id HĐ thầu phụ, 'r' = id bản ghi, '' = không), quyền]
+const DUYET_TRUOC = [
+  ['POST', /^\/du-an\/(\d+)\/doanh-thu$/, 'Doanh thu', 'doanh_thu', 'p', QUYEN.hd],
+  ['PUT', /^\/doanh-thu\/(\d+)$/, 'Doanh thu', 'doanh_thu', 'r', QUYEN.hd],
+  ['DELETE', /^\/doanh-thu\/(\d+)$/, 'Doanh thu', 'doanh_thu', 'r', QUYEN.hd],
+  ['POST', /^\/du-an\/(\d+)\/tien-ve$/, 'Tiền về', 'tien_ve', 'p', QUYEN.tien],
+  ['PUT', /^\/tien-ve\/(\d+)$/, 'Tiền về', 'tien_ve', 'r', QUYEN.tien],
+  ['DELETE', /^\/tien-ve\/(\d+)$/, 'Tiền về', 'tien_ve', 'r', QUYEN.tien],
+  ['POST', /^\/du-an\/(\d+)\/chi-phi$/, 'Chi phí', 'chi_phi', 'p', QUYEN.tien],
+  ['PUT', /^\/chi-phi\/(\d+)$/, 'Chi phí', 'chi_phi', 'r', QUYEN.tien],
+  ['DELETE', /^\/chi-phi\/(\d+)$/, 'Chi phí', 'chi_phi', 'r', QUYEN.tien],
+  ['POST', /^\/du-an\/(\d+)\/thau-phu$/, 'Thầu phụ', 'thau_phu', 'p', QUYEN.hd],
+  ['PUT', /^\/thau-phu\/(\d+)$/, 'Thầu phụ', 'thau_phu', 'r', QUYEN.hd],
+  ['DELETE', /^\/thau-phu\/(\d+)$/, 'Thầu phụ', 'thau_phu', 'r', QUYEN.hd],
+  ['POST', /^\/thau-phu\/(\d+)\/hd-pl$/, 'Thầu phụ – HĐ/PL', 'tp_hd_pl', 'tp', QUYEN.hd],
+  ['PUT', /^\/tp-hd-pl\/(\d+)$/, 'Thầu phụ – HĐ/PL', 'tp_hd_pl', 'r', QUYEN.hd],
+  ['DELETE', /^\/tp-hd-pl\/(\d+)$/, 'Thầu phụ – HĐ/PL', 'tp_hd_pl', 'r', QUYEN.hd],
+  ['POST', /^\/thau-phu\/(\d+)\/thanh-toan$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'tp', QUYEN.tien],
+  ['PUT', /^\/tp-thanh-toan\/(\d+)$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'r', QUYEN.tien],
+  ['DELETE', /^\/tp-thanh-toan\/(\d+)$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'r', QUYEN.tien],
+  ['PUT', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
+  ['DELETE', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
+  ['PUT', /^\/du-an\/(\d+)\/bh$/, 'DT-CP dự kiến · BH/Khác', 'bh', 'p', Q_ANY],
+  ['PUT', /^\/so-du-dau-ky$/, 'Số dư đầu kỳ', 'sddk', '', ['admin', 'ke_toan']],
+];
+const KIEM = { // kiểm tra dữ liệu ngay lúc gửi (lỗi báo ngay cho người nhập, không phải chờ tới lúc duyệt)
+  doanh_thu: (b, m, cu) => validateRevenue(m === 'PUT' ? { ...b, loai: cu?.loai } : b), tien_ve: (b) => validateTienVe(b),
+  chi_phi: (b, m) => validateCost(m === 'POST' ? { ...b, _new: true } : b),
+  thau_phu: (b, m) => (m === 'POST' ? (() => { const t = validateTp(b), l = validateTpLine({ ...(b.hd || {}), ma_loai: 'HĐ' });
+    return { data: { ...t.data, gia_tri: l.data.gia_tri, ngay: l.data.ngay }, errors: [...t.errors, ...l.errors] }; })() : validateTp(b)),
+  tp_hd_pl: (b) => validateTpLine(b), tp_thanh_toan: (b) => validateTpPay(b),
+};
+const soTien = (x) => { const n = Number(String(x ?? '').replace(/[.,\s]/g, '')); return Number.isFinite(n) && String(x ?? '').trim() !== '' ? n : null; };
+api.use(wrap(async (req, res, next) => {
+  if (req.noiBo !== undefined || !req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
+  const r = DUYET_TRUOC.find(([m, re]) => m === req.method && re.test(req.path));
+  if (!r || laDuyet(req)) return next(); // không thuộc diện duyệt / người có quyền duyệt -> ghi ngay
+  const [method, re, doi_tuong, kind, tim, roles] = r;
+  if (!roles.includes(req.user.role)) return bad(res, 'Bạn không có quyền thực hiện thao tác này', 403);
+  const m = req.path.match(re), id = Number(m[1]) || 0, body = { ...(req.body || {}) };
+  let du_an_id = null, before = null, ban_ghi_id = null;
+  if (tim === 'p') { const p = await store.getProject(id); if (!p) return bad(res, 'Không tìm thấy dự án', 404); du_an_id = p.id; }
+  if (tim === 'tp') { const t = await store.getTp(id); if (!t) return bad(res, 'Không tìm thấy hợp đồng đầu vào', 404); du_an_id = t.du_an_id; }
+  if (tim === 'r') {
+    before = await store.auditInfo(kind, id);
+    if (!before) return bad(res, 'Không tìm thấy dòng số liệu (có thể đã bị xóa)', 404);
+    ban_ghi_id = id;
+    du_an_id = (await store.listProjects()).find((p) => p.ma_du_an === before.ma_du_an)?.id || null;
+  }
+  if (kind === 'sddk') du_an_id = Number(body.du_an_id) || null;
+  // Kiểm tra dữ liệu lúc gửi
+  let data = null;
+  if (method !== 'DELETE' && KIEM[kind]) { const v = KIEM[kind](body, method, before); if (v.errors.length) return bad(res, v.errors); data = v.data; }
+  // Xóa HĐ / PL, HĐ thầu phụ: kiểm tra Passcode NGAY lúc gửi (không lưu Passcode vào hồ sơ)
+  if (method === 'DELETE' && (kind === 'thau_phu' || kind === 'tp_hd_pl' || (kind === 'doanh_thu' && (await store.getRevenue(id))?.loai === 'hd'))) {
+    if (!(await requirePasscode(req, res))) return;
+  }
+  delete body.passcode;
+  // Nội dung hồ sơ: trước → sau
+  const hanh_dong = method === 'POST' ? 'Thêm' : method === 'DELETE' ? 'Xóa' : 'Sửa';
+  let noi_dung = '';
+  if (kind === 'td') noi_dung = method === 'DELETE' ? `Xóa số liệu TĐ${m[2]}` : `Chốt / sửa TĐ${m[2]}: DT ${audit.money(soTien(body.dt))} · CP ${audit.money(soTien(body.cp))}${body.ngay ? ' · ngày ' + String(body.ngay).split('-').reverse().join('/') : ''}`;
+  else if (kind === 'bh') noi_dung = ['DT-CP dự kiến / BH-Khác', body.ns_cp !== undefined && `DT-CP dự kiến: ${audit.money(soTien(body.ns_cp))}`, body.bh_khac !== undefined && `BH/Khác: ${audit.money(soTien(body.bh_khac))}`].filter(Boolean).join(' | ');
+  else if (kind === 'sddk') noi_dung = `${du_an_id ? 'Số dư đầu kỳ dự án' : 'Số dư đầu kỳ chung (công ty)'}: ${audit.money(soTien(body.so_tien))}`;
+  else if (method === 'POST') noi_dung = audit.describe(kind, { ...data, tp: data?.so_ma || '', hd: '', so_hieu: [data?.ma_loai, data?.so_ma || data?.so_hieu].filter(Boolean).join(' ') }) || doi_tuong;
+  else if (method === 'PUT') { const d = audit.diff(kind, before, { ...before, ...data }); noi_dung = audit.describe(kind, before) + (d ? ` | ${d}` : ''); }
+  else noi_dung = audit.describe(kind, before);
+  if (kind === 'thau_phu' && method === 'POST' && data?.gia_tri !== undefined) noi_dung += ` · HĐ gốc ${audit.money(data.gia_tri)}`;
+  const tien = method === 'DELETE' ? (before?.gia_tri ?? before?.so_tien ?? null)
+    : kind === 'td' ? soTien(body.cp) : kind === 'sddk' ? soTien(body.so_tien) : kind === 'bh' ? soTien(body.bh_khac)
+      : (data?.gia_tri ?? data?.so_tien ?? null);
+  const du_an = du_an_id ? (await store.listProjects()).find((p) => p.id === du_an_id)?.ma_du_an || '' : before?.ma_du_an || '';
+  const hs = await store.addDuyet({ hanh_dong, doi_tuong, loai: kind, ban_ghi_id, du_an, du_an_id, noi_dung: noi_dung.slice(0, 1000), so_tien: tien === null ? null : Math.round(tien),
+    nguoi_nhap_id: req.user.id, nguoi_nhap: req.user.username, ho_ten_nhap: req.user.full_name || '', yeu_cau: { method, path: req.path, body } });
+  audit.log(req, 'Gửi duyệt', doi_tuong, `${hanh_dong} · ${noi_dung}`.slice(0, 1000), { du_an });
+  res.status(202).json({ cho_duyet: true, id: hs.id, thong_bao: `Đã gửi duyệt: ${hanh_dong.toLowerCase()} ${doi_tuong.toLowerCase()}. Số liệu chưa tính vào tổng cho tới khi Quản trị / Lãnh đạo duyệt.` });
+}));
+// Ghi lại yêu cầu gốc khi duyệt (gửi tới chính máy chủ, dưới tên người nhập)
+async function ghiYeuCau(hs, approver) {
+  const y = typeof hs.yeu_cau === 'string' ? JSON.parse(hs.yeu_cau) : hs.yeu_cau;
+  const u = hs.nguoi_nhap_id && (await store.getUserById(hs.nguoi_nhap_id));
+  const uid = u && u.active !== false ? u.id : approver.id; // người nhập đã bị khóa -> ghi dưới tên người duyệt
+  const r = await fetch(`http://127.0.0.1:${PORT}/api${y.path}`, { method: y.method,
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch', 'X-Noi-Bo': NOI_BO, 'X-Noi-Bo-User': String(uid) },
+    body: y.method === 'GET' ? undefined : JSON.stringify(y.body || {}) });
+  const b = await r.json().catch(() => ({}));
+  return r.ok ? { ok: true, id: Number(b?.id) || null } : { ok: false, loi: (b.errors || ['Lỗi ' + r.status]).join('; ') };
+}
+// Hồ sơ tự động cho thao tác KHÔNG phải chờ (Quản trị / Lãnh đạo tự nhập, thông tin dự án…) – để có lịch sử. Không tạo khi đang ghi lúc duyệt.
 const KHONG_DUYET = new Set(['Tài khoản', 'Cài đặt', 'Liên hệ', 'Mục tiêu năm', 'Dữ liệu mẫu', 'Cá nhân', 'Ảnh công trình']);
 audit.onGhi(({ req, hanh_dong, doi_tuong, kind, ban_ghi_id, du_an, noi_dung }) => {
-  if (!req.user || KHONG_DUYET.has(doi_tuong)) return;
+  if (!req.user || req.noiBo !== undefined || KHONG_DUYET.has(doi_tuong)) return;
   const tu = QUYEN.duyet.includes(req.user.role);
   store.addDuyet({ hanh_dong, doi_tuong, loai: kind || '', ban_ghi_id, du_an, noi_dung, nguoi_nhap_id: req.user.id, nguoi_nhap: req.user.username, ho_ten_nhap: req.user.full_name || '',
     ...(tu ? { trang_thai: 'duyet', nguoi_duyet_id: req.user.id, nguoi_duyet: req.user.full_name || req.user.username, ly_do: 'Tự duyệt (người nhập có quyền duyệt)' } : {}) })
@@ -249,7 +357,6 @@ audit.onGhi(({ req, hanh_dong, doi_tuong, kind, ban_ghi_id, du_an, noi_dung }) =
 api.use(audit.middleware); // ghi nhật ký mọi thao tác thêm / sửa / xóa
 
 // ---------- Phê duyệt ----------
-const laDuyet = (req) => QUYEN.duyet.includes(req.user.role);
 // Số hồ sơ để hiện chuông / số trên tab: người duyệt = số chờ duyệt; người nhập = số của mình bị từ chối trong 7 ngày, số đang chờ
 api.get('/duyet/dem', quyen('nop'), wrap(async (req, res) => {
   const out = { la_duyet: laDuyet(req), cua_toi_cho: await store.countDuyet('cho', req.user.id), cua_toi_tu_choi: await store.countDuyet('tu_choi', req.user.id, 7) };
@@ -258,9 +365,12 @@ api.get('/duyet/dem', quyen('nop'), wrap(async (req, res) => {
 }));
 // Danh sách: ?tt=cho|duyet|tu_choi (trống = tất cả) &q= &trang= ; người nhập chỉ xem hồ sơ của mình
 api.get('/duyet', quyen('nop'), wrap(async (req, res) => {
-  const tt = ['cho', 'duyet', 'tu_choi'].includes(req.query.tt) ? req.query.tt : '';
+  const tt = ['cho', 'duyet', 'tu_choi', 'huy'].includes(req.query.tt) ? req.query.tt : '';
   const trang = Math.max(0, Math.min(1000, Number(req.query.trang) || 0)), LIM = 50;
-  const r = await store.listDuyet({ tt, q: String(req.query.q || '').trim().slice(0, 100), nguoi_nhap_id: laDuyet(req) && req.query.cua_toi !== '1' ? null : req.user.id, limit: LIM, offset: trang * LIM });
+  const du_an_id = parseId(req.query.du_an); // mục "Chờ duyệt" trong Nhập liệu: mọi hồ sơ của dự án đó
+  const r = await store.listDuyet({ tt, du_an_id, q: String(req.query.q || '').trim().slice(0, 100),
+    nguoi_nhap_id: du_an_id || (laDuyet(req) && req.query.cua_toi !== '1') ? null : req.user.id, limit: LIM, offset: trang * LIM });
+  r.rows = r.rows.map(({ yeu_cau, ...x }) => x); // không trả yêu cầu gốc ra trình duyệt
   res.json({ ...r, trang, moi_trang: LIM, la_duyet: laDuyet(req) });
 }));
 // Nhãn "Chờ duyệt" / "Bị từ chối" trên các dòng số liệu ở trang nhập liệu
@@ -272,12 +382,41 @@ api.post('/duyet/xu-ly', quyen('duyet'), wrap(async (req, res) => {
   const ly_do = String(req.body?.ly_do || '').replace(/[<>]/g, '').trim().slice(0, 500);
   if (!ids.length || !hd) return bad(res, 'Chưa chọn hồ sơ hoặc thao tác không hợp lệ');
   if (hd === 'tu_choi' && !ly_do) return bad(res, 'Từ chối cần ghi lý do');
-  const xong = await store.xuLyDuyet(ids, { trang_thai: hd, nguoi_duyet_id: req.user.id, nguoi_duyet: req.user.full_name || req.user.username, ly_do });
+  const ten = req.user.full_name || req.user.username, xong = [], loi = [];
+  for (const id of ids.sort((a, b) => a - b)) { // theo thứ tự gửi: thêm trước, sửa / xóa sau
+    const hs = await store.getDuyet(id);
+    if (!hs || hs.trang_thai !== 'cho') continue;
+    if (hd === 'duyet' && hs.yeu_cau) { // ghi vào số liệu
+      const g = await ghiYeuCau(hs, req.user).catch((e) => ({ ok: false, loi: e.message }));
+      if (!g.ok) { await store.capNhatDuyet(id, { loi: g.loi.slice(0, 500) }); loi.push(`${hs.hanh_dong} ${hs.doi_tuong}${hs.du_an ? ' · ' + hs.du_an : ''}: ${g.loi}`); continue; }
+      const r2 = await store.capNhatDuyet(id, { trang_thai: 'duyet', ban_ghi_id: hs.hanh_dong === 'Thêm' ? g.id : null, nguoi_duyet_id: req.user.id, nguoi_duyet: ten, ly_do, loi: '' });
+      if (r2) xong.push(r2);
+    } else {
+      const r2 = await store.capNhatDuyet(id, { trang_thai: hd, nguoi_duyet_id: req.user.id, nguoi_duyet: ten, ly_do });
+      if (r2) xong.push(r2);
+    }
+  }
   for (const r of xong.slice(0, 200)) {
     audit.log(req, hd === 'duyet' ? 'Duyệt' : 'Từ chối', 'Phê duyệt', `${r.hanh_dong} ${r.doi_tuong}${r.du_an ? ' · ' + r.du_an : ''} (người nhập ${r.ho_ten_nhap || r.nguoi_nhap})${ly_do ? ' | Lý do: ' + ly_do : ''}`);
   }
   if (xong.length > 200) audit.log(req, hd === 'duyet' ? 'Duyệt' : 'Từ chối', 'Phê duyệt', `… và ${xong.length - 200} hồ sơ khác`);
-  res.json({ ok: true, so: xong.length });
+  res.json({ ok: !loi.length, so: xong.length, loi });
+}));
+// Hủy hồ sơ còn chờ: người nhập tự hủy nội dung nhập sai (chưa duyệt -> chưa ghi gì vào số liệu) hoặc người duyệt hủy. Ghi nhật ký.
+api.post('/duyet/huy', quyen('nop'), wrap(async (req, res) => {
+  const ids = [...new Set((Array.isArray(req.body?.ids) ? req.body.ids : []).map(Number).filter((x) => Number.isInteger(x) && x > 0))].slice(0, 500);
+  if (!ids.length) return bad(res, 'Chưa chọn hồ sơ');
+  let so = 0;
+  for (const id of ids) {
+    const hs = await store.getDuyet(id);
+    if (!hs || hs.trang_thai !== 'cho') continue;
+    if (hs.nguoi_nhap_id !== req.user.id && !laDuyet(req)) return bad(res, 'Chỉ người nhập hoặc người duyệt được hủy hồ sơ này', 403);
+    const tu = hs.nguoi_nhap_id === req.user.id;
+    const r = await store.capNhatDuyet(id, { trang_thai: 'huy', nguoi_duyet_id: req.user.id, nguoi_duyet: req.user.full_name || req.user.username,
+      ly_do: tu ? 'Người nhập tự hủy (chưa duyệt, chưa tính vào số liệu)' : 'Người duyệt hủy' });
+    if (r) { so++; audit.log(req, 'Hủy gửi duyệt', 'Phê duyệt', `${hs.hanh_dong} ${hs.doi_tuong}${hs.du_an ? ' · ' + hs.du_an : ''} · ${hs.noi_dung}`.slice(0, 1000), { du_an: hs.du_an }); }
+  }
+  res.json({ ok: true, so });
 }));
 
 // ---------- Nhật ký hoạt động ----------
@@ -348,6 +487,7 @@ function passcodeLocked(uid) {
 }
 // Kiểm tra Passcode xóa (gửi lỗi và trả false nếu không hợp lệ)
 async function requirePasscode(req, res) {
+  if (req.noiBo !== undefined) return true; // ghi khi duyệt: Passcode đã kiểm tra lúc người nhập gửi
   const stored = (await store.getSettings())[PASSCODE_KEY];
   if (!stored) { bad(res, 'Quản trị chưa đặt Passcode xóa (tab Cài đặt). Chưa thể xóa.', 403); return false; }
   const wait = passcodeLocked(req.user.id);
