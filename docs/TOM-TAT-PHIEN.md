@@ -2,6 +2,16 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.09.11.26 – Nhập theo dòng thời gian: TĐ2 nhiều đợt (mỗi phụ lục 1 đợt), thay 3 ô TĐ của V07
+- Người dùng: "TĐ2 điều chỉnh có nhiều đợt, sắp xếp nhập khoa học, logic". Mỗi dòng HĐ / PL (doanh thu CĐT và HĐ đầu vào) chỉ nhập: Loại · **Thuộc TĐ**
+  (tự gợi ý HĐ -> TĐ1, PL -> TĐ2; sửa tay: PL ký cùng HĐ -> TĐ1, HĐ ký thêm -> TĐ2, phát sinh quyết toán -> TĐ3) · Ngày · Giá trị phát sinh (+/−) · VAT.
+- Công thức: TĐk = tổng các dòng thuộc TĐ1..k; TĐ3: HĐ đã có hồ sơ quyết toán -> giá trị quyết toán (doanh thu) / HT/QT (HĐ đầu vào), chưa có -> tổng mọi dòng.
+  Mục IV cột TĐ2 = từng đợt (PL01, PL02…) + "HĐ mới". Dòng nhập theo 3 ô TĐ ở V07 vẫn đọc đúng (tương thích), sửa lại thì chuyển sang cách mới.
+- Kho dữ liệu: THÊM cột `td` vào `doanh_thu` (HĐ đầu vào đã có `td`). Cột `gt_td1..3` giữ lại (không dùng cho dòng mới).
+- Bảng Doanh thu mục 1: trong mỗi HĐ xếp theo TĐ -> ngày -> số PL; nhãn "TĐ1 · Ký HĐ" / "TĐ2 · Đợt 1, 2…" / "TĐ2 · HĐ ký thêm" / "TĐ3 · Quyết toán";
+  giá trị đợt có dấu +/− và lũy kế "→" sau mỗi đợt; dòng Cộng ghi "TĐ1 → TĐ2 → TĐ3" (TĐ3 = hồ sơ quyết toán nếu có). Hộp HĐ thầu phụ: cột Thuộc TĐ + Giá trị, TỔNG có "TĐ1 → TĐ2 → TĐ3".
+- Kiểm tra: kịch bản nhiều đợt 12/12 ĐẠT; tương thích 3 ô TĐ 15/15; duyệt 28/28; tester 4.635 ĐẠT 0 LỖI (bộ nhớ tạm + PostgreSQL); dữ liệu cũ giống hệt bản gốc; máy tính + iPhone 13 không tràn.
+
 ## V07.09.11.26 – Doanh thu + HĐ đầu vào: 3 ô giá trị TĐ1 / TĐ2 / TĐ3 nhập tay (thay cho HĐ = TĐ1, PL = TĐ2)
 - Mỗi dòng HĐ / PL (doanh thu với CĐT và HĐ đầu vào: thầu phụ, vật tư, nhân công, MMTB) có 3 ô (trước VAT): TĐ1 (trống = 0) · TĐ2 (trống = TĐ1) ·
   TĐ3 (trống = quyết toán: doanh thu theo hồ sơ QT của HĐ, HĐ đầu vào theo giá trị HT/QT; chưa có thì = TĐ2). Nhập tay TĐ3 được ưu tiên.

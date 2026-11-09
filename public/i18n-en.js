@@ -1329,7 +1329,17 @@ window.BKS_EN = {
 "Giá trị tại thời điểm ký HĐ (trước VAT). Phụ lục ký sau: để trống = 0": "Value at contract signing (excl. VAT). Addendum signed later: leave blank = 0",
 "Giá trị sau điều chỉnh (trước VAT). Để trống = bằng TĐ1": "Value after variations (excl. VAT). Blank = same as M1",
 "Giá trị quyết toán (trước VAT). Để trống = theo hồ sơ quyết toán đã nhập ở mục 2, chưa có thì bằng TĐ2": "Final account value (excl. VAT). Blank = per final account record in section 2, otherwise same as M2",
-"Giá trị hiện hành = TĐ mới nhất có số": "Current value = latest milestone with a value"
+"Giá trị hiện hành = TĐ mới nhất có số": "Current value = latest milestone with a value",
+"TĐ2 – Điều chỉnh (đợt)": "M2 – Variation (round)",
+"TĐ1 · Ký HĐ": "M1 · Contract signed",
+"TĐ3 · Quyết toán": "M3 · Final account",
+"TĐ2 · HĐ ký thêm": "M2 · Additional contract",
+"0 · PL giảm: nhập số âm": "0 · decreasing addendum: negative",
+"0 · giảm: số âm": "0 · decrease: negative",
+"(TĐ3 = hồ sơ quyết toán ở mục 2)": "(M3 = final account record in section 2)",
+"TĐ1: HĐ gốc / PL ký cùng HĐ · TĐ2: mỗi phụ lục điều chỉnh là 1 đợt (Đợt 1, 2…) hoặc HĐ ký thêm · TĐ3: phát sinh ở giai đoạn quyết toán": "M1: original contract / addendum signed with it · M2: each variation addendum is one round (Round 1, 2…) or an additional contract · M3: arising at final account stage",
+"TĐ1 ký HĐ · TĐ2 điều chỉnh (mỗi phụ lục 1 đợt) / HĐ ký thêm · TĐ3 quyết toán": "M1 contract signed · M2 variations (one addendum per round) / additional contract · M3 final account",
+"Giá trị HĐ lũy kế sau dòng này (trước VAT)": "Cumulative contract value after this line (excl. VAT)"
 },
 "patterns": [
 [
@@ -2105,6 +2115,10 @@ window.BKS_EN = {
 "M1 {} · M2 {} · M3 {}"
 ],
 [
+"TĐ1 {} → TĐ2 {} → TĐ3 {}",
+"M1 {} → M2 {} → M3 {}"
+],
+[
 "✓ Đã duyệt {} hồ sơ",
 "✓ Approved {} submissions"
 ],
@@ -2451,6 +2465,10 @@ window.BKS_EN = {
 [
 "Chi phí TĐ{}",
 "Cost M{}"
+],
+[
+"TĐ2 · Đợt {}",
+"M2 · Round {}"
 ],
 [
 "+ Chốt TĐ{}",
