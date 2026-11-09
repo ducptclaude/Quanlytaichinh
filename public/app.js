@@ -2601,7 +2601,9 @@ function duyetInit() {
     $('#dy-sub').textContent = 'Các lần thêm / sửa / xóa số liệu bạn đã gửi và kết quả duyệt. Số chờ duyệt CHƯA tính vào tổng. Nhập sai khi chưa duyệt: bấm Hủy (không cần duyệt, có ghi nhật ký). Bị từ chối: nhập lại.';
     $('#dy-act').hidden = true; $('#dy-mine-wrap').hidden = true; $('#dy-all').hidden = true;
   }
-  dyPoll(); setInterval(dyPoll, 30000);
+  dyPoll(); setInterval(dyPoll, 15000); // dự phòng khi kênh tức thì bị chặn
+  dyKenhMo();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { DY.nhanLuc = 0; dyPoll(); dyPanel(); } });
   new MutationObserver(() => { clearTimeout(DY.t); DY.t = setTimeout(dyGanNhan, 120); }).observe($('main'), { childList: true, subtree: true });
 }
 async function dyPoll() {
@@ -2622,6 +2624,24 @@ async function dyPoll() {
     DY.dem = so;
     if (Date.now() - (DY.nhanLuc || 0) > 25000) { DY.nhanLuc = Date.now(); DY.nhan = new Map((await api('/api/duyet/nhan', AUTO)).map((x) => [x.loai + ':' + x.ban_ghi_id, x])); dyGanNhan(true); }
   } catch {}
+}
+// Nhận thông báo tức thì từ máy chủ: có hồ sơ mới / được duyệt / từ chối / hủy -> cập nhật số, mục Chờ duyệt, số liệu trang đang mở
+function dyKenhMo() {
+  if (!window.EventSource) return;
+  let t = 0;
+  const es = new EventSource('/api/duyet/su-kien');
+  es.addEventListener('duyet', (e) => {
+    let d = {}; try { d = JSON.parse(e.data); } catch { /* bỏ qua */ }
+    clearTimeout(t);
+    t = setTimeout(() => { // gộp nhiều thông báo liền nhau
+      DY.nhanLuc = 0; dyPoll(); dyPanel();
+      if (!$('#tab-duyet').hidden) loadDuyet(true);
+      if (d.uid !== ME?.id && (d.ghi || d.loai === 'ghi')) { // số liệu vừa thay đổi ở máy khác -> tải lại trang nhập liệu đang mở
+        const tab = ['revenue', 'cost'].find((x) => !$('#tab-' + x).hidden && !document.querySelector('#tab-' + x + ' [data-dirty]'));
+        if (tab && loaders[tab]) loaders[tab]();
+      }
+    }, 250);
+  });
 }
 function dyToast(msg) {
   document.querySelectorAll('.dy-toast').forEach((x) => x.remove()); // chỉ giữ thông báo mới nhất, không chồng nhau

@@ -332,8 +332,15 @@ api.use(wrap(async (req, res, next) => {
   const hs = await store.addDuyet({ hanh_dong, doi_tuong, loai: kind, ban_ghi_id, du_an, du_an_id, noi_dung: noi_dung.slice(0, 1000), so_tien: tien === null ? null : Math.round(tien),
     nguoi_nhap_id: req.user.id, nguoi_nhap: req.user.username, ho_ten_nhap: req.user.full_name || '', yeu_cau: { method, path: req.path, body } });
   audit.log(req, 'Gửi duyệt', doi_tuong, `${hanh_dong} · ${noi_dung}`.slice(0, 1000), { du_an });
+  dyBao({ loai: 'gui', uid: req.user.id, du_an_id });
   res.status(202).json({ cho_duyet: true, id: hs.id, thong_bao: `Đã gửi duyệt: ${hanh_dong.toLowerCase()} ${doi_tuong.toLowerCase()}. Số liệu chưa tính vào tổng cho tới khi Quản trị / Lãnh đạo duyệt.` });
 }));
+// Kênh đẩy thông báo tức thì (Server-Sent Events): có hồ sơ mới / duyệt / từ chối / hủy -> mọi máy đang mở web cập nhật ngay, không chờ 30 giây
+const dyKenh = new Set();
+function dyBao(d) {
+  const msg = `event: duyet\ndata: ${JSON.stringify({ ...d, t: Date.now() })}\n\n`;
+  for (const c of dyKenh) { try { c.write(msg); } catch { dyKenh.delete(c); } }
+}
 // Ghi lại yêu cầu gốc khi duyệt (gửi tới chính máy chủ, dưới tên người nhập)
 async function ghiYeuCau(hs, approver) {
   const y = typeof hs.yeu_cau === 'string' ? JSON.parse(hs.yeu_cau) : hs.yeu_cau;
@@ -348,6 +355,7 @@ async function ghiYeuCau(hs, approver) {
 // Hồ sơ tự động cho thao tác KHÔNG phải chờ (Quản trị / Lãnh đạo tự nhập, thông tin dự án…) – để có lịch sử. Không tạo khi đang ghi lúc duyệt.
 const KHONG_DUYET = new Set(['Tài khoản', 'Cài đặt', 'Liên hệ', 'Mục tiêu năm', 'Dữ liệu mẫu', 'Cá nhân', 'Ảnh công trình']);
 audit.onGhi(({ req, hanh_dong, doi_tuong, kind, ban_ghi_id, du_an, noi_dung }) => {
+  if (req.user && req.noiBo === undefined && !KHONG_DUYET.has(doi_tuong)) dyBao({ loai: 'ghi', uid: req.user.id, du_an });
   if (!req.user || req.noiBo !== undefined || KHONG_DUYET.has(doi_tuong)) return;
   const tu = QUYEN.duyet.includes(req.user.role);
   store.addDuyet({ hanh_dong, doi_tuong, loai: kind || '', ban_ghi_id, du_an, noi_dung, nguoi_nhap_id: req.user.id, nguoi_nhap: req.user.username, ho_ten_nhap: req.user.full_name || '',
@@ -400,8 +408,19 @@ api.post('/duyet/xu-ly', quyen('duyet'), wrap(async (req, res) => {
     audit.log(req, hd === 'duyet' ? 'Duyệt' : 'Từ chối', 'Phê duyệt', `${r.hanh_dong} ${r.doi_tuong}${r.du_an ? ' · ' + r.du_an : ''} (người nhập ${r.ho_ten_nhap || r.nguoi_nhap})${ly_do ? ' | Lý do: ' + ly_do : ''}`);
   }
   if (xong.length > 200) audit.log(req, hd === 'duyet' ? 'Duyệt' : 'Từ chối', 'Phê duyệt', `… và ${xong.length - 200} hồ sơ khác`);
+  if (xong.length || loi.length) dyBao({ loai: hd, uid: req.user.id, ghi: hd === 'duyet' && xong.length > 0 });
   res.json({ ok: !loi.length, so: xong.length, loi });
 }));
+// Kết nối nhận thông báo tức thì (trình duyệt tự nối lại khi rớt mạng); nhịp giữ kết nối 20 giây
+api.get('/duyet/su-kien', quyen('nop'), (req, res) => {
+  res.set({ 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no', Connection: 'keep-alive' });
+  res.flushHeaders?.();
+  res.write('retry: 3000\n\n');
+  if (dyKenh.size > 500) { res.end(); return; } // giới hạn số kết nối
+  dyKenh.add(res);
+  const nhip = setInterval(() => { try { res.write(': nhip\n\n'); } catch { /* đã đóng */ } }, 20000);
+  req.on('close', () => { clearInterval(nhip); dyKenh.delete(res); });
+});
 // Hủy hồ sơ còn chờ: người nhập tự hủy nội dung nhập sai (chưa duyệt -> chưa ghi gì vào số liệu) hoặc người duyệt hủy. Ghi nhật ký.
 api.post('/duyet/huy', quyen('nop'), wrap(async (req, res) => {
   const ids = [...new Set((Array.isArray(req.body?.ids) ? req.body.ids : []).map(Number).filter((x) => Number.isInteger(x) && x > 0))].slice(0, 500);
@@ -414,7 +433,7 @@ api.post('/duyet/huy', quyen('nop'), wrap(async (req, res) => {
     const tu = hs.nguoi_nhap_id === req.user.id;
     const r = await store.capNhatDuyet(id, { trang_thai: 'huy', nguoi_duyet_id: req.user.id, nguoi_duyet: req.user.full_name || req.user.username,
       ly_do: tu ? 'Người nhập tự hủy (chưa duyệt, chưa tính vào số liệu)' : 'Người duyệt hủy' });
-    if (r) { so++; audit.log(req, 'Hủy gửi duyệt', 'Phê duyệt', `${hs.hanh_dong} ${hs.doi_tuong}${hs.du_an ? ' · ' + hs.du_an : ''} · ${hs.noi_dung}`.slice(0, 1000), { du_an: hs.du_an }); }
+    if (r) { so++; dyBao({ loai: 'huy', uid: req.user.id }); audit.log(req, 'Hủy gửi duyệt', 'Phê duyệt', `${hs.hanh_dong} ${hs.doi_tuong}${hs.du_an ? ' · ' + hs.du_an : ''} · ${hs.noi_dung}`.slice(0, 1000), { du_an: hs.du_an }); }
   }
   res.json({ ok: true, so });
 }));

@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.09.11.26 – Duyệt: thông báo + đồng bộ tức thì
+- Máy chủ đẩy thông báo tức thì (Server-Sent Events, `GET /api/duyet/su-kien`, hàm `dyBao`): gửi duyệt / duyệt / từ chối / hủy / người duyệt ghi số liệu -> mọi máy đang mở cập nhật ngay
+  (số trên tab, thông báo nổi, mục Chờ duyệt, danh sách Duyệt; trang Doanh thu / Chi phí đang mở tự tải lại số liệu nếu không có dòng đang nhập dở). Dự phòng: kiểm tra lại mỗi 15 giây (trước 30) + khi quay lại cửa sổ.
+- Đo trên máy: người nhập gửi -> máy người duyệt hiện số sau ~0,3 giây; duyệt -> máy người nhập cập nhật số liệu sau ~0,3 giây.
+- Câu báo sau khi gửi (VD "Đã tạo HĐ thầu phụ…") đổi thành "⏳ Đã gửi duyệt: … – CHƯA tính vào tổng…" (khung vàng) khi nội dung đang chờ duyệt.
+- Kiểm tra: 28 tình huống duyệt 0 lỗi; tester 4.545 ĐẠT 0 LỖI.
+
 ## V01.09.11.26 – Duyệt TRƯỚC khi ghi: số chờ duyệt không tính vào tổng, tự hủy khi nhập sai
 - Người dùng chốt: phạm vi = Tiền (tiền về, thanh toán HĐ đầu vào, chi phí) + Giá trị HĐ (HĐ/PL/NT-QT CĐT, HĐ đầu vào + PL) + Chốt TĐ + Số dư đầu kỳ (+ DT-CP dự kiến/BH);
   người duyệt = Quản trị + Lãnh đạo (tự nhập = tự duyệt); sửa đã duyệt -> chờ duyệt, số cũ vẫn tính, lưu lịch sử.

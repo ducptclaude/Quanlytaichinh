@@ -3174,3 +3174,5 @@ tr.dy-cho > td:first-child { box-shadow: inset 3px 0 0 #eda100; }
 :root[data-theme="dark"] .dy-panel { background: rgba(224,163,46,.08); border-color: rgba(240,195,109,.35); }
 :root[data-theme="dark"] .dy-panel summary { color: #f3c870; } :root[data-theme="dark"] .dy-panel .dy-p-note { color: #e2b765; }
 :root[data-theme="dark"] .dy-loi { color: #fca5a5; }
+.msg.warn { color: #8a5a00; background: #fff6df; border: 1px solid #f0c36d; border-radius: 8px; padding: 6px 10px; }
+:root[data-theme="dark"] .msg.warn { color: #f3c870; background: rgba(224,163,46,.10); border-color: rgba(240,195,109,.35); }

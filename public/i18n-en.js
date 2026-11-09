@@ -1455,6 +1455,10 @@ window.BKS_EN = {
 "Contract (M1) – Variation (M2) – Final account (M3) · auto-calculated from data {}"
 ],
 [
+"⏳ Đã gửi duyệt: {} – CHƯA tính vào tổng cho tới khi Quản trị / Lãnh đạo duyệt.",
+"⏳ Submitted for approval: {} – NOT included in totals until approved by Admin / Management."
+],
+[
 "{} dự án · {} HĐ chủ đầu tư ({} đã QT) · {} HĐ thầu phụ ({} đã QT) · Đơn vị: tỷ đồng",
 "{} projects · {} Employer contracts ({} settled) · {} subcontracts ({} settled) · Unit: bn VND"
 ],

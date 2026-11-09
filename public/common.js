@@ -18,11 +18,16 @@ async function api(url, opts = {}) {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error((body.errors || ['Lỗi ' + res.status]).join('\n'));
   // Đã gửi duyệt (chưa ghi vào số liệu): báo cho trang biết để hiện thông báo + mục "Chờ duyệt"
-  if (res.status === 202 && body && body.cho_duyet) { try { window.dispatchEvent(new CustomEvent('bks-cho-duyet', { detail: body })); } catch { /* trình duyệt cũ */ } }
+  if (res.status === 202 && body && body.cho_duyet) { window.__choDuyetLuc = Date.now(); try { window.dispatchEvent(new CustomEvent('bks-cho-duyet', { detail: body })); } catch { /* trình duyệt cũ */ } }
   return body;
 }
 
 function showMsg(el, text, type = 'ok') {
+  // Vừa gửi duyệt (chưa ghi vào số liệu): đổi câu "Đã thêm / Đã tạo / Đã lưu…" cho đúng thực tế
+  if (type === 'ok' && text && /^Đã /.test(text) && Date.now() - (window.__choDuyetLuc || 0) < 3000) {
+    text = '⏳ Đã gửi duyệt: ' + text.replace(/^Đã /, '').replace(/\.?\s*Nhấp đúp.*$/, '') + ' – CHƯA tính vào tổng cho tới khi Quản trị / Lãnh đạo duyệt.';
+    type = 'warn';
+  }
   el.textContent = text;
   el.className = 'msg ' + (text ? type : '');
 }
