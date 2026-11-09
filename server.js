@@ -338,7 +338,7 @@ api.use(wrap(async (req, res, next) => {
 // Kênh đẩy thông báo tức thì (Server-Sent Events): có hồ sơ mới / duyệt / từ chối / hủy -> mọi máy đang mở web cập nhật ngay, không chờ 30 giây
 const dyKenh = new Set();
 function dyBao(d) {
-  const msg = `event: duyet\ndata: ${JSON.stringify({ ...d, t: Date.now() })}\n\n`;
+  const msg = `event: duyet\ndata: ${JSON.stringify({ ...d, t: Date.now() })}\n\n:${' '.repeat(512)}\n\n`; // đệm để không bị giữ lại ở máy chủ trung gian
   for (const c of dyKenh) { try { c.write(msg); } catch { dyKenh.delete(c); } }
 }
 // Ghi lại yêu cầu gốc khi duyệt (gửi tới chính máy chủ, dưới tên người nhập)
@@ -411,11 +411,18 @@ api.post('/duyet/xu-ly', quyen('duyet'), wrap(async (req, res) => {
   if (xong.length || loi.length) dyBao({ loai: hd, uid: req.user.id, ghi: hd === 'duyet' && xong.length > 0 });
   res.json({ ok: !loi.length, so: xong.length, loi });
 }));
+// Thử đường truyền tức thì (công khai, không chứa số liệu): 3 nhịp cách nhau 1 giây rồi đóng
+app.get('/su-kien-thu', (req, res) => {
+  res.set({ 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no' });
+  res.flushHeaders?.(); res.write(':' + ' '.repeat(2048) + '\n\n');
+  let n = 0; const t = setInterval(() => { res.write(`data: nhip ${++n} ${Date.now()}\n\n:${' '.repeat(512)}\n\n`); if (n >= 3) { clearInterval(t); res.end(); } }, 1000);
+  req.on('close', () => clearInterval(t));
+});
 // Kết nối nhận thông báo tức thì (trình duyệt tự nối lại khi rớt mạng); nhịp giữ kết nối 20 giây
 api.get('/duyet/su-kien', quyen('nop'), (req, res) => {
   res.set({ 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no', Connection: 'keep-alive' });
   res.flushHeaders?.();
-  res.write('retry: 3000\n\n');
+  res.write(':' + ' '.repeat(2048) + '\nretry: 3000\n\n'); // đệm 2 KB đầu: đẩy qua bộ đệm của máy chủ trung gian (Railway) ngay
   if (dyKenh.size > 500) { res.end(); return; } // giới hạn số kết nối
   dyKenh.add(res);
   const nhip = setInterval(() => { try { res.write(': nhip\n\n'); } catch { /* đã đóng */ } }, 20000);

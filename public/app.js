@@ -2639,6 +2639,9 @@ function dyKenhMo() {
       if (d.uid !== ME?.id && (d.ghi || d.loai === 'ghi')) { // số liệu vừa thay đổi ở máy khác -> tải lại trang nhập liệu đang mở
         const tab = ['revenue', 'cost'].find((x) => !$('#tab-' + x).hidden && !document.querySelector('#tab-' + x + ' [data-dirty]'));
         if (tab && loaders[tab]) loaders[tab]();
+        if (!$('#tab-report').hidden && !document.querySelector('dialog[open]')) { // Báo cáo đang mở: tải lại số, giữ vị trí cuộn
+          const y = scrollY; Promise.resolve(loadReport()).then(() => scrollTo(0, y)).catch(() => {});
+        }
       }
     }, 250);
   });
