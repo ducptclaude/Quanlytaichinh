@@ -580,7 +580,7 @@ window.BKS_EN = {
 "Tình trạng dự án": "Project status",
 "Tính vào chi phí": "Counted as cost",
 "TĐ2 · điều chỉnh": "M2 · variation",
-"TĐ2 – Điều chỉnh": "M2 – Variation",
+"TĐ2 – Điều chỉnh": "M2 – Variations",
 "TĐ3 – Quyết toán": "M3 – Final account",
 "± LN so TĐ trước": "± Profit vs. previous milestone",
 "Đã thu (tiền về)": "Collected (cash received)",
@@ -1315,7 +1315,21 @@ window.BKS_EN = {
 "Hủy nội dung chưa duyệt (nhập sai) – không ghi vào số liệu, có ghi nhật ký": "Cancel unapproved entry (entered by mistake) – nothing is recorded; logged",
 "Bản sửa / xóa đang chờ duyệt – số hiện tại (đã duyệt) vẫn được tính": "Change / deletion pending approval – the current (approved) figure still counts",
 "Thêm / sửa / xóa doanh thu, tiền về, chi phí, HĐ đầu vào, thanh toán, chốt TĐ, số dư đầu kỳ của người nhập liệu được giữ ở đây và CHƯA tính vào tổng. Duyệt = ghi vào số liệu; Từ chối / Hủy = không ghi.": "Additions / changes / deletions of revenue, collections, costs, procurement contracts, payments, milestone figures and opening balances by data-entry users are held here and NOT included in totals. Approve = record; Reject / Cancel = nothing recorded.",
-"Các lần thêm / sửa / xóa số liệu bạn đã gửi và kết quả duyệt. Số chờ duyệt CHƯA tính vào tổng. Nhập sai khi chưa duyệt: bấm Hủy (không cần duyệt, có ghi nhật ký). Bị từ chối: nhập lại.": "Your submitted additions / changes / deletions and their approval results. Pending figures are NOT included in totals. Entered by mistake and not yet approved: click Cancel (no approval needed, logged). Rejected: re-enter."
+"Các lần thêm / sửa / xóa số liệu bạn đã gửi và kết quả duyệt. Số chờ duyệt CHƯA tính vào tổng. Nhập sai khi chưa duyệt: bấm Hủy (không cần duyệt, có ghi nhật ký). Bị từ chối: nhập lại.": "Your submitted additions / changes / deletions and their approval results. Pending figures are NOT included in totals. Entered by mistake and not yet approved: click Cancel (no approval needed, logged). Rejected: re-enter.",
+"Giá trị TĐ1 – Ký HĐ": "M1 value – Contract signed",
+"Giá trị TĐ2 – Điều chỉnh": "M2 value – Variations",
+"Giá trị TĐ3 – Quyết toán": "M3 value – Final account",
+"= TĐ1": "= M1",
+"= quyết toán / TĐ2": "= final account / M2",
+"= HT/QT · TĐ2": "= certified/final · M2",
+"Giá trị hiện hành (TĐ mới nhất, sau VAT)": "Current value (latest milestone, incl. VAT)",
+"HĐ/PL hiện hành": "Current contract/addendum",
+"HĐ điều chỉnh": "Contract adjustment",
+"Nhập giá trị ít nhất 1 thời điểm (TĐ1 / TĐ2 / TĐ3)": "Enter a value for at least one milestone (M1 / M2 / M3)",
+"Giá trị tại thời điểm ký HĐ (trước VAT). Phụ lục ký sau: để trống = 0": "Value at contract signing (excl. VAT). Addendum signed later: leave blank = 0",
+"Giá trị sau điều chỉnh (trước VAT). Để trống = bằng TĐ1": "Value after variations (excl. VAT). Blank = same as M1",
+"Giá trị quyết toán (trước VAT). Để trống = theo hồ sơ quyết toán đã nhập ở mục 2, chưa có thì bằng TĐ2": "Final account value (excl. VAT). Blank = per final account record in section 2, otherwise same as M2",
+"Giá trị hiện hành = TĐ mới nhất có số": "Current value = latest milestone with a value"
 },
 "patterns": [
 [
@@ -2087,6 +2101,10 @@ window.BKS_EN = {
 "{}/{} contracts settled{}"
 ],
 [
+"TĐ1 {} · TĐ2 {} · TĐ3 {}",
+"M1 {} · M2 {} · M3 {}"
+],
+[
 "✓ Đã duyệt {} hồ sơ",
 "✓ Approved {} submissions"
 ],
@@ -2389,6 +2407,10 @@ window.BKS_EN = {
 [
 "HT {} · lệch {}{}",
 "Certified {} · diff. {}{}"
+],
+[
+"TĐ1 {} · TĐ2 {}",
+"M1 {} · M2 {}"
 ],
 [
 "Mục I · TĐ{}",

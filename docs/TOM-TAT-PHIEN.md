@@ -2,6 +2,16 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.09.11.26 – Doanh thu + HĐ đầu vào: 3 ô giá trị TĐ1 / TĐ2 / TĐ3 nhập tay (thay cho HĐ = TĐ1, PL = TĐ2)
+- Mỗi dòng HĐ / PL (doanh thu với CĐT và HĐ đầu vào: thầu phụ, vật tư, nhân công, MMTB) có 3 ô (trước VAT): TĐ1 (trống = 0) · TĐ2 (trống = TĐ1) ·
+  TĐ3 (trống = quyết toán: doanh thu theo hồ sơ QT của HĐ, HĐ đầu vào theo giá trị HT/QT; chưa có thì = TĐ2). Nhập tay TĐ3 được ưu tiên.
+- Giá trị HĐ/PL (còn phải thu, đã thanh toán…) = TĐ mới nhất có số. Dòng cũ (chưa nhập ô nào) giữ cách tính cũ -> số cũ KHÔNG đổi
+  (so sánh toàn bộ mốc TĐ của 12 dự án mẫu trước / sau: 0 chỗ khác).
+- Kho dữ liệu: THÊM cột `gt_td1`, `gt_td2`, `gt_td3` vào `doanh_thu` và `tp_hd_pl`. Công thức: `lib/report.js` `tdLine`, `tpLine`, `tpTd`; mục IV cột TĐ2 = phần tăng TĐ1 -> TĐ2 theo PL ("HĐ điều chỉnh" / "HĐ mới").
+- Giao diện: form Doanh thu mục 1 có 3 ô TĐ + giá trị hiện hành; bảng ghi chú "TĐ1 · TĐ2 · TĐ3" dưới số tiền; hộp HĐ thầu phụ thay ô "Thuộc TĐ" + "Giá trị" bằng 3 ô TĐ, dòng TỔNG theo 3 TĐ;
+  form tạo HĐ đầu vào giữ ô "Thuộc thời điểm" (giá trị đưa vào ô TĐ đó). Nhật ký ghi trước → sau của TĐ1/2/3.
+- Kiểm tra: 15 tình huống TĐ (doanh thu + chi phí, có QT, nhập tay TĐ3) 0 lỗi; 28 tình huống duyệt 0 lỗi; tester 4.590 ĐẠT 0 LỖI (bộ nhớ tạm + PostgreSQL); máy tính + iPhone 13 không tràn.
+
 ## V06.09.11.26 – Phân quyền: tab Báo cáo chỉ Quản trị, Lãnh đạo, Ban Kiểm soát (+ Chỉ xem / Khách)
 - `QUYEN.bao_cao` = admin, lanh_dao, bks, viewer (người dùng chọn giữ quyền xem cho Chỉ xem / Khách). Biên tập, QS, Kế toán: không thấy tab Báo cáo (gồm Dashboard),
   không có Trợ lý số liệu, máy chủ chặn `/api/bao-cao` (403). `QUYEN.xuat` = admin, lanh_dao, bks.
