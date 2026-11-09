@@ -683,11 +683,15 @@ function bHtSection(list, v) {
   const P = bPeriod(list);
   const { rows } = bTongHopData(list, v, P);
   const R = bMuc3Data(list, v, rows, 3).R.map((r) => {
-    // TL % HT = Thực chi ÷ Chi phí TĐ3 · GTHT = TL % HT × DT TĐ3 · % Tiền về = Tiền về ÷ GTHT (xếp loại theo % tiền về)
-    const ht = r.cp > 0 ? r.chi / r.cp : null;
-    const gtht = ht != null ? Math.round(ht * r.dt) : 0;
+    // GTHT: dự án đã có đợt thanh toán / quyết toán (Doanh thu mục 2) -> tổng lũy kế các đợt HT/QT; chưa có -> cost to cost
+    //  (TL % HT = Thực chi ÷ Chi phí TĐ3 · GTHT = TL % HT × DT TĐ3). % Tiền về = Tiền về ÷ GTHT (xếp loại theo % tiền về)
+    const hds = r.x.d.hds || [];
+    const coHt = hds.some((h) => h.so_dot > 0);
+    let ht, gtht, nguon;
+    if (coHt) { gtht = Math.round(hds.reduce((a, h) => a + (h.nt?.[v] || 0), 0)); ht = r.dt > 0 ? gtht / r.dt : null; nguon = 'htqt'; }
+    else { ht = r.cp > 0 ? r.chi / r.cp : null; gtht = ht != null ? Math.round(ht * r.dt) : 0; nguon = 'c2c'; }
     const p = gtht > 0 ? r.thu / gtht : null;
-    return { ...r, ht, gtht, p, xl: htXl(p) };
+    return { ...r, ht, gtht, nguon, p, xl: htXl(p) };
   });
   // Bảng giữ thứ tự A–Z theo mã dự án; dự án Chưa đạt được đẩy lên thành khung thông báo phía trên bảng
   R.sort((a, b) => bNat(a.x.d.ma_du_an, b.x.d.ma_du_an));
@@ -708,7 +712,7 @@ function bHtSection(list, v) {
   };
   const cnt = (name) => R.filter((r) => r.xl && r.xl[1] === name).length;
   return `<section class="card b-sec ht-sec no-print-break">
-    <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành</h3><p>TL % HT = Thực chi ÷ Chi phí TĐ3 · GTHT = TL % HT × Doanh thu TĐ3 · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về</p></div>
+    <div class="th-head"><span class="th-no">✓</span><div class="th-ttl"><h3>Đánh giá hoàn thành</h3><p>GTHT = lũy kế đợt thanh toán / quyết toán (đã có) · chưa có: Thực chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 (cost to cost) · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về</p></div>
       <div class="th-tags"><span>TĐ3 mới nhất</span><span>${v === 'gt' ? 'Trước VAT' : 'Sau VAT'}</span><span>Đơn vị: ${TYD()}</span></div></div>
     ${bad.length ? `<div class="ht-alert" role="alert"><div class="ht-alert-h">⚠ ${bad.length} dự án <b>Chưa đạt</b> – cần xử lý sớm</div>
       ${bad.map((r) => `<div class="ht-alert-r"><b>${esc(r.x.d.ma_du_an)}</b> <span class="muted">${esc(r.x.d.ten_du_an)}</span> · Tiền về <b class="neg">${pc(r.p)}</b> · ${fix(r).replace(/^<div class="ht-warn">⚠ /, '<span class="ht-warn">').replace(/<\/div>$/, '</span>')}</div>`).join('')}</div>` : ''}
@@ -716,7 +720,7 @@ function bHtSection(list, v) {
       <div class="ht-l"><div class="table-wrap ${R.length > 8 ? 'ht-scroll' : ''}"><table class="b-table ht-table">
         <thead><tr><th class="num">STT</th><th>Mã DA</th><th>Tên dự án</th><th class="num">DT TĐ3</th><th class="num">GTHT</th><th class="num">TL % HT</th><th class="num">Tiền về</th><th class="num">% Tiền về</th><th>Tiêu chuẩn đánh giá</th><th>Xếp loại</th><th>Giải pháp</th></tr></thead>
         <tbody>${R.map((r, i) => `<tr class="${r.xl && r.xl[1] === 'Chưa đạt' ? 'ht-bad' : ''}"><td class="num">${i + 1}</td><td><b>${esc(r.x.d.ma_du_an)}</b></td><td class="ht-name">${esc(r.x.d.ten_du_an)}</td>
-          <td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.gtht)}</td><td class="num">${pc(r.ht)}</td><td class="num">${bTy(r.thu)}</td><td class="num"><b>${pc(r.p)}</b></td><td class="muted">${r.xl ? r.xl[3] : '—'}</td><td>${badge(r.xl)}</td><td class="ht-fix">${fix(r)}</td></tr>`).join('')}</tbody>
+          <td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.gtht)}<div class="td-note" title="${r.nguon === 'htqt' ? 'Tổng lũy kế các đợt thanh toán / quyết toán (Doanh thu mục 2)' : 'Chưa có đợt thanh toán / quyết toán: tính theo chi phí (Thực chi ÷ Chi phí TĐ3 × DT TĐ3)'}">${r.nguon === 'htqt' ? 'theo TT/QT' : 'cost to cost'}</div></td><td class="num">${pc(r.ht)}</td><td class="num">${bTy(r.thu)}</td><td class="num"><b>${pc(r.p)}</b></td><td class="muted">${r.xl ? r.xl[3] : '—'}</td><td>${badge(r.xl)}</td><td class="ht-fix">${fix(r)}</td></tr>`).join('')}</tbody>
         <tfoot><tr><td></td><td colspan="2">Tổng cộng (${R.length} dự án)</td><td class="num">${bTy(T.dt)}</td><td class="num">${bTy(T.gtht)}</td><td class="num">${pc(hT)}</td><td class="num">${bTy(T.thu)}</td><td class="num">${pc(pT)}</td><td>${xT ? xT[3] : ''}</td><td>${badge(xT)}</td><td></td></tr></tfoot>
       </table></div></div>
       <div class="ht-r">

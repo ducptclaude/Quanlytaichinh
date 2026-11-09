@@ -550,7 +550,7 @@ window.BKS_EN = {
 "Đã đổi mật khẩu": "Password changed",
 "Đơn vị sở hữu *": "Owner entity *",
 "đang kết nối...": "connecting...",
-"+ Đợt thanh toán": "+ Payment instalment",
+"+ Đợt thanh toán": "+ Payment round",
 "6 tháng gần nhất": "Last 6 months",
 "CHI TIẾT CHI PHÍ": "COST DETAILS",
 "CHI TIẾT TIỀN VỀ": "COLLECTION DETAILS",
@@ -1339,7 +1339,12 @@ window.BKS_EN = {
 "(TĐ3 = hồ sơ quyết toán ở mục 2)": "(M3 = final account record in section 2)",
 "TĐ1: HĐ gốc / PL ký cùng HĐ · TĐ2: mỗi phụ lục điều chỉnh là 1 đợt (Đợt 1, 2…) hoặc HĐ ký thêm · TĐ3: phát sinh ở giai đoạn quyết toán": "M1: original contract / addendum signed with it · M2: each variation addendum is one round (Round 1, 2…) or an additional contract · M3: arising at final account stage",
 "TĐ1 ký HĐ · TĐ2 điều chỉnh (mỗi phụ lục 1 đợt) / HĐ ký thêm · TĐ3 quyết toán": "M1 contract signed · M2 variations (one addendum per round) / additional contract · M3 final account",
-"Giá trị HĐ lũy kế sau dòng này (trước VAT)": "Cumulative contract value after this line (excl. VAT)"
+"Giá trị HĐ lũy kế sau dòng này (trước VAT)": "Cumulative contract value after this line (excl. VAT)",
+"theo TT/QT": "per payments/final",
+"cost to cost": "cost to cost",
+"Đã có đợt thanh toán / quyết toán: Giá trị hoàn thành = tổng lũy kế các đợt; chưa có: tính theo chi phí (cost to cost)": "With payment rounds / final account: Completed value = cumulative total of rounds; otherwise cost to cost",
+"GTHT = lũy kế đợt thanh toán / quyết toán (đã có) · chưa có: Thực chi ÷ Chi phí TĐ3 × Doanh thu TĐ3 (cost to cost) · % Tiền về = Tiền về ÷ GTHT · Xếp loại theo % tiền về": "CV = cumulative payment rounds / final account (if any) · otherwise: Actual expenditure ÷ M3 cost × M3 revenue (cost to cost) · % Collections = Collections ÷ CV · Rated by % collections",
+"Nhập giá trị quyết toán (phần còn lại sau các đợt đã nghiệm thu / thanh toán)": "Enter final account value (remaining after certified / paid rounds)"
 },
 "patterns": [
 [
@@ -1831,6 +1836,10 @@ window.BKS_EN = {
 "Rejected {} {} from unknown origin {} (IP {})"
 ],
 [
+"Nhập giá trị đợt thanh toán {}",
+"Enter value of payment round {}"
+],
+[
 "Mã khởi tạo (SETUP_TOKEN): {}",
 "Setup code (SETUP_TOKEN): {}"
 ],
@@ -2237,6 +2246,10 @@ window.BKS_EN = {
 [
 "(còn phải thu {})",
 "(receivable {})"
+],
+[
+"Đợt thanh toán {}",
+"Payment round {}"
 ],
 [
 "Doanh thu · TĐ{}",

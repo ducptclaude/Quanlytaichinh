@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.09.11.26 – Doanh thu mục 2: thêm Đợt thanh toán / Quyết toán; GTHT theo lũy kế TT/QT, chưa có thì cost to cost
+- Doanh thu mục 2 (Giá trị Hoàn thành / Quyết toán): thanh "Thêm cho HĐ [chọn HĐ] · + Đợt thanh toán · + Quyết toán" -> điền sẵn form (tên "Đợt thanh toán n" kế tiếp / "Quyết toán", Số HĐ).
+- Báo cáo › Đánh giá hoàn thành: GTHT của dự án = tổng lũy kế các đợt thanh toán / quyết toán (mục 2) khi đã có; chưa có -> cost to cost (Thực chi ÷ CP TĐ3 × DT TĐ3).
+  TL % HT = GTHT ÷ DT TĐ3. Ô GTHT ghi nguồn "theo TT/QT" / "cost to cost". Theo nút VAT trước / sau.
+- Kiểm tra: dự án có đợt (DOT-01) theo TT/QT, thêm đợt 40 tr -> GTHT tăng đúng; dự án chưa có đợt (C2C-01) = 40% × 200 tr = 0,08 tỷ; tester 0 LỖI; không tràn, không lỗi trang.
+
 ## V09.09.11.26 – Đồng bộ dự án giữa Báo cáo và Nhập liệu
 - Báo cáo chọn 1 dự án ở Phạm vi -> Nhập liệu › Doanh thu / Chi phí chuyển sang đúng dự án đó (`dongBoDuAn`); bấm vào báo cáo công trình cũng vậy.
 - Nhập liệu chọn dự án (Doanh thu hoặc Chi phí) -> trang kia + Báo cáo (vai được xem) cũng theo dự án đó (`baoCaoTheoDuAn`, mục I nhảy TĐ mới nhất).
