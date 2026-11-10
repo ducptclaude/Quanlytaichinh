@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V20.10.11.26 – Doanh thu mục 2: tên đợt kế tiếp theo tên hồ sơ đã có
+- "+ Đợt" (từng HĐ) và "+ Đợt tiếp theo" (thanh Thêm cho HĐ): tên = tên hồ sơ có số nhập sau cùng + 1 (VD "Hoàn thành đợt 2" -> "Hoàn thành đợt 3"); chưa có đợt -> "Hoàn thành đợt 1" (`tenDotKeTiep`).
+
 ## V19.10.11.26 – Mục I: tiêu đề cố định
 - Bỏ chữ đổi theo TĐ (Dự kiến / Điều chỉnh / Quyết toán) ở tiêu đề mục I -> luôn "Doanh thu – Chi phí – Lợi nhuận"; dòng mô tả dưới vẫn ghi TĐ đang xem.
 

@@ -1354,7 +1354,8 @@ window.BKS_EN = {
 "Tự động (theo số liệu)": "Automatic (from data)",
 "Tự động theo số liệu": "Automatic from data",
 "Tự động theo số liệu (đang chọn Tạm dừng)": "Automatic from data (On hold selected)",
-"Trạng thái tự chạy theo số liệu: Chuẩn bị · Đang thi công · Hoàn thành (đã quyết toán hoặc đạt 100%). Chỉ chọn tay khi dự án Tạm dừng": "Status follows the data: Preparing · In progress · Completed (finalised or 100%). Set manually only when the project is On hold"
+"Trạng thái tự chạy theo số liệu: Chuẩn bị · Đang thi công · Hoàn thành (đã quyết toán hoặc đạt 100%). Chỉ chọn tay khi dự án Tạm dừng": "Status follows the data: Preparing · In progress · Completed (finalised or 100%). Set manually only when the project is On hold",
+"+ Đợt tiếp theo": "+ Next round"
 },
 "patterns": [
 [
@@ -1370,16 +1371,16 @@ window.BKS_EN = {
 "Receivable = Revenue M{} (section I) − Collections (section II) · Remaining to pay = Cost M{} (section I) − Expenditure (section II) · Balance = Receivable − Remaining to pay. Changing the milestone in section I (M1 / M2 / M3) updates section III."
 ],
 [
+"{} Mũi tên: tăng / giảm so với TĐ{} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).",
+"{} Arrows: increase / decrease vs. M{} (green = favourable, red = unfavourable). Completion column: % completed value = CV ÷ M3 revenue (per payment rounds / final account; contracts without rounds: provisional cost to cost)."
+],
+[
 "Sẽ xóa vĩnh viễn kèm toàn bộ dữ liệu: {} dòng HĐ/PL, {} nghiệm thu/QT, {} tiền về, {} HĐ đầu vào – thầu phụ, vật tư, MMTB, nhân công ({} thanh toán), {} chi phí, {} thời điểm TĐ. Không hoàn tác được.",
 "Will be permanently deleted with all data: {} contract/addendum rows, {} certifications/final accounts, {} collections, {} procurement contracts – subcontractors, materials, machinery, labour ({} payments), {} costs, {} milestones. Cannot be undone."
 ],
 [
 "Đơn vị: {}, sau VAT · Thực chi = chi phí đã chi + tiền đã trả HĐ đầu vào (gồm tạm ứng), lũy kế đến hiện tại · nhận tiền vay {} {}, trả nợ gốc {} {} không tính vào chi phí",
 "Unit: {}, after VAT · Expenditure = costs paid + payments on procurement contracts (incl. advances), cumulative to date · loan proceeds {} {}, principal repaid {} {} not counted as cost"
-],
-[
-"{} Mũi tên: tăng / giảm so với TĐ{} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).",
-"{} Arrows: increase / decrease vs. M{} (green = favourable, red = unfavourable). Completion column: % completed value = CV ÷ M3 revenue (per payment rounds / final account; contracts without rounds: provisional cost to cost)."
 ],
 [
 "Đơn vị: {}, sau VAT · thanh xanh đậm = kế hoạch (DT HĐ − giá trị thầu phụ HT/QT); thanh xanh ngọc = thực (tiền về − đã trả HĐ đầu vào) · HĐ xếp theo số hiệu",
@@ -1986,6 +1987,10 @@ window.BKS_EN = {
 "Advance {} · Payments {}"
 ],
 [
+"{}: VAT 0% (chưa có VAT)",
+"{}: VAT 0% (no VAT yet)"
+],
+[
 "Lấy số hệ thống theo {}",
 "Use system figures per {}"
 ],
@@ -2060,10 +2065,6 @@ window.BKS_EN = {
 [
 "Số liệu nhập tay · {}",
 "Manually entered figures · {}"
-],
-[
-"{}: VAT 0% (chưa có VAT)",
-"{}: VAT 0% (no VAT yet)"
 ],
 [
 "{}: chưa nhập giá trị",
@@ -2264,6 +2265,14 @@ window.BKS_EN = {
 [
 "Đợt thanh toán {}",
 "Payment round {}"
+],
+[
+"Hoàn thành đợt {}",
+"Completion round {}"
+],
+[
+"Nhập giá trị \"{}\"",
+"Enter value of \"{}\""
 ],
 [
 "Doanh thu · TĐ{}",

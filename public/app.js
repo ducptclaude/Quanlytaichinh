@@ -437,7 +437,7 @@ function buildRevenueSections() {
       ${loai === 'qt' && can('hd') ? `
       <div class="tv-tools qt-tools">
         <label class="tv-hd-pick">Thêm cho HĐ <select id="qt-hd-pick"></select></label>
-        <button type="button" data-qtq="dot">+ Đợt thanh toán</button>
+        <button type="button" data-qtq="dot" title="Thêm đợt kế tiếp, tên theo hồ sơ đã có (VD Hoàn thành đợt 2 -> Hoàn thành đợt 3)">+ Đợt tiếp theo</button>
         <button type="button" data-qtq="qt">+ Quyết toán</button>
         <span class="muted small">Đã có đợt thanh toán / quyết toán: Giá trị hoàn thành = tổng lũy kế các đợt; chưa có: tính theo chi phí (cost to cost)</span>
       </div>` : ''}
@@ -631,6 +631,17 @@ async function loadRevenue() {
   if (fHd && !fHd.elements.id.value) syncMaLoai(fHd);
 }
 
+// Tên đợt kế tiếp của 1 HĐ theo tên hồ sơ đã nhập (bỏ hồ sơ "Quyết toán"): "Hoàn thành đợt 2" -> "Hoàn thành đợt 3";
+//  chưa có đợt nào -> "Hoàn thành đợt 1"
+function tenDotKeTiep(hdId) {
+  const ds = revData.items.filter((r) => r.loai === 'qt' && r.hd_id === hdId && !/quy[eế]t to[aá]n/i.test(r.so_hieu || ''));
+  const coSo = ds.map((r) => String(r.so_hieu || '').trim().match(/^(.*?)(\d+)$/)).filter(Boolean);
+  if (!coSo.length) return `Hoàn thành đợt ${ds.length + 1}`;
+  const cuoi = ds.map((r, i) => ({ r, i })).filter((x) => /\d+$/.test(String(x.r.so_hieu || '').trim())).pop().r; // hồ sơ có số nhập sau cùng
+  const tien = String(cuoi.so_hieu).trim().match(/^(.*?)(\d+)$/)[1];
+  const max = Math.max(...coSo.filter((m) => m[1] === tien).map((m) => Number(m[2])));
+  return `${tien}${max + 1}`;
+}
 function renderRevenue() {
   const { items, tong } = revData;
   { // Mục 2: ô chọn HĐ cho thanh "Thêm cho HĐ" (+ Đợt thanh toán / + Quyết toán)
@@ -875,10 +886,9 @@ async function onRevTableClick(e) {
     const f = $('.rev-form[data-loai="qt"]'); const k = Number($('#qt-hd-pick')?.value);
     if (!f || !k) return;
     resetRevForm(f); f._hdAc?.set(k);
-    const n = revData.items.filter((r) => r.loai === 'qt' && r.hd_id === k && !/quy[eế]t to[aá]n/i.test(r.so_hieu || '')).length;
-    const qt = e.target.dataset.qtq === 'qt';
-    f.elements.so_hieu.value = qt ? 'Quyết toán' : `Đợt thanh toán ${n + 1}`;
-    showMsg($('.msg', f), qt ? 'Nhập giá trị quyết toán (phần còn lại sau các đợt đã nghiệm thu / thanh toán)' : `Nhập giá trị đợt thanh toán ${n + 1}`);
+    const qt = e.target.dataset.qtq === 'qt', ten = qt ? 'Quyết toán' : tenDotKeTiep(k);
+    f.elements.so_hieu.value = ten;
+    showMsg($('.msg', f), qt ? 'Nhập giá trị quyết toán (phần còn lại sau các đợt đã nghiệm thu / thanh toán)' : `Nhập giá trị "${ten}"`);
     f.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(() => f.elements.gia_tri.focus(), 300);
     return;
@@ -889,9 +899,8 @@ async function onRevTableClick(e) {
     if (!f) return;
     resetRevForm(f);
     const k = Number(qtadd);
-    const n = revData.items.filter((r) => r.loai === 'qt' && r.hd_id === k).length;
     f._hdAc?.set(k);
-    f.elements.so_hieu.value = `Nghiệm thu đợt ${n + 1}`;
+    f.elements.so_hieu.value = tenDotKeTiep(k); // theo tên hồ sơ đã có: Hoàn thành đợt 2 -> Hoàn thành đợt 3
     showMsg($('.msg', f), 'Nhập giá trị đợt mới (đổi tên thành "Quyết toán" nếu là hồ sơ quyết toán)');
     f.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(() => f.elements.gia_tri.focus(), 300);
