@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V22.10.11.26 – Nhập liệu Doanh thu / Chi phí: nút chọn TĐ1 / TĐ2 / TĐ3, liên kết Báo cáo
+- Thanh TĐ1 Ký HĐ · TĐ2 Điều chỉnh · TĐ3 Quyết toán cạnh tiêu đề trang Doanh thu và Chi phí; dùng chung `BST.i_td` với Báo cáo (chọn ở đâu, nơi khác nhảy theo).
+- Dòng HĐ / PL mới (form Doanh thu, form tạo HĐ đầu vào, phụ lục mới trong hộp HĐ thầu phụ): ô "Thuộc thời điểm" tự lấy TĐ đang chọn (thay cho gợi ý HĐ→TĐ1, PL→TĐ2); dòng đang sửa không bị đổi.
+
 ## V21.10.11.26 – Ô tiền nhận công thức / số dán từ Excel, Word; ô VAT hiện %
 - `common.js`: `docSo` đọc số dán (1.234.567 · 1,234,567.89 · 1.234.567,89 · 1 234 567 đ · (1.234) = âm), `tinhCongThuc` tính + − × ÷ ( ) % không dùng eval
   (VD =1.250.000*12, 2.500.000+350.000, =1000000*10%). Đang gõ công thức: ô nền xanh nhạt; rời ô / Enter: thay bằng kết quả; sai: viền đỏ, không lưu số bừa.

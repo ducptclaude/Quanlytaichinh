@@ -1641,6 +1641,10 @@ window.BKS_EN = {
 "Cost to cost: Actual expenditure {} ÷ Forecast cost {} {}"
 ],
 [
+"Đang nhập cho TĐ{} – {}. Dùng chung với Báo cáo",
+"Entering for M{} – {}. Shared with the Report"
+],
+[
 "Dự kiến và thực hiện · Đơn vị: tỷ đồng ({})",
 "Forecast and actual · Unit: bn VND ({})"
 ],

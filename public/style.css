@@ -3331,3 +3331,12 @@ td .vat-wrap { display: inline-block; width: 100%; }
 .vat-wrap > input::-webkit-outer-spin-button, .vat-wrap > input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .vat-wrap::after { content: '%'; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 700; color: var(--muted, #64748b); pointer-events: none; }
 .vat-wrap:has(> input:placeholder-shown)::after { display: none; }
+
+/* Nhập liệu: thanh chọn TĐ1 / TĐ2 / TĐ3 cạnh tiêu đề (dùng chung với Báo cáo) */
+.toolbar .td-pick { margin-right: auto; margin-left: 14px; }
+@media (max-width: 720px) { .toolbar .td-pick { margin-left: 0; order: 3; width: 100%; justify-content: space-between; } .toolbar .td-pick button { padding: 6px 8px; font-size: 11.5px; } }
+#tab-revenue > .card > .toolbar, #tab-cost > .card > .toolbar { justify-content: flex-start !important; }
+#tab-revenue > .card > .toolbar .td-pick, #tab-cost > .card > .toolbar .td-pick { margin: 0 auto 0 18px !important; }
+#tab-revenue > .card > .toolbar .project-select, #tab-cost > .card > .toolbar .project-select { margin-left: auto; }
+@media (max-width: 720px) { #tab-revenue > .card > .toolbar .td-pick, #tab-cost > .card > .toolbar .td-pick { margin: 6px 0 0 !important; } }
+#tab-revenue > .card > .toolbar > h2, #tab-cost > .card > .toolbar > h2 { flex: 0 0 auto !important; }

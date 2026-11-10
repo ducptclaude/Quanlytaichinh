@@ -457,7 +457,7 @@ function buildRevenueSections() {
     f.elements.gia_tri.addEventListener('input', update);
     if (f.elements.td) { // Thuộc TĐ tự gợi ý theo loại (HĐ -> TĐ1, PL -> TĐ2) cho tới khi người dùng tự chọn
       f.elements.td.addEventListener('change', () => { f._manualTd = true; });
-      const goiY = () => { if (!f._manualTd && f.elements.ma_loai) f.elements.td.value = f.elements.ma_loai.value === 'HĐ' ? '1' : '2'; };
+      const goiY = () => { if (!f._manualTd) f.elements.td.value = String(tdDangChon()); }; // theo TĐ đang chọn (nút TĐ1/TĐ2/TĐ3 – dùng chung với Báo cáo)
       f.elements.ma_loai?.addEventListener('change', goiY); f.elements.so_ma?.addEventListener('input', () => setTimeout(goiY, 0)); f._tdGoiY = goiY;
     }
     f.elements.vat.addEventListener('input', update);
@@ -642,7 +642,27 @@ function tenDotKeTiep(hdId) {
   const max = Math.max(...coSo.filter((m) => m[1] === tien).map((m) => Number(m[2])));
   return `${tien}${max + 1}`;
 }
+// ---------- Thời điểm đang làm việc (TĐ1 / TĐ2 / TĐ3) – dùng chung Báo cáo (BST.i_td) và Nhập liệu ----------
+const TD_PICK = [[1, 'Ký HĐ'], [2, 'Điều chỉnh'], [3, 'Quyết toán']];
+const tdDangChon = () => { const n = Number(typeof BST !== 'undefined' ? BST.i_td : 1); return [1, 2, 3].includes(n) ? n : 1; };
+function renderTdPick() {
+  const n = tdDangChon();
+  $$('[data-td-pick]').forEach((el) => {
+    el.innerHTML = TD_PICK.map(([k, t]) => `<button type="button" data-tdpick="${k}" class="${k === n ? 'on' : ''}" title="Đang nhập cho TĐ${k} – ${t}. Dùng chung với Báo cáo"><b>TĐ${k}</b> ${t}</button>`).join('');
+  });
+}
+// Chọn TĐ ở Nhập liệu: đổi luôn TĐ của Báo cáo; ô "Thuộc thời điểm" của dòng mới nhảy theo
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tdpick]'); if (!b) return;
+  BST.i_td = Number(b.dataset.tdpick); try { bSave(); } catch { /* chưa tải Báo cáo */ }
+  renderTdPick();
+  $$('.rev-form[data-loai="hd"]').forEach((f) => { if (!f.elements.id.value) { f._manualTd = false; f._tdGoiY?.(); } });
+  if (cForm?.elements.td && !cForm.elements.id.value) cForm.elements.td.value = String(tdDangChon());
+  const tab = ['revenue', 'cost'].find((x) => !$('#tab-' + x).hidden);
+  showMsg($(tab === 'cost' ? '#c-msg' : '#r-new-msg') || document.createElement('div'), '');
+});
 function renderRevenue() {
+  renderTdPick();
   const { items, tong } = revData;
   { // Mục 2: ô chọn HĐ cho thanh "Thêm cho HĐ" (+ Đợt thanh toán / + Quyết toán)
     const pick = $('#qt-hd-pick');
@@ -1487,6 +1507,7 @@ function resetCostForm(nhom, sub) {
   const keepNhom = nhom || cForm.elements.nhom.value;
   const keepSub = sub || cForm.elements.nhom_con.value;
   cForm.reset();
+  if (cForm.elements.td) cForm.elements.td.value = String(tdDangChon()); // HĐ đầu vào mới: thuộc TĐ đang chọn
   cForm.elements.id.value = '';
   cForm.elements.nhom.value = keepNhom;
   fillSubOptions(keepNhom, keepSub);
@@ -2186,7 +2207,7 @@ async function onTpDlgClick(e) {
     catch (err) { return showMsg(msg(), err.message, 'err'); }
     tpMoKhoa.add(c.id); renderTpDlg(); return showMsg(msg(), 'Đã mở khóa – có thể điều chỉnh. Đóng bảng chi tiết sẽ khóa lại.');
   }
-  if (t.dataset.addpl) { tpDrafts.lines.push({ key: ++tpSeq, ma_loai: t.dataset.addpl }); return renderTpDlg(); }
+  if (t.dataset.addpl) { tpDrafts.lines.push({ key: ++tpSeq, ma_loai: t.dataset.addpl, td: tdDangChon() }); return renderTpDlg(); }
   if (t.dataset.addpay) {
     const loai = t.dataset.addpay;
     const d = { key: ++tpSeq, loai };
@@ -2909,4 +2930,4 @@ $('#dy-q')?.addEventListener('input', (e) => { clearTimeout(DY.tq); DY.tq = setT
 // Mục "Chờ duyệt" cập nhật mỗi khi tải lại số liệu Doanh thu / Chi phí (đổi dự án, lưu, xóa…)
 { const lr = loadRevenue, lc = loadCost;
   loadRevenue = async function (...a) { const r = await lr.apply(this, a); dyPanel(); return r; };
-  loadCost = async function (...a) { const r = await lc.apply(this, a); dyPanel(); return r; }; }
+  loadCost = async function (...a) { const r = await lc.apply(this, a); dyPanel(); renderTdPick(); if (cForm?.elements.td && !cForm.elements.id.value) cForm.elements.td.value = String(tdDangChon()); return r; }; }
