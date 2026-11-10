@@ -2,6 +2,17 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V23.10.11.26 – Đợt A: mỗi HĐ / PL có 3 thời điểm độc lập (Doanh thu + HĐ đầu vào)
+- Quy tắc: TĐ1 = giá trị KÝ của từng văn bản (HĐ và PL đều tính, kể cả PL ký sau) · TĐ2 = TĐ1 + nhiều đợt điều chỉnh tăng / giảm · TĐ3 = giá trị quyết toán (chưa có = TĐ2).
+- Kho dữ liệu (chỉ THÊM): bảng `dieu_chinh` (loai dt/tp, vb_id, ngày, nội dung, số tiền ±); `doanh_thu` thêm `gt_qt`, `qt_dong`, `ngay_qt`.
+  Khi đọc: `gia_tri` = TĐ2 (đã cộng đợt), `gia_tri_ky` = TĐ1, `dot` = danh sách đợt.
+- API: POST/PUT/DELETE `/api/dieu-chinh` (qua duyệt như các nhập liệu khác), PUT `/api/doanh-thu/:id/quyet-toan` (số QT từng văn bản + đóng QT cả HĐ). Có nhật ký.
+- Doanh thu mục 1: cột TĐ1 Ký · TĐ2 Điều chỉnh (mũi tên ▲▼ so TĐ1, số đợt) · TĐ3 Quyết toán; các đợt hiện dưới từng văn bản; nút ± Đợt, Quyết toán. Bỏ ô "Thuộc thời điểm".
+  Đóng QT: văn bản chưa có số QT tạm lấy TĐ2 + lưu ý ⚠. Dữ liệu cũ (QT nhận biết qua hồ sơ "Quyết toán" ở mục 2) giữ cách tính cũ.
+- HĐ đầu vào: ô giá trị = giá trị ký (TĐ1), cột TĐ2 + nút ± Đợt; TĐ3 = ô HT/QT (trống = TĐ2). Bỏ ô "Thuộc TĐ" ở form tạo và hộp chi tiết.
+- Báo cáo mục I: thẻ Doanh thu / Chi phí ghi tách HĐ · PL tại TĐ đang chọn; TĐ3 có lưu ý số văn bản chưa có số QT. Mục IV đổi chú thích TĐ.
+- Ảnh hưởng dữ liệu mẫu: TĐ1 tăng (đã cộng PL ký), TĐ2 / TĐ3 không đổi.
+
 ## V22.10.11.26 – Nhập liệu Doanh thu / Chi phí: nút chọn TĐ1 / TĐ2 / TĐ3, liên kết Báo cáo
 - Thanh TĐ1 Ký HĐ · TĐ2 Điều chỉnh · TĐ3 Quyết toán cạnh tiêu đề trang Doanh thu và Chi phí; dùng chung `BST.i_td` với Báo cáo (chọn ở đâu, nơi khác nhảy theo).
 - Dòng HĐ / PL mới (form Doanh thu, form tạo HĐ đầu vào, phụ lục mới trong hộp HĐ thầu phụ): ô "Thuộc thời điểm" tự lấy TĐ đang chọn (thay cho gợi ý HĐ→TĐ1, PL→TĐ2); dòng đang sửa không bị đổi.

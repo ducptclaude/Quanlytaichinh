@@ -5,6 +5,7 @@ const store = require('./lib/db');
 const auth = require('./lib/auth');
 const security = require('./lib/security');
 const audit = require('./lib/audit');
+const { validateDieuChinh, validateQuyetToan } = require('./lib/validate');
 const { TP_NHOM, TRANG_THAI, ROLES, QUYEN, validateProject, validateUser, validateSettings, validateContact, validateTarget, validateRevenue, validateTienVe, validateCost, validateTp, validateTpLine, validateTpPay, passwordErrors, passcodeErrors } = require('./lib/validate');
 const { buildContracts, summarizeContracts } = require('./lib/subcontract');
 const { KHOI_CHI_PHI, NHOM_CHI_PHI, summarizeCost, sortCost, costLine } = require('./lib/cost');
@@ -277,6 +278,10 @@ const DUYET_TRUOC = [
   ['POST', /^\/thau-phu\/(\d+)\/thanh-toan$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'tp', QUYEN.tien],
   ['PUT', /^\/tp-thanh-toan\/(\d+)$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'r', QUYEN.tien],
   ['DELETE', /^\/tp-thanh-toan\/(\d+)$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'r', QUYEN.tien],
+  ['POST', /^\/dieu-chinh$/, 'Đợt điều chỉnh', 'dieu_chinh', 'vb', QUYEN.hd],
+  ['PUT', /^\/dieu-chinh\/(\d+)$/, 'Đợt điều chỉnh', 'dieu_chinh', 'r', QUYEN.hd],
+  ['DELETE', /^\/dieu-chinh\/(\d+)$/, 'Đợt điều chỉnh', 'dieu_chinh', 'r', QUYEN.hd],
+  ['PUT', /^\/doanh-thu\/(\d+)\/quyet-toan$/, 'Quyết toán HĐ', 'qt_dt', 'r', QUYEN.hd],
   ['PUT', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
   ['DELETE', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
   ['PUT', /^\/du-an\/(\d+)\/bh$/, 'DT-CP dự kiến · BH/Khác', 'bh', 'p', Q_ANY],
@@ -288,6 +293,7 @@ const KIEM = { // kiểm tra dữ liệu ngay lúc gửi (lỗi báo ngay cho ng
   thau_phu: (b, m) => (m === 'POST' ? (() => { const t = validateTp(b), l = validateTpLine({ ...(b.hd || {}), ma_loai: 'HĐ' });
     return { data: { ...t.data, gia_tri: l.data.gia_tri, ngay: l.data.ngay }, errors: [...t.errors, ...l.errors] }; })() : validateTp(b)),
   tp_hd_pl: (b) => validateTpLine(b), tp_thanh_toan: (b) => validateTpPay(b),
+  dieu_chinh: (b, m) => validateDieuChinh(b, m === 'PUT'), qt_dt: (b) => validateQuyetToan(b),
 };
 const soTien = (x) => { const n = Number(String(x ?? '').replace(/[.,\s]/g, '')); return Number.isFinite(n) && String(x ?? '').trim() !== '' ? n : null; };
 api.use(wrap(async (req, res, next) => {
@@ -300,6 +306,7 @@ api.use(wrap(async (req, res, next) => {
   let du_an_id = null, before = null, ban_ghi_id = null;
   if (tim === 'p') { const p = await store.getProject(id); if (!p) return bad(res, 'Không tìm thấy dự án', 404); du_an_id = p.id; }
   if (tim === 'tp') { const t = await store.getTp(id); if (!t) return bad(res, 'Không tìm thấy hợp đồng đầu vào', 404); du_an_id = t.du_an_id; }
+  if (tim === 'vb') { const v = await vanBanOf(body.loai, Number(body.vb_id)); if (!v) return bad(res, 'Không tìm thấy HĐ / PL', 404); du_an_id = v.du_an_id; }
   if (tim === 'r') {
     before = await store.auditInfo(kind, id);
     if (!before) return bad(res, 'Không tìm thấy dòng số liệu (có thể đã bị xóa)', 404);
@@ -320,12 +327,14 @@ api.use(wrap(async (req, res, next) => {
   let noi_dung = '';
   if (kind === 'td') noi_dung = method === 'DELETE' ? `Xóa số liệu TĐ${m[2]}` : `Chốt / sửa TĐ${m[2]}: DT ${audit.money(soTien(body.dt))} · CP ${audit.money(soTien(body.cp))}${body.ngay ? ' · ngày ' + String(body.ngay).split('-').reverse().join('/') : ''}`;
   else if (kind === 'bh') noi_dung = ['DT-CP dự kiến / BH-Khác', body.ns_cp !== undefined && `DT-CP dự kiến: ${audit.money(soTien(body.ns_cp))}`, body.bh_khac !== undefined && `BH/Khác: ${audit.money(soTien(body.bh_khac))}`].filter(Boolean).join(' | ');
+  else if (kind === 'dieu_chinh' && method === 'POST') { const v = await vanBanOf(body.loai, Number(body.vb_id)); noi_dung = `Đợt điều chỉnh ${body.loai === 'tp' ? 'HĐ đầu vào' : 'doanh thu'} ${v?.so_hieu || ''} · ${data.so_tien > 0 ? '+' : ''}${audit.money(data.so_tien)}${data.noi_dung ? ' · ' + data.noi_dung : ''}`; }
+  else if (kind === 'qt_dt') noi_dung = `${audit.describe('qt_dt', before)} | ${data.dong ? 'Đóng' : 'Mở'} quyết toán${data.ngay_qt ? ' ngày ' + String(data.ngay_qt).split('-').reverse().join('/') : ''} · ${data.items.filter((x) => x.gt_qt !== null).length}/${data.items.length} văn bản có số QT`;
   else if (kind === 'sddk') noi_dung = `${du_an_id ? 'Số dư đầu kỳ dự án' : 'Số dư đầu kỳ chung (công ty)'}: ${audit.money(soTien(body.so_tien))}`;
   else if (method === 'POST') noi_dung = audit.describe(kind, { ...data, tp: data?.so_ma || '', hd: '', so_hieu: [data?.ma_loai, data?.so_ma || data?.so_hieu].filter(Boolean).join(' ') }) || doi_tuong;
   else if (method === 'PUT') { const d = audit.diff(kind, before, { ...before, ...data }); noi_dung = audit.describe(kind, before) + (d ? ` | ${d}` : ''); }
   else noi_dung = audit.describe(kind, before);
   if (kind === 'thau_phu' && method === 'POST' && data?.gia_tri !== undefined) noi_dung += ` · HĐ gốc ${audit.money(data.gia_tri)}`;
-  const tien = method === 'DELETE' ? (before?.gia_tri ?? before?.so_tien ?? null)
+  const tien = kind === 'qt_dt' ? data.items.reduce((a, x) => a + (x.gt_qt || 0), 0) : method === 'DELETE' ? (before?.gia_tri ?? before?.so_tien ?? null)
     : kind === 'td' ? soTien(body.cp) : kind === 'sddk' ? soTien(body.so_tien) : kind === 'bh' ? soTien(body.bh_khac)
       : (data?.gia_tri ?? data?.so_tien ?? null);
   const du_an = du_an_id ? (await store.listProjects()).find((p) => p.id === du_an_id)?.ma_du_an || '' : before?.ma_du_an || '';
@@ -988,6 +997,53 @@ api.get('/doanh-thu-tong', wrap(async (_req, res) => {
   }
   res.json({ tat_ca: true, so_du_an: projects.length, du_an: { id: 0, ma_du_an: 'Tất cả', ten_du_an: `Tất cả dự án (${projects.length})`, chu_dau_tu: '' },
     items, tong: summarize(items), tien_ve, tong_tien_ve: summarizeTienVe(tien_ve) });
+}));
+
+// ---------- Đợt điều chỉnh (TĐ2) của HĐ / PL và Quyết toán HĐ (TĐ3) – Đợt A ----------
+// Văn bản HĐ / PL: doanh thu (dòng loại hd) hoặc HĐ đầu vào (dòng tp_hd_pl) -> { du_an_id, so_hieu, tp_id }
+async function vanBanOf(loai, id) {
+  if (!Number.isInteger(id) || id <= 0) return null;
+  if (loai === 'dt') { const r = await store.getRevenue(id); return r && r.loai === 'hd' ? { du_an_id: r.du_an_id, so_hieu: r.so_hieu } : null; }
+  if (loai === 'tp') { const l = await store.getTpLine(id); const t = l && (await store.getTp(l.tp_id)); return t ? { du_an_id: t.du_an_id, so_hieu: `${l.ma_loai} ${t.so_ma}`, tp_id: t.id } : null; }
+  return null;
+}
+api.post('/dieu-chinh', canHd, wrap(async (req, res) => {
+  const { data, errors } = validateDieuChinh(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const v = await vanBanOf(data.loai, data.vb_id);
+  if (!v) return bad(res, 'Không tìm thấy HĐ / PL', 404);
+  if (v.tp_id && (await lockedErr(res, v.tp_id))) return;
+  res.status(201).json(await store.createDieuChinh(data, req.user.id));
+}));
+api.put('/dieu-chinh/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getDieuChinh(id));
+  if (!cur) return bad(res, 'Không tìm thấy đợt điều chỉnh', 404);
+  const { data, errors } = validateDieuChinh(req.body || {}, true);
+  if (errors.length) return bad(res, errors);
+  if (cur.loai === 'tp') { const v = await vanBanOf('tp', cur.vb_id); if (v?.tp_id && (await lockedErr(res, v.tp_id))) return; }
+  await store.updateDieuChinh(id, data, req.user.id);
+  res.json({ ok: true });
+}));
+api.delete('/dieu-chinh/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getDieuChinh(id));
+  if (!cur) return bad(res, 'Không tìm thấy đợt điều chỉnh', 404);
+  if (cur.loai === 'tp') { const v = await vanBanOf('tp', cur.vb_id); if (v?.tp_id && (await lockedErr(res, v.tp_id))) return; }
+  await store.deleteDieuChinh(id);
+  res.json({ ok: true });
+}));
+// Quyết toán HĐ CĐT (id = dòng HĐ gốc): giá trị QT từng văn bản cùng Số mã (HĐ + PL), đóng / mở quyết toán – đóng HĐ là đóng cả các PL
+api.put('/doanh-thu/:id/quyet-toan', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const head = id && (await store.getRevenue(id));
+  if (!head || head.loai !== 'hd' || head.ma_loai !== 'HĐ') return bad(res, 'Chỉ quyết toán ở dòng HĐ gốc', 404);
+  const { data, errors } = validateQuyetToan(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const cung = new Set((await store.listRevenue(head.du_an_id)).filter((r) => r.loai === 'hd' && String(r.so_ma).toLowerCase() === String(head.so_ma).toLowerCase()).map((r) => r.id));
+  if (data.items.some((x) => !cung.has(x.id))) return bad(res, 'Có dòng không thuộc HĐ này');
+  await store.setQuyetToanDt(id, data, req.user.id);
+  res.json({ ok: true });
 }));
 
 // ---------- Giá trị tiền về ----------

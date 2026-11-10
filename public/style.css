@@ -3340,3 +3340,16 @@ td .vat-wrap { display: inline-block; width: 100%; }
 #tab-revenue > .card > .toolbar .project-select, #tab-cost > .card > .toolbar .project-select { margin-left: auto; }
 @media (max-width: 720px) { #tab-revenue > .card > .toolbar .td-pick, #tab-cost > .card > .toolbar .td-pick { margin: 6px 0 0 !important; } }
 #tab-revenue > .card > .toolbar > h2, #tab-cost > .card > .toolbar > h2 { flex: 0 0 auto !important; }
+
+/* Đợt A – 3 thời điểm mỗi văn bản: mũi tên chênh lệch, dòng đợt điều chỉnh, hộp đợt / quyết toán */
+.td-up { color: var(--ok); } .td-down { color: var(--danger); }
+.td-note.td-up, .td-note.td-down { font-weight: 600; }
+button.link-btn { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+button.link-btn:hover { color: var(--teal); }
+tr.dc-row td { font-size: 12px; color: var(--muted); padding-top: 2px; padding-bottom: 2px; border-top: 0; }
+tr.dc-row td.indent { padding-left: 34px; } tr.dc-row td.indent2 { padding-left: 60px; }
+tr.dc-row td.td-up, tr.dc-row td.td-down { font-weight: 600; }
+.rev-table th.td-col { white-space: nowrap; }
+dialog.dc-dlg { max-width: 860px; }
+.dc-dlg label.chk { display: flex; align-items: center; gap: 8px; flex-direction: row; }
+.dc-dlg label.chk input { width: auto; }
