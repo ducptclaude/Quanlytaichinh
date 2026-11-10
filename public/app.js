@@ -1866,7 +1866,7 @@ function renderTpCard() {
     </tr>`;
   // Trong mỗi HĐ CĐT: gom theo loại HĐ đầu vào (Thầu phụ · Vật tư · MMTB · Nhân công), mỗi loại 1 dòng cộng, bấm để mở các HĐ
   const tpLoaiRows = (g, n) => HDV.map((k) => [k, g.rows.filter((c) => (c.nhom || 'thau_phu') === k)]).filter(([, r]) => r.length).map(([k, rows], li) => {
-    const key = `${g.k}:${k}`, mo = autoOpen || tpOpen.has(key), cl = sumOf(rows, 'con_lai');
+    const key = `${g.k}:${k}`, mo = Boolean(q) || tpOpen.has(key), cl = sumOf(rows, 'con_lai'); // nhóm loại mặc định thu gọn (chỉ tự mở khi đang tìm kiếm)
     return `<tr class="tv-sub-row tp-loai-row">
       <td class="num muted">${n}.${li + 1}</td>
       <td colspan="2" class="indent"><button class="grp-toggle" data-tpsub="${esc(key)}" title="${mo ? 'Thu gọn' : 'Mở các hợp đồng'}">${mo ? '▾' : '▸'}</button>

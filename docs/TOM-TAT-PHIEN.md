@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V14.10.11.26 – HĐ đầu vào: nhóm loại mặc định thu gọn
+- Nhóm Thầu phụ / Vật tư / Nhân công / MMTB luôn thu gọn khi mở trang (kể cả dự án chỉ có 1 HĐ CĐT); chỉ tự mở khi đang tìm kiếm; bấm ▸ để mở.
+
 ## V13.10.11.26 – Chi phí: HĐ đầu vào gom theo loại; đầu Báo cáo gọn
 - Bảng "1. Hợp đồng đầu vào": trong mỗi HĐ CĐT thêm cấp nhóm theo loại (Thầu phụ · Vật tư · Nhân công · MMTB) có dòng cộng, bấm ▸ để mở các HĐ (số thứ tự n.m.k); "Mở / Thu gọn tất cả" gồm cả cấp loại.
 - Đầu Báo cáo: ẩn nhãn Lập lúc / Người lập / phiên bản trên màn hình (vẫn in khi In / PDF), chỉ còn Phạm vi · Đơn vị – không xuống dòng.
