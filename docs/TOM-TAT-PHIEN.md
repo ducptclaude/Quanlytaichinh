@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V24.10.11.26 — Giao diện khớp điện thoại & máy tính bảng (iPhone, Galaxy, Z Fold / Z Flip, iPad, Galaxy Tab)
+- Rà 18 khung máy × 9 trang (Báo cáo, Dashboard, Dự án, Doanh thu, Chi phí, Duyệt, Tài khoản, Cài đặt, Cá nhân), dọc + ngang.
+- Sửa: cụm nút đầu trang ≤ 600px xuống dòng gọn (ẩn nhãn vai trò, rút gọn tên, ô ngôn ngữ hẹp); ≤ 380px thu nhỏ thêm;
+  khung Đánh giá hoàn thành – thu tiền không rộng quá màn hình (Z Fold mở, iPad ngang); nút TĐ1/2/3 ≤ 400px chia đều 3 ô.
+- Kiểm tra: 18 thiết bị (iPhone SE / 13 Mini / 15 / 15 Pro Max, Galaxy S8 / S9+ / S24 / A55, Z Fold 7 gập + mở, Z Flip 7, iPad Mini / gen 11 / Pro 11, Galaxy Tab S9, iPhone 15 + iPad ngang)
+  – 0 tràn ngang, 0 lỗi trang. Điểm khôi phục: `phien-10.11.26-19h38`.
+
 ## V23.10.11.26 – Đợt A: mỗi HĐ / PL có 3 thời điểm độc lập (Doanh thu + HĐ đầu vào)
 - Quy tắc: TĐ1 = giá trị KÝ của từng văn bản (HĐ và PL đều tính, kể cả PL ký sau) · TĐ2 = TĐ1 + nhiều đợt điều chỉnh tăng / giảm · TĐ3 = giá trị quyết toán (chưa có = TĐ2).
 - Kho dữ liệu (chỉ THÊM): bảng `dieu_chinh` (loai dt/tp, vb_id, ngày, nội dung, số tiền ±); `doanh_thu` thêm `gt_qt`, `qt_dong`, `ngay_qt`.

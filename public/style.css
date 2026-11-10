@@ -3353,3 +3353,30 @@ tr.dc-row td.td-up, tr.dc-row td.td-down { font-weight: 600; }
 dialog.dc-dlg { max-width: 860px; }
 .dc-dlg label.chk { display: flex; align-items: center; gap: 8px; flex-direction: row; }
 .dc-dlg label.chk input { width: auto; }
+
+/* =====================================================================
+   ĐIỆN THOẠI / MÁY TÍNH BẢNG (iPhone SE → Pro Max, Galaxy S / A / Z Fold / Z Flip, iPad, Galaxy Tab)
+   - Cụm nút đầu trang (Xuất, Đơn vị, Ngôn ngữ, Sáng/Tối, Người dùng) xuống dòng gọn, không kéo ngang trang
+   - Khung Đánh giá hoàn thành – thu tiền không rộng quá màn hình (Z Fold mở, iPad xoay ngang)
+   ===================================================================== */
+.ht-w > *, .ht-l { min-width: 0; max-width: 100%; }
+@media (max-width: 600px) {
+  .user-box { flex-wrap: wrap; row-gap: 8px; width: 100%; margin-left: 0; justify-content: flex-start; }
+  .user-box .user-grp { margin-left: auto; }
+  #me-role { display: none; }
+  #me-name { display: inline-block; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+  .lang-pick { max-width: 96px; }
+  .user-grp .tab-menu { right: 0; left: auto; }
+}
+@media (max-width: 380px) {
+  #me-name { max-width: 76px; }
+  .lang-pick { max-width: 70px; padding: 6px 4px; }
+  .theme-btn { width: 32px; height: 32px; font-size: 15px; }
+  .user-box { gap: 5px; }
+}
+/* Nút chọn TĐ1 / TĐ2 / TĐ3 (Báo cáo, Dashboard, Doanh thu, Chi phí): màn hình ≤ 400px chia đều 3 nút, chữ gọn, không tràn */
+@media (max-width: 400px) {
+  .i-tdseg, .db-tdseg { display: flex !important; width: 100%; max-width: 100%; box-sizing: border-box; }
+  .i-tdseg button, .db-tdseg button { flex: 1 1 0; min-width: 0; padding: 6px 4px !important; font-size: 11.5px !important; white-space: normal !important; line-height: 1.2; text-align: center; }
+  .i-tdseg button b, .db-tdseg button b { display: block; margin: 0 !important; }
+}
