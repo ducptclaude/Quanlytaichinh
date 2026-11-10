@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.10.11.26 – Mục III: phối màu bảng Thu / Chi đồng bộ các bảng khác
+- Đầu bảng cùng nền kem; nhóm THU navy / CHI nâu đồng phân biệt bằng chữ + vạch mảnh dưới tên nhóm; thân bảng nền trắng (bỏ nền xanh / cam cả cột);
+  chỉ cột Còn phải thu / Còn phải chi (`c-kq`) và Còn lại có nền rất nhạt; đường chia nhóm mảnh màu kem. Giao diện tối giữ nguyên.
+
 ## V08.10.11.26 – Đầu Báo cáo: thiết kế lại tông navy – teal
 - Vạch dọc trái navy → teal; tên công ty dạng nhãn teal; tiêu đề navy đậm 25px, "TÀI CHÍNH DỰ ÁN" chuyển màu navy → teal; dòng thông tin tách thành nhãn (Phạm vi · Đơn vị · Lập lúc · Người lập · phiên bản).
 - Khung Số dư – Thực thu – Thực chi nền trắng viền mảnh; dòng "Còn lại" nổi bật nền teal nhạt. Điện thoại: logo lên trên. Giao diện tối giữ tông xanh đêm (chỉ thêm nhãn).

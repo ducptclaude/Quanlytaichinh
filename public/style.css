@@ -3223,3 +3223,24 @@ tr.dy-cho > td:first-child { box-shadow: inset 3px 0 0 #eda100; }
 @media (max-width: 760px) { #b-report .b-head { padding: 18px 16px 16px 20px; } #b-report .b-head h1 { font-size: 20px; } #b-report .b-mi { white-space: normal; } }
 @media print { #b-report .b-head::before { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
 @media (max-width: 760px) { #b-report .b-brand { flex-direction: column; align-items: flex-start; gap: 10px; } #b-report .b-brand img { width: 48px; height: 48px; border-radius: 12px; } #b-report .b-mi { padding: 3px 8px; } }
+/* =====================================================================
+   Mục III – bảng Thu / Chi: phối màu lại cho đồng bộ các bảng khác (giao diện sáng)
+   Đầu bảng cùng nền kem như bảng khác; nhóm Thu / Chi phân biệt bằng chữ màu + vạch mảnh dưới tiêu đề nhóm;
+   thân bảng nền trắng, chỉ cột "Còn phải thu / chi" và "Còn lại" có nền rất nhạt; đường chia nhóm mảnh
+   ===================================================================== */
+:root:not([data-theme="dark"]) #b-report .th-t3 { --t3-thu: transparent; --t3-chi: transparent; --t3-thu-h: transparent; --t3-chi-h: transparent; }
+:root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-thu,
+:root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-chi { background: transparent; font-size: 11.5px; font-weight: 800; letter-spacing: 1px; padding-top: 8px; padding-bottom: 6px; border-bottom: 2px solid; }
+:root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-thu { color: #1f3b73; border-bottom-color: #3462a3; }
+:root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-chi { color: #8a4f1c; border-bottom-color: #c27a3e; }
+:root:not([data-theme="dark"]) #b-report .th-t3 .c-thu, :root:not([data-theme="dark"]) #b-report .th-t3 .c-chi { background: transparent; }
+:root:not([data-theme="dark"]) #b-report .th-t3 .g1, :root:not([data-theme="dark"]) #b-report .th-t3 .g-con,
+:root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-chi { border-left: 1px solid #e3d8c6 !important; }
+/* cột kết quả của từng nhóm: Còn phải thu / Còn phải chi / Còn lại – nền rất nhạt, chữ đậm */
+:root:not([data-theme="dark"]) #b-report .th-t3 tbody td.c-thu.c-kq { background: rgba(52,98,163,.05); }
+:root:not([data-theme="dark"]) #b-report .th-t3 tbody td.c-chi.c-kq { background: rgba(194,122,62,.06); }
+:root:not([data-theme="dark"]) #b-report .th-t3 tbody td.g-con { background: rgba(42,157,143,.06); }
+:root:not([data-theme="dark"]) #b-report .th-t3 tfoot td.g-con { background: rgba(42,157,143,.10); }
+:root:not([data-theme="dark"]) #b-report .th-t3 tbody tr:hover td { background-color: rgba(31,59,115,.035); }
+:root:not([data-theme="dark"]) #b-report .th-t3 thead th, :root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-thu, :root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-chi { background: var(--cfb-cream, #f6f1e9) !important; }
+:root:not([data-theme="dark"]) #b-report .th-t3 tfoot td.c-thu, :root:not([data-theme="dark"]) #b-report .th-t3 tfoot td.c-chi { background: transparent; }
