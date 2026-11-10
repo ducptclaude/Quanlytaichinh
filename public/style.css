@@ -3185,3 +3185,41 @@ tr.dy-cho > td:first-child { box-shadow: inset 3px 0 0 #eda100; }
 .td-tag.td-k1 { background: #e8f0fe; color: #2f6bd8; } .td-tag.td-k2 { background: #fff1e6; color: #c25e12; } .td-tag.td-k3 { background: #e3f6f1; color: #0f8a72; }
 :root[data-theme="dark"] .td-tag.td-k1 { background: rgba(91,141,239,.16); color: #9dbcf5; } :root[data-theme="dark"] .td-tag.td-k2 { background: rgba(224,123,57,.16); color: #f0b07f; } :root[data-theme="dark"] .td-tag.td-k3 { background: rgba(18,165,139,.16); color: #6fd6c4; }
 .tp-dtl select.tp-td { padding: 5px 6px; font-size: 13px; min-width: 64px; }
+/* =====================================================================
+   Đầu Báo cáo – tông NAVY / TEAL chuyên nghiệp (giao diện sáng; giao diện tối giữ nguyên)
+   ===================================================================== */
+#b-report .b-head { position: relative; overflow: hidden; gap: 24px; padding: 24px 26px 22px 30px; border-radius: 18px; }
+#b-report .b-head::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(180deg, #1f3b73 0%, #14a39a 100%); }
+#b-report .b-head h1 { margin: 4px 0 6px; font-size: 25px; font-weight: 800; letter-spacing: .2px; line-height: 1.2; }
+#b-report .b-company { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 1.6px; padding: 3px 10px; border-radius: 999px; }
+#b-report .b-tag { font-size: 14px; margin-bottom: 10px; }
+#b-report .b-meta { display: flex; flex-wrap: wrap; gap: 6px 8px; font-size: 12px; }
+#b-report .b-mi { display: inline-flex; align-items: baseline; gap: 6px; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+#b-report .b-mi em { font-style: normal; font-size: 10.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+#b-report .b-mi b { font-weight: 700; }
+#b-report .b-brand img { width: 64px; height: 64px; border-radius: 16px; }
+#b-report .b-cash { padding: 12px 16px; border-radius: 14px; min-width: 260px; }
+#b-report .b-cash-i { padding: 4px 0; }
+#b-report .b-cash-i.con { margin-top: 6px; padding: 8px 10px; border-radius: 10px; border-top: 0; }
+:root:not([data-theme="dark"]) #b-report .b-head { background: linear-gradient(115deg, #ffffff 0%, #f5f8fd 55%, #eef8f7 100%); border: 1px solid #dbe4f0; box-shadow: 0 10px 28px -18px rgba(31,59,115,.35); }
+:root:not([data-theme="dark"]) #b-report .b-company { color: #0f8f87; background: #e3f6f3; }
+:root:not([data-theme="dark"]) #b-report .b-head h1 { color: #1f3b73; }
+:root:not([data-theme="dark"]) #b-report .b-h1-acc { background: linear-gradient(90deg, #1f3b73, #14a39a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+:root:not([data-theme="dark"]) #b-report .b-tag { color: #5b6b84; }
+:root:not([data-theme="dark"]) #b-report .b-mi { background: #ffffff; border: 1px solid #e1e8f2; color: #2b3a55; }
+:root:not([data-theme="dark"]) #b-report .b-mi em { color: #14a39a; }
+:root:not([data-theme="dark"]) #b-report .b-mi b { color: #1f3b73; }
+:root:not([data-theme="dark"]) #b-report .b-mi.b-ver { color: #7a879b; background: #f4f7fb; }
+:root:not([data-theme="dark"]) #b-report .b-cash { background: #ffffff; border: 1px solid #dbe4f0; box-shadow: 0 6px 18px -14px rgba(31,59,115,.45); }
+:root:not([data-theme="dark"]) #b-report .b-cash-i span { color: #5b6b84; }
+:root:not([data-theme="dark"]) #b-report .b-cash-i b, :root:not([data-theme="dark"]) #b-report .b-cash-i .b-cash-v { color: #1f3b73; }
+:root:not([data-theme="dark"]) #b-report .b-cash-i.con { background: linear-gradient(90deg, #e3f6f3, #eef3fb); }
+:root:not([data-theme="dark"]) #b-report .b-cash-i.con span { color: #0f8f87; }
+:root:not([data-theme="dark"]) #b-report .b-cash-i.con b { color: #0f6f69; font-size: 20px; }
+:root:not([data-theme="dark"]) #b-report .b-cash-u { color: #8a96a8; }
+:root[data-theme="dark"] #b-report .b-mi { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); color: #c9d6ea; }
+:root[data-theme="dark"] #b-report .b-mi em { color: #6fd6c4; } :root[data-theme="dark"] #b-report .b-company { background: rgba(20,163,154,.14); }
+:root[data-theme="dark"] #b-report .b-cash-i.con { background: rgba(20,163,154,.10); }
+@media (max-width: 760px) { #b-report .b-head { padding: 18px 16px 16px 20px; } #b-report .b-head h1 { font-size: 20px; } #b-report .b-mi { white-space: normal; } }
+@media print { #b-report .b-head::before { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+@media (max-width: 760px) { #b-report .b-brand { flex-direction: column; align-items: flex-start; gap: 10px; } #b-report .b-brand img { width: 48px; height: 48px; border-radius: 12px; } #b-report .b-mi { padding: 3px 8px; } }

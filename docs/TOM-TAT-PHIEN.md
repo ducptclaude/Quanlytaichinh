@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.10.11.26 – Đầu Báo cáo: thiết kế lại tông navy – teal
+- Vạch dọc trái navy → teal; tên công ty dạng nhãn teal; tiêu đề navy đậm 25px, "TÀI CHÍNH DỰ ÁN" chuyển màu navy → teal; dòng thông tin tách thành nhãn (Phạm vi · Đơn vị · Lập lúc · Người lập · phiên bản).
+- Khung Số dư – Thực thu – Thực chi nền trắng viền mảnh; dòng "Còn lại" nổi bật nền teal nhạt. Điện thoại: logo lên trên. Giao diện tối giữ tông xanh đêm (chỉ thêm nhãn).
+
 ## V07.10.11.26 – Kỳ báo cáo: đến HÔM NAY
 - "Toàn bộ thời gian" = từ tháng đầu có số liệu đến hôm nay (trước: đến tháng cuối có số liệu, ghi ngày cuối tháng). Mọi kỳ kết thúc ở tháng hiện tại (Tháng này, 6 tháng, Lũy kế, Toàn bộ) ghi đến ngày hôm nay thay cho ngày cuối tháng.
 
