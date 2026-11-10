@@ -116,14 +116,16 @@ function bPeriod(list) {
     case 'quy': from = `${y}-${String(q * 3 + 1).padStart(2, '0')}`; to = ymAdd(from, 2); label = `Quý ${ROMAN_Q[q]}/${y}`; break;
     case '6t': to = now; from = ymAdd(now, -5); label = '6 tháng gần nhất'; break;
     case 'luyke': { const all = bAllMonths(list); from = all[0] && all[0] < now ? all[0] : now; to = now; label = `Lũy kế đến ${ymTxt(now)}`; break; }
-    case 'all': { const all = bAllMonths(list); from = all[0] || now; to = all.length ? all[all.length - 1] : now; label = 'Toàn bộ thời gian'; break; }
+    case 'all': { const all = bAllMonths(list); from = all[0] && all[0] < now ? all[0] : now; to = now; label = 'Toàn bộ thời gian'; break; } // từ tháng đầu có số liệu đến hôm nay
     case 'tuychon': from = BST.tu || ymAdd(now, -2); to = BST.den || now; if (from > to) [from, to] = [to, from]; label = from === to ? `Tháng ${ymTxt(from)}` : `${ymTxt(from)} – ${ymTxt(to)}`; break;
     default: from = `${y}-01`; to = `${y}-12`; label = `Năm ${y}`;
   }
   const n = ymDiff(from, to) + 1;
   const prev = BST.ky === 'luyke' || BST.ky === 'all' ? null : { from: ymAdd(from, -n), to: ymAdd(from, -1) };
   const [fy, fm] = from.split('-'), [ty, tm] = to.split('-');
-  return { from, to, n, prev, label, range: `01/${fm}/${fy} – ${lastDay(to)}/${tm}/${ty}` };
+  // Kỳ kết thúc ở tháng hiện tại (Tháng này, 6 tháng, Lũy kế, Toàn bộ…): ghi đến HÔM NAY thay vì ngày cuối tháng
+  const den = to === now ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : `${lastDay(to)}/${tm}/${ty}`;
+  return { from, to, n, prev, label, range: `01/${fm}/${fy} – ${den}` };
 }
 // Tổng trong khoảng tháng [a, b]
 function bSumRange(list, v, a, b) {

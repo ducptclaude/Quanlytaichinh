@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.10.11.26 – Kỳ báo cáo: đến HÔM NAY
+- "Toàn bộ thời gian" = từ tháng đầu có số liệu đến hôm nay (trước: đến tháng cuối có số liệu, ghi ngày cuối tháng). Mọi kỳ kết thúc ở tháng hiện tại (Tháng này, 6 tháng, Lũy kế, Toàn bộ) ghi đến ngày hôm nay thay cho ngày cuối tháng.
+
 ## V06.10.11.26 – Mục I: dòng so sánh TĐ dễ hiểu
 - Thẻ Doanh thu / Chi phí / Lợi nhuận: bằng TĐ trước -> chỉ ghi "= TĐx" (bỏ "so với TĐx" lặp); chênh lệch -> "▲/▼ số (±%) so với TĐx".
 
