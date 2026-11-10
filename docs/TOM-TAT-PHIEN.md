@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V25.10.11.26 — Điện thoại: giữ nguyên dạng bảng (bỏ đổi bảng thành thẻ)
+- Người dùng: dạng thẻ khó đọc → `public/common.js` `mcardInit` TẮT (bật lại: `window.BANG_THE = true`). CSS thẻ cũ còn trong `style.css` nhưng không dùng (bảng không còn lớp `m-card`).
+- ≤ 900px: bảng vuốt ngang trong khung bảng (trang không kéo ngang), chữ bảng 12px, ô gọn, bóng mờ mép phải báo còn cột.
+- Kiểm tra: 18 thiết bị × 9 trang – 0 tràn ngang trang, 0 lỗi; iPhone 15: bảng Báo cáo mục I / II, Doanh thu, Chi phí, Tài khoản hiện đúng dạng bảng. Điểm khôi phục: `phien-10.11.26-20h07`.
+
 ## V24.10.11.26 — Giao diện khớp điện thoại & máy tính bảng (iPhone, Galaxy, Z Fold / Z Flip, iPad, Galaxy Tab)
 - Rà 18 khung máy × 9 trang (Báo cáo, Dashboard, Dự án, Doanh thu, Chi phí, Duyệt, Tài khoản, Cài đặt, Cá nhân), dọc + ngang.
 - Sửa: cụm nút đầu trang ≤ 600px xuống dòng gọn (ẩn nhãn vai trò, rút gọn tên, ô ngôn ngữ hẹp); ≤ 380px thu nhỏ thêm;

@@ -453,7 +453,7 @@ function askPasscode(title, detail = '') {
 }
 
 // ---------------------------------------------------------------------
-// Điện thoại: bảng số liệu hiện thành thẻ (mỗi dòng = 1 thẻ "nhãn cột : giá trị"), không phải cuộn ngang.
+// (ĐANG TẮT) Điện thoại: bảng số liệu hiện thành thẻ (mỗi dòng = 1 thẻ "nhãn cột : giá trị"), không phải cuộn ngang.
 // Gắn nhãn từ tiêu đề bảng (hỗ trợ tiêu đề nhiều tầng có colspan/rowspan: "THU · Kế hoạch").
 // Áp cho bảng trong .table-wrap và .pc-tbl; bỏ qua bảng có class no-mcard. Giao diện máy tính giữ nguyên.
 // ---------------------------------------------------------------------
@@ -499,6 +499,7 @@ function mcardLabels(table) {
   }
 }
 (function mcardInit() {
+  if (window.BANG_THE !== true) return; // TẮT (người dùng yêu cầu): điện thoại giữ nguyên dạng bảng, vuốt ngang trong khung bảng. Bật lại: đặt window.BANG_THE = true
   const SEL = '.table-wrap > table:not(.no-mcard), table.pc-tbl:not(.no-mcard)';
   let queued = false;
   const run = () => {
