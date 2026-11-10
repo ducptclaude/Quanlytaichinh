@@ -3244,3 +3244,14 @@ tr.dy-cho > td:first-child { box-shadow: inset 3px 0 0 #eda100; }
 :root:not([data-theme="dark"]) #b-report .th-t3 tbody tr:hover td { background-color: rgba(31,59,115,.035); }
 :root:not([data-theme="dark"]) #b-report .th-t3 thead th, :root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-thu, :root:not([data-theme="dark"]) #b-report .th-t3 thead tr.t3-grp th.g-chi { background: var(--cfb-cream, #f6f1e9) !important; }
 :root:not([data-theme="dark"]) #b-report .th-t3 tfoot td.c-thu, :root:not([data-theme="dark"]) #b-report .th-t3 tfoot td.c-chi { background: transparent; }
+/* Mục III – phương án 5 (người dùng chọn): kiểu bảng tài chính – lưới mảnh, đầu bảng xám xanh, tên nhóm Thu navy / Chi nâu đồng, dòng tổng navy chữ trắng */
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead th { background: #eef2f7 !important; color: #334155 !important; border: 1px solid #d5dde8 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-thu, html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-chi { background: #eef2f7 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-thu { color: #1f3b73 !important; border-bottom: 2px solid #3462a3 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-chi { color: #8a4f1c !important; border-bottom: 2px solid #c27a3e !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tbody td { border: 1px solid #e6ebf2 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tbody td.c-kq, html:root:not([data-theme="dark"]) body #b-report table.th-t3 tbody td.g-con { background: transparent !important; font-weight: 800; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td { background: #1f3b73 !important; color: #fff !important; border-color: #1f3b73 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .neg { color: #ffb4b4 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { color: #9fe3da !important; }
+@media print { html body #b-report table.th-t3 tfoot td, html body #b-report table.th-t3 thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }

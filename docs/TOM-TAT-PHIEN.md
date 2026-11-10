@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.10.11.26 – Mục III: phương án 5 "bảng tài chính" (người dùng chọn trong 5 phương án)
+- Lưới mảnh đầy đủ (#e6ebf2), đầu bảng xám xanh #eef2f7, tên nhóm THU navy (vạch #3462a3) / CHI nâu đồng (vạch #c27a3e), cột kết quả chữ đậm, dòng Tổng cộng nền navy chữ trắng (số âm hồng nhạt, dương teal nhạt). Giao diện tối giữ nguyên. In / PDF giữ màu.
+
 ## V09.10.11.26 – Mục III: phối màu bảng Thu / Chi đồng bộ các bảng khác
 - Đầu bảng cùng nền kem; nhóm THU navy / CHI nâu đồng phân biệt bằng chữ + vạch mảnh dưới tên nhóm; thân bảng nền trắng (bỏ nền xanh / cam cả cột);
   chỉ cột Còn phải thu / Còn phải chi (`c-kq`) và Còn lại có nền rất nhạt; đường chia nhóm mảnh màu kem. Giao diện tối giữ nguyên.
