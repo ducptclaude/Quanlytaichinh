@@ -3313,3 +3313,9 @@ html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { co
 .td-mx.cpk tbody tr.cpk-n th { font-size: 12.5px; }
 .td-mx.cpk td.num { white-space: nowrap; }
 @media (max-width: 720px) { .td-mx.cpk .cpk-bar { display: none; } .td-mx.cpk tbody th { white-space: normal; } }
+/* Mục III: nút sắp xếp ở tiêu đề Tên dự án / Tình trạng */
+.t3-sort { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; }
+.t3-sort .t3-ar { font-size: 10px; opacity: .55; }
+.t3-sort:hover .t3-ar, .t3-sort.on .t3-ar { opacity: 1; color: #14a39a; }
+.t3-sort.on { color: #1f3b73; }
+.t3-sort:focus-visible { outline: 2px solid #14a39a; outline-offset: 2px; border-radius: 4px; }

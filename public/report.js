@@ -678,6 +678,12 @@ function bThuGonBang() {
 document.addEventListener('click', (e) => {
   const m = e.target.closest('[data-thmore]');
   if (m) { const k = m.dataset.thmore; thMo.has(k) ? thMo.delete(k) : thMo.add(k); return bThuGonBang(); }
+  const so = e.target.closest('[data-t3sort]');
+  if (so) { // mục III: sắp xếp theo Tên dự án / Tình trạng – bấm lần 1 tăng dần, lần 2 giảm dần, lần 3 bỏ (về A–Z mã)
+    const k = so.dataset.t3sort, c = BST.t3_sort || {};
+    BST.t3_sort = c.k !== k ? { k, dir: 'asc' } : c.dir === 'asc' ? { k, dir: 'desc' } : {};
+    bSave(); return renderKeepPos(`[data-t3sort="${k}"]`);
+  }
   const b = e.target.closest('[data-itd], [data-itd3]'); if (!b) return; // nút TĐ ở mục I hoặc mục III (dùng chung 1 lựa chọn)
   const a = 'itd' in b.dataset ? 'itd' : 'itd3', n = b.dataset[a];
   BST.i_td = Number(n); bSave(); renderKeepPos(`[data-${a}="${n}"]`);
@@ -783,6 +789,14 @@ function bTongHopHtml(list, v, P) {
   const { to, rows, T } = bTongHopData(list, v, P);
   // Mục III: theo TĐ đang chọn ở mục I – Còn phải thu = DT TĐ − dòng thu · Còn phải chi = CP TĐ − dòng chi · Còn lại = phải thu − phải chi
   const { k: k3, R: R3, T: T3 } = bMuc3Data(list, v, rows);
+  // Mục III: sắp xếp theo Tên dự án / Tình trạng (bấm tiêu đề cột; bấm lần nữa đảo chiều)
+  const S3 = BST.t3_sort || {}, TT_THU_TU = { 'Đang thi công': 1, 'Chuẩn bị': 2, 'Tạm dừng': 3, 'Hoàn thành': 4 };
+  if (S3.k) {
+    const d = S3.dir === 'desc' ? -1 : 1;
+    R3.sort((a, b) => d * (S3.k === 'ten' ? bNat(a.x.d.ten_du_an, b.x.d.ten_du_an)
+      : (TT_THU_TU[a.x.d.trang_thai] || 9) - (TT_THU_TU[b.x.d.trang_thai] || 9) || bNat(a.x.d.ma_du_an, b.x.d.ma_du_an)));
+  }
+  const s3h = (k, lab) => `<button type="button" class="t3-sort ${S3.k === k ? 'on' : ''}" data-t3sort="${k}" title="Bấm để sắp xếp theo ${lab.toLowerCase()}${S3.k === k ? ' (bấm lần nữa để đảo chiều)' : ''}">${lab} <span class="t3-ar">${S3.k === k ? (S3.dir === 'desc' ? '▼' : '▲') : '⇅'}</span></button>`;
   const vt = v === 'gt' ? 'trước VAT' : 'sau VAT';
   const ty = (x) => `<span class="${x < 0 ? 'neg' : ''}">${bTy(x)}</span>`;
   const meter = (a, b, color) => `<span class="f-meter"><i style="width:${b > 0 ? Math.max(0, Math.min(100, (a / b) * 100)) : 0}%;background:${a < 0 ? '#d92d35' : color}"></i></span>`;
@@ -877,7 +891,7 @@ function bTongHopHtml(list, v, P) {
       ${card('ln', 'Còn lại (thu − chi)', T3.con, ['Còn phải thu − Còn phải chi', T3.con < 0 ? 'Phần còn phải chi lớn hơn phần còn phải thu' : 'Tiền dự án còn dư khi thu – chi hết'])}
     </div>
     <div class="table-wrap${MOT ? ' th-mot' : ''}"><table class="b-table th-table th-t3">
-      <thead><tr class="t3-grp"><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">Tên dự án</th><th rowspan="2">Tình trạng</th>
+      <thead><tr class="t3-grp"><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">${s3h('ten', 'Tên dự án')}</th><th rowspan="2">${s3h('tt', 'Tình trạng')}</th>
         <th colspan="3" class="g-thu">Thu (tiền về)</th><th colspan="3" class="g-chi">Chi (tiền ra)</th><th rowspan="2" class="num g-con">Còn lại (thu − chi)</th></tr>
         <tr class="t3-sub"><th class="num c-thu g1">Doanh thu TĐ${k3}</th><th class="num c-thu">Dòng thu</th><th class="num c-thu">Còn phải thu</th>
         <th class="num c-chi g1">Chi phí TĐ${k3}</th><th class="num c-chi">Dòng chi</th><th class="num c-chi">Còn phải chi</th></tr></thead>

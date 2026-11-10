@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V18.10.11.26 – Mục III: sắp xếp theo Tên dự án / Tình trạng
+- Bấm tiêu đề "Tên dự án" hoặc "Tình trạng" (⇅): lần 1 tăng dần ▲, lần 2 giảm dần ▼, lần 3 bỏ (về thứ tự mã dự án). Tình trạng theo thứ tự Đang thi công → Chuẩn bị → Tạm dừng → Hoàn thành. Ghi nhớ lựa chọn (`BST.t3_sort`).
+
 ## V17.10.11.26 – Báo cáo xem 1 dự án: chỉ ẩn bảng mục III
 - Sửa lại V12: mục I và II luôn hiện bảng; chỉ bảng mục III tự ẩn khi chọn 1 dự án (hiện lại khi chọn Tất cả).
 
