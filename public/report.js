@@ -816,7 +816,8 @@ function bTongHopHtml(list, v, P) {
         return `<span class="i-dl ${(d > 0) === good ? 'up' : 'dn'}" title="So với TĐ${k - 1}: ${bn(d)} đ">${d > 0 ? '▲' : '▼'} ${bTy(Math.abs(d))}${b0 ? ` (${d > 0 ? '+' : '−'}${Math.abs((d / Math.abs(b0)) * 100).toFixed(1).replace('.', ',')}%)` : ''}</span>`; };
       const seg = `<div class="i-tdseg" role="group" aria-label="Chọn thời điểm">${[[1, 'Ký HĐ'], [2, 'Điều chỉnh'], [3, 'Quyết toán']].map(([n, t]) =>
         `<button type="button" data-itd="${n}" class="${n === k ? 'on' : ''}"><b>TĐ${n}</b> ${t}</button>`).join('')}</div>`;
-      const sub = (f, good) => (k > 1 ? `${dl(TT[f], P0[f], good)} <span class="muted">so với TĐ${k - 1}</span>` : '');
+      // Bằng TĐ trước: chỉ ghi "= TĐx"; chênh lệch: mũi tên + số + % "so với TĐx"
+      const sub = (f, good) => (k > 1 ? (P0[f] != null && Math.abs(TT[f] - P0[f]) < 1e6 ? dl(TT[f], P0[f], good) : `${dl(TT[f], P0[f], good)} <span class="muted">so với TĐ${k - 1}</span>`) : '');
       // Bảng: mỗi dự án chỉ 1 ô thay đổi LN (mũi tên + số, rê chuột xem DT / CP) – đỡ nhiễu khi nhiều dự án
       const doi = (r) => (k > 1 ? Math.abs(r.dt - r.b.dt) >= 1e6 || Math.abs(r.cp - r.b.cp) >= 1e6 : false);
       const nDoi = R.filter(doi).length;
