@@ -850,7 +850,7 @@ function bTongHopHtml(list, v, P) {
         const d = (r.dt - r.cp) - (r.b.dt - r.b.cp);
         const tip = `So với TĐ${k - 1}: DT ${r.dt - r.b.dt >= 0 ? '+' : '−'}${bTy(Math.abs(r.dt - r.b.dt))} · CP ${r.cp - r.b.cp >= 0 ? '+' : '−'}${bTy(Math.abs(r.cp - r.b.cp))} · LN ${d >= 0 ? '+' : '−'}${bTy(Math.abs(d))} ${TY()}`;
         return `<td class="num i-dc" title="${tip}"><span class="i-dl ${Math.abs(d) < 1e6 ? 'eq' : d > 0 ? 'up' : 'dn'}">${Math.abs(d) < 1e6 ? '=' : d > 0 ? '▲' : '▼'} ${bTy(Math.abs(d))}</span></td>`; };
-      return `${thHead('I', `Doanh thu – Chi phí – Lợi nhuận ${TEN[2]}`, TEN[1], [TEN[0], vt[0].toUpperCase() + vt.slice(1)])}
+      return `${thHead('I', 'Doanh thu – Chi phí – Lợi nhuận', TEN[1], [TEN[0], vt[0].toUpperCase() + vt.slice(1)])}
     <div class="i-tdbar">${seg}<label class="i-doi ${k > 1 ? '' : 'off'}" title="${k > 1 ? '' : 'TĐ1 là mốc đầu – không có thay đổi để lọc'}"><input type="checkbox" data-idoi ${chiDoi ? 'checked' : ''} ${k > 1 ? '' : 'disabled'}> Chỉ dự án có thay đổi <b>${k > 1 ? nDoi : 0}</b>/${R.length}</label><span class="muted small">Mũi tên ▲▼ = tăng / giảm so với TĐ liền trước</span></div>
     <div class="f-grid th-grid3">
       ${card('dt', `Doanh thu ${TEN[2]}`, TT.dt, k === 1 ? [`${rows.length} dự án · giá trị HĐ khi ký`, `${rows.filter((x) => x.td1).length}/${rows.length} dự án đã chốt TĐ1`] : [sub('dt', true), `${rows.length} dự án`])}
