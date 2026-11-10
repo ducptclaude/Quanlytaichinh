@@ -1350,7 +1350,11 @@ window.BKS_EN = {
 "tạm tính (cost to cost)": "provisional (cost to cost)",
 "TT/QT + tạm tính": "payments/final + provisional",
 "HĐ chưa quyết toán – giá trị tạm tính": "Contract not yet finalised – provisional value",
-"GTHT theo từng HĐ: đã có đợt thanh toán / quyết toán = lũy kế các đợt · HĐ chưa quyết toán chưa có đợt = tạm tính cost to cost (Thực chi ÷ CP TĐ3 trước VAT × DT TĐ3) · % Tiền về = Tiền về ÷ GTHT": "CV per contract: with payment rounds / final account = cumulative rounds · unsettled contract without rounds = provisional cost to cost (Actual expenditure ÷ M3 cost excl. VAT × M3 revenue) · % Collections = Collections ÷ CV"
+"GTHT theo từng HĐ: đã có đợt thanh toán / quyết toán = lũy kế các đợt · HĐ chưa quyết toán chưa có đợt = tạm tính cost to cost (Thực chi ÷ CP TĐ3 trước VAT × DT TĐ3) · % Tiền về = Tiền về ÷ GTHT": "CV per contract: with payment rounds / final account = cumulative rounds · unsettled contract without rounds = provisional cost to cost (Actual expenditure ÷ M3 cost excl. VAT × M3 revenue) · % Collections = Collections ÷ CV",
+"Tự động (theo số liệu)": "Automatic (from data)",
+"Tự động theo số liệu": "Automatic from data",
+"Tự động theo số liệu (đang chọn Tạm dừng)": "Automatic from data (On hold selected)",
+"Trạng thái tự chạy theo số liệu: Chuẩn bị · Đang thi công · Hoàn thành (đã quyết toán hoặc đạt 100%). Chỉ chọn tay khi dự án Tạm dừng": "Status follows the data: Preparing · In progress · Completed (finalised or 100%). Set manually only when the project is On hold"
 },
 "patterns": [
 [

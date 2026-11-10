@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.10.11.26 – Tình trạng tự động tính ở máy chủ, dùng chung mọi trang; ô chọn tay chỉ còn Tạm dừng
+- `lib/report.js` `tinhTrangTuDong` (lũy kế đến nay, trước VAT; cùng quy tắc GTHT theo từng HĐ) -> `trang_thai_tu_dong` trong số liệu báo cáo; API mới `GET /api/du-an-tinh-trang` (chỉ mã + tình trạng, không số tiền) cho trang Dự án.
+- Báo cáo / Dashboard / Trợ lý / Nhập liệu › Dự án hiện cùng tình trạng tự động (kể cả vai nhập liệu không xem Báo cáo). Form dự án: ô Trạng thái chỉ còn "Tự động (theo số liệu)" / "Tạm dừng".
+- Kiểm tra: 15 dự án – Báo cáo, trang Dự án (Quản trị) và trang Dự án (QS) trùng khớp; duyệt 28/28; tester 0 LỖI.
+
 ## V02.10.11.26 – Tình trạng dự án tự chạy theo số liệu (Báo cáo, Dashboard, Trợ lý)
 - `bTinhTrangTuDong` (report.js, chạy sau khi tải số liệu báo cáo): Tạm dừng (nhập tay) giữ nguyên · mọi HĐ CĐT đã quyết toán hoặc % hoàn thành (GTHT ÷ DT TĐ3) ≥ 100% -> Hoàn thành ·
   chưa có HĐ CĐT và chưa chi -> Chuẩn bị · còn lại -> Đang thi công. Trạng thái nhập tay giữ ở `trang_thai_nhap` (rê chuột ô Tình trạng xem). Trang Nhập liệu › Dự án vẫn hiện trạng thái nhập tay.

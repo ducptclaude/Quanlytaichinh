@@ -668,6 +668,8 @@ api.use('/users', users);
 // ---------- Dự án ----------
 
 api.get('/du-an', wrap(async (_req, res) => res.json(await store.listProjects())));
+// Tình trạng tự động theo số liệu (không trả số tiền): [{ id, tt }]
+api.get('/du-an-tinh-trang', wrap(async (_req, res) => res.json((await reportProjects()).map((d) => ({ id: d.id, tt: d.trang_thai_tu_dong })))));
 
 api.post('/du-an', canHd, wrap(async (req, res) => {
   const { data, errors } = validateProject(req.body || {});

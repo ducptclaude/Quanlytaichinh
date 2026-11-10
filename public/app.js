@@ -39,7 +39,8 @@ let users = [];
   document.body.classList.add('roles-ready'); // đến đây mới hiện các mục theo quyền (tránh nhấp nháy tab quản trị)
 
   const stSel = $('#p-form [name=trang_thai]');
-  if (stSel) stSel.innerHTML = META.trang_thai.map((t) => `<option>${esc(t)}</option>`).join('');
+  // Trạng thái tự chạy theo số liệu; chỉ chọn tay khi Tạm dừng
+  if (stSel) { stSel.innerHTML = '<option value="Đang thi công">Tự động (theo số liệu)</option><option value="Tạm dừng">Tạm dừng</option>'; stSel.title = 'Trạng thái tự chạy theo số liệu: Chuẩn bị · Đang thi công · Hoàn thành (đã quyết toán hoặc đạt 100%). Chỉ chọn tay khi dự án Tạm dừng'; }
   const roleSel = $('#u-form [name=role]');
   if (roleSel) roleSel.innerHTML = Object.entries(META.roles).filter(([k]) => ME.role === 'admin' || k !== 'admin').map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
 
@@ -161,7 +162,10 @@ const LOP = { dk: 'du_kien', th: 'thuc_hien' };
 const lopOf = (d, lop = DSTATE.lop) => d[LOP[lop] || 'thuc_hien'];
 
 async function loadProjects() {
-  [projects, dash] = await Promise.all([api('/api/du-an'), api('/api/dashboard')]);
+  let tt;
+  [projects, dash, tt] = await Promise.all([api('/api/du-an'), api('/api/dashboard'), api('/api/du-an-tinh-trang').catch(() => [])]);
+  const m = new Map(tt.map((x) => [x.id, x.tt]));
+  for (const r of projects) { r.trang_thai_nhap = r.trang_thai; if (m.has(r.id)) r.trang_thai = m.get(r.id); } // trạng thái tự động theo số liệu
   renderProjects();
 }
 
@@ -179,7 +183,7 @@ function renderProjects() {
         <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình"><b class="p-ma">${esc(r.ma_du_an)}</b></a></td>
         <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình">${esc(r.ten_du_an)}</a></td>
         <td>${esc(r.chu_dau_tu)}</td>
-        <td><span class="st st-${slug(r.trang_thai)}">${esc(r.trang_thai)}</span></td>
+        <td><span class="st st-${slug(r.trang_thai)}" title="Tự động theo số liệu${r.trang_thai_nhap === 'Tạm dừng' ? ' (đang chọn Tạm dừng)' : ''}">${esc(r.trang_thai)}</span></td>
         <td class="num">${days(r)}</td>
         <td class="small">${dmy(r.ngay_bat_dau)}${r.ngay_ket_thuc ? '<br>→ ' + dmy(r.ngay_ket_thuc) : ''}</td>
         <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
@@ -311,6 +315,7 @@ $('#p-tbody').addEventListener('click', async (e) => {
     const r = projects.find((x) => x.id === Number(edit));
     if (!r) return;
     for (const [k, v] of Object.entries(r)) if (pForm.elements[k]) pForm.elements[k].value = v ?? '';
+    if (pForm.elements.trang_thai) pForm.elements.trang_thai.value = r.trang_thai === 'Tạm dừng' ? 'Tạm dừng' : 'Đang thi công'; // khác Tạm dừng = Tự động
     pForm.elements.toa_do.value = r.vi_do != null && r.kinh_do != null ? mapFmt(Number(r.vi_do), Number(r.kinh_do)) : '';
     $('#p-form-title').textContent = 'Sửa dự án ' + r.ma_du_an;
     pDays();

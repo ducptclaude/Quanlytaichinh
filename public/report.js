@@ -25,23 +25,11 @@ async function loadReport() {
   bTinhTrangTuDong(BC);
   renderReport();
 }
-// Tình trạng dự án tự chạy theo số liệu (Báo cáo, Dashboard, Trợ lý); trạng thái nhập tay giữ ở d.trang_thai_nhap
-//  Tạm dừng (nhập tay) -> giữ · mọi HĐ CĐT đã quyết toán hoặc % hoàn thành ≥ 100% -> Hoàn thành
-//  chưa có HĐ CĐT, chưa chi đồng nào -> Chuẩn bị · còn lại -> Đang thi công
+// Tình trạng dự án tự chạy theo số liệu (máy chủ tính – lib/report.js tinhTrangTuDong, cùng số với trang Dự án); nhập tay giữ ở d.trang_thai_nhap
 function bTinhTrangTuDong(bc) {
   if (!bc?.du_an?.length || bc._ttTuDong) return;
   bc._ttTuDong = true;
-  let G = new Map();
-  try { G = bGthtMap(bc.du_an, 'gt'); } catch { /* thiếu số liệu: giữ trạng thái nhập tay */ }
-  for (const d of bc.du_an) {
-    const nhap = d.trang_thai, hds = d.hds || [], g = G.get(d.id);
-    const chi = (d.tien_thuc?.gd || []).length || (d.thuc_hien?.chi_phi?.gt || 0) > 0;
-    let tt = 'Đang thi công';
-    if (nhap === 'Tạm dừng') tt = 'Tạm dừng';
-    else if ((hds.length && hds.every((h) => h.da_qt)) || (g && g.ht != null && g.ht >= 0.9995)) tt = 'Hoàn thành';
-    else if (!hds.length && !chi) tt = 'Chuẩn bị';
-    d.trang_thai_nhap = nhap; d.trang_thai = tt; d.tt_tu_dong = tt !== nhap;
-  }
+  for (const d of bc.du_an) if (d.trang_thai_tu_dong) { d.trang_thai_nhap = d.trang_thai_nhap || d.trang_thai; d.trang_thai = d.trang_thai_tu_dong; }
 }
 
 // Mô tả phạm vi báo cáo để ghi nhật ký
