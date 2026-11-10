@@ -1505,82 +1505,7 @@ function renderReport() {
 
   ${bPcSection(list, v)}
 
-  ${ME?.role === 'viewer' ? '' /* Chỉ xem: không hiện Phân tích chi tiết */ : `<div class="card b-detail-bar">
-    <div><b>Phân tích chi tiết</b> <span class="muted small">(I → ${one ? 'IV' : 'V'}: tổng quan theo hợp đồng, biểu đồ, ${one ? '' : 'tổng hợp dự án, '}chi tiết từng dự án, cảnh báo${warnN ? ` – <b class="warn-text">${warnN} cảnh báo</b>` : ''})</span></div>
-    <button type="button" class="${BST.chi_tiet ? '' : 'primary'}" id="b-detail-toggle">${BST.chi_tiet ? 'Ẩn chi tiết ▴' : 'Hiện chi tiết ▾'}</button>
-  </div>
-  <div id="b-detail" class="b-detail" ${BST.chi_tiet ? '' : 'hidden'}>
-  <section class="card b-sec">
-    <h2>I. Tổng quan theo hợp đồng</h2>
-    <p class="b-count">${T.so_da} dự án · ${T.so_hd} HĐ chủ đầu tư (${T.so_hd_qt} đã quyết toán) · ${T.so_tp} HĐ đầu vào (${T.so_tp_qt} đã quyết toán)</p>
-    <div class="b-kpi-grid">
-      <div class="b-rowlab">Dự kiến<small>theo hợp đồng</small></div>
-      ${kpi('Doanh thu', T.dk.dt[v], `HĐ + PL; đã QT theo quyết toán`)}
-      ${kpi('Chi phí', T.dk.cp[v], `${bpct(T.dk.cp[v], T.dk.dt[v])} doanh thu`)}
-      ${kpi('Lợi nhuận', lnDk, `Tỷ suất ${bpct(lnDk, T.dk.dt[v])}`, lnDk < 0 ? 'bad' : 'good')}
-      <div class="b-rowlab">Thực hiện<small>đến hiện tại</small></div>
-      ${kpi('Doanh thu', T.th.dt[v], `Đã nghiệm thu · đạt ${bpct(T.th.dt[v], T.dk.dt[v])} dự kiến`)}
-      ${kpi('Chi phí', T.th.cp[v], `${bpct(T.th.cp[v], T.th.dt[v])} doanh thu`)}
-      ${kpi('Lợi nhuận', lnTh, `Tỷ suất ${bpct(lnTh, T.th.dt[v])}`, lnTh < 0 ? 'bad' : 'good')}
-      <div class="b-rowlab">Dòng tiền & công nợ<small>sau VAT</small></div>
-      ${kpi('Tiền về', T.tien_ve, `${bpct(T.tien_ve, T.dk.dt.sv)} giá trị HĐ`)}
-      ${kpi('Còn phải thu', T.th.con_lai, T.th.con_lai < 0 ? 'Âm: CĐT ứng trước vượt nghiệm thu' : 'Theo khối lượng nghiệm thu')}
-      ${kpi('Còn phải trả HĐ đầu vào', T.tp_con_lai, `Đã trả ${bn(T.tp_da_tt)} · trả nợ gốc vay ${bn(T.tra_goc)}`)}
-    </div>
-  </section>
-
-  <section class="card b-sec">
-    <h2>II. Biểu đồ</h2>
-    <div class="b-charts">
-      <div><h3>Doanh thu – Chi phí thực hiện (lũy kế)</h3><div id="b-ch-line" class="chart"></div></div>
-      <div><h3>Dòng tiền thực tế theo tháng (sau VAT)</h3><div id="b-ch-flow" class="chart"></div></div>
-      <div><h3>Cơ cấu chi phí dự kiến theo nhóm</h3><div id="b-ch-cost" class="chart"></div></div>
-      <div><h3>${one ? 'Lãi gộp dự kiến theo HĐ chủ đầu tư' : 'Lợi nhuận theo dự án'}</h3><div id="b-ch-ln" class="chart"></div></div>
-    </div>
-  </section>
-
-  ${one ? '' : `<section class="card b-sec">
-    <h2>III. Tổng hợp theo dự án</h2>
-    <h3>1. Hiệu quả (${vt})</h3>
-    <div class="table-wrap"><table class="b-table">
-      <thead><tr><th rowspan="2">Dự án</th><th rowspan="2">Trạng thái</th><th rowspan="2" class="num">Tiến độ</th>
-        <th colspan="4" class="grp">Dự kiến</th><th colspan="4" class="grp">Thực hiện</th></tr>
-        <tr><th class="num">Doanh thu</th><th class="num">Chi phí</th><th class="num">Lợi nhuận</th><th class="num">%</th>
-        <th class="num">Doanh thu</th><th class="num">Chi phí</th><th class="num">Lợi nhuận</th><th class="num">%</th></tr></thead>
-      <tbody>${projRows((d) => {
-        const a = d.du_kien.doanh_thu[v] - d.du_kien.chi_phi[v], b = d.thuc_hien.doanh_thu[v] - d.thuc_hien.chi_phi[v];
-        return `<tr><td><b>${esc(d.ma_du_an)}</b> ${esc(d.ten_du_an)}</td><td>${esc(d.trang_thai)}</td><td class="num">${d.tien_do}%</td>
-          <td class="num">${bn(d.du_kien.doanh_thu[v])}</td><td class="num">${bn(d.du_kien.chi_phi[v])}</td><td class="num strong">${bm(a)}</td><td class="num">${bpct(a, d.du_kien.doanh_thu[v])}</td>
-          <td class="num">${bn(d.thuc_hien.doanh_thu[v])}</td><td class="num">${bn(d.thuc_hien.chi_phi[v])}</td><td class="num strong">${bm(b)}</td><td class="num">${bpct(b, d.thuc_hien.doanh_thu[v])}</td></tr>`;
-      })}</tbody>
-      <tfoot><tr><td colspan="3">TỔNG CỘNG</td><td class="num">${bn(T.dk.dt[v])}</td><td class="num">${bn(T.dk.cp[v])}</td><td class="num">${bm(lnDk)}</td><td class="num">${bpct(lnDk, T.dk.dt[v])}</td>
-        <td class="num">${bn(T.th.dt[v])}</td><td class="num">${bn(T.th.cp[v])}</td><td class="num">${bm(lnTh)}</td><td class="num">${bpct(lnTh, T.th.dt[v])}</td></tr></tfoot>
-    </table></div>
-    <h3>2. Dòng tiền & công nợ (sau VAT)</h3>
-    <div class="table-wrap"><table class="b-table">
-      <thead><tr><th>Dự án</th><th class="num">HĐ CĐT (đã QT)</th><th class="num">Giá trị HĐ dự kiến</th><th class="num">Tiền về</th><th class="num">% thu</th><th class="num">Còn phải thu</th>
-        <th class="num">HĐ đầu vào (đã QT)</th><th class="num">Đã trả HĐ đầu vào</th><th class="num">Còn phải trả HĐ đầu vào</th><th class="num">Trả nợ gốc vay</th><th class="num">Cảnh báo</th></tr></thead>
-      <tbody>${projRows((d) => `<tr><td><b>${esc(d.ma_du_an)}</b> ${esc(d.ten_du_an)}</td><td class="num">${d.so_hd} (${d.so_hd_qt})</td>
-        <td class="num">${bn(d.du_kien.doanh_thu.sv)}</td><td class="num">${bn(d.tien_ve)}</td><td class="num">${bpct(d.tien_ve, d.du_kien.doanh_thu.sv)}</td><td class="num">${bm(d.thuc_hien.con_lai)}</td>
-        <td class="num">${d.so_tp} (${d.so_tp_qt})</td><td class="num">${bn(d.tp.da_tt)}</td><td class="num">${bm(d.tp.con_lai)}</td><td class="num">${bn(d.tra_goc.sv)}</td>
-        <td class="num">${d.canh_bao.length ? `<span class="st st-tam-tinh">${d.canh_bao.length}</span>` : '0'}</td></tr>`)}</tbody>
-      <tfoot><tr><td>TỔNG CỘNG</td><td class="num">${T.so_hd} (${T.so_hd_qt})</td><td class="num">${bn(T.dk.dt.sv)}</td><td class="num">${bn(T.tien_ve)}</td><td class="num">${bpct(T.tien_ve, T.dk.dt.sv)}</td>
-        <td class="num">${bm(T.th.con_lai)}</td><td class="num">${T.so_tp} (${T.so_tp_qt})</td><td class="num">${bn(T.tp_da_tt)}</td><td class="num">${bm(T.tp_con_lai)}</td><td class="num">${bn(T.tra_goc)}</td><td class="num">${T.canh_bao}</td></tr></tfoot>
-    </table></div>
-  </section>`}
-
-  <section class="card b-sec">
-    <h2>${one ? 'III' : 'IV'}. Chi tiết theo dự án</h2>
-    <div class="no-print b-tools"><button type="button" class="sm" id="b-open-all">Mở tất cả</button><button type="button" class="sm" id="b-close-all">Thu gọn tất cả</button></div>
-    ${list.map((d) => bProjectDetail(d, v, Boolean(one))).join('')}
-  </section>
-
-  <section class="card b-sec">
-    <h2>${one ? 'IV' : 'V'}. Cảnh báo & lưu ý</h2>
-    ${bWarnTable(list)}
-  </section>
-
-  </div>`}
+  ${'' /* Đã bỏ nhóm "Phân tích chi tiết" (I → V) theo yêu cầu người dùng – V05.10.11.26 */}
   <div class="b-foot">Nguồn: ${esc(BC.ten_he_thong || 'PROJECT PROFIT')} · ${esc(BC.phien_ban)} · Số liệu lấy tự động từ các tab Doanh thu, Chi phí, Thầu phụ, Tiền về tại thời điểm lập báo cáo.</div>`;
 
   bWrapSections();
@@ -1868,7 +1793,7 @@ function bPcCard(d, idx) {
     </header>
     <nav class="pc-tabs no-print">${PC_TABS.map(([k, t]) => `<button type="button" data-pt="${k}" class="${k === tab ? 'on' : ''}">${t}</button>`).join('')}</nav>
     <div class="pc-body">${bPcBody(d, tab)}</div>
-    <button type="button" class="pc-more no-print" data-pdetail="${d.id}">Xem chi tiết công trình ${esc(d.ma_du_an)} →</button>
+
   </article>`;
 }
 

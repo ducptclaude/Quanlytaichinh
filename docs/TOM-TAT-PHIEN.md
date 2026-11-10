@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.10.11.26 – Báo cáo: bỏ nguyên nhóm "Phân tích chi tiết" (I → V)
+- Bỏ thanh "Phân tích chi tiết / Hiện chi tiết" và toàn bộ nội dung bên trong (tổng quan theo HĐ, biểu đồ, tổng hợp dự án, chi tiết từng dự án, bảng cảnh báo); bỏ nút "Xem chi tiết công trình" ở thẻ công trình.
+- Các mục còn lại giữ nguyên: Bảng tổng hợp I–IV, Đánh giá hoàn thành, Báo cáo theo công trình. Xuất Excel / In không đổi.
+
 ## V04.10.11.26 – Đánh giá hoàn thành: bỏ ghi chú nguồn dưới GTHT
 - Bỏ "theo TT/QT"; dự án có HĐ tạm tính chỉ ghi "tạm tính" (rê chuột xem cách tính).
 
