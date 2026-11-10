@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V15.10.11.26 – Báo cáo theo công trình: xem 1 dự án thẻ trải full chiều ngang
+- `.pc-grid.one` bỏ giới hạn 640px -> thẻ công trình rộng bằng khung; cơ cấu chi phí: biểu đồ 120px, chú giải chữ 12px, % đứng sát tên mục.
+
 ## V14.10.11.26 – HĐ đầu vào: nhóm loại mặc định thu gọn
 - Nhóm Thầu phụ / Vật tư / Nhân công / MMTB luôn thu gọn khi mở trang (kể cả dự án chỉ có 1 HĐ CĐT); chỉ tự mở khi đang tìm kiếm; bấm ▸ để mở.
 

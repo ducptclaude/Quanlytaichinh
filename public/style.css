@@ -3282,3 +3282,10 @@ html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { co
 :root[data-theme="dark"] .tp-loai-row td { background: rgba(255,255,255,.03); }
 /* Đầu Báo cáo: ẩn Lập lúc / Người lập / phiên bản trên màn hình (gọn 1 dòng, tránh xuống dòng); vẫn in ra khi In / PDF */
 @media screen { #b-report .b-mi.b-in { display: none; } }
+/* Báo cáo theo công trình – xem 1 dự án: thẻ trải đủ chiều ngang khung (không chừa khoảng trống bên phải) */
+.pc-grid.one { grid-template-columns: minmax(0, 1fr); }
+/* Xem 1 dự án (thẻ rộng): cơ cấu chi phí gọn – % đứng sát tên mục, biểu đồ to hơn, chữ to hơn */
+.pc-grid.one .pc-donut { gap: 16px; }
+.pc-grid.one .pc-donut svg { width: 120px; height: 120px; }
+.pc-grid.one .pc-legend { flex: 0 1 340px; font-size: 12px; gap: 4px; }
+.pc-grid.one .pc-legend i { width: 10px; height: 10px; }
