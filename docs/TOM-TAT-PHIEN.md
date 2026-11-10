@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V16.10.11.26 – Thẻ công trình: nút Tiền thực tế ở đầu thẻ, bảng chi phí I – II – III
+- Nút "💵 Tiền thực tế ▾/▴" ở góc phải đầu thẻ (thay nút "So với thực tế"): bảng tiền thực tế mặc định ẨN, bấm mở hiện giữa ma trận TĐ và bảng chi phí (bấm từ tab khác tự về Tổng quan).
+- Tổng quan thêm bảng "Chi phí kế hoạch" theo khối I. Trực tiếp · II. Gián tiếp · III. Tài chính (kèm nhóm), giá trị + tỷ trọng + thanh tỷ lệ, theo nút VAT (`bPcCpKhoi`).
+
 ## V15.10.11.26 – Báo cáo theo công trình: xem 1 dự án thẻ trải full chiều ngang
 - `.pc-grid.one` bỏ giới hạn 640px -> thẻ công trình rộng bằng khung; cơ cấu chi phí: biểu đồ 120px, chú giải chữ 12px, % đứng sát tên mục.
 

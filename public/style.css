@@ -3289,3 +3289,27 @@ html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { co
 .pc-grid.one .pc-donut svg { width: 120px; height: 120px; }
 .pc-grid.one .pc-legend { flex: 0 1 340px; font-size: 12px; gap: 4px; }
 .pc-grid.one .pc-legend i { width: 10px; height: 10px; }
+
+/* Thẻ công trình: nút đóng / mở Tiền thực tế ở góc phải đầu thẻ; bảng chi phí I – II – III */
+.pc-head { position: relative; }
+.pc-tt-tog { margin-left: auto; align-self: flex-start; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; color: #fff; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.45); cursor: pointer; white-space: nowrap; }
+.pc-tt-tog:hover { background: rgba(255,255,255,.24); }
+.pc-tt-tog.on { background: #fff; color: var(--pc, #1f3b73); border-color: #fff; }
+@media (max-width: 720px) { .pc-tt-tog { position: absolute; right: 10px; bottom: 10px; padding: 4px 10px; font-size: 11.5px; } }
+.cpk-wrap { margin-top: 12px; }
+.td-mx.cpk th, .td-mx.cpk td { padding: 7px 12px; vertical-align: middle; }
+.td-mx.cpk tbody tr.cpk-k th { font-weight: 800; color: var(--fg-navy, #1f3b73); }
+.td-mx.cpk tbody tr.cpk-n th { padding-left: 28px; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.td-mx.cpk tbody tr.cpk-n td { font-size: 12.5px; }
+.td-mx.cpk .cpk-bar { width: 32%; }
+.td-mx.cpk tfoot th, .td-mx.cpk tfoot td { font-weight: 800; border-top: 2px solid var(--bd-cdd8e5, #cdd8e5); }
+/* Bảng chi phí I – II – III: cột tên rộng, chữ thường, không xuống dòng; số căn phải sát cột */
+.td-mx.cpk { table-layout: auto !important; width: 100%; }
+.td-mx.cpk th, .td-mx.cpk td { width: auto !important; }
+.td-mx.cpk thead th.td-corner { width: 38% !important; }
+.td-mx.cpk thead th:nth-child(2), .td-mx.cpk thead th:nth-child(3) { text-align: right; width: 14% !important; }
+.td-mx.cpk tbody th, .td-mx.cpk tfoot th { text-transform: none !important; letter-spacing: 0 !important; white-space: nowrap; font-size: 13px; }
+.td-mx.cpk tbody tr.cpk-k th { font-size: 13.5px; }
+.td-mx.cpk tbody tr.cpk-n th { font-size: 12.5px; }
+.td-mx.cpk td.num { white-space: nowrap; }
+@media (max-width: 720px) { .td-mx.cpk .cpk-bar { display: none; } .td-mx.cpk tbody th { white-space: normal; } }

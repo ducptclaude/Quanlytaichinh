@@ -1794,6 +1794,7 @@ function bPcCard(d, idx) {
         <div class="pc-dates">${bPcDates(d)}</div>
         <div class="pc-meta"><span class="pc-st">${esc(d.trang_thai)}</span><span class="pc-prog">Tiến độ: <b>${d.tien_do}%</b><i><b style="width:${Math.min(100, d.tien_do)}%"></b></i></span></div>
       </div>
+      <button type="button" class="pc-tt-tog no-print ${BST.td_tt === true ? 'on' : ''}" data-tdtt aria-pressed="${BST.td_tt === true}" title="Đóng / mở bảng tiền thực tế (tiền về, thực chi theo TĐ) ở Tổng quan">💵 Tiền thực tế ${BST.td_tt === true ? '▴' : '▾'}</button>
     </header>
     <nav class="pc-tabs no-print">${PC_TABS.map(([k, t]) => `<button type="button" data-pt="${k}" class="${k === tab ? 'on' : ''}">${t}</button>`).join('')}</nav>
     <div class="pc-body">${bPcBody(d, tab)}</div>
@@ -1959,7 +1960,7 @@ function bTdBlock(d) {
   C[3] = tds[3] ? { ...val(tds[3]), nhap: true, st: dmy(tds[3].ngay) }
     : { ...C[2], nhap: false, ke: 'TĐ2', st: done ? 'Đã hoàn thành · chưa chốt quyết toán' : 'Chưa quyết toán', warn: done };
   for (const n of [1, 2, 3]) C[n].ht = tds[n] ? bSysMoc(d, n, tds[n].ngay) : null;
-  const tt = BST.td_tt !== false; // bảng tiền thực tế mặc định hiện; bấm "So với thực tế" để ẩn
+  const tt = BST.td_tt === true; // bảng tiền thực tế mặc định ẨN; bấm nút "Tiền thực tế" ở đầu thẻ để mở (hiện giữa ma trận và bảng chi phí)
   const ROWS = [['dt', 'Doanh thu', true, false, 'td-r-dt'], ['cp', 'Chi phí', false, false, 'td-r-cp'], ['ln', 'Lợi nhuận', true, false, 'td-r-ln'], ['ts', 'Tỷ suất LN', true, true, 'td-r-ts']];
   const fmtV = (x, isPct) => (isPct ? (x === null ? '—' : `${(x * 100).toFixed(1).replace('.', ',')}%`) : bTyU(x));
   const htNote = (n, k, isPct) => { // đối chiếu số hệ thống, chỉ báo khi lệch
@@ -2006,12 +2007,29 @@ function bTdBlock(d) {
   })();
   return `<div class="pc-tds">
     <div class="pc-td-bar no-print"><span>Ma trận <b>kế hoạch</b> theo hợp đồng tại 3 thời điểm · trước VAT</span>
-      ${Object.keys(tds).length ? `<button type="button" class="pc-tt-sw ${tt ? 'on' : ''}" data-tdtt aria-pressed="${tt ? 'true' : 'false'}">${tt ? '✓ ' : ''}So với thực tế</button>` : ''}</div>
+</div>
     <div class="table-wrap td-wrap"><table class="td-mx no-mcard">
       <thead><tr><th class="td-corner">Chỉ tiêu</th>${[1, 2, 3].map(head).join('')}</tr></thead>
       <tbody>${ROWS.map(([k, label, good, isPct, cls]) => `<tr class="${cls}"><th>${label}</th>${[1, 2, 3].map((n) => cell(n, k, good, isPct)).join('')}</tr>`).join('')}</tbody>
-    </table></div>${thucRows}
+    </table></div>${thucRows}${bPcCpKhoi(d)}
   </div>`;
+}
+// Bảng chi phí kế hoạch theo khối I – II – III (Trực tiếp · Gián tiếp · Tài chính) và nhóm, theo nút VAT
+function bPcCpKhoi(d) {
+  const v = BST.vat, LM = ['I', 'II', 'III', 'IV'];
+  const tong = (d.khoi || []).reduce((a, k) => a + (k[v] || 0), 0);
+  const pc = (x) => (tong ? `${((x / tong) * 100).toFixed(1).replace('.', ',')}%` : '—');
+  const rows = (d.khoi || []).map((k, i) => {
+    const ns = (d.nhom || []).filter((n) => n.khoi === k.code && n[v]).sort((a, b) => b[v] - a[v]);
+    return `<tr class="cpk-k"><th>${LM[i]}. ${esc(k.ten.charAt(0) + k.ten.slice(1).toLowerCase())}</th><td class="num"><b>${bTyU(k[v] || 0)}</b></td><td class="num">${pc(k[v] || 0)}</td>
+      <td class="cpk-bar"><span class="pc-bar wide"><i style="width:${tong ? Math.max(0, ((k[v] || 0) / tong) * 100) : 0}%"></i></span></td></tr>`
+      + ns.map((n) => `<tr class="cpk-n"><th>${esc(n.code === 'tc_tra_no' ? 'Lãi vay ngân hàng' : n.ten)}</th><td class="num">${bTyU(n[v])}</td><td class="num muted">${pc(n[v])}</td><td></td></tr>`).join('');
+  }).join('');
+  return `<div class="table-wrap td-wrap cpk-wrap"><table class="td-mx cpk no-mcard">
+    <thead><tr><th class="td-corner">Chi phí kế hoạch<br><small>${v === 'gt' ? 'trước VAT' : 'sau VAT'}</small></th><th class="num">Giá trị</th><th class="num">Tỷ trọng</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr><th>Tổng chi phí</th><td class="num"><b>${bTyU(tong)}</b></td><td class="num">100%</td><td></td></tr></tfoot>
+  </table></div>`;
 }
 function bTdDialog(d, n) {
   const t = (d.thoi_diem || []).find((x) => x.td === n);
@@ -2134,9 +2152,13 @@ $('#b-report').addEventListener('click', async (e) => {
     $('.pc-body', card).innerHTML = bPcBody(BC.du_an.find((x) => x.id === id), 'tong');
     return bPcDraw(card);
   }
-  if (e.target.closest('[data-tdtt]')) { // bật/tắt dòng thực tế cho mọi TĐ, giữ nguyên tab đang xem
-    BST.td_tt = BST.td_tt === false;
-    $('.pc-body', card).innerHTML = bPcBody(BC.du_an.find((x) => x.id === id), 'tong');
+  if (e.target.closest('[data-tdtt]')) { // đóng / mở bảng tiền thực tế (nút ở đầu thẻ) – chuyển về tab Tổng quan
+    BST.td_tt = BST.td_tt !== true;
+    pcTab[id] = 'tong';
+    card.querySelectorAll('.pc-tabs button').forEach((b) => b.classList.toggle('on', b.dataset.pt === 'tong'));
+    const b = card.querySelector('.pc-tt-tog');
+    if (b) { b.classList.toggle('on', BST.td_tt); b.setAttribute('aria-pressed', String(BST.td_tt)); b.textContent = `💵 Tiền thực tế ${BST.td_tt ? '▴' : '▾'}`; }
+    card.querySelector('.pc-body').innerHTML = bPcBody(BC.du_an.find((x) => x.id === id), 'tong');
     return bPcDraw(card);
   }
   if (e.target.closest('[data-pcngay]')) return bNgayDialog(BC.du_an.find((x) => x.id === id));
