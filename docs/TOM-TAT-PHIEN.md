@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V17.10.11.26 – Báo cáo xem 1 dự án: chỉ ẩn bảng mục III
+- Sửa lại V12: mục I và II luôn hiện bảng; chỉ bảng mục III tự ẩn khi chọn 1 dự án (hiện lại khi chọn Tất cả).
+
 ## V16.10.11.26 – Thẻ công trình: nút Tiền thực tế ở đầu thẻ, bảng chi phí I – II – III
 - Nút "💵 Tiền thực tế ▾/▴" ở góc phải đầu thẻ (thay nút "So với thực tế"): bảng tiền thực tế mặc định ẨN, bấm mở hiện giữa ma trận TĐ và bảng chi phí (bấm từ tab khác tự về Tổng quan).
 - Tổng quan thêm bảng "Chi phí kế hoạch" theo khối I. Trực tiếp · II. Gián tiếp · III. Tài chính (kèm nhóm), giá trị + tỷ trọng + thanh tỷ lệ, theo nút VAT (`bPcCpKhoi`).

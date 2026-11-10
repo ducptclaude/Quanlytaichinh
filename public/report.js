@@ -779,7 +779,7 @@ function bMuc3Data(list, v, rows, k = [1, 2, 3].includes(Number(BST.i_td)) ? Num
   return { k, R, T };
 }
 function bTongHopHtml(list, v, P) {
-  const MOT = Boolean(bScope().one); // xem 1 dự án: ẩn bảng danh sách dự án ở mục I–III (3 thẻ số đã thể hiện)
+  const MOT = Boolean(bScope().one); // xem 1 dự án: ẩn bảng danh sách dự án ở mục III (mục I, II vẫn hiện)
   const { to, rows, T } = bTongHopData(list, v, P);
   // Mục III: theo TĐ đang chọn ở mục I – Còn phải thu = DT TĐ − dòng thu · Còn phải chi = CP TĐ − dòng chi · Còn lại = phải thu − phải chi
   const { k: k3, R: R3, T: T3 } = bMuc3Data(list, v, rows);
@@ -843,7 +843,7 @@ function bTongHopHtml(list, v, P) {
       ${card('cp', `Chi phí ${TEN[2]}`, TT.cp, k === 1 ? [`Bằng <b>${bpct(TT.cp, TT.dt)}</b> doanh thu`, 'Dự toán chi phí khi ký HĐ'] : [sub('cp', false), `Bằng <b>${bpct(TT.cp, TT.dt)}</b> doanh thu`])}
       ${card('ln', `Lợi nhuận ${TEN[2]}`, TT.ln, [`Tỷ suất <b>${bpct(TT.ln, TT.dt)}</b>${k > 1 ? ` · TĐ${k - 1} ${bpct(P0.ln, P0.dt)}` : ''}`, k > 1 ? sub('ln', true) : `Bình quân <b>${rows.length ? bTy(TT.ln / rows.length) : '0'}</b> ${TY()} / dự án`])}
     </div>
-    <div class="table-wrap${MOT ? ' th-mot' : ''}"><table class="b-table th-table th-t1">
+    <div class="table-wrap"><table class="b-table th-table th-t1">
       ${hd(['Hoàn thành', 'Doanh thu', 'Chi phí', 'Lợi nhuận', '± LN so TĐ trước', 'Tỷ lệ LN'])}
       <tbody>${RR.map((r, i) => `<tr>${prj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
@@ -859,7 +859,7 @@ function bTongHopHtml(list, v, P) {
       ${card('cp', 'Dòng chi', T.chi, ['Chi phí đã chi + đã trả HĐ đầu vào', `Bằng <b>${bpct(T.chi, T.thu)}</b> dòng thu`], 'tỷ', 'chi')}
       ${card('ln', 'Còn lại (thu − chi)', T.con, [T.con < 0 ? 'Đang chi nhiều hơn thu' : 'Tiền dự án đang có', 'Không gồm tiền vay, trả nợ gốc'], 'tỷ', 'con')}
     </div>
-    <div class="table-wrap${MOT ? ' th-mot' : ''}"><table class="b-table th-table">
+    <div class="table-wrap"><table class="b-table th-table">
       ${hd(['Dòng thu', 'Dòng chi', 'Còn lại (Thu − Chi)'])}
       <tbody>${rows.map((x, i) => `<tr>${prj(x, i)}<td class="num">${tlk('thu', x.thu, x.d.id)}</td><td class="num">${tlk('chi', x.chi, x.d.id)}</td>
         <td class="num strong ${x.con < 0 ? 'neg' : 'pos'}">${tlk('con', x.con, x.d.id)}</td></tr>`).join('')}</tbody>
