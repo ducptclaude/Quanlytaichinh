@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.10.11.26 – Mục I: cột Hoàn thành = % giá trị hoàn thành (như Đánh giá hoàn thành)
+- Cột Hoàn thành mục I (mọi TĐ) = GTHT ÷ Doanh thu TĐ3: HĐ có đợt thanh toán / quyết toán -> lũy kế; HĐ chưa có đợt -> tạm tính cost to cost (thay cho Thực chi ÷ Chi phí dự kiến).
+- Gộp công thức GTHT vào 1 hàm dùng chung `bGthtMap` (mục I + Đánh giá hoàn thành) – hai nơi luôn cùng số. Rê chuột ô % xem GTHT, DT TĐ3 và nguồn tính.
+- Kiểm tra: 14/14 dự án khớp giữa mục I và Đánh giá hoàn thành ở cả TĐ1/2/3 (tổng 68,9%); tester 0 LỖI. Điểm khôi phục đầu phiên: `phien-10.11.26-13h43`.
+
 ## V11.09.11.26 – GTHT theo từng HĐ; "Tạm tính" = HĐ chưa quyết toán (không theo VAT)
 - Đánh giá hoàn thành: GTHT tính theo TỪNG HĐ CĐT: có đợt thanh toán / quyết toán -> lũy kế các đợt; chưa có đợt mà đã QT -> giá trị TĐ3; chưa QT, chưa có đợt -> TẠM TÍNH
   cost to cost = (Thực chi ÷ CP TĐ3, tính trên số TRƯỚC VAT nên bấm Trước/Sau VAT không đổi tỷ lệ) × DT TĐ3 của HĐ. Nhãn nguồn: "theo TT/QT" / "tạm tính (cost to cost)" / "TT/QT + tạm tính".

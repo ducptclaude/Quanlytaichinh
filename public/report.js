@@ -678,16 +678,14 @@ document.addEventListener('click', (e) => {
 //  % hoàn thành = Dòng thu ÷ GTHT · Xếp loại: ≥120% Rất tốt · ≥90% Tốt · >70% Đạt · ≤70% Chưa đạt
 const HT_XL = [[1.2, 'Rất tốt', 'xl-rt', '≥ 120%'], [0.9, 'Tốt', 'xl-t', '90% – 120%'], [0.7000001, 'Đạt', 'xl-d', '70% – 90%'], [-Infinity, 'Chưa đạt', 'xl-cd', '≤ 70%']];
 const htXl = (p) => (p == null ? null : HT_XL.find(([m]) => p >= m));
-function bHtSection(list, v) {
-  if (!list.length) return '';
+// Giá trị hoàn thành (GTHT) & % hoàn thành của từng dự án – dùng chung cho mục I (cột Hoàn thành) và Đánh giá hoàn thành
+//  Theo từng HĐ CĐT: có đợt thanh toán / quyết toán -> lũy kế các đợt; chưa có đợt mà đã QT -> giá trị TĐ3;
+//  chưa QT, chưa có đợt -> TẠM TÍNH cost to cost = (Thực chi ÷ CP TĐ3, trên số trước VAT) × DT TĐ3 của HĐ. % hoàn thành = GTHT ÷ DT TĐ3
+function bGthtMap(list, v) {
   const P = bPeriod(list);
-  const { rows } = bTongHopData(list, v, P);
-  // Tỷ lệ cost to cost của dự án tính trên số TRƯỚC VAT (bấm Trước / Sau VAT không đổi tỷ lệ)
   const tlGt = new Map(bMuc3Data(list, 'gt', bTongHopData(list, 'gt', P).rows, 3).R.map((r) => [r.x.d.id, r.cp > 0 ? r.chi / r.cp : null]));
-  const R = bMuc3Data(list, v, rows, 3).R.map((r) => {
-    // GTHT theo TỪNG HĐ CĐT: HĐ đã có đợt thanh toán / quyết toán (Doanh thu mục 2) -> tổng lũy kế các đợt;
-    //  HĐ chưa có đợt: đã quyết toán -> giá trị TĐ3 (quyết toán); chưa quyết toán -> TẠM TÍNH cost to cost = tỷ lệ (Thực chi ÷ CP TĐ3) × DT TĐ3 của HĐ.
-    //  TL % HT = GTHT ÷ DT TĐ3 · % Tiền về = Tiền về ÷ GTHT (xếp loại theo % tiền về)
+  const M = new Map();
+  for (const r of bMuc3Data(list, v, bTongHopData(list, v, P).rows, 3).R) {
     const hds = r.x.d.hds || [], tl = tlGt.get(r.x.d.id) ?? null;
     let gtht = 0, nHt = 0, nTam = 0;
     if (!hds.length) { gtht = tl != null ? tl * r.dt : 0; nTam = 1; }
@@ -697,10 +695,20 @@ function bHtSection(list, v) {
       else if (tl != null) { gtht += tl * (h.td3?.[v] || 0); nTam++; }
     }
     gtht = Math.round(gtht);
-    const ht = r.dt > 0 ? gtht / r.dt : null;
-    const nguon = nTam && nHt ? 'mix' : nTam ? 'c2c' : 'htqt';
-    const p = gtht > 0 ? r.thu / gtht : null;
-    return { ...r, ht, gtht, nguon, nHt, nTam, p, xl: htXl(p) };
+    M.set(r.x.d.id, { gtht, dt3: r.dt, ht: r.dt > 0 ? gtht / r.dt : null, nguon: nTam && nHt ? 'mix' : nTam ? 'c2c' : 'htqt', nHt, nTam });
+  }
+  return M;
+}
+const GT_NGUON = (g) => (g.nguon === 'htqt' ? 'theo đợt thanh toán / quyết toán' : g.nguon === 'c2c' ? 'tạm tính cost to cost (Thực chi ÷ CP TĐ3 trước VAT × DT TĐ3)' : `${g.nHt} HĐ theo đợt TT/QT + ${g.nTam} HĐ tạm tính cost to cost`);
+function bHtSection(list, v) {
+  if (!list.length) return '';
+  const P = bPeriod(list);
+  const { rows } = bTongHopData(list, v, P);
+  const G = bGthtMap(list, v);
+  const R = bMuc3Data(list, v, rows, 3).R.map((r) => {
+    const g = G.get(r.x.d.id) || { gtht: 0, ht: null, nguon: 'c2c', nHt: 0, nTam: 0 };
+    const p = g.gtht > 0 ? r.thu / g.gtht : null;
+    return { ...r, ...g, p, xl: htXl(p) };
   });
   // Bảng giữ thứ tự A–Z theo mã dự án; dự án Chưa đạt được đẩy lên thành khung thông báo phía trên bảng
   R.sort((a, b) => bNat(a.x.d.ma_du_an, b.x.d.ma_du_an));
@@ -809,8 +817,10 @@ function bTongHopHtml(list, v, P) {
       const RR = chiDoi ? R.filter(doi) : R;
       // % hoàn thành (tạm, cost-to-cost) = Thực chi (mục II, cùng cơ sở VAT) ÷ Chi phí dự kiến của TĐ đang chọn
       const htPct = (chi, cp) => (cp > 0 ? `${((chi / cp) * 100).toFixed(1).replace('.', ',')}%` : '—');
-      const htCell = (chi, cp) => { const p = cp > 0 ? chi / cp : 0;
-        return `<td class="th-ht" title="Cost to cost: Thực chi ${bTy(chi)} ÷ Chi phí dự kiến ${bTy(cp)} ${TY()}"><span class="ht-wrap">${meter(Math.min(p, 1), 1, p > 1 ? '#d92d35' : BCOL.dk)}<b class="ht-pct ${p > 1 ? 'neg' : ''}">${htPct(chi, cp)}</b></span></td>`; };
+      // Cột Hoàn thành = % giá trị hoàn thành (GTHT ÷ DT TĐ3): theo đợt thanh toán / quyết toán, HĐ chưa có đợt tạm tính cost to cost (như Đánh giá hoàn thành)
+      const GH = bGthtMap(list, v);
+      const htCell = (d) => { const g = GH.get(d.id) || { gtht: 0, dt3: 0, ht: 0, nguon: 'c2c' }; const p = g.ht || 0;
+        return `<td class="th-ht" title="Giá trị hoàn thành ${bTy(g.gtht)} ÷ Doanh thu TĐ3 ${bTy(g.dt3)} ${TY()} – ${GT_NGUON(g)}"><span class="ht-wrap">${meter(Math.min(p, 1), 1, p > 1 ? '#d92d35' : BCOL.dk)}<b class="ht-pct ${p > 1 ? 'neg' : ''}">${bpct(g.gtht, g.dt3)}</b></span></td>`; };
       const dCell = (r) => { if (!doi(r)) return '<td class="num i-dc"><span class="i-dl eq">—</span></td>';
         const d = (r.dt - r.cp) - (r.b.dt - r.b.cp);
         const tip = `So với TĐ${k - 1}: DT ${r.dt - r.b.dt >= 0 ? '+' : '−'}${bTy(Math.abs(r.dt - r.b.dt))} · CP ${r.cp - r.b.cp >= 0 ? '+' : '−'}${bTy(Math.abs(r.cp - r.b.cp))} · LN ${d >= 0 ? '+' : '−'}${bTy(Math.abs(d))} ${TY()}`;
@@ -824,12 +834,12 @@ function bTongHopHtml(list, v, P) {
     </div>
     <div class="table-wrap"><table class="b-table th-table th-t1">
       ${hd(['Hoàn thành', 'Doanh thu', 'Chi phí', 'Lợi nhuận', '± LN so TĐ trước', 'Tỷ lệ LN'])}
-      <tbody>${RR.map((r, i) => `<tr>${prj(r.x, i)}${htCell(r.x.chi, r.cp)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
+      <tbody>${RR.map((r, i) => `<tr>${prj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
         <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}${k === 1 && !r.x.td1 ? '<sup class="th-tt" title="Chưa chốt TĐ1: lấy HĐ gốc và chi phí trên hệ thống">*</sup>' : ''}</b></td></tr>`).join('')}</tbody>
-      ${foot([htPct(RR.reduce((a, r) => a + r.x.chi, 0), RR.reduce((a, r) => a + r.cp, 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', bpct(TT.ln, TT.dt)])}
+      ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', bpct(TT.ln, TT.dt)])}
     </table></div>
-    ${k === 1 ? `<p class="muted small f-note">Số dự kiến theo TĐ1 đã chốt (Doanh thu, Chi phí khi ký HĐ – nhập ở bảng TĐ của từng dự án). <b>(*)</b> Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = hợp đồng gốc + phụ lục tăng / giảm với CĐT; chi phí = thầu phụ theo HĐ + PL và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán; dự án / hợp đồng chưa quyết toán tạm tính theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % hoàn thành tạm tính theo chi phí (cost to cost) = Thực chi ÷ Chi phí dự kiến.</p>`}`;
+    ${k === 1 ? `<p class="muted small f-note">Số dự kiến theo TĐ1 đã chốt (Doanh thu, Chi phí khi ký HĐ – nhập ở bảng TĐ của từng dự án). <b>(*)</b> Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = hợp đồng gốc + phụ lục tăng / giảm với CĐT; chi phí = thầu phụ theo HĐ + PL và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán; dự án / hợp đồng chưa quyết toán tạm tính theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>`}`;
     })()}
 
     ${thHead('II', 'Dòng tiền thực tế', 'Tiền thật đã thu về và đã chi ra của dự án', [`Lũy kế đến ${dTo}`, vt[0].toUpperCase() + vt.slice(1)])}
