@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.10.11.26 – Báo cáo: xem 1 dự án thì ẩn bảng danh sách ở mục I–III
+- Chọn 1 dự án ở Phạm vi: ẩn bảng dự án của mục I, II, III (3 thẻ số đã thể hiện) – class `th-mot`; chọn Tất cả dự án: hiện lại. Mục IV, Đánh giá hoàn thành giữ nguyên.
+
 ## V11.10.11.26 – Mục III: giữ tông cafe, bỏ nền đậm, phân biệt bằng màu chữ
 - Đầu bảng + dòng tổng nền kem như các bảng khác (bỏ nền xám / navy của phương án 5); giữ lưới mảnh màu kem.
 - Màu chữ: nhóm Thu navy (#1f3b73), nhóm Chi nâu đồng (#8a4f1c), Còn lại teal; số âm đỏ. Các bảng khác giữ tông cafe.

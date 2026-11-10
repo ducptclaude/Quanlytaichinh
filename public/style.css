@@ -3274,3 +3274,4 @@ html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td.c-chi { c
 html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td.g-con { color: #0f6f69 !important; }
 html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .neg { color: #d92d35 !important; }
 html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { color: inherit !important; }
+#b-report .th-mot { display: none; } /* xem 1 dự án: ẩn bảng danh sách dự án mục I–III */
