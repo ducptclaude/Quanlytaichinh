@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V21.10.11.26 – Ô tiền nhận công thức / số dán từ Excel, Word; ô VAT hiện %
+- `common.js`: `docSo` đọc số dán (1.234.567 · 1,234,567.89 · 1.234.567,89 · 1 234 567 đ · (1.234) = âm), `tinhCongThuc` tính + − × ÷ ( ) % không dùng eval
+  (VD =1.250.000*12, 2.500.000+350.000, =1000000*10%). Đang gõ công thức: ô nền xanh nhạt; rời ô / Enter: thay bằng kết quả; sai: viền đỏ, không lưu số bừa.
+  Áp dụng mọi ô tiền dùng `attachMoneyInput` (Doanh thu, Chi phí, tiền về, hộp HĐ thầu phụ, số dư đầu kỳ, chốt TĐ).
+- Ô VAT (name="vat" / data-f="vat"): có giá trị thì hiện ký tự % bên phải (`attachVatInput`, tự gắn kể cả bảng vẽ lại); giá trị lưu vẫn là số.
+
 ## V20.10.11.26 – Doanh thu mục 2: tên đợt kế tiếp theo tên hồ sơ đã có
 - "+ Đợt" (từng HĐ) và "+ Đợt tiếp theo" (thanh Thêm cho HĐ): tên = tên hồ sơ có số nhập sau cùng + 1 (VD "Hoàn thành đợt 2" -> "Hoàn thành đợt 3"); chưa có đợt -> "Hoàn thành đợt 1" (`tenDotKeTiep`).
 

@@ -1355,7 +1355,9 @@ window.BKS_EN = {
 "Tự động theo số liệu": "Automatic from data",
 "Tự động theo số liệu (đang chọn Tạm dừng)": "Automatic from data (On hold selected)",
 "Trạng thái tự chạy theo số liệu: Chuẩn bị · Đang thi công · Hoàn thành (đã quyết toán hoặc đạt 100%). Chỉ chọn tay khi dự án Tạm dừng": "Status follows the data: Preparing · In progress · Completed (finalised or 100%). Set manually only when the project is On hold",
-"+ Đợt tiếp theo": "+ Next round"
+"+ Đợt tiếp theo": "+ Next round",
+"Gõ số, dán từ Excel / Word, hoặc gõ công thức (VD: =1.250.000*12, 2.500.000+350.000, =1000000*10%)": "Type a number, paste from Excel / Word, or type a formula (e.g. =1,250,000*12, 2,500,000+350,000, =1000000*10%)",
+"Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
 [

@@ -3319,3 +3319,15 @@ html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { co
 .t3-sort:hover .t3-ar, .t3-sort.on .t3-ar { opacity: 1; color: #14a39a; }
 .t3-sort.on { color: #1f3b73; }
 .t3-sort:focus-visible { outline: 2px solid #14a39a; outline-offset: 2px; border-radius: 4px; }
+
+/* Ô tiền: đang gõ công thức (xanh nhạt) / công thức sai (viền đỏ) */
+input.money.cong-thuc { background: #f0faf8 !important; color: #0f6f69; font-family: ui-monospace, Menlo, Consolas, monospace; }
+input.money.cong-thuc-loi { border-color: #d92d35 !important; box-shadow: 0 0 0 2px rgba(217,45,53,.15) !important; }
+:root[data-theme="dark"] input.money.cong-thuc { background: rgba(20,163,154,.12) !important; color: #6fd6c4; }
+/* Ô VAT: hiện % sau số khi đã nhập */
+.vat-wrap { position: relative; display: block; }
+td .vat-wrap { display: inline-block; width: 100%; }
+.vat-wrap > input { padding-right: 26px !important; width: 100%; -moz-appearance: textfield; }
+.vat-wrap > input::-webkit-outer-spin-button, .vat-wrap > input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.vat-wrap::after { content: '%'; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 700; color: var(--muted, #64748b); pointer-events: none; }
+.vat-wrap:has(> input:placeholder-shown)::after { display: none; }

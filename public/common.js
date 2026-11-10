@@ -109,24 +109,103 @@ function dvNum(n, def, autoD) {
 
 // ---------- Ô nhập tiền: hiển thị 1.234.567, cho phép số âm (phụ lục giảm) ----------
 const moneyFmt = new Intl.NumberFormat('vi-VN');
+// ---------- Ô số tiền: gõ số, dán từ Excel / Word, hoặc gõ công thức ----------
+// Đọc 1 số dán từ Excel / Word: 1.234.567 · 1,234,567.89 · 1.234.567,89 · 1 234 567 đ · (1.234) = số âm
+function docSo(tok) {
+  let t = String(tok).trim();
+  if (!t) return NaN;
+  const am = /^\(.*\)$/.test(t); if (am) t = t.slice(1, -1);
+  t = t.replace(/[^\d.,]/g, '');
+  if (!t || !/\d/.test(t)) return NaN;
+  const nd = (t.match(/\./g) || []).length, nc = (t.match(/,/g) || []).length;
+  let so;
+  if (nd && nc) { // có cả . và , -> dấu xuất hiện sau cùng là dấu thập phân
+    const thapPhan = t.lastIndexOf('.') > t.lastIndexOf(',') ? '.' : ',';
+    so = Number(t.split(thapPhan === '.' ? ',' : '.').join('').replace(thapPhan, '.'));
+  } else if (nd + nc) {
+    const d = nd ? '.' : ',', parts = t.split(d);
+    // nhiều dấu, hoặc 1 dấu và sau nó đúng 3 chữ số -> dấu nghìn (kiểu Việt Nam); còn lại -> thập phân
+    so = parts.length > 2 || parts[1].length === 3 ? Number(parts.join('')) : Number(parts[0] + '.' + parts[1]);
+  } else so = Number(t);
+  return am ? -so : so;
+}
+// Có phải công thức không: bắt đầu bằng "=" hoặc có phép tính giữa các số (1.000 + 2.000, 1000*10%, (100-20)/2 …)
+const laCongThuc = (s) => { const t = String(s ?? '').trim(); return t.startsWith('=') || /\d\s*[+*/x×÷:]\s*[\d(]/i.test(t) || /\d[\s ]*-[\s ]*[\d(]/.test(t) || /%/.test(t); };
+// Tính công thức (không dùng eval): + − × ÷, ngoặc, % (10% = 0,1); số theo kiểu Excel / Word ở trên. Lỗi -> NaN
+function tinhCongThuc(s) {
+  let t = String(s ?? '').trim().replace(/^=/, '').replace(/[₫đ]|vn[dđ]|đồng|dong/gi, '')
+    .replace(/(\d)[\s ]+(?=\d{3}\b)/g, '$1').replace(/[×xX]/g, '*').replace(/[÷:]/g, '/').replace(/[−–]/g, '-').replace(/\s+/g, '');
+  const tk = t.match(/\d[\d.,]*|[-+*/()%]/g);
+  if (!tk || tk.join('') !== t) return NaN;
+  let i = 0;
+  const so = () => { // số / ngoặc / dấu âm, kèm % phía sau
+    let v;
+    if (tk[i] === '-') { i++; v = -so(); return v; }
+    if (tk[i] === '+') { i++; return so(); }
+    if (tk[i] === '(') { i++; v = cong(); if (tk[i] !== ')') throw new Error('ngoặc'); i++; }
+    else { v = docSo(tk[i] ?? ''); if (!Number.isFinite(v)) throw new Error('số'); i++; }
+    while (tk[i] === '%') { v /= 100; i++; }
+    return v;
+  };
+  const nhan = () => { let v = so(); while (tk[i] === '*' || tk[i] === '/') { const o = tk[i++]; const b = so(); v = o === '*' ? v * b : v / b; } return v; };
+  const cong = () => { let v = nhan(); while (tk[i] === '+' || tk[i] === '-') { const o = tk[i++]; const b = nhan(); v = o === '+' ? v + b : v - b; } return v; };
+  try { const v = cong(); return i === tk.length && Number.isFinite(v) ? v : NaN; } catch { return NaN; }
+}
+// Giá trị (đồng, số nguyên dạng chuỗi) từ nội dung ô: số / số dán / công thức. '' = trống, '-' = đang gõ dấu âm
 const parseMoney = (s) => {
   const t = String(s ?? '').trim();
-  const neg = t.startsWith('-');
+  if (!t) return '';
+  if (t === '-') return '-';
+  const v = laCongThuc(t) ? tinhCongThuc(t) : docSo(t.replace(/^-/, '')) * (t.startsWith('-') ? -1 : 1);
+  if (Number.isFinite(v)) return String(Math.round(v));
+  if (laCongThuc(t)) return ''; // công thức sai: coi như chưa nhập -> báo lỗi, không lấy bừa số
+  const neg = t.startsWith('-'); // dự phòng: chỉ lấy chữ số
   const digits = t.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
   return digits ? (neg ? '-' : '') + digits : (neg ? '-' : '');
 };
 function formatMoneyInput(input) {
+  if (laCongThuc(input.value)) { input.classList.add('cong-thuc'); return; } // đang gõ công thức: giữ nguyên, tính khi rời ô / Enter
+  input.classList.remove('cong-thuc', 'cong-thuc-loi');
   const raw = parseMoney(input.value);
   const fromEnd = input.value.length - (input.selectionStart ?? input.value.length);
   input.value = raw === '' || raw === '-' ? raw : moneyFmt.format(Number(raw));
   const pos = Math.max(0, input.value.length - fromEnd);
   try { input.setSelectionRange(pos, pos); } catch {}
 }
-function attachMoneyInput(input) {
-  input.setAttribute('inputmode', 'numeric');
-  input.setAttribute('autocomplete', 'off');
-  input.addEventListener('input', () => formatMoneyInput(input));
+// Rời ô / Enter: tính công thức -> ghi kết quả (sai công thức: viền đỏ, giữ nguyên để sửa)
+function chotCongThuc(input) {
+  if (!laCongThuc(input.value)) return;
+  const v = tinhCongThuc(input.value);
+  if (!Number.isFinite(v)) { input.classList.add('cong-thuc-loi'); input.title = 'Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000'; return; }
+  input.classList.remove('cong-thuc', 'cong-thuc-loi'); input.title = '';
+  input.value = moneyFmt.format(Math.round(v));
+  input.dispatchEvent(new Event('input', { bubbles: true })); // cập nhật số sau VAT, nút Lưu…
 }
+function attachMoneyInput(input) {
+  if (!input || input.dataset.money) return;
+  input.dataset.money = '1';
+  input.setAttribute('inputmode', 'text'); // cho gõ được + − × ÷ = ( )
+  input.setAttribute('autocomplete', 'off');
+  if (!input.title) input.title = 'Gõ số, dán từ Excel / Word, hoặc gõ công thức (VD: =1.250.000*12, 2.500.000+350.000, =1000000*10%)';
+  input.addEventListener('input', () => formatMoneyInput(input));
+  input.addEventListener('blur', () => chotCongThuc(input));
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') chotCongThuc(input); });
+}
+
+// ---------- Ô VAT: có giá trị thì hiện ký tự % phía sau ----------
+function attachVatInput(input) {
+  if (!input || input.dataset.vatPct || input.parentElement?.classList.contains('vat-wrap')) return;
+  input.dataset.vatPct = '1';
+  const w = document.createElement('span'); w.className = 'vat-wrap';
+  input.parentNode.insertBefore(w, input); w.appendChild(input);
+  if (!input.placeholder) input.placeholder = '0';
+}
+// Tự gắn cho mọi ô VAT (kể cả bảng vẽ lại sau): name="vat", data-f="vat"
+(function () {
+  const gan = (root) => (root.querySelectorAll ? root.querySelectorAll('input[name="vat"], input[data-f="vat"]') : []).forEach(attachVatInput);
+  const chay = () => { gan(document); new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => n.nodeType === 1 && (n.matches?.('input[name="vat"], input[data-f="vat"]') ? attachVatInput(n) : gan(n))))).observe(document.body, { childList: true, subtree: true }); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', chay); else chay();
+})();
 
 // ---------- Ô ngày dd/mm/yyyy (không phụ thuộc ngôn ngữ trình duyệt) ----------
 // Trả về: '' nếu trống, 'YYYY-MM-DD' nếu hợp lệ, null nếu sai
