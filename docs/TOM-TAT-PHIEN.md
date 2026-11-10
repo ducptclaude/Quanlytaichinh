@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.10.11.26 – Mục III: giữ tông cafe, bỏ nền đậm, phân biệt bằng màu chữ
+- Đầu bảng + dòng tổng nền kem như các bảng khác (bỏ nền xám / navy của phương án 5); giữ lưới mảnh màu kem.
+- Màu chữ: nhóm Thu navy (#1f3b73), nhóm Chi nâu đồng (#8a4f1c), Còn lại teal; số âm đỏ. Các bảng khác giữ tông cafe.
+
 ## V10.10.11.26 – Mục III: phương án 5 "bảng tài chính" (người dùng chọn trong 5 phương án)
 - Lưới mảnh đầy đủ (#e6ebf2), đầu bảng xám xanh #eef2f7, tên nhóm THU navy (vạch #3462a3) / CHI nâu đồng (vạch #c27a3e), cột kết quả chữ đậm, dòng Tổng cộng nền navy chữ trắng (số âm hồng nhạt, dương teal nhạt). Giao diện tối giữ nguyên. In / PDF giữ màu.
 

@@ -3255,3 +3255,22 @@ html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td { backgro
 html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .neg { color: #ffb4b4 !important; }
 html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { color: #9fe3da !important; }
 @media print { html body #b-report table.th-t3 tfoot td, html body #b-report table.th-t3 thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+/* Mục III – người dùng: giữ tông CAFE, bỏ nền đậm; phân biệt bằng MÀU CHỮ (Thu navy · Chi nâu đồng · Còn lại teal), giữ lưới mảnh */
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead th,
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-thu,
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-chi { background: var(--cfb-cream, #f6f1e9) !important; color: var(--cfb-br, #8a6a3e) !important; border: 1px solid var(--cfb-bd, #e7ddcf) !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-thu { color: #1f3b73 !important; border-bottom: 2px solid #3462a3 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr.t3-grp th.g-chi { color: #8a4f1c !important; border-bottom: 2px solid #c27a3e !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr:not(.t3-grp) th.c-thu, html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr:not(.t3-grp) th:is(:nth-child(1),:nth-child(2),:nth-child(3)) { color: #2c4f86 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead tr:not(.t3-grp) th:is(:nth-child(4),:nth-child(5),:nth-child(6)) { color: #9a5a22 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 thead th.g-con { color: #0f6f69 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tbody td { border: 1px solid #efe8dc !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tbody td.c-thu.c-kq { color: #1f3b73; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tbody td.c-chi.c-kq { color: #8a4f1c; }
+/* Dòng tổng: nền kem như các bảng khác, chữ màu theo nhóm */
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td { background: var(--cfb-cream, #f6f1e9) !important; color: var(--cfb-navy, #1f2a44) !important; border-color: var(--cfb-bd, #e7ddcf) !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td.c-thu { color: #1f3b73 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td.c-chi { color: #8a4f1c !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td.g-con { color: #0f6f69 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .neg { color: #d92d35 !important; }
+html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { color: inherit !important; }
