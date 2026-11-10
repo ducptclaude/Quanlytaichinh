@@ -22,7 +22,26 @@ const MUC = { cao: 'Cao', tb: 'Trung bình', thap: 'Thấp' };
 async function loadReport() {
   $('#b-report').innerHTML = '<div class="card muted">Đang tổng hợp số liệu...</div>';
   BC = await api('/api/bao-cao');
+  bTinhTrangTuDong(BC);
   renderReport();
+}
+// Tình trạng dự án tự chạy theo số liệu (Báo cáo, Dashboard, Trợ lý); trạng thái nhập tay giữ ở d.trang_thai_nhap
+//  Tạm dừng (nhập tay) -> giữ · mọi HĐ CĐT đã quyết toán hoặc % hoàn thành ≥ 100% -> Hoàn thành
+//  chưa có HĐ CĐT, chưa chi đồng nào -> Chuẩn bị · còn lại -> Đang thi công
+function bTinhTrangTuDong(bc) {
+  if (!bc?.du_an?.length || bc._ttTuDong) return;
+  bc._ttTuDong = true;
+  let G = new Map();
+  try { G = bGthtMap(bc.du_an, 'gt'); } catch { /* thiếu số liệu: giữ trạng thái nhập tay */ }
+  for (const d of bc.du_an) {
+    const nhap = d.trang_thai, hds = d.hds || [], g = G.get(d.id);
+    const chi = (d.tien_thuc?.gd || []).length || (d.thuc_hien?.chi_phi?.gt || 0) > 0;
+    let tt = 'Đang thi công';
+    if (nhap === 'Tạm dừng') tt = 'Tạm dừng';
+    else if ((hds.length && hds.every((h) => h.da_qt)) || (g && g.ht != null && g.ht >= 0.9995)) tt = 'Hoàn thành';
+    else if (!hds.length && !chi) tt = 'Chuẩn bị';
+    d.trang_thai_nhap = nhap; d.trang_thai = tt; d.tt_tu_dong = tt !== nhap;
+  }
 }
 
 // Mô tả phạm vi báo cáo để ghi nhật ký
@@ -785,7 +804,7 @@ function bTongHopHtml(list, v, P) {
   // Cột dự án tách riêng: STT | Mã DA | Tên dự án | Tình trạng
   // Số trong bảng mục II bấm được -> bảng chi tiết của dự án đó (pid) hoặc tất cả (dòng tổng)
   const tlk = (key, val, pid = 0) => `<button type="button" class="tt-link tt-sm ${val < 0 ? 'neg' : ''}" data-ttd="${key}" data-tts="1"${pid ? ` data-ttp="${pid}"` : ''} title="Bấm để xem bảng chi tiết">${bTy(val)}</button>`;
-  const prj = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma"><b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}">${esc(x.d.ten_du_an)}</td><td class="th-tt2"><span class="st st-${slug(x.d.trang_thai)} th-st">${esc(x.d.trang_thai)}</span></td>`;
+  const prj = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma"><b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}">${esc(x.d.ten_du_an)}</td><td class="th-tt2"><span class="st st-${slug(x.d.trang_thai)} th-st" title="Tự động theo số liệu (% hoàn thành, quyết toán)${x.d.trang_thai_nhap && x.d.trang_thai_nhap !== x.d.trang_thai ? ` – nhập tay: ${esc(x.d.trang_thai_nhap)}` : ''}">${esc(x.d.trang_thai)}</span></td>`;
   // Cột Hoàn thành = thanh mức đạt (tách từ ô tỷ lệ), cột tỷ lệ % bên phải
   const dTo = to === bNowYm() ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : `${lastDay(to)}/${to.slice(5)}/${to.slice(0, 4)}`;
   const hd = (cols) => `<thead><tr><th class="num th-stt">STT</th><th>Mã DA</th><th>Tên dự án</th><th>Tình trạng</th>${cols.map((c) => `<th class="${c === 'Hoàn thành' ? 'th-ht' : 'num'}">${c}</th>`).join('')}</tr></thead>`;

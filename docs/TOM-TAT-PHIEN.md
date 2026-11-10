@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.10.11.26 – Tình trạng dự án tự chạy theo số liệu (Báo cáo, Dashboard, Trợ lý)
+- `bTinhTrangTuDong` (report.js, chạy sau khi tải số liệu báo cáo): Tạm dừng (nhập tay) giữ nguyên · mọi HĐ CĐT đã quyết toán hoặc % hoàn thành (GTHT ÷ DT TĐ3) ≥ 100% -> Hoàn thành ·
+  chưa có HĐ CĐT và chưa chi -> Chuẩn bị · còn lại -> Đang thi công. Trạng thái nhập tay giữ ở `trang_thai_nhap` (rê chuột ô Tình trạng xem). Trang Nhập liệu › Dự án vẫn hiện trạng thái nhập tay.
+- Kiểm tra: 15 dự án thử (DEMO-03/07/12 đã QT -> Hoàn thành; DEMO-05 nhập Chuẩn bị nhưng đã thi công 37,8% -> Đang thi công; dự án mới -> Chuẩn bị; Tạm dừng giữ); tester 0 LỖI.
+
 ## V01.10.11.26 – Mục I: cột Hoàn thành = % giá trị hoàn thành (như Đánh giá hoàn thành)
 - Cột Hoàn thành mục I (mọi TĐ) = GTHT ÷ Doanh thu TĐ3: HĐ có đợt thanh toán / quyết toán -> lũy kế; HĐ chưa có đợt -> tạm tính cost to cost (thay cho Thực chi ÷ Chi phí dự kiến).
 - Gộp công thức GTHT vào 1 hàm dùng chung `bGthtMap` (mục I + Đánh giá hoàn thành) – hai nơi luôn cùng số. Rê chuột ô % xem GTHT, DT TĐ3 và nguồn tính.

@@ -437,7 +437,7 @@ async function asAsk(label, fn) {
   try { await asLoad(); el.innerHTML = fn(); AS.last = { el, rerun: fn }; } catch (err) { el.innerHTML = `<span class="neg">Lỗi: ${esc(err.message)}</span>`; }
 }
 async function asLoad(force) {
-  if (!BC || force || Date.now() - AS.at > 60000) { BC = await api('/api/bao-cao'); AS.at = Date.now(); }
+  if (!BC || force || Date.now() - AS.at > 60000) { BC = await api('/api/bao-cao'); bTinhTrangTuDong(BC); AS.at = Date.now(); }
 }
 function asVatSync() { $$('#as-vat button').forEach((b) => b.classList.toggle('on', b.dataset.v === BST.vat)); }
 
