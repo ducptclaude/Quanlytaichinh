@@ -1864,6 +1864,17 @@ function renderTpCard() {
       <td class="c-note tp-note" title="${esc([c.hang_muc, c.ghi_chu].filter(Boolean).join(' · '))}">${c.hang_muc ? `<span class="tp-hm">${esc(c.hang_muc)}</span>` : ''}${c.ghi_chu ? `<small class="muted">${esc(c.ghi_chu)}</small>` : ''}</td>
       <td class="row-actions tp-act"><button class="sm" data-tpopen="${c.id}">Chi tiết</button>${edit ? `<button class="danger sm" data-tpdel="${c.id}" title="Xóa hợp đồng">Xóa</button>` : ''}</td>
     </tr>`;
+  // Trong mỗi HĐ CĐT: gom theo loại HĐ đầu vào (Thầu phụ · Vật tư · MMTB · Nhân công), mỗi loại 1 dòng cộng, bấm để mở các HĐ
+  const tpLoaiRows = (g, n) => HDV.map((k) => [k, g.rows.filter((c) => (c.nhom || 'thau_phu') === k)]).filter(([, r]) => r.length).map(([k, rows], li) => {
+    const key = `${g.k}:${k}`, mo = autoOpen || tpOpen.has(key), cl = sumOf(rows, 'con_lai');
+    return `<tr class="tv-sub-row tp-loai-row">
+      <td class="num muted">${n}.${li + 1}</td>
+      <td colspan="2" class="indent"><button class="grp-toggle" data-tpsub="${esc(key)}" title="${mo ? 'Thu gọn' : 'Mở các hợp đồng'}">${mo ? '▾' : '▸'}</button>
+        <span class="tp-kind tp-k-${k}">${TP_NGAN[k]}</span> <span class="muted small">(${rows.length} HĐ · ${rows.filter(tpDaQt).length} đã QT)</span></td>
+      <td class="num">${mtr(sumOf(rows, 'hd_sau_vat'))}</td><td class="num">${mtr(sumOf(rows, 'qt_sau_vat'))}</td><td class="num">${mtr(sumOf(rows, 'da_tt'))}</td>
+      <td class="num strong ${cl < 0 ? 'neg' : ''}">${mtr(cl)}</td><td colspan="2"></td>
+    </tr>` + (mo ? rows.map((c, i) => childRow(c, `${n}.${li + 1}.${i + 1}`)).join('') : '');
+  }).join('');
   $('#tp-tbody').innerHTML = list.length ? groups.map((g, gi) => {
     const n = gi + 1;
     const open = autoOpen || tpOpen.has(g.k);
@@ -1879,7 +1890,7 @@ function renderTpCard() {
       <td class="num strong">${mtr(sumOf(g.rows, 'da_tt'))}</td>
       <td class="num tv-head-sum ${cl < 0 ? 'neg' : ''}">${mtr(cl)}</td>
       <td colspan="2" class="muted small">${g.k ? '' : 'Mở chi tiết HĐ để gắn'}</td>
-    </tr>` + (open ? g.rows.map((c, i) => childRow(c, `${n}.${i + 1}`)).join('') : '');
+    </tr>` + (open ? tpLoaiRows(g, n) : '');
   }).join('') + leHtml : leHtml || `<tr><td colspan="9" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
   $('#tp-tfoot').innerHTML = `<tr><td></td><td colspan="2">${filtered ? `TỔNG ĐANG LỌC (${T.so_hd}/${tatCa.length} HĐ)` : `TỔNG HĐ ĐẦU VÀO (${T.so_hd} HĐ)`}</td>
     <td class="num">${mtr(T.hd_sau_vat)}</td><td class="num">${mtr(T.qt_sau_vat)}</td><td class="num">${mtr(T.da_tt)}</td>
@@ -1888,14 +1899,15 @@ function renderTpCard() {
     <td class="num ${T.con_lai < 0 ? 'neg' : ''}">${mtr(T.con_lai)}</td><td colspan="2"></td></tr>` : '');
   const btn = $('#tp-toggle-all');
   btn.hidden = autoOpen || !list.length;
-  btn.textContent = groups.some((g) => !tpOpen.has(g.k)) ? 'Mở tất cả' : 'Thu gọn tất cả';
+  btn.textContent = groups.some((g) => !tpOpen.has(g.k) || HDV.some((k) => g.rows.some((c) => (c.nhom || 'thau_phu') === k) && !tpOpen.has(`${g.k}:${k}`))) ? 'Mở tất cả' : 'Thu gọn tất cả';
   // Ô chọn HĐ CĐT ở form tạo HĐTP
   const sel = cForm?.elements.hd_cdt;
   if (sel) { const keep = Number(sel.value) || null; sel.innerHTML = hdCdtOptions(keep); }
 }
 
 $('#tp-toggle-all').addEventListener('click', () => {
-  const ks = [...tpGroups(costData.thau_phu).map((g) => g.k), 'le']; // gồm cả nhóm Mua lẻ
+  const G = tpGroups(costData.thau_phu);
+  const ks = [...G.map((g) => g.k), ...G.flatMap((g) => HDV.map((k) => `${g.k}:${k}`)), 'le']; // gồm nhóm loại HĐ và nhóm Mua lẻ
   const close = ks.every((k) => tpOpen.has(k));
   ks.forEach((k) => (close ? tpOpen.delete(k) : tpOpen.add(k)));
   renderTpCard();
@@ -1907,6 +1919,8 @@ $('#tp-tbody').addEventListener('click', (e) => {
     renderCost();
     return $(`[data-cgrp="${le}"]`)?.closest('tr')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+  const sub = e.target.dataset.tpsub;
+  if (sub) { tpOpen.has(sub) ? tpOpen.delete(sub) : tpOpen.add(sub); return renderTpCard(); }
   const k = e.target.dataset.tpgrp;
   if (k === undefined) return;
   const n = k === 'le' ? 'le' : Number(k); // 'le' = nhóm Mua lẻ (không HĐ)

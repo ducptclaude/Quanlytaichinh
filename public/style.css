@@ -3275,3 +3275,10 @@ html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td.g-con { c
 html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .neg { color: #d92d35 !important; }
 html:root:not([data-theme="dark"]) body #b-report table.th-t3 tfoot td .pos { color: inherit !important; }
 #b-report .th-mot { display: none; } /* xem 1 dự án: ẩn bảng danh sách dự án mục I–III */
+/* HĐ đầu vào: dòng nhóm theo loại (Thầu phụ / Vật tư / MMTB / Nhân công) trong mỗi HĐ CĐT */
+.tp-loai-row td { background: var(--bg-fbfcfe, #fbfcfe); font-size: 13px; }
+.tp-loai-row td.indent { padding-left: 28px; }
+.tp-loai-row + .tv-child td.tp-hd, .tp-loai-row ~ .tv-child td.indent { padding-left: 52px; }
+:root[data-theme="dark"] .tp-loai-row td { background: rgba(255,255,255,.03); }
+/* Đầu Báo cáo: ẩn Lập lúc / Người lập / phiên bản trên màn hình (gọn 1 dòng, tránh xuống dòng); vẫn in ra khi In / PDF */
+@media screen { #b-report .b-mi.b-in { display: none; } }

@@ -1484,7 +1484,7 @@ function renderReport() {
       <div class="b-company">${esc(BC.ten_cong_ty || '')}</div>
       <h1>BÁO CÁO TỔNG QUAN <span class="b-h1-acc">TÀI CHÍNH DỰ ÁN</span></h1>
       <div class="b-tag">Theo dõi nhanh hiệu quả kinh doanh và tình hình tài chính</div>
-      <div class="b-meta"><span class="b-mi"><em>Phạm vi</em><b>${esc(scope)}</b></span><span class="b-mi"><em>Đơn vị</em>VNĐ · ${vt}</span><span class="b-mi"><em>Lập lúc</em>${lap.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}</span><span class="b-mi"><em>Người lập</em>${esc(BC.nguoi_lap)}</span><span class="b-mi b-ver">${esc(BC.phien_ban)}</span></div>
+      <div class="b-meta"><span class="b-mi"><em>Phạm vi</em><b>${esc(scope)}</b></span><span class="b-mi"><em>Đơn vị</em>VNĐ · ${vt}</span><span class="b-mi b-in"><em>Lập lúc</em>${lap.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}</span><span class="b-mi b-in"><em>Người lập</em>${esc(BC.nguoi_lap)}</span><span class="b-mi b-ver b-in">${esc(BC.phien_ban)}</span></div>
     </div></div>    ${(() => { // Dòng tiền lũy kế đến hôm nay (= mục II khi xem Toàn bộ thời gian): thu − chi, không gồm vay / trả gốc
       const { T: C } = bTongHopData(list, v, { to: '9999-12' });
       // Số dư đầu kỳ (nhập tay): xem 1 dự án = số dư dự án đó; xem nhiều dự án = số dư chung + tổng số dư các dự án

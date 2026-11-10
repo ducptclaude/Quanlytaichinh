@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.10.11.26 – Chi phí: HĐ đầu vào gom theo loại; đầu Báo cáo gọn
+- Bảng "1. Hợp đồng đầu vào": trong mỗi HĐ CĐT thêm cấp nhóm theo loại (Thầu phụ · Vật tư · Nhân công · MMTB) có dòng cộng, bấm ▸ để mở các HĐ (số thứ tự n.m.k); "Mở / Thu gọn tất cả" gồm cả cấp loại.
+- Đầu Báo cáo: ẩn nhãn Lập lúc / Người lập / phiên bản trên màn hình (vẫn in khi In / PDF), chỉ còn Phạm vi · Đơn vị – không xuống dòng.
+
 ## V12.10.11.26 – Báo cáo: xem 1 dự án thì ẩn bảng danh sách ở mục I–III
 - Chọn 1 dự án ở Phạm vi: ẩn bảng dự án của mục I, II, III (3 thẻ số đã thể hiện) – class `th-mot`; chọn Tất cả dự án: hiện lại. Mục IV, Đánh giá hoàn thành giữ nguyên.
 
