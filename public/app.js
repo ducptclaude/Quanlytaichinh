@@ -717,13 +717,21 @@ function renderRevenue() {
     }
   }
   const hd = tong.hd, qt = tong.qt;
-  $('#r-k-hd').textContent = dvT(hd.sau_vat);
-  $('#r-k-hd-sub').innerHTML = `${hd.so_dong} dòng${hd.tam_tinh ? ' · <span class="warn-text" title="HĐ chưa quyết toán">có HĐ tạm tính</span>' : ''}`;
+  // 3 thẻ trên cùng chạy theo TĐ đang chọn: HĐ/PL sau VAT tại TĐk (± so TĐ trước); HT/QT, tiền về (số thực tế) so với HĐ tại TĐk
+  const kT = tdDangChon(), hdR = items.filter((r) => r.loai === 'hd');
+  const svK = (k) => hdR.reduce((a, r) => { const x = vbTd(r); return a + svTd([x.t1, x.t2, x.t3][k - 1], r.vat); }, 0);
+  const hdK = svK(kT), hdTruoc = kT > 1 ? svK(kT - 1) : null;
+  const pctK = (v) => (hdK ? `${((v / hdK) * 100).toFixed(1).replace('.', ',')}%` : '—');
+  $('#r-k-hd-lab').textContent = `HĐ/PL sau VAT · TĐ${kT} ${TD_TEN_NL[kT]}`;
+  $('#r-k-hd').textContent = dvT(hdK);
+  const dK = hdTruoc === null ? 0 : hdK - hdTruoc;
+  $('#r-k-hd-sub').innerHTML = `${hd.so_dong} dòng${hdTruoc !== null ? ` · ${dK ? `<span class="${dK > 0 ? 'td-up' : 'td-down'}">${dK > 0 ? '▲ +' : '▼ '}${dvT(dK)}</span>` : '='} so TĐ${kT - 1}` : ''}${hd.tam_tinh ? ' · <span class="warn-text" title="HĐ chưa quyết toán">có HĐ tạm tính</span>' : ''}`;
+  $('#r-k-qt-lab').textContent = 'HT/QT sau VAT';
   $('#r-k-qt').textContent = dvT(qt.sau_vat);
-  $('#r-k-qt-sub').innerHTML = `${qt.so_dong} dòng`;
+  $('#r-k-qt-sub').innerHTML = `${qt.so_dong} dòng · đạt <b>${pctK(qt.sau_vat)}</b> HĐ TĐ${kT}`;
   const tv = revData.tong_tien_ve;
   $('#r-k-tv').textContent = dvT(tv.tong);
-  $('#r-k-tv-sub').textContent = `Tạm ứng ${dvT(tv.tam_ung)} · Thanh toán ${dvT(tv.thanh_toan)} · Quyết toán ${dvT(tv.quyet_toan)}`;
+  $('#r-k-tv-sub').innerHTML = `Đạt <b>${pctK(tv.tong)}</b> HĐ TĐ${kT} · còn phải thu <b>${dvT(hdK - tv.tong)}</b><br>Tạm ứng ${dvT(tv.tam_ung)} · Thanh toán ${dvT(tv.thanh_toan)} · Quyết toán ${dvT(tv.quyet_toan)}`;
 
   for (const loai of Object.keys(REV_LABEL)) {
     const cols = loai === 'hd' ? 3 + tdSoCot() + 4 + (canRv('hd') ? 1 : 0) : (canRv('hd') ? 10 : 9);

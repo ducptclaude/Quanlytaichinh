@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.11.11.26 – Doanh thu: 3 thẻ trên cùng chạy theo TĐ đang chọn
+- Thẻ HĐ/PL: "HĐ/PL sau VAT · TĐk …" = giá trị tại TĐk (khớp dòng TỔNG của bảng) + ▲▼ so TĐ trước.
+- Thẻ HT/QT và Tiền về (số thực tế, không chia theo TĐ): thêm "đạt x% HĐ TĐk"; tiền về thêm "còn phải thu" = HĐ TĐk − tiền về.
+
 ## V12.11.11.26 – Tab TĐ2: form nhập điều chỉnh ngay trên bảng (thay nút ± Điều chỉnh ở từng dòng)
 - Form: Văn bản (HĐ / PL chưa khoá, kèm TĐ2 hiện tại) · Cách nhập (Tăng / giảm ± | Chốt giá trị mới) · Số tiền · Ngày · Nội dung;
   xem trước "TĐ2 mới = … · ▲▼ so với hiện tại". Nút "Xem các đợt" mở hộp xem / sửa / xóa đợt đã nhập.

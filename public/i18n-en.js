@@ -1450,6 +1450,11 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["HĐ/PL sau VAT · TĐ{} Ký", "Contract/addendum after VAT · M{} Signed"],
+["HĐ/PL sau VAT · TĐ{} Điều chỉnh", "Contract/addendum after VAT · M{} Adjusted"],
+["HĐ/PL sau VAT · TĐ{} Quyết toán", "Contract/addendum after VAT · M{} Final account"],
+["{} dòng · đạt {} HĐ TĐ{}", "{} rows · {} of M{} contract value"],
+["Đạt {} HĐ TĐ{} · còn phải thu {}", "{} of M{} contract value · {} still to collect"],
 ["TĐ2 mới = {} đ · {} so với hiện tại", "New M2 = {} VND · {} vs current"],
 ["TĐ2 hiện tại: {} đ", "Current M2: {} VND"],
 ["Đã ghi điều chỉnh {} đ cho {} (TĐ2)", "Recorded adjustment {} VND for {} (M2)"],
