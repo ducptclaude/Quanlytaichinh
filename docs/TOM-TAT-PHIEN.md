@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V20.11.11.26 – Chi phí: bảng + 4 thẻ chạy theo TĐ, HĐ đã gắn nằm dưới gói, tách rõ nội dung từng TĐ
+- HĐ gắn gói hiện NGAY DƯỚI gói (↳ HĐ …); dòng gói TĐ2 / TĐ3 = tổng HĐ đã gắn, ± so TĐ1 của chính gói (VD Kết cấu 300 -> 350 ▲50). Không lặp ở nhóm HĐ CĐT;
+  dòng tổng "TỔNG HĐ NGOÀI GÓI". Nút Đóng gói ẩn khi gói đã có HĐ. Cảnh báo ⚠ cộng dồn chỉ khi còn HĐ KHÔNG gắn gói / mua lẻ (máy chủ `duTruMoc` + `dtrChiTiet`).
+- 4 thẻ trên cùng (`costKpiTd`): Chi phí trực tiếp / gián tiếp / tài chính / Tổng theo TĐ đang chọn (HĐ tại TĐ + chi phí đã ghi + gói / dự trù), ▲▼ so TĐ trước.
+  Đối chiếu 6 dự án mẫu × 3 TĐ: thẻ Tổng = Báo cáo (0 lệch).
+- Tách nội dung theo TĐ: TĐ1 = kế hoạch (gói tạm tính + HĐ ký từ đầu; cột 2 = tỷ trọng %; ẩn HĐ gắn gói / phát sinh, nhà thầu của gói, thanh toán, tình trạng QT);
+  TĐ2 = HĐ thật dưới gói, phát sinh, điều chỉnh, thanh toán; TĐ3 = thêm tình trạng + bộ lọc quyết toán. Tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-11.11.26-13h49`.
+
 ## V19.11.11.26 – Bảng HĐ đầu vào: gói gom gọn – mỗi nhóm gói là 1 nhóm chính ở đầu bảng
 - Bỏ tầng "G" lồng nhau: mỗi nhóm có gói (Thầu phụ, Vật tư, Nhân công…) = 1 dòng nhóm chính G1, G2… (như nhóm HĐ CĐT), đặt ĐẦU bảng, mở / thu riêng từng nhóm.
 - Mỗi gói 1 dòng: tên + nhãn tình trạng cùng hàng, cột ghi chú chỉ "VAT x%" (rê chuột xem trước VAT). Nút Nhập ở dòng nhóm, Đóng gói / Mở lại ở dòng gói (TĐ2).

@@ -1490,6 +1490,38 @@ window.BKS_EN = {
 },
 "patterns": [
 [
+"TỔNG HĐ NGOÀI GÓI ({} HĐ)",
+"CONTRACTS OUTSIDE PACKAGES ({} contracts)"
+],
+[
+"{} · TĐ{}",
+"{} · M{}"
+],
+[
+"Tổng chi phí TĐ{} · sau VAT",
+"Total cost M{} · after VAT"
+],
+[
+"{} tổng · {} so TĐ{}",
+"{} of total · {} vs M{}"
+],
+[
+"HĐ đầu vào {} · chi phí đã ghi {} · gói / dự trù {}",
+"Procurement contracts {} · recorded costs {} · packages / budget {}"
+],
+[
+"HĐ đầu vào {} · chi phí đã ghi {}",
+"Procurement contracts {} · recorded costs {}"
+],
+[
+"{} tổng",
+"{} of total"
+],
+[
+"= TĐ{}",
+"= M{}"
+],
+[
 "TỔNG CỘNG TĐ{}",
 "GRAND TOTAL M{}"
 ],

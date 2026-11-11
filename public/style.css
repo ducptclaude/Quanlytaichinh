@@ -3455,3 +3455,8 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .tp-goi-row td { padding-top: 7px; padding-bottom: 7px; }
 .tp-goi-head td { background: color-mix(in srgb, #2a5bd7 7%, var(--bg-ffffff)); }
 .tp-goi-tong td { font-weight: 700; background: color-mix(in srgb, #2a5bd7 5%, var(--bg-ffffff)); }
+
+.tp-goi-hd td { background: color-mix(in srgb, #2a5bd7 3%, var(--bg-ffffff)); padding-top: 6px; padding-bottom: 6px; }
+.tp-goi-hdl { padding-left: 18px; }
+
+.kpi .sub .kpi-ss { font-weight: 700; }
