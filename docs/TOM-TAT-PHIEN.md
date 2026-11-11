@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V29.11.11.26 – HĐ đã gắn gói hiện nhãn như HĐ thường
+- Dòng HĐ dưới gói: "↳" + nhãn loại (Thầu phụ / Vật tư / Nhân công / MMTB) + Số HĐ + dòng "n phụ lục / Không phụ lục" (TĐ3 thêm tình trạng QT), giống HĐ ngoài gói; nhãn không đổi loại tại chỗ (loại theo gói). Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V28.11.11.26 – Gói chi phí gắn vào HĐ chủ đầu tư
 - Kho dữ liệu: THÊM cột `du_tru.hd_cdt_id` (ADD COLUMN IF NOT EXISTS, không xóa / đổi gì). Đã thử trên PostgreSQL có dữ liệu cũ.
 - TĐ1 tạo gói: có ô "Thuộc HĐ chủ đầu tư". Bảng: mỗi gói có ô chọn HĐ CĐT (chọn là chuyển). HĐ tạo ở TĐ2 gắn vào gói mà chưa chọn HĐ CĐT → tự theo HĐ CĐT của gói.

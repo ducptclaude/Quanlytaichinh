@@ -2312,7 +2312,8 @@ function renderTpCard() {
       <td class="row-actions tp-act">${edit && kTd === 2 && !coQt && !hd.length ? `<button class="sm" data-goidong="${r.id}" data-tt="${r.tinh_trang === 'dong' ? '' : 'dong'}" title="${r.tinh_trang === 'dong' ? 'Tính lại gói vào TĐ2' : 'Gói không dùng nữa: TĐ2 = 0 (TĐ1 giữ nguyên)'}">${r.tinh_trang === 'dong' ? 'Mở lại' : 'Đóng gói'}</button>` : ''}</td></tr>` +
       (moG2 ? hd : []).map((c) => `<tr class="tv-child tp-goi-hd" data-tpid="${c.id}">
       <td class="num muted"></td>
-      <td class="indent tp-hd"><div class="tp-goi-l tp-goi-hdl"><span class="muted">↳ HĐ</span><b class="tp-open so-ma-pick" data-tp="${c.id}" title="Nhấp đúp để mở bảng nhập chi tiết">${esc(c.so_ma)}</b>${kTd === 3 ? (([cls, lab, tip]) => `<span class="tp-st ${cls}" title="${tip}">${lab}</span>`)(TP_TT[tpTT(c)]) : ''}</div></td>
+      <td class="indent tp-hd tp-goi-hdc"><div class="tp-l1"><span class="muted">↳</span><span class="tp-kind tp-k-${c.nhom || 'thau_phu'}" title="${esc(TPN()[c.nhom || 'thau_phu'])} – HĐ đã xác định, thuộc gói">${TP_NGAN[c.nhom || 'thau_phu']}</span><b class="tp-open so-ma-pick" data-tp="${c.id}" title="Nhấp đúp để mở bảng nhập chi tiết">${esc(c.so_ma)}</b></div>
+        <div class="tp-l2">${kTd === 3 ? (([cls, lab, tip]) => `<span class="tp-st ${cls}" title="${tip}">${lab}</span>`)(TP_TT[tpTT(c)]) : ''}${c.so_pl ? `<span>${c.so_pl} phụ lục</span>` : '<span>Không phụ lục</span>'}</div></td>
       <td class="c-dt tp-dt">${esc(c.doi_tac)}</td>
       <td class="num">${mtr(tpTdSv(c, kTd))}</td>${hdSs(c)}
       <td class="num c-tt">${mtr(c.da_tt)}</td><td class="num ${c.con_lai < 0 ? 'neg' : ''} c-tt">${mtr(c.con_lai)}</td>
