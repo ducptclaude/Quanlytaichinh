@@ -675,6 +675,7 @@ document.addEventListener('click', (e) => {
   $$('.rev-form[data-loai="hd"]').forEach((f) => { if (!f.elements.id.value) { f._manualTd = false; f._tdGoiY?.(); } });
   if (cForm?.elements.td && !cForm.elements.id.value) cForm.elements.td.value = String(tdDangChon());
   const tab = ['revenue', 'cost'].find((x) => !$('#tab-' + x).hidden);
+  if (cForm && tab === 'cost') setCostMode();
   showMsg($(tab === 'cost' ? '#c-msg' : '#r-new-msg') || document.createElement('div'), '');
   // đổi chế độ nhập: vẽ lại bảng + hộp chi tiết đang mở
   if (tab === 'revenue' && revData) renderRevenue();
@@ -1461,12 +1462,23 @@ const costTpMode = () => {
 function fillHinhThuc() {
   const e = cForm.elements, hdv = !e.id.value && HDV.includes(e.nhom.value) && e.nhom.value !== 'thau_phu';
   // Có cả 2 quyền mới cho chọn; chỉ 1 quyền -> tự chọn đúng hình thức được phép
-  $('#c-ht-wrap').hidden = !(hdv && can('hd') && can('tien'));
+  $('#c-ht-wrap').hidden = !(hdv && can('hd') && can('tien')) || tdDangChon() !== 1;
   if (hdv && !(can('hd') && can('tien'))) e.hinh_thuc.value = can('hd') ? 'hd' : 'le';
+  if (hdv && tdDangChon() !== 1) e.hinh_thuc.value = 'le'; // TĐ2 / TĐ3: chỉ thêm dòng chi phí mua lẻ, HĐ đầu vào mới tạo ở TĐ1
 }
 function setCostMode() {
   fillHinhThuc();
   const tp = costTpMode();
+  // TĐ2 / TĐ3: không tạo HĐ đầu vào mới (thầu phụ chỉ có dạng HĐ -> ẩn ô nhập, hướng dẫn)
+  const chan = tp && tdDangChon() !== 1;
+  [...cForm.children].forEach((el) => { if ((el.tagName === 'LABEL' || el.classList.contains('actions') || el.classList.contains('tp-hint')) && !el.querySelector('[name=nhom]')) el.classList.toggle('td-an', chan); });
+  const note = $('#c-td-note');
+  if (note) {
+    note.hidden = !chan && !(HDV.includes(cForm.elements.nhom.value) && tdDangChon() !== 1 && !cForm.elements.id.value);
+    note.innerHTML = chan
+      ? `<b>Đang ở TĐ${tdDangChon()}:</b> HĐ ${esc((TPN()[cForm.elements.nhom.value] || '').toLowerCase())} mới chỉ tạo ở tab <b>TĐ1</b>. Điều chỉnh / quyết toán HĐ đã có: nhấp đúp Số HĐ ở bảng "1. Hợp đồng đầu vào".`
+      : `<b>Đang ở TĐ${tdDangChon()}:</b> chỉ thêm dòng chi phí mua lẻ. HĐ đầu vào mới tạo ở tab <b>TĐ1</b>.`;
+  }
   $$('.c-tp', cForm).forEach((el) => (el.hidden = !tp));
   $$('.c-gen', cForm).forEach((el) => (el.hidden = tp));
   if (tp) $('#c-sub-wrap').hidden = true;
@@ -1615,6 +1627,7 @@ async function saveCost() {
   const e = cForm.elements;
   const reqDt = NHOM().find((n) => n.code === e.nhom.value)?.bat_buoc_doi_tac;
   if (reqDt && !costTpMode() && !e.doi_tac.value.trim()) return showMsg(msg, `Nhập ${reqDt.toLowerCase()}`, 'err');
+  if (costTpMode() && tdDangChon() !== 1) return showMsg(msg, 'HĐ đầu vào mới chỉ tạo ở tab TĐ1', 'err');
   if (costTpMode()) {
     // Tạo hợp đồng thầu phụ kèm dòng HĐ gốc
     try {

@@ -3413,3 +3413,4 @@ table[data-td-on="3"] tr.hd-head > :nth-child(6), table[data-td-on="3"] tr.hd-ch
 input.qt-in { width: 100%; min-width: 120px; }
 .num-lk { white-space: nowrap; font-weight: 600; }
 select.dc-kieu { display: block; margin-top: 6px; width: 100%; min-width: 150px; font-size: 12.5px; }
+#c-form .td-an { display: none !important; }

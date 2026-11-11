@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.11.11.26 – Chi phí: HĐ đầu vào mới chỉ tạo ở tab TĐ1
+- TĐ2 / TĐ3: nhóm Thầu phụ ẩn ô nhập + nút, hiện hướng dẫn (tạo mới ở TĐ1; điều chỉnh / quyết toán HĐ đã có: nhấp đúp Số HĐ ở bảng 1).
+  Vật tư / MMTB / Nhân công: ẩn ô Hình thức, chỉ thêm dòng chi phí mua lẻ. Bấm lưu kiểu HĐ ở TĐ2/3 bị chặn ("chỉ tạo ở tab TĐ1").
+
 ## V05.11.11.26 – Form Thêm HĐ/PL: chọn văn bản đã có -> ghi điều chỉnh TĐ2, tự chuyển tab TĐ2
 - Ở tab TĐ1, chọn Loại "(đã có)" của Số mã (VD PL01 đã có): báo "đã có – số nhập ghi thành điều chỉnh TĐ2", nút đổi thành "Ghi điều chỉnh → TĐ2".
   Bấm -> tạo 1 đợt điều chỉnh (+ tăng / − giảm, Ghi chú = nội dung) cho văn bản đó, tự chuyển sang tab TĐ2. Văn bản đã khoá (có số QT) -> báo khoá.
