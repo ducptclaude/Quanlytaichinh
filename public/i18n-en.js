@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Chọn HĐ CĐT cho gói ở cột bên phải": "Choose the employer contract for each package in the right column",
+"Gói thuộc HĐ chủ đầu tư nào – chọn để chuyển": "Employer contract of this package – choose to move",
 "TỔNG HĐ ĐẦU VÀO": "TOTAL PROCUREMENT CONTRACTS",
 "(gói chi phí – tạm tính)": "(cost packages – provisional)",
 "(dự trù + HĐ đầu vào đã gắn)": "(budget + linked procurement contracts)",
@@ -1520,6 +1522,30 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"({} gói · {} HĐ ngoài gói)",
+"({} packages · {} contracts outside packages)"
+],
+[
+"({} gói)",
+"({} packages)"
+],
+[
+"({} HĐ ngoài gói)",
+"({} contracts outside packages)"
+],
+[
+"({} gói · {} HĐ ngoài gói · {} đã QT)",
+"({} packages · {} contracts outside packages · {} final)"
+],
+[
+"({} HĐ ngoài gói · {} đã QT)",
+"({} contracts outside packages · {} final)"
+],
+[
+"Đã chuyển gói sang {}",
+"Package moved to {}"
+],
 [
 "(không thuộc gói · {} HĐ)",
 "(outside packages · {} contracts)"

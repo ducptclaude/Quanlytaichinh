@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V28.11.11.26 – Gói chi phí gắn vào HĐ chủ đầu tư
+- Kho dữ liệu: THÊM cột `du_tru.hd_cdt_id` (ADD COLUMN IF NOT EXISTS, không xóa / đổi gì). Đã thử trên PostgreSQL có dữ liệu cũ.
+- TĐ1 tạo gói: có ô "Thuộc HĐ chủ đầu tư". Bảng: mỗi gói có ô chọn HĐ CĐT (chọn là chuyển). HĐ tạo ở TĐ2 gắn vào gói mà chưa chọn HĐ CĐT → tự theo HĐ CĐT của gói.
+- Bảng HĐ đầu vào xếp: HĐ CĐT → Gói (theo nhóm) → HĐ đã gắn; rồi HĐ ngoài gói theo loại. Điều chỉnh / quyết toán cả nhóm thuộc HĐ CĐT chung của các gói trong nhóm (khác nhau → "Chưa gắn HĐ CĐT"). Dòng HĐ CĐT có gói mặc định mở.
+- Số liệu: tổng các HĐ CĐT = tổng cũ = Báo cáo (thử 900 / 970 / 970). Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V27.11.11.26 – Dòng tổng bảng Chi phí dùng từ như Báo cáo
 - "TỔNG HĐ NGOÀI GÓI" → "TỔNG HĐ ĐẦU VÀO (không thuộc gói · n HĐ)"; TĐ1 "TỔNG DỰ TRÙ (gói chi phí – tạm tính)", TĐ2/3 "TỔNG GÓI CHI PHÍ (dự trù + HĐ đầu vào đã gắn)"; "TỔNG CỘNG TĐk" → "TỔNG CHI PHÍ TĐk (HĐ đầu vào + dự trù / gói chi phí)"; thẻ tổng "gói / dự trù" → "dự trù". Số không đổi. Tester 4.518 ĐẠT, 0 LỖI.
 

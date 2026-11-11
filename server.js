@@ -1158,6 +1158,8 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   if (!id || !(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
   const { data, errors } = validateDuTru(req.body || {});
   if (errors.length) return bad(res, errors);
+  if (data.loai !== 'ky') data.hd_cdt_id = null; // chỉ gói (dòng TĐ1) mới gắn HĐ CĐT
+  if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
   res.status(201).json(await store.createDuTru(id, data, req.user.id));
 }));
 // Gói chi phí phải là dòng dự trù TĐ1 của cùng dự án, chưa đóng
@@ -1171,6 +1173,14 @@ api.put('/du-tru/:id', canHd, wrap(async (req, res) => {
   const id = parseId(req.params.id);
   const cur = id && (await store.getDuTru(id));
   if (!cur) return bad(res, 'Không tìm thấy dòng dự trù', 404);
+  // Chỉ đổi HĐ chủ đầu tư của gói – không gửi số tiền
+  if (req.body && 'hd_cdt_id' in req.body && !('so_tien' in req.body) && !('tinh_trang' in req.body)) {
+    if (cur.loai !== 'ky') return bad(res, 'Chỉ gói chi phí (dòng TĐ1) mới gắn HĐ chủ đầu tư');
+    const hd = req.body.hd_cdt_id === '' || req.body.hd_cdt_id === null ? null : Number(req.body.hd_cdt_id);
+    if (hd !== null) { if (!Number.isInteger(hd) || hd <= 0) return bad(res, 'HĐ chủ đầu tư không hợp lệ'); const e = await checkHeadRef(hd, cur.du_an_id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
+    await store.setDuTruCdt(id, hd);
+    return res.json({ ok: true });
+  }
   // Chỉ đổi tình trạng gói (tạm tính / đã xác định / đóng) – không gửi số tiền
   if (req.body && 'tinh_trang' in req.body && !('so_tien' in req.body)) {
     const tt = ['', 'xd', 'dong'].includes(req.body.tinh_trang) ? req.body.tinh_trang : null;
@@ -1471,7 +1481,8 @@ api.post('/du-an/:id/thau-phu', canHd, wrap(async (req, res) => {
   const errors = [...t.errors, ...l.errors];
   if (errors.length) return bad(res, errors);
   if (t.data.hd_cdt_id) { const e = await checkHeadRef(t.data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
-  if (t.data.goi_id) { const e = await checkGoi(t.data.goi_id, id); if (e) return bad(res, e); }
+  if (t.data.goi_id) { const e = await checkGoi(t.data.goi_id, id); if (e) return bad(res, e);
+    if (!t.data.hd_cdt_id) t.data.hd_cdt_id = (await store.getDuTru(t.data.goi_id))?.hd_cdt_id || null; } // chưa chọn HĐ CĐT -> theo gói
   res.status(201).json(await store.createTp(id, t.data, l.data, req.user.id));
 }));
 
