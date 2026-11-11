@@ -3480,3 +3480,6 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .tp-goi-r .grp-sp { width: 22px; }
 .tp-goi-r .tp-l2 { margin-top: 3px; }
 .tp-goi-r .tp-l2 .st, .tp-goi-r .tp-l2 .goi-chip { margin-left: 0; }
+
+@keyframes dcFlash { 0% { box-shadow: 0 0 0 3px rgba(42,91,215,.55); } 100% { box-shadow: 0 0 0 0 rgba(42,91,215,0); } }
+.dc-flash { animation: dcFlash 1.2s ease-out; border-radius: 12px; }

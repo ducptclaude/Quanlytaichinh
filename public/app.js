@@ -500,6 +500,17 @@ function buildRevenueSections() {
     const f = $('.rev-form[data-loai="hd"]');
     if (!el || !f) return;
     window.getSelection?.().removeAllRanges();
+    // TĐ2: nhảy văn bản (HĐ / PL) lên form điều chỉnh phía trên
+    const dfm = $('#dc-form');
+    if (dfm && !dfm.hidden && el.dataset.vb) {
+      const ok = [...dfm.elements.vb_id.options].some((o) => o.value === el.dataset.vb);
+      if (!ok) return showMsg($('#td-hd-msg'), 'Văn bản này đã chốt quyết toán – không điều chỉnh được', 'err');
+      dfm.elements.vb_id.value = el.dataset.vb; dfm.elements.vb_id.dispatchEvent(new Event('change', { bubbles: true }));
+      dfm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => dfm.elements.so_tien.focus({ preventScroll: true }), 350);
+      dfm.classList.remove('dc-flash'); void dfm.offsetWidth; dfm.classList.add('dc-flash');
+      return;
+    }
     resetRevForm(f);
     pickExistingSoMa(f, el.dataset.soma);
     showMsg($('.msg', f), `Thêm ${f.elements.ma_loai.value} cho ${el.dataset.soma} – nhập giá trị rồi bấm Thêm dòng`);
@@ -898,7 +909,7 @@ function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null }
   return `
     <tr class="${child ? 'hd-child' : 'hd-head'}" data-rid="${r.id}" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
       <td class="num muted">${stt}</td>
-      <td class="${child ? 'indent' : ''}">${toggle}${child ? '<span class="tree">└</span>' : ''}<span class="kind-tag ${r.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${esc(r.ma_loai || '')}</span> ${can('hd') ? `<b class="so-ma-pick" data-soma="${esc(r.so_ma || '')}" title="Nhấp đúp để thêm phụ lục cho ${esc(r.so_ma || '')}">${esc(r.so_ma || r.so_hieu)}</b>` : `<b>${esc(r.so_ma || r.so_hieu)}</b>`}${qtTag}${!child && r.tam_tinh ? ' <span class="st st-tam-tinh" title="HĐ chưa quyết toán – giá trị tạm tính">Tạm tính</span>' : ''}</td>
+      <td class="${child ? 'indent' : ''}">${toggle}${child ? '<span class="tree">└</span>' : ''}<span class="kind-tag ${r.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${esc(r.ma_loai || '')}</span> ${can('hd') ? `<b class="so-ma-pick" data-soma="${esc(r.so_ma || '')}" data-vb="${r.id}" title="${tdDangChon() === 2 ? `Nhấp đúp để chọn ${esc(r.ma_loai || '')} ${esc(r.so_ma || '')} ở form điều chỉnh TĐ2 phía trên` : `Nhấp đúp để thêm phụ lục cho ${esc(r.so_ma || '')}`}">${esc(r.so_ma || r.so_hieu)}</b>` : `<b>${esc(r.so_ma || r.so_hieu)}</b>`}${qtTag}${!child && r.tam_tinh ? ' <span class="st st-tam-tinh" title="HĐ chưa quyết toán – giá trị tạm tính">Tạm tính</span>' : ''}</td>
       <td>${dmy(r.ngay)}</td>
       ${md === 1 ? `<td class="num td-col-on">${dvm(x.t1)}</td>`
         : md === 2 ? `<td class="num td-col-on">${canRv('hd') && !khoa ? `<button type="button" class="link-btn" data-rdot="${r.id}" title="${ds.length ? ds.length + ' đợt điều chỉnh – bấm để xem / thêm' : 'Bấm để thêm điều chỉnh'}">${dvm(x.t2)}</button>` : dvm(x.t2)}</td>${tdSoSanh(x.t2, x.t1)}`

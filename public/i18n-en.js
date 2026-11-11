@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Văn bản này đã chốt quyết toán – không điều chỉnh được": "This document has a settled final account – it cannot be adjusted",
 "Chọn HĐ CĐT cho gói ở cột bên phải": "Choose the employer contract for each package in the right column",
 "Gói thuộc HĐ chủ đầu tư nào – chọn để chuyển": "Employer contract of this package – choose to move",
 "TỔNG HĐ ĐẦU VÀO": "TOTAL PROCUREMENT CONTRACTS",
@@ -1522,6 +1523,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Nhấp đúp để chọn {} {} ở form điều chỉnh TĐ2 phía trên",
+"Double-click to select {} {} in the M2 adjustment form above"
+],
 [
 "({} gói · {} HĐ ngoài gói)",
 "({} packages · {} contracts outside packages)"

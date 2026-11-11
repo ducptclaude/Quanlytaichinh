@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V31.11.11.26 – Doanh thu TĐ2: nhấp đúp Số HĐ / PL → chọn ở form điều chỉnh
+- Tab TĐ2 trang Doanh thu: nhấp đúp số HĐ / PL trong bảng 1 → form "TĐ2 – Điều chỉnh" phía trên chọn đúng văn bản đó, cuộn tới, đặt con trỏ ở ô Số tiền, khung nháy sáng. Văn bản đã chốt QT → báo không điều chỉnh được. TĐ1 giữ như cũ (điền sẵn PL kế tiếp). Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V30.11.11.26 – Căn dòng gói + bỏ ghi chú "cộng dồn"
 - Dòng gói: cột nút ▸ cố định (gói không có HĐ để trống cùng độ rộng), tên gói dòng trên, nhãn Tạm tính / Đã có HĐ dòng dưới → thẳng hàng; HĐ dưới gói thụt vào ngang tên gói.
 - Bỏ ghi chú "⚠ cộng dồn" (bảng Chi phí, cây chi phí, hộp gói) và "⚠ n nhóm cộng dồn nhiều nguồn" (Báo cáo). Chỉ bỏ chữ cảnh báo, cách tính không đổi. Tester 4.518 ĐẠT, 0 LỖI.
