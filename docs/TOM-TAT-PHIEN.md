@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V25.11.11.26 – Khóa HĐ đầu vào chỉ khi ĐÃ QUYẾT TOÁN và còn lại = 0
+- Trước: trả đủ (còn lại = 0) là khóa, kể cả chưa quyết toán → không thêm được đợt thanh toán. Nay khóa sửa (`khoa_so`, lib/subcontract.js) = còn lại = 0 VÀ đã quyết toán (có đợt Quyết toán, hoặc mọi HĐ/PL có số HT/QT). Áp dụng máy chủ (chặn ghi) + giao diện.
+- Cờ `khoa` dùng trong công thức báo cáo / dòng tiền GIỮ NGUYÊN → số liệu không đổi.
+- Khi khóa: dưới bảng thanh toán có dòng nhắc + nút Mở khóa. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V24.11.11.26 – Cân đối cột "± so TĐ1" bảng Chi phí
 - Dòng gói: diễn giải tách 2 dòng ngắn "ký ±…" / "điều chỉnh ±…" khi có cả hai; chỉ một nguồn thì ghi "do giá trị ký" / "do điều chỉnh". Cột không còn bị kéo rộng khi chọn đơn vị Đồng. Tester 4.518 ĐẠT, 0 LỖI.
 

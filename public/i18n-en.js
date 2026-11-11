@@ -1,6 +1,13 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) nên đang khóa số. Mở khóa để điều chỉnh – số liệu giữ nguyên; đóng bảng chi tiết sẽ tự khóa lại nếu còn lại vẫn = 0.": "The contract's final account is settled and fully paid (balance = 0), so it is locked. Unlock to adjust – figures stay the same; closing the detail panel locks it again if the balance is still 0.",
+"Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) – đã khóa số. Muốn điều chỉnh, bấm Mở khóa (cần Passcode).": "The contract's final account is settled and fully paid (balance = 0) – locked. To adjust, click Unlock (Passcode required).",
+"🔒 Hợp đồng đã ": "🔒 The contract's ",
+" và thanh toán đủ – ": " is settled and fully paid – ",
+"🔒 Đã quyết toán và thanh toán đủ (Còn lại = 0) nên không thêm đợt thanh toán được. Cần thêm: bấm": "🔒 Final account settled and fully paid (balance = 0), so no more payment rounds can be added. To add one, click",
+"🔒 Đã QT · thanh toán đủ · Khóa số": "🔒 Final account · fully paid · Locked",
+"🔒 Đã thanh toán đủ (Còn lại = 0) nên không thêm đợt thanh toán được. Cần thêm: bấm": "🔒 Fully paid (balance = 0), so no more payment rounds can be added. To add one, click",
 "do giá trị ký": "from signed value",
 "do điều chỉnh": "from adjustments",
 "so giá trị ký": "vs signed value",

@@ -2105,7 +2105,7 @@ function tpTdSv(c, k) {
 function tpDcVanBan() {
   const out = [];
   for (const c of costData?.thau_phu || []) {
-    if (c.khoa) continue;
+    if (c.khoa_so) continue;
     for (const l of c.lines || []) {
       if (l.gia_tri_qt !== null && l.gia_tri_qt !== undefined && l.gia_tri_qt !== '') continue; // đã có số QT -> khoá
       out.push({ id: l.id, c, l, t2: Number(l.gia_tri) || 0, vat: l.vat });
@@ -2499,8 +2499,8 @@ function renderTpDlg() {
   if (dlg.dataset.tp === String(c.id)) $$('[data-k][data-dirty]', dlg).forEach((tr) => keep.set(tr.dataset.k, $$('[data-f]', tr).map((x) => [x.dataset.f, x.value])));
   dlg.dataset.tp = String(c.id);
   const canInfo = can('hd') && !costAll, canPay = can('tien') && !costAll; // xem tổng hợp tất cả dự án: chỉ xem
-  const moKhoa = c.khoa && tpMoKhoa.has(c.id); // đã thanh toán đủ nhưng đang mở khóa tạm để sửa
-  const locked = c.khoa && !moKhoa;
+  const moKhoa = c.khoa_so && tpMoKhoa.has(c.id); // đã thanh toán đủ nhưng đang mở khóa tạm để sửa
+  const locked = c.khoa_so && !moKhoa;
   const editL = canInfo && !locked, editP = canPay && !locked; // Còn lại = 0 -> khóa số; HĐ/PL: QS · thanh toán: Kế toán
   const edit = editL || editP;
   const inp = (name, val, attrs = '', ok = edit) => `<input data-f="${name}" value="${esc(val ?? '')}" ${attrs} ${ok ? '' : 'disabled'}>`;
@@ -2552,11 +2552,11 @@ function renderTpDlg() {
     <div class="tp-dlg-head">
       <div>
         <div class="muted small">Hợp đồng ${tpTen(c)} · ${esc(c.ma_du_an || costData.du_an.ma_du_an)} · ${NOTE_DONG}</div>
-        <h3>${esc(c.so_ma)} ${locked ? '<span class="st st-lock">🔒 Thanh toán đủ · Khóa số</span>' : moKhoa ? '<span class="st st-tam-tinh">🔓 Đang mở khóa</span>' : c.da_qt ? '<span class="st st-hoan-thanh">Đã QT</span>' : '<span class="st">Chưa QT</span>'}</h3>
+        <h3>${esc(c.so_ma)} ${locked ? '<span class="st st-lock">🔒 Đã QT · thanh toán đủ · Khóa số</span>' : moKhoa ? '<span class="st st-tam-tinh">🔓 Đang mở khóa</span>' : c.da_qt ? '<span class="st st-hoan-thanh">Đã QT</span>' : '<span class="st">Chưa QT</span>'}</h3>
       </div>
       <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button>
     </div>
-    ${locked ? `<div class="lock-bar">🔒 Hợp đồng đã thanh toán đủ – <b>Giá trị còn lại = 0</b>, đã <b>khóa chỉnh sửa</b>. Muốn điều chỉnh, bấm <b>Mở khóa</b> (cần Passcode); số liệu giữ nguyên.${canInfo || canPay ? ' <button type="button" class="sm" data-tpmokhoa>🔓 Mở khóa</button>' : ''}</div>` : ''}${moKhoa ? '<div class="lock-bar unlock-bar">🔓 Đang mở khóa để điều chỉnh. Đóng bảng chi tiết sẽ tự khóa lại nếu Giá trị còn lại vẫn = 0.</div>' : ''}
+    ${locked ? `<div class="lock-bar">🔒 Hợp đồng đã <b>quyết toán</b> và thanh toán đủ – <b>Giá trị còn lại = 0</b>, đã <b>khóa chỉnh sửa</b>. Muốn điều chỉnh, bấm <b>Mở khóa</b> (cần Passcode); số liệu giữ nguyên.${canInfo || canPay ? ' <button type="button" class="sm" data-tpmokhoa>🔓 Mở khóa</button>' : ''}</div>` : ''}${moKhoa ? '<div class="lock-bar unlock-bar">🔓 Đang mở khóa để điều chỉnh. Đóng bảng chi tiết sẽ tự khóa lại nếu Giá trị còn lại vẫn = 0.</div>' : ''}
     ${canInfo ? `<div class="grid-form tp-info" data-k="info">
       <label>Loại hợp đồng<select data-f="nhom">${HDV.map((k) => `<option value="${k}" ${k === (c.nhom || 'thau_phu') ? 'selected' : ''}>${esc(TPN()[k])}</option>`).join('')}</select></label>
       <label>Số HĐ *<input data-f="so_ma" value="${esc(c.so_ma)}" maxlength="120"></label>
@@ -2614,7 +2614,7 @@ function renderTpDlg() {
       <button class="sm" data-addpay="quyet_toan">+ Quyết toán</button>` : ''}
       <span class="spacer"></span>
       ${editL ? '<button class="danger sm" data-deltp>Xóa hợp đồng</button>' : ''}
-    </div>` : locked && canInfo ? '<div class="tv-tools"><span class="spacer"></span><button class="danger sm" data-deltp>Xóa hợp đồng</button></div>' : ''}
+    </div>` : locked && (canInfo || canPay) ? `<div class="tv-tools">${canPay ? '<span class="muted small">🔒 Đã quyết toán và thanh toán đủ (Còn lại = 0) nên không thêm đợt thanh toán được. Cần thêm: bấm <button type="button" class="sm" data-tpmokhoa>🔓 Mở khóa</button></span>' : ''}<span class="spacer"></span>${canInfo ? '<button class="danger sm" data-deltp>Xóa hợp đồng</button>' : ''}</div>` : ''}
     <div class="msg" id="tp-msg" role="alert"></div>`;
   if (edit) {
     $$('input.money', dlg).forEach(attachMoneyInput);
@@ -2660,7 +2660,7 @@ async function onTpDlgClick(e) {
   if (t.dataset.close !== undefined) return closeTp();
   if (t.dataset.deltp !== undefined) return deleteTp(c.id);
   if (t.dataset.tpmokhoa !== undefined) {
-    const pc = await askPasscode(`Mở khóa hợp đồng ${c.so_ma}?`, 'Hợp đồng đã thanh toán đủ (còn lại = 0) nên đang khóa số. Mở khóa để điều chỉnh – số liệu giữ nguyên; đóng bảng chi tiết sẽ tự khóa lại nếu còn lại vẫn = 0.');
+    const pc = await askPasscode(`Mở khóa hợp đồng ${c.so_ma}?`, 'Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) nên đang khóa số. Mở khóa để điều chỉnh – số liệu giữ nguyên; đóng bảng chi tiết sẽ tự khóa lại nếu còn lại vẫn = 0.');
     if (pc === null) return;
     try { await api(`/api/thau-phu/${c.id}/mo-khoa`, { method: 'POST', body: JSON.stringify({ passcode: pc }) }); }
     catch (err) { return showMsg(msg(), err.message, 'err'); }
@@ -3417,7 +3417,7 @@ function dcVanBan() {
   }
   for (const c of costData.thau_phu || []) {
     const l = c.lines.find((x) => x.id === dcCur.id);
-    if (l) return { ten: `${l.ma_loai} ${c.so_ma}`, sub: `HĐ đầu vào · ${tpTen(c)}`, t1: Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2: Number(l.gia_tri) || 0, dot: l.dot || [], ok: can('hd') && !(c.khoa && !tpMoKhoa.has(c.id)) && nnV(l.gia_tri_qt) === null };
+    if (l) return { ten: `${l.ma_loai} ${c.so_ma}`, sub: `HĐ đầu vào · ${tpTen(c)}`, t1: Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2: Number(l.gia_tri) || 0, dot: l.dot || [], ok: can('hd') && !(c.khoa_so && !tpMoKhoa.has(c.id)) && nnV(l.gia_tri_qt) === null };
   }
   return null;
 }

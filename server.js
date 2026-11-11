@@ -1439,7 +1439,7 @@ api.delete('/chi-phi/:id', canTien, wrap(async (req, res) => {
 }));
 
 // ---------- Thầu phụ theo hợp đồng ----------
-const LOCK_MSG = 'Hợp đồng đã thanh toán đủ (còn lại = 0) – đã khóa số. Muốn điều chỉnh, bấm Mở khóa (cần Passcode).';
+const LOCK_MSG = 'Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) – đã khóa số. Muốn điều chỉnh, bấm Mở khóa (cần Passcode).';
 // Mở khóa tạm (sau khi nhập đúng Passcode): tpId -> hết hạn; khóa lại khi đóng bảng chi tiết hoặc sau 60 phút
 const tpMoKhoa = new Map();
 const TP_MO_KHOA_MS = 60 * 60 * 1000;
@@ -1450,7 +1450,7 @@ async function tpIsLocked(tpId) {
   const tp = await store.getTp(tpId);
   if (!tp) return false;
   const c = buildContracts(await store.listTp(tp.du_an_id)).find((x) => x.id === tpId);
-  return Boolean(c?.khoa);
+  return Boolean(c?.khoa_so); // khóa sửa: đã quyết toán + còn lại = 0
 }
 async function lockedErr(res, tpId) {
   if (await tpIsLocked(tpId)) { bad(res, LOCK_MSG, 423); return true; }
