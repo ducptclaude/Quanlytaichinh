@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V24.11.11.26 – Cân đối cột "± so TĐ1" bảng Chi phí
+- Dòng gói: diễn giải tách 2 dòng ngắn "ký ±…" / "điều chỉnh ±…" khi có cả hai; chỉ một nguồn thì ghi "do giá trị ký" / "do điều chỉnh". Cột không còn bị kéo rộng khi chọn đơn vị Đồng. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V23.11.11.26 – Chi tiết HĐ đầu vào theo TĐ + tăng / giảm từng HĐ gắn gói + đồng bộ đơn vị tiền
 - Khung chi tiết HĐ, bảng "Giá trị HĐ / PL" chỉ hiện cột của TĐ đang chọn: TĐ1 (giá trị ký, sau VAT) · TĐ2 (TĐ1 + TĐ2 ▲▼ so TĐ1, sau VAT) · TĐ3 (TĐ2 + TĐ3 nhập, HT/QT sau VAT ▲▼ so TĐ2).
 - Bảng chính Chi phí: HĐ gắn gói có ô ± riêng (TĐ2: so giá trị ký; TĐ3: so TĐ2); dòng gói ghi diễn giải "ký ±… · điều chỉnh ±…" (gói tạm tính → HĐ ký → sau điều chỉnh).

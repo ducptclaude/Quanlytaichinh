@@ -2266,8 +2266,8 @@ function renderTpCard() {
     const a = tpTdSv(c, kTd), b = kTd === 2 ? kySv(c) : tpTdSv(c, 2), d = Math.round(a - b), lb = kTd === 2 ? 'so giá trị ký' : 'so TĐ2';
     return d ? `<td class="num ${d > 0 ? 'neg' : 'pos'}" title="HĐ ${kTd === 2 ? 'điều chỉnh' : 'quyết toán'} ${lb}: ${dvT(b, 'trieu')} → ${dvT(a, 'trieu')}">${d > 0 ? '▲ ' : '▼ '}${mtr(Math.abs(d))}<div class="muted small">${lb}</div></td>` : `<td class="num muted" title="Không đổi ${lb}">= ${kTd === 2 ? 'ký' : 'TĐ2'}</td>`; };
   const goiSs = (r, hd) => { const h = cell2(goiSv(r, kTd), kTd > 1 ? goiSv(r, kTd - 1) : 0); if (kTd !== 2 || !hd.length) return h;
-    const g1 = goiSv(r, 1), ky = hd.reduce((a, c) => a + kySv(c), 0), g2 = goiSv(r, 2);
-    return h.replace(/<\/td>$/, `<div class="muted small tp-goi-ss" title="Gói tạm tính ${dvT(g1, 'trieu')} → HĐ ký ${dvT(ky, 'trieu')} → sau điều chỉnh ${dvT(g2, 'trieu')}">ký ${sg(ky - g1)} · điều chỉnh ${sg(g2 - ky)}</div></td>`); };
+    const g1 = goiSv(r, 1), ky = hd.reduce((a, c) => a + kySv(c), 0), g2 = goiSv(r, 2); const dk = Math.round(ky - g1), dd = Math.round(g2 - ky);
+    return h.replace(/<\/td>$/, `<div class="muted small tp-goi-ss" title="Gói tạm tính ${dvT(g1, 'trieu')} → HĐ ký ${dvT(ky, 'trieu')} → sau điều chỉnh ${dvT(g2, 'trieu')}">${dk && dd ? `<div>ký ${sg(dk)}</div><div>điều chỉnh ${sg(dd)}</div>` : dk ? 'do giá trị ký' : dd ? 'do điều chỉnh' : ''}</div></td>`); };
   const nhaThau = (r) => { const hd = kTd === 1 ? [] : hdCua(r); return hd.length ? esc([...new Set(hd.map((c) => c.doi_tac || c.so_ma))].join(', ')) : '<span class="muted">Chưa rõ nhà thầu</span>'; };
   const soTien = (rows, f, strong = '') => (rows.length ? `<td class="num ${strong} c-tt">${mtr(sumOf(rows, f))}</td>` : '<td class="num muted">—</td>');
   // Mỗi nhóm có gói = 1 nhóm chính ở ĐẦU bảng; dưới mỗi gói là các HĐ thật đã gắn (↳)
