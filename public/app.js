@@ -1547,7 +1547,21 @@ function setCostMode() {
   $('#c-ngay-label').textContent = tp ? 'Ngày ký HĐ' : 'Ngày';
   $('#c-gt-label').textContent = tp ? 'Giá trị HĐ (trước VAT) *' : 'Giá trị (trước VAT) *';
   $('button[type=submit]', cForm).textContent = cForm.elements.id.value ? 'Lưu thay đổi' : tp ? `Tạo HĐ ${(TPN()[cForm.elements.nhom.value] || '').toLowerCase()}` : 'Thêm dòng';
+  // TĐ1 + HĐ đầu vào: mặc định tạo GÓI (chưa rõ nhà thầu / HĐ) – ẩn Số HĐ, nhà thầu, HĐ CĐT, hạng mục
+  const goiMode = costGoiMode();
+  $('#c-cach-wrap').hidden = !(tp && tdDangChon() === 1) || Boolean(cForm.elements.id.value);
+  $('#c-goiten-wrap').hidden = !goiMode;
+  ['hd_cdt', 'so_tp', 'doi_tac', 'hang_muc'].forEach((n) => cForm.elements[n]?.closest('label')?.classList.toggle('goi-an', goiMode));
+  $('.tp-hint', cForm)?.classList.toggle('goi-an', goiMode);
+  if (goiMode) {
+    const nhom = cForm.elements.nhom.value, ten = cForm.elements.ten_goi;
+    if (!ten.value.trim()) ten.placeholder = `VD: ${TPN()[nhom] || 'Gói'} ${(costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom).length + 1} – Kết cấu`;
+    $('#c-ngay-label').textContent = 'Ngày dự trù';
+    $('#c-gt-label').textContent = 'Giá trị tạm tính (trước VAT) *';
+    $('button[type=submit]', cForm).textContent = 'Tạo gói chi phí (tạm tính)';
+  }
 }
+const costGoiMode = () => costTpMode() && tdDangChon() === 1 && !cForm.elements.id.value && (cForm.elements.cach?.value || 'goi') === 'goi';
 
 // ---------- Bộ nhớ gợi ý HĐ đầu vào: nhà thầu đã có + hạng mục từng thi công (mọi dự án) ----------
 let tpGoiY = null, tpGoiYAt = 0;
@@ -1662,6 +1676,20 @@ function resetCostForm(nhom, sub) {
 
 async function saveCost() {
   const msg = $('#c-msg');
+  if (costGoiMode()) { // TĐ1: tạo gói chi phí tạm tính (dòng dự trù TĐ1 của nhóm)
+    const e = cForm.elements, ten = e.ten_goi.value.trim(), ngayG = dmyToIso(e.ngay.value), gt = parseMoney(e.gia_tri.value);
+    if (!ten) return showMsg(msg, 'Nhập Tên gói (VD: Thầu phụ 1 – Kết cấu)', 'err');
+    if (ngayG === null) return showMsg(msg, 'Ngày không hợp lệ, nhập theo dạng dd/mm/yyyy', 'err');
+    if (!(gt > 0)) return showMsg(msg, 'Nhập giá trị tạm tính của gói', 'err');
+    try {
+      const nhom = e.nhom.value;
+      await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom, loai: 'ky', noi_dung: ten + (e.ghi_chu.value.trim() ? ' · ' + e.ghi_chu.value.trim() : ''), so_tien: gt, vat: e.vat.value || 0, ngay: ngayG }) });
+      e.ten_goi.value = ''; e.gia_tri.value = ''; e.ghi_chu.value = '';
+      showMsg(msg, `Đã tạo gói "${ten}" (tạm tính). Sang TĐ2: tạo HĐ thật và chọn gói này ở ô "Gói chi phí".`);
+      await loadCost(); setCostMode();
+    } catch (err) { showMsg(msg, err.message, 'err'); }
+    return;
+  }
   const id = cForm.elements.id.value;
   const ngay = dmyToIso(cForm.elements.ngay.value);
   if (ngay === null) return showMsg(msg, 'Ngày không hợp lệ, nhập theo dạng dd/mm/yyyy', 'err');
@@ -2065,6 +2093,24 @@ function renderTpCard() {
       <td class="num">${mtr(leSv(k))}</td>${kTd === 1 ? `<td class="num">${mtr(leSv(k))}</td>` : '<td class="num muted">=</td>'}<td class="num">${mtr(leSv(k))}</td><td class="num muted">${mtr(0)}</td>
       <td class="c-note tp-note">Đã chi theo chứng từ</td>
       <td class="row-actions tp-act"><button class="sm" data-leopen="${k}">Xem dòng</button></td></tr>`).join('');
+  const goiDs = (q || tpFilter.loc ? [] : (costData.du_tru || []).filter((r) => r.loai === 'ky' && (!tpFilter.nhom || r.nhom === tpFilter.nhom)));
+  const ganG = new Set(tatCa.map((c) => c.goi_id).filter(Boolean));
+  const goiSv = (r, k) => { const sv = (Number(r.so_tien) || 0) + Math.round(((Number(r.so_tien) || 0) * (Number(r.vat) || 0)) / 100); return k === 1 || (!ganG.has(r.id) && r.tinh_trang !== 'dong') ? sv : 0; };
+  const goiSum = (k) => goiDs.reduce((a, r) => a + goiSv(r, k), 0);
+  const goiMo = !tpOpen.has('goi-dong');
+  const goiHtml = !goiDs.length ? '' : `<tr class="tv-head-row tp-goi-head">
+      <td class="num">G</td>
+      <td colspan="2"><button class="grp-toggle" data-tpgoi="1" title="${goiMo ? 'Thu gọn' : 'Mở các gói'}">${goiMo ? '▾' : '▸'}</button>
+        <span class="kind-tag tp-goi">Gói</span> <b>Gói chi phí – dự trù TĐ1</b> <span class="muted small">(${goiDs.length} gói · ${goiDs.filter((r) => !ganG.has(r.id) && r.tinh_trang !== 'dong').length} còn tạm tính · không cộng vào Tổng HĐ, đã tính ở khung Dự trù)</span></td>
+      <td class="num strong">${mtr(goiSum(kTd))}</td>${kTd === 1 ? '<td class="num muted">—</td>' : ssCell(goiSum(kTd), goiSum(kTd - 1), 'strong')}
+      <td class="num muted">—</td><td class="num muted">—</td><td colspan="2" class="muted small">TĐ2: gắn HĐ thật vào gói ở form trên</td></tr>` +
+    (goiMo ? goiDs.map((r, i) => `<tr class="tv-child tp-goi-row">
+      <td class="num muted">G.${i + 1}</td>
+      <td class="indent tp-hd"><div class="tp-l1"><span class="tp-kind tp-k-${esc(r.nhom)}">${esc(TP_NGAN[r.nhom] || r.nhom)}</span><b>${esc(r.noi_dung || 'Gói #' + r.id)}</b></div><div class="tp-l2">${goiChip(r)}</div></td>
+      <td class="c-dt tp-dt muted">${(() => { const hd = tatCa.filter((c) => c.goi_id === r.id); return hd.length ? esc(hd.map((c) => c.doi_tac || c.so_ma).join(', ')) : 'Chưa rõ nhà thầu'; })()}</td>
+      <td class="num">${mtr(goiSv(r, kTd))}</td>${kTd === 1 ? '<td class="num muted">—</td>' : ssCell(goiSv(r, kTd), goiSv(r, kTd - 1))}
+      <td class="num muted">—</td><td class="num muted">—</td><td class="c-note tp-note muted small">Tạm tính (trước VAT ${money(r.so_tien)} đ, VAT ${Number(r.vat) || 0}%)</td>
+      <td class="row-actions tp-act"><button class="sm" data-goinhom="${esc(r.nhom)}">Xem gói</button></td></tr>`).join('') : '');
   const childRow = (c, stt) => `
     <tr class="tv-child" data-tpid="${c.id}">
       <td class="num muted">${stt}</td>
@@ -2103,7 +2149,7 @@ function renderTpCard() {
       <td class="num tv-head-sum ${cl < 0 ? 'neg' : ''}">${mtr(cl)}</td>
       <td colspan="2" class="muted small">${g.k ? '' : 'Mở chi tiết HĐ để gắn'}</td>
     </tr>` + (open ? tpLoaiRows(g, n) : '');
-  }).join('') + leHtml : leHtml || `<tr><td colspan="9" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
+  }).join('') + goiHtml + leHtml : goiHtml + leHtml || `<tr><td colspan="9" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
   $('#tp-tfoot').innerHTML = `<tr><td></td><td colspan="2">${filtered ? `TỔNG ĐANG LỌC (${T.so_hd}/${tatCa.length} HĐ)` : `TỔNG HĐ ĐẦU VÀO (${T.so_hd} HĐ)`}</td>
     ${c45(filtered ? list : tatCa, T.qt_sau_vat)}<td class="num">${mtr(T.da_tt)}</td>
     <td class="num ${T.con_lai < 0 ? 'neg' : ''}">${mtr(T.con_lai)}</td><td colspan="2"></td></tr>` + (leTot ? `<tr class="tp-grand"><td></td><td colspan="2">TỔNG GỒM MUA LẺ <span class="muted small">(khớp bảng chi phí bên dưới)</span></td>
@@ -2125,6 +2171,9 @@ $('#tp-toggle-all').addEventListener('click', () => {
   renderTpCard();
 });
 $('#tp-tbody').addEventListener('click', (e) => {
+  if (e.target.dataset.tpgoi) { tpOpen.has('goi-dong') ? tpOpen.delete('goi-dong') : tpOpen.add('goi-dong'); return renderTpCard(); }
+  const gn = e.target.dataset.goinhom;
+  if (gn) { const r = $(`#dtr-tbody tr[data-dtr="${gn}"]`); if (r) { r.scrollIntoView({ behavior: 'smooth', block: 'center' }); (r.querySelector('button') || r).click(); } return; }
   const le = e.target.closest('[data-leopen]')?.dataset.leopen;
   if (le) { // mở nhóm chi phí tương ứng ở cây chi phí và cuộn tới
     moKhoiCua(le); costOpen.add(le); NHOM().find((n) => n.code === le)?.sub.forEach((sc) => costOpen.add(`${le}:${sc.code}`));
@@ -2140,6 +2189,7 @@ $('#tp-tbody').addEventListener('click', (e) => {
   renderTpCard();
 });
 $('#tp-q').addEventListener('input', (e) => { tpFilter.q = e.target.value; if (costData) renderTpCard(); });
+cForm?.elements.cach?.addEventListener('change', () => setCostMode());
 // Đổi loại HĐ ngay trên bảng
 $('#tp-tbody').addEventListener('change', async (e) => {
   const sel = e.target.closest('[data-tpkind]');

@@ -3445,3 +3445,6 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 :root[data-theme="dark"] .tp-ps { background: rgba(247,199,104,.12); color: #f7d38a; border-color: rgba(247,199,104,.35); }
 #dtr-dlg .tp-dtl input.date-dmy { width: 118px; min-width: 0; }
 #dtr-dlg .tp-dtl td:first-child { white-space: normal; min-width: 150px; }
+
+.goi-an { display: none !important; }
+.tp-goi-head td { background: color-mix(in srgb, #2a5bd7 6%, var(--bg-ffffff)); }

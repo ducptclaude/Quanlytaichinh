@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V17.11.11.26 – TĐ1 tạo GÓI chi phí ngay ở form (chưa rõ nhà thầu / HĐ) + khối Gói trong bảng HĐ đầu vào
+- Form "Thêm chi phí", nhóm HĐ đầu vào (thầu phụ, vật tư, MMTB, nhân công) ở TĐ1: ô "Cách nhập" – mặc định **Gói chi phí (tạm tính)**: chỉ Tên gói, ngày, giá trị, VAT, ghi chú
+  (ẩn Số HĐ, nhà thầu, HĐ CĐT, hạng mục) -> tạo dòng dự trù TĐ1 của nhóm. Chọn "HĐ đã có nhà thầu" -> form HĐ như cũ. TĐ2: tạo HĐ + chọn gói (V16).
+- Bảng "1. Hợp đồng đầu vào": khối **G – Gói chi phí** (từng gói: tình trạng, nhà thầu đã gắn / "Chưa rõ nhà thầu", giá trị tại TĐ đang chọn, ± so TĐ trước, nút Xem gói);
+  KHÔNG cộng vào Tổng HĐ đầu vào (đã tính ở khung Dự trù). Số liệu hệ thống không đổi; tester 4.518 ĐẠT, 0 LỖI.
+
 ## V16.11.11.26 – Gói chi phí (TĐ1 tạm tính → TĐ2 gắn HĐ thật / phát sinh → TĐ3 quyết toán) + bảng HĐ đầu vào theo TĐ
 - Người dùng duyệt đề xuất (Revi). Số liệu hệ thống GIỮ NGUYÊN: chưa gắn gói thì cách tính y như cũ (đã so toàn bộ số báo cáo dữ liệu mẫu trước / sau: giống hệt).
 - Gói = mỗi dòng dự trù TĐ1 (tên VD "Thầu phụ 1 – Kết cấu", nhóm, giá trị, VAT). Kho dữ liệu (chỉ THÊM): `du_tru.tinh_trang` ('' tạm tính · 'xd' · 'dong'),

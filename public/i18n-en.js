@@ -1,6 +1,18 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Cách nhập (TĐ1)": "Entry type (M1)",
+"Gói chi phí – chưa rõ nhà thầu / HĐ (tạm tính)": "Cost package – contractor / contract not yet known (provisional)",
+"HĐ đã có nhà thầu (đã xác định)": "Contract with known contractor (confirmed)",
+"Tên gói *": "Package name *",
+"Ngày dự trù": "Budget date",
+"Giá trị tạm tính (trước VAT) *": "Provisional value (before VAT) *",
+"Tạo gói chi phí (tạm tính)": "Create cost package (provisional)",
+"Gói chi phí – dự trù TĐ1": "Cost packages – M1 budget",
+"Chưa rõ nhà thầu": "Contractor not yet known",
+"Xem gói": "View package",
+"TĐ2: gắn HĐ thật vào gói ở form trên": "M2: link the real contract to the package in the form above",
+"Gói": "Package",
 "Gói chi phí (TĐ2) *": "Cost package (M2) *",
 "— Chọn gói chi phí —": "— Select cost package —",
 "➕ Phát sinh ngoài TĐ1 (TĐ1 = 0)": "➕ New item outside M1 (M1 = 0)",
@@ -1461,6 +1473,18 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Đã tạo gói \"{}\" (tạm tính). Sang TĐ2: tạo HĐ thật và chọn gói này ở ô \"Gói chi phí\".",
+"Package \"{}\" created (provisional). In M2: create the real contract and pick this package in \"Cost package\"."
+],
+[
+"({} gói · {} còn tạm tính · không cộng vào Tổng HĐ, đã tính ở khung Dự trù)",
+"({} packages · {} still provisional · not in the contract total, counted in the Budget box)"
+],
+[
+"Tạm tính (trước VAT {} đ, VAT {}%)",
+"Provisional (before VAT {} VND, VAT {}%)"
+],
 [
 "Gói: {}",
 "Package: {}"

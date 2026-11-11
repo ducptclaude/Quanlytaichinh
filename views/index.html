@@ -173,6 +173,8 @@
             <label id="c-ht-wrap" hidden>Hình thức *<select name="hinh_thuc"><option value="le">Dòng chi phí (mua lẻ, không có HĐ)</option><option value="hd">Hợp đồng (HĐ, PL, quyết toán, thanh toán)</option></select></label>
             <label id="c-sub-wrap">Hạng mục *<select name="nhom_con"></select></label>
             <label class="c-tp">Thuộc HĐ chủ đầu tư<select name="hd_cdt"></select></label>
+            <label class="c-tp c-cach" id="c-cach-wrap" hidden title="TĐ1: chưa rõ nhà thầu / HĐ thì tạo GÓI tạm tính; sang TĐ2 gắn HĐ thật vào gói">Cách nhập (TĐ1)<select name="cach"><option value="goi">Gói chi phí – chưa rõ nhà thầu / HĐ (tạm tính)</option><option value="hd">HĐ đã có nhà thầu (đã xác định)</option></select></label>
+            <label class="c-tp span-2" id="c-goiten-wrap" hidden>Tên gói *<input name="ten_goi" maxlength="300" placeholder="VD: Thầu phụ 1 – Kết cấu"></label>
             <label class="c-tp c-goi" id="c-goi-wrap" hidden title="TĐ2: HĐ thay giá trị tạm tính của gói dự trù TĐ1, hoặc là phát sinh ngoài TĐ1 (TĐ1 = 0)">Gói chi phí (TĐ2) *<select name="goi"></select></label>
             <label class="c-tp"><span id="c-so-label">Số HĐ thầu phụ *</span><input name="so_tp" maxlength="120" placeholder="Số mới: gõ · Số đã có: nhấp đúp" title="Số HĐ mới: gõ trực tiếp. Số đã có: nhấp đúp để mở bảng chi tiết"></label>
             <label class="span-2 c-gen">Nội dung *<input name="noi_dung" maxlength="300"></label>
