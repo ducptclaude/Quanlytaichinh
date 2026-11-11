@@ -3466,3 +3466,8 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 
 .tp-dot-ds td.pos { color: var(--ok, #16a34a); font-weight: 600; }
 .tp-dot-ds td.neg { font-weight: 600; }
+
+.tp-hdpl.td-m1 .c2v, .tp-hdpl.td-m1 .c3v, .tp-hdpl.td-m1 .c3s,
+.tp-hdpl.td-m2 .c3v, .tp-hdpl.td-m2 .c3s,
+.tp-hdpl.td-m3 .c1v, .tp-hdpl.td-m3 .c2s { display: none; }
+.tp-goi-ss { font-weight: 400; }

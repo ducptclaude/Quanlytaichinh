@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V23.11.11.26 – Chi tiết HĐ đầu vào theo TĐ + tăng / giảm từng HĐ gắn gói + đồng bộ đơn vị tiền
+- Khung chi tiết HĐ, bảng "Giá trị HĐ / PL" chỉ hiện cột của TĐ đang chọn: TĐ1 (giá trị ký, sau VAT) · TĐ2 (TĐ1 + TĐ2 ▲▼ so TĐ1, sau VAT) · TĐ3 (TĐ2 + TĐ3 nhập, HT/QT sau VAT ▲▼ so TĐ2).
+- Bảng chính Chi phí: HĐ gắn gói có ô ± riêng (TĐ2: so giá trị ký; TĐ3: so TĐ2); dòng gói ghi diễn giải "ký ±… · điều chỉnh ±…" (gói tạm tính → HĐ ký → sau điều chỉnh).
+- Đơn vị tiền: dòng "Tạm ứng · Thanh toán · Quyết toán" ở bảng tiền về Doanh thu nay theo ô Đơn vị (trước luôn ghi đồng). Rà 4 trang × 3 TĐ × đơn vị Tỷ / Đồng: không còn số lệch đơn vị (hộp chi tiết và ô xem trước cạnh ô nhập giữ đồng như thiết kế).
+- Kiểm tra: tester 4.518 ĐẠT, 0 LỖI. Số liệu không đổi.
+
 ## V22.11.11.26 – Ghi rõ các đợt điều chỉnh TĐ2 trong chi tiết HĐ đầu vào
 - Khung chi tiết HĐ (tab TĐ2 / TĐ3) thêm bảng **"Các đợt điều chỉnh TĐ2"**: HĐ/PL · Đợt · Ngày · Nội dung · ± (▲▼) · VAT · TĐ2 lũy kế sau từng đợt · dòng Tổng điều chỉnh; nút "Sửa / thêm" (TĐ2) mở danh sách đợt. TĐ1 không hiện. Số liệu không đổi.
 - Kiểm tra: HĐTP-01 350 → +50 (400) → −20 (380), tổng +30; tester 4.518 ĐẠT, 0 LỖI; điện thoại không tràn ngang.

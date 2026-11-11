@@ -1,6 +1,10 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"so giá trị ký": "vs signed value",
+"so TĐ2": "vs M2",
+"= ký": "= signed",
+"= TĐ2": "= M2",
 "Các đợt điều chỉnh TĐ2": "M2 adjustment rounds",
 "Chưa có đợt điều chỉnh – TĐ2 = TĐ1": "No adjustments yet – M2 = M1",
 "TỔNG ĐIỀU CHỈNH": "TOTAL ADJUSTMENTS",
@@ -1502,6 +1506,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"ký {} · điều chỉnh {}",
+"signed {} · adjusted {}"
+],
 [
 "TỔNG HĐ NGOÀI GÓI ({} HĐ)",
 "CONTRACTS OUTSIDE PACKAGES ({} contracts)"
