@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Thu gọn các HĐ của gói": "Collapse the package contracts",
+"Mở các HĐ của gói": "Expand the package contracts",
 "Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) nên đang khóa số. Mở khóa để điều chỉnh – số liệu giữ nguyên; đóng bảng chi tiết sẽ tự khóa lại nếu còn lại vẫn = 0.": "The contract's final account is settled and fully paid (balance = 0), so it is locked. Unlock to adjust – figures stay the same; closing the detail panel locks it again if the balance is still 0.",
 "Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) – đã khóa số. Muốn điều chỉnh, bấm Mở khóa (cần Passcode).": "The contract's final account is settled and fully paid (balance = 0) – locked. To adjust, click Unlock (Passcode required).",
 "🔒 Hợp đồng đã ": "🔒 The contract's ",
@@ -1515,6 +1517,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"{} HĐ – xem từng dòng bên dưới",
+"{} contracts – see rows below"
+],
 [
 "ký {}",
 "signed {}"

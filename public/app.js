@@ -2284,16 +2284,16 @@ function renderTpCard() {
       ${soTien(hdN, 'da_tt', 'strong')}${soTien(hdN, 'con_lai', 'strong')}
       <td class="c-note tp-note muted small">${kTd === 2 ? 'Điều chỉnh cả nhóm: bấm Nhập' : kTd === 3 ? 'Quyết toán nhóm: bấm Nhập' : 'Sửa / xóa gói: bấm Nhập'}</td>
       <td class="row-actions tp-act"><button class="sm" data-goinhom="${esc(code)}">${can('hd') && !costAll ? 'Nhập' : 'Xem'}</button></td></tr>` +
-    (!mo ? '' : ky.map((r, i) => { const hd = hdCua(r), qtNhom = kTd === 3 && coQt && !hd.length;
+    (!mo ? '' : ky.map((r, i) => { const hd = hdCua(r), qtNhom = kTd === 3 && coQt && !hd.length, coCon = kTd > 1 && hd.length > 0, moG2 = coCon && tpOpen.has('gr:' + r.id);
       return `<tr class="tv-child tp-goi-row">
       <td class="num muted">${so}.${i + 1}</td>
-      <td class="indent tp-hd"><div class="tp-goi-l"><b>${esc(r.noi_dung || 'Gói #' + r.id)}</b>${kTd === 1 ? ' <span class="st st-tam-tinh">Tạm tính</span>' : goiChip(r)}</div></td>
-      <td class="c-dt tp-dt">${nhaThau(r)}</td>
+      <td class="indent tp-hd"><div class="tp-goi-l">${coCon ? `<button class="grp-toggle" data-tpgr="${r.id}" title="${moG2 ? 'Thu gọn các HĐ của gói' : 'Mở các HĐ của gói'}">${moG2 ? '▾' : '▸'}</button>` : ''}<b>${esc(r.noi_dung || 'Gói #' + r.id)}</b>${kTd === 1 ? ' <span class="st st-tam-tinh">Tạm tính</span>' : goiChip(r)}</div></td>
+      <td class="c-dt tp-dt">${moG2 ? `<span class="muted small">${hd.length} HĐ – xem từng dòng bên dưới</span>` : nhaThau(r)}</td>
       ${qtNhom ? '<td class="num muted" title="Nhóm đã quyết toán – TĐ3 theo số quyết toán của nhóm">theo QT nhóm</td><td class="num muted">—</td>' : `<td class="num">${mtr(goiSv(r, kTd))}</td>${goiSs(r, hd)}`}
       ${soTien(hd, 'da_tt')}${soTien(hd, 'con_lai')}
       <td class="c-note tp-note muted small" title="Tạm tính trước VAT ${money(r.so_tien)} đ · VAT ${Number(r.vat) || 0}%">VAT ${Number(r.vat) || 0}%</td>
       <td class="row-actions tp-act">${edit && kTd === 2 && !coQt && !hd.length ? `<button class="sm" data-goidong="${r.id}" data-tt="${r.tinh_trang === 'dong' ? '' : 'dong'}" title="${r.tinh_trang === 'dong' ? 'Tính lại gói vào TĐ2' : 'Gói không dùng nữa: TĐ2 = 0 (TĐ1 giữ nguyên)'}">${r.tinh_trang === 'dong' ? 'Mở lại' : 'Đóng gói'}</button>` : ''}</td></tr>` +
-      (kTd > 1 ? hd : []).map((c) => `<tr class="tv-child tp-goi-hd" data-tpid="${c.id}">
+      (moG2 ? hd : []).map((c) => `<tr class="tv-child tp-goi-hd" data-tpid="${c.id}">
       <td class="num muted"></td>
       <td class="indent tp-hd"><div class="tp-goi-l tp-goi-hdl"><span class="muted">↳ HĐ</span><b class="tp-open so-ma-pick" data-tp="${c.id}" title="Nhấp đúp để mở bảng nhập chi tiết">${esc(c.so_ma)}</b>${kTd === 3 ? (([cls, lab, tip]) => `<span class="tp-st ${cls}" title="${tip}">${lab}</span>`)(TP_TT[tpTT(c)]) : ''}</div></td>
       <td class="c-dt tp-dt">${esc(c.doi_tac)}</td>
@@ -2367,12 +2367,13 @@ function renderTpCard() {
 
 $('#tp-toggle-all').addEventListener('click', () => {
   const G = tpGroups(costData.thau_phu);
-  const ks = [...G.map((g) => g.k), ...G.flatMap((g) => HDV.map((k) => `${g.k}:${k}`)), 'le']; // gồm nhóm loại HĐ và nhóm Mua lẻ
+  const ks = [...G.map((g) => g.k), ...G.flatMap((g) => HDV.map((k) => `${g.k}:${k}`)), 'le', ...[...new Set((costData.thau_phu || []).map((c) => c.goi_id).filter(Boolean))].map((id) => 'gr:' + id)]; // gồm nhóm loại HĐ và nhóm Mua lẻ
   const close = ks.every((k) => tpOpen.has(k));
   ks.forEach((k) => (close ? tpOpen.delete(k) : tpOpen.add(k)));
   renderTpCard();
 });
 $('#tp-tbody').addEventListener('click', (e) => {
+  if (e.target.dataset.tpgr) { const k = 'gr:' + e.target.dataset.tpgr; tpOpen.has(k) ? tpOpen.delete(k) : tpOpen.add(k); return renderTpCard(); }
   if (e.target.dataset.tpgoi) { const k = `goi:${e.target.dataset.tpgoi}:dong`; tpOpen.has(k) ? tpOpen.delete(k) : tpOpen.add(k); return renderTpCard(); }
   const gn = e.target.dataset.goinhom;
   if (gn) return openDtr(gn, tdDangChon() > 1 && can('hd') && !costAll); // TĐ2 / TĐ3: mở sẵn dòng đợt điều chỉnh / quyết toán · hộp gói / dự trù của nhóm: sửa gói (TĐ1), điều chỉnh nhóm (TĐ2), quyết toán nhóm (TĐ3)

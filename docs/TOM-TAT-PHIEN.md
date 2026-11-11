@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V26.11.11.26 – Gói chi phí thu gọn được các HĐ, không lặp danh sách đối tác
+- Mỗi gói đã gắn HĐ có nút ▸/▾ riêng; mặc định thu gọn (gọn bảng). Thu gọn: cột Đối tác ghi danh sách đối tác; mở ra: ghi "n HĐ – xem từng dòng bên dưới" (không lặp). Nút "Mở / Thu gọn tất cả" gồm cả các gói. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V25.11.11.26 – Khóa HĐ đầu vào chỉ khi ĐÃ QUYẾT TOÁN và còn lại = 0
 - Trước: trả đủ (còn lại = 0) là khóa, kể cả chưa quyết toán → không thêm được đợt thanh toán. Nay khóa sửa (`khoa_so`, lib/subcontract.js) = còn lại = 0 VÀ đã quyết toán (có đợt Quyết toán, hoặc mọi HĐ/PL có số HT/QT). Áp dụng máy chủ (chặn ghi) + giao diện.
 - Cờ `khoa` dùng trong công thức báo cáo / dòng tiền GIỮ NGUYÊN → số liệu không đổi.
