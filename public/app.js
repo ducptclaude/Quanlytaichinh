@@ -567,9 +567,13 @@ function pickExistingSoMa(f, soMa) {
   f._tdGoiY?.();
   f.elements.gia_tri.focus({ preventScroll: true });
 }
+// Văn bản HĐ / PL đã có (cùng Số mã + Loại) – nhập ở form mới = ghi điều chỉnh TĐ2 cho văn bản đó
+const vbDaCo = (f) => (f.elements.id.value ? null : hdRows().find((r) => normVn(r.so_ma) === normVn(f.elements.so_ma.value) && r.ma_loai === f.elements.ma_loai.value) || null);
 function updateSoPreview(f) {
-  const so = f.elements.so_ma.value.trim();
-  $('.so-preview', f).textContent = so ? `Hiển thị: ${f.elements.ma_loai.value} ${so}` : '';
+  const so = f.elements.so_ma.value.trim(), co = so && vbDaCo(f);
+  const el = $('.so-preview', f);
+  el.innerHTML = !so ? '' : co ? `<b class="warn-text">${esc(co.so_hieu)} đã có</b> – số nhập sẽ ghi thành <b>điều chỉnh TĐ2</b> (+ tăng / − giảm)` : `Hiển thị: ${esc(f.elements.ma_loai.value)} ${esc(so)}`;
+  if (!f.elements.id.value) $('button[type=submit]', f).textContent = co ? 'Ghi điều chỉnh → TĐ2' : 'Thêm dòng';
 }
 
 function resetRevForm(f) {
@@ -930,6 +934,19 @@ async function saveRevenue(f) {
   if (f.elements.hd_id) {
     if (!f.elements.hd_id.value) return showMsg(msgEl, 'Chọn Số HĐ từ danh sách gợi ý (nhập HĐ ở mục 1 trước nếu chưa có)', 'err');
     body.hd_id = f.elements.hd_id.value;
+  }
+  // Văn bản đã có: ghi thành 1 đợt điều chỉnh TĐ2 (+ tăng / − giảm) rồi tự chuyển sang tab TĐ2
+  const co = f.dataset.loai === 'hd' && vbDaCo(f);
+  if (co) {
+    if (!Number(body.gia_tri)) return showMsg(msgEl, `Nhập số tăng (+) hoặc giảm (−) cho ${co.so_hieu}`, 'err');
+    try {
+      await api('/api/dieu-chinh', { method: 'POST', body: JSON.stringify({ loai: 'dt', vb_id: co.id, ngay, noi_dung: body.ghi_chu || 'Điều chỉnh', so_tien: body.gia_tri }) });
+      BST.i_td = 2; try { bSave(); } catch { /* chưa tải Báo cáo */ }
+      resetRevForm(f);
+      await loadRevenue();
+      showMsg($('#td-hd-msg'), `Đã ghi điều chỉnh ${Number(body.gia_tri) > 0 ? '+' : ''}${money(body.gia_tri)} đ cho ${co.so_hieu} vào TĐ2 – đã chuyển sang tab TĐ2`);
+    } catch (err) { showMsg(msgEl, err.message, 'err'); }
+    return;
   }
   try {
     await api(id ? `/api/doanh-thu/${id}` : `/api/du-an/${revProjectId}/doanh-thu`,

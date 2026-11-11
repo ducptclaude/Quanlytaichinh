@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Ghi điều chỉnh → TĐ2": "Record adjustment → M2",
 "Passcode (8 số)": "Passcode (8 digits)",
 "± Điều chỉnh": "± Adjust",
 "Lưu QT": "Save final account",
@@ -1436,6 +1437,8 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["{} đã có – số nhập sẽ ghi thành điều chỉnh TĐ2 (+ tăng / − giảm)", "{} already exists – the amount will be recorded as an M2 adjustment (+ increase / − decrease)"],
+["Đã ghi điều chỉnh {} đ cho {} vào TĐ2 – đã chuyển sang tab TĐ2", "Recorded adjustment {} VND for {} in M2 – switched to the M2 tab"],
 ["Đã lưu số quyết toán {} – văn bản đã khoá", "Final account saved for {} – document locked"],
 ["Đã mở khoá {}", "{} unlocked"],
 ["Đã lưu – HĐ {} đã quyết toán hết, đã đóng (khoá toàn bộ)", "Saved – contract {} fully settled, closed (all locked)"],
