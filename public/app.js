@@ -433,7 +433,7 @@ function buildRevenueSections() {
         <table class="rev-table ${loai === 'hd' ? 'td-mode-tbl' : ''}">
           <thead><tr>
             <th class="num">#</th><th>${loai === 'hd' ? 'Số HĐ / Phụ lục' : 'Số HĐ / Đợt – Hồ sơ'}</th><th>${loai === 'hd' ? 'Ngày ký' : 'Ngày'}</th>
-            ${loai === 'hd' ? `<th class="num td-col" title="Ký – giá trị lúc ký (trước VAT)">TĐ1</th><th class="num td-col" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm (trước VAT)">TĐ2</th><th class="num td-col" title="Quyết toán – giá trị quyết toán (trước VAT). Chưa có = TĐ2">TĐ3</th><th class="num">VAT</th>`
+            ${loai === 'hd' ? '<th class="num td-col td-th-slot">TĐ</th><th class="num">VAT</th>'
               : '<th class="num">Trước VAT</th><th class="num">VAT</th><th class="num">Tiền VAT</th>'}
             <th class="num">Sau VAT</th><th>Ghi chú</th><th>Người cập nhật</th>${can('hd') ? '<th></th>' : ''}
           </tr></thead>
@@ -706,22 +706,23 @@ function renderRevenue() {
   $('#r-k-tv-sub').textContent = `Tạm ứng ${dvT(tv.tam_ung)} · Thanh toán ${dvT(tv.thanh_toan)} · Quyết toán ${dvT(tv.quyet_toan)}`;
 
   for (const loai of Object.keys(REV_LABEL)) {
-    const cols = (canRv('hd') ? 10 : 9) + (loai === 'hd' ? 1 : 0);
+    const cols = loai === 'hd' ? 3 + tdSoCot() + 4 + (canRv('hd') ? 1 : 0) : (canRv('hd') ? 10 : 9);
     const card = $(`.rev-card[data-loai="${loai}"]`);
     const rows = items.filter((r) => r.loai === loai);
     if (loai === 'hd') {
       const f = $('.rev-form', card); if (f) f.hidden = canRv('hd') && tdDangChon() !== 1;
-      $('table', card).dataset.tdOn = tdDangChon();
+      { const th = $('thead .td-th-slot', card) || $('thead th.td-col-on', card); if (th) { $$('thead th.td-col', card).forEach((x) => x !== th && x.remove()); th.outerHTML = tdThHtml(); } }
       $('tbody', card).innerHTML = rows.length ? hdGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
     } else $('tbody', card).innerHTML = rows.length ? qtGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
     const t = tong[loai];
     if (loai === 'hd') {
       const gs = hdGroups(rows), t1 = gs.reduce((a, g) => a + grpTd(g).t1, 0), t2 = gs.reduce((a, g) => a + grpTd(g).t2, 0), t3 = gs.reduce((a, g) => a + grpTd(g).t3, 0);
+      const tk = [t1, t2, t3], k = tdDangChon();
       $('tfoot', card).innerHTML = `
       <tr>
         <td></td><td colspan="2">TỔNG ${REV_LABEL[loai].short}${t.tam_tinh ? ' <span class="st st-tam-tinh" title="Có HĐ chưa quyết toán">Có tạm tính</span>' : ''}</td>
-        <td class="num">${dvm(t1)}</td><td class="num">${dvm(t2)}${tdDelta(t2, t1)}</td><td class="num">${dvm(t3)}${tdDelta(t3, t2)}</td><td></td>
-        <td class="num">${dvm(t.sau_vat)}<div class="td-note">tại TĐ2</div></td>
+        <td class="num td-col-on">${dvm(tk[k - 1])}</td>${k > 1 ? tdSoSanh(tk[k - 1], tk[k - 2]) : ''}<td></td>
+        <td class="num">${dvm(rows.reduce((a2, r) => { const x = vbTd(r); return a2 + svTd([x.t1, x.t2, x.t3][k - 1], r.vat); }, 0))}<div class="td-note">tại TĐ${k}</div></td>
         <td colspan="${canRv('hd') ? 3 : 2}"></td>
       </tr>`;
       $$('input.qt-in', card).forEach(attachMoneyInput);
@@ -839,6 +840,18 @@ const vbTd = (r) => { const t1 = Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2 = Nu
 // Mũi tên chênh lệch so với thời điểm trước (bằng nhau: không ghi gì)
 const tdDeltaG = (v, truoc, f = dvm) => { const d = Math.round(v - truoc); return d ? `<div class="td-note ${d > 0 ? 'td-up' : 'td-down'}">${d > 0 ? '▲ +' : '▼ '}${f(d)}</div>` : ''; };
 const tdDelta = (v, truoc) => tdDeltaG(v, truoc);
+// Giá trị sau VAT của 1 số trước VAT (cùng cách làm tròn VAT của hệ thống)
+const svTd = (gt, vat) => (Number(gt) || 0) + calcVat(Number(gt) || 0, Number(vat) || 0);
+// Bảng nhập liệu: chỉ hiện cột TĐ đang chọn + cột "So với TĐ trước" (TĐ1: không có cột so sánh)
+const TD_TEN_NL = { 1: 'Ký', 2: 'Điều chỉnh', 3: 'Quyết toán' };
+const tdSoCot = () => (tdDangChon() === 1 ? 1 : 2);
+const tdThHtml = () => { const k = tdDangChon();
+  return `<th class="num td-col td-col-on" title="${TD_TEN_NL[k]} (trước VAT)">TĐ${k} · ${TD_TEN_NL[k]}</th>${k > 1 ? `<th class="num td-col" title="Tăng / giảm so với TĐ${k - 1}">± so TĐ${k - 1}</th>` : ''}`; };
+// Ô so sánh: mũi tên + số + %; bằng nhau: "="
+const tdSoSanh = (v, truoc) => { const d = Math.round(v - truoc);
+  if (!d) return '<td class="num td-ss muted" title="Không đổi">=</td>';
+  const pct = truoc ? ` <span class="td-pct">(${d > 0 ? '+' : '−'}${Math.abs((d / Math.abs(truoc)) * 100).toFixed(1).replace('.', ',')}%)</span>` : '';
+  return `<td class="num td-ss ${d > 0 ? 'td-up' : 'td-down'}">${d > 0 ? '▲ +' : '▼ '}${dvm(d)}${pct}</td>`; };
 // Hộp nhập liệu: mọi số hiện bằng ĐỒNG đầy đủ cho khớp với ô nhập (không theo đơn vị hiển thị của trang)
 const dDong = (n) => fmt.format(Math.round(Number(n) || 0));
 const NOTE_DONG = '<span class="dv-dong" title="Ô nhập và số trong hộp này luôn tính bằng đồng (không đổi theo ô Đơn vị)">Đơn vị: đồng</span>';
@@ -855,13 +868,13 @@ function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null }
       <td class="num muted">${stt}</td>
       <td class="${child ? 'indent' : ''}">${toggle}${child ? '<span class="tree">└</span>' : ''}<span class="kind-tag ${r.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${esc(r.ma_loai || '')}</span> ${can('hd') ? `<b class="so-ma-pick" data-soma="${esc(r.so_ma || '')}" title="Nhấp đúp để thêm phụ lục cho ${esc(r.so_ma || '')}">${esc(r.so_ma || r.so_hieu)}</b>` : `<b>${esc(r.so_ma || r.so_hieu)}</b>`}${qtTag}${!child && r.tam_tinh ? ' <span class="st st-tam-tinh" title="HĐ chưa quyết toán – giá trị tạm tính">Tạm tính</span>' : ''}</td>
       <td>${dmy(r.ngay)}</td>
-      <td class="num">${dvm(x.t1)}</td>
-      <td class="num">${canRv('hd') && md === 2 && !khoa ? `<button type="button" class="link-btn" data-rdot="${r.id}" title="Xem / thêm điều chỉnh">${dvm(x.t2)}</button>` : dvm(x.t2)}${tdDelta(x.t2, x.t1)}${ds.length ? `<div class="td-note muted">${ds.length} đợt</div>` : ''}</td>
-      <td class="num ${x.coQt || (g && !g.pls.length && t3 !== x.t2) ? '' : 'muted'}">${canRv('hd') && md === 3 && !x.coQt && !hdKhoa(r)
+      ${md === 1 ? `<td class="num td-col-on">${dvm(x.t1)}</td>`
+        : md === 2 ? `<td class="num td-col-on">${canRv('hd') && !khoa ? `<button type="button" class="link-btn" data-rdot="${r.id}" title="Xem / thêm điều chỉnh">${dvm(x.t2)}</button>` : dvm(x.t2)}${ds.length ? `<div class="td-note muted">${ds.length} đợt</div>` : ''}</td>${tdSoSanh(x.t2, x.t1)}`
+          : `<td class="num td-col-on ${x.coQt || (g && !g.pls.length && t3 !== x.t2) ? '' : 'muted'}">${canRv('hd') && !x.coQt && !hdKhoa(r)
         ? `<input class="money num qt-in" data-qtin="${r.id}" placeholder="${dvNum(x.t2, 'dong')}" title="Nhập số quyết toán (đồng, trước VAT). Lưu xong văn bản bị khoá">`
-        : `${x.coQt ? '🔒 ' : ''}${dvm(t3)}`}${tdDelta(t3, x.t2)}${thieu ? '<div class="td-note warn-text" title="Đã đóng quyết toán nhưng văn bản này chưa có số quyết toán – tạm lấy TĐ2">⚠ chưa có số QT</div>' : ''}</td>
+        : `${x.coQt ? '🔒 ' : ''}${dvm(t3)}`}${thieu ? '<div class="td-note warn-text" title="Đã đóng quyết toán nhưng văn bản này chưa có số quyết toán – tạm lấy TĐ2">⚠ chưa có số QT</div>' : ''}</td>${tdSoSanh(t3, x.t2)}`}
       <td class="num">${vatBadge(r.vat)}</td>
-      <td class="num strong">${dvm(r.sau_vat)}</td>
+      <td class="num strong" title="Sau VAT tại TĐ${md}">${dvm(svTd([x.t1, x.t2, t3][md - 1], r.vat))}</td>
       <td class="wrap">${esc(r.ghi_chu)}</td>
       <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
       ${canRv('hd') ? `<td class="row-actions">${khoa
@@ -869,11 +882,11 @@ function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null }
         : md === 1 ? `<button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button>`
           : md === 2 ? `<button data-rdot="${r.id}" title="Nhập tăng / giảm hoặc chốt giá trị mới (TĐ2)">± Điều chỉnh</button>`
             : `<button class="primary" data-rqtsave="${r.id}" title="Lưu số quyết toán – văn bản sẽ bị khoá">Lưu QT</button>`}</td>` : ''}
-    </tr>${ds.map((d, k) => `
+    </tr>${md !== 2 ? '' : ds.map((d, k) => `
     <tr class="dc-row" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
       <td></td><td class="indent${child ? '2' : ''}" colspan="3"><span class="tree">↳</span> Đợt ${k + 1}${d.ngay ? ' · ' + dmy(d.ngay) : ''}${d.noi_dung ? ' · ' + esc(d.noi_dung) : ''}</td>
       <td class="num ${Number(d.so_tien) > 0 ? 'td-up' : 'td-down'}">${Number(d.so_tien) > 0 ? '+' : ''}${dvm(d.so_tien)}</td>
-      <td colspan="${canRv('hd') ? 6 : 5}"></td>
+      <td colspan="${canRv('hd') ? 5 : 4}"></td>
     </tr>`).join('')}`;
 }
 // TĐ1 / TĐ2 / TĐ3 của 1 HĐ (HĐ + các PL) – cùng cách tính với Báo cáo
@@ -901,7 +914,7 @@ function hdGroupsHtml(rows) {
       : '<span class="grp-toggle-sp"></span>';
     let html = '';
     if (g.head) html += hdRowHtml(g.head, n, { toggle, g });
-    else html += `<tr class="hd-head hd-orphan"><td class="num muted">${n}</td><td colspan="${canRv('hd') ? 10 : 9}">${toggle}${canRv('hd') ? `<b class="so-ma-pick" data-soma="${esc(g.so_ma)}" title="Nhấp đúp để thêm dòng cho ${esc(g.so_ma)}">${esc(g.so_ma)}</b>` : `<b>${esc(g.so_ma)}</b>`} <span class="st st-tam-tinh">Chưa có HĐ gốc</span></td></tr>`;
+    else html += `<tr class="hd-head hd-orphan"><td class="num muted">${n}</td><td colspan="${2 + tdSoCot() + 4 + (canRv('hd') ? 1 : 0)}">${toggle}${canRv('hd') ? `<b class="so-ma-pick" data-soma="${esc(g.so_ma)}" title="Nhấp đúp để thêm dòng cho ${esc(g.so_ma)}">${esc(g.so_ma)}</b>` : `<b>${esc(g.so_ma)}</b>`} <span class="st st-tam-tinh">Chưa có HĐ gốc</span></td></tr>`;
     if (!closed) g.pls.forEach((r, i) => { html += hdRowHtml(r, `${n}.${i + 1}`, { child: true, head: g.head }); });
     // (bỏ dòng "Cộng <Số HĐ>" theo yêu cầu – tổng chung ở dòng TỔNG HĐ/PL cuối bảng)
     return html;
@@ -3239,7 +3252,8 @@ function renderDuTru() {
   card.hidden = costAll || !Array.isArray(rows);
   if (card.hidden) return;
   const ok = can('hd');
-  $('.dtr-table').dataset.tdOn = tdDangChon();
+  const kd = tdDangChon(), vk = (x) => [x.t1, x.t2, x.t3][kd - 1], vt = (x) => [x.t1, x.t2, x.t3][kd - 2];
+  $('.dtr-table thead tr').innerHTML = `<th>Nhóm chi phí</th>${tdThHtml()}<th class="num" title="HĐ đầu vào (TĐ2) + chi phí đã ghi của nhóm, trước VAT">Chi tiết đã có</th><th>Lưu ý</th><th></th>`;
   const codes = [...new Set(rows.map((r) => r.nhom))].sort((a, b) => NHOM().findIndex((x) => x.code === a) - NHOM().findIndex((x) => x.code === b));
   const tot = [0, 0, 0];
   $('#dtr-tbody').innerHTML = codes.length ? codes.map((code) => {
@@ -3249,15 +3263,13 @@ function renderDuTru() {
       ct.nguon.length ? `<span class="warn-text" title="Nhóm có cả ${ct.nguon.join(' + ')} và dự trù – đang cộng dồn, kiểm tra tránh tính trùng">⚠ cộng dồn</span>` : ''].filter(Boolean).join(' ');
     return `<tr data-dtr="${esc(code)}">
       <td><b>${esc(n?.ten || code)}</b></td>
-      <td class="num">${dvm(x.t1)}</td>
-      <td class="num">${dvm(x.t2)}${tdDelta(x.t2, x.t1)}</td>
-      <td class="num ${x.coQt ? '' : 'muted'}">${dvm(x.t3)}${tdDelta(x.t3, x.t2)}</td>
+      <td class="num td-col-on ${kd === 3 && !x.coQt ? 'muted' : ''}">${kd === 3 && x.coQt ? '🔒 ' : ''}${dvm(vk(x))}</td>${kd > 1 ? tdSoSanh(vk(x), vt(x)) : ''}
       <td class="num">${ct.v ? dvm(ct.v) : '<span class="muted">–</span>'}</td>
       <td>${note}</td>
       <td class="row-actions"><button type="button" class="sm" data-dtropen="${esc(code)}">${ok ? 'Nhập / sửa' : 'Xem'}</button></td>
     </tr>`;
-  }).join('') : `<tr><td colspan="7" class="empty">Chưa có dự trù. ${ok ? 'Chọn nhóm bên dưới rồi bấm <b>+ Dự trù</b>.' : ''}</td></tr>`;
-  $('#dtr-tfoot').innerHTML = codes.length ? `<tr><td>TỔNG DỰ TRÙ</td><td class="num">${dvm(tot[0])}</td><td class="num">${dvm(tot[1])}${tdDelta(tot[1], tot[0])}</td><td class="num">${dvm(tot[2])}${tdDelta(tot[2], tot[1])}</td><td colspan="3"></td></tr>` : '';
+  }).join('') : `<tr><td colspan="${4 + tdSoCot()}" class="empty">Chưa có dự trù. ${ok ? 'Chọn nhóm bên dưới rồi bấm <b>+ Dự trù</b>.' : ''}</td></tr>`;
+  $('#dtr-tfoot').innerHTML = codes.length ? `<tr><td>TỔNG DỰ TRÙ</td><td class="num td-col-on">${dvm(tot[kd - 1])}</td>${kd > 1 ? tdSoSanh(tot[kd - 1], tot[kd - 2]) : ''}<td colspan="3"></td></tr>` : '';
   $('#dtr-total').innerHTML = dvm(tot[1]);
   const tools = $('#dtr-tools');
   tools.innerHTML = ok ? `<label class="tv-hd-pick">Nhóm <select id="dtr-pick">${NHOM().map((n) => `<option value="${n.code}">${esc(n.ten)}</option>`).join('')}</select></label>

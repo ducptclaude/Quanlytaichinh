@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.11.11.26 – Bảng nhập liệu chỉ hiện cột TĐ đang chọn + cột so sánh với TĐ trước
+- Doanh thu mục 1 và khung Dự trù: TĐ1 -> cột "TĐ1 · Ký"; TĐ2 -> "TĐ2 · Điều chỉnh" + "± so TĐ1"; TĐ3 -> "TĐ3 · Quyết toán" + "± so TĐ2".
+  Cột so sánh: mũi tên ▲▼ + số + % (bằng nhau: "="). Dòng tổng cũng vậy.
+- Dòng đợt điều chỉnh chỉ hiện ở tab TĐ2 (số tiền nằm dưới cột so sánh). Cột Sau VAT theo TĐ đang chọn (ghi "tại TĐk" ở dòng tổng).
+
 ## V09.11.11.26 – Doanh thu mục 1: bỏ dòng "Cộng <Số HĐ>" (HĐ + PL) dưới mỗi hợp đồng
 - Tổng chung vẫn ở dòng TỔNG HĐ/PL cuối bảng. Lưu ý văn bản chưa có số QT vẫn hiện ở ô TĐ3 của từng văn bản.
 

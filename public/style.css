@@ -3418,3 +3418,9 @@ select.dc-kieu { display: block; margin-top: 6px; width: 100%; min-width: 150px;
 .dv-dong { font-weight: 600; color: var(--teal); }
 .dc-hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--muted); }
 @media (max-width: 700px) { #dc-dlg .tp-dtl td:nth-child(3) input, #dtr-dlg .tp-dtl td:nth-child(3) input { min-width: 160px; } }
+
+/* Bảng nhập liệu: 1 cột TĐ đang chọn + cột so sánh với TĐ trước */
+.rev-table th.td-col-on, .dtr-table th.td-col-on { color: var(--teal); }
+td.td-col-on { background: rgba(15, 163, 163, .07); font-weight: 600; }
+td.td-ss { white-space: nowrap; font-weight: 600; }
+td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
