@@ -1,6 +1,17 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Passcode (8 số)": "Passcode (8 digits)",
+"± Điều chỉnh": "± Adjust",
+"Lưu QT": "Save final account",
+"Tăng / giảm (±)": "Increase / decrease (±)",
+"Chốt giá trị mới": "Set new value",
+"+ Điều chỉnh (TĐ2)": "+ Adjustment (M2)",
+"+ Quyết toán (TĐ3) – nhập xong sẽ khoá nhóm": "+ Final account (M3) – locks the group once saved",
+"Chưa có dự trù TĐ1 mà điều chỉnh ở TĐ2 = chi phí ngoài dự trù": "No M1 estimate but an M2 adjustment = cost outside the estimate",
+"TĐ1 – Giá trị ký ban đầu:": "M1 – Initial signed value:",
+"TĐ2 – Điều chỉnh:": "M2 – Adjustment:",
+"TĐ3 – Quyết toán:": "M3 – Final account:",
 "🔒 Đã chốt QT": "🔒 Final account closed",
 "🔒 Khoá": "🔒 Locked",
 "🔒 Đã chốt quyết toán": "🔒 Final account closed",
@@ -1425,6 +1436,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["Đã lưu số quyết toán {} – văn bản đã khoá", "Final account saved for {} – document locked"],
+["Đã mở khoá {}", "{} unlocked"],
+["Đã lưu – HĐ {} đã quyết toán hết, đã đóng (khoá toàn bộ)", "Saved – contract {} fully settled, closed (all locked)"],
+["🔒 Đã đóng QT {}", "🔒 Final account closed {}"],
 ["Chốt quyết toán & khoá toàn bộ HĐ (HĐ + {} PL) – cần đủ số quyết toán cho HĐ và tất cả phụ lục", "Close the final account & lock the whole contract (contract + {} addenda) – requires values for the contract and every addendum"],
 ["Chưa chốt quyết toán: {} chưa có số quyết toán. Nhập đủ cho HĐ và tất cả phụ lục rồi chốt lại.", "Not closed: {} has no final account value. Enter values for the contract and every addendum, then close again."],
 ["Dự trù {}", "Estimate {}"],

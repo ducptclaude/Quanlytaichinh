@@ -437,7 +437,7 @@ function attachQuickPicker(input, getOptions, onPick, emptyText = 'Chưa có d�
 
 // ---------- Hộp nhập Passcode 8 số (ẩn ký tự) ----------
 // Trả về Promise<string|null>: passcode hoặc null nếu hủy
-function askPasscode(title, detail = '') {
+function askPasscode(title, detail = '', nut = 'Xác nhận xóa') {
   return new Promise((resolve) => {
     const dlg = document.createElement('dialog');
     dlg.className = 'pass-dlg';
@@ -445,12 +445,12 @@ function askPasscode(title, detail = '') {
       <form method="dialog" class="stack">
         <h3>${esc(title)}</h3>
         ${detail ? `<p class="muted small">${esc(detail)}</p>` : ''}
-        <label>Passcode xóa (8 số)
+        <label>Passcode (8 số)
           <input name="pc" type="password" inputmode="numeric" maxlength="8" autocomplete="off" pattern="\\d{8}" required placeholder="••••••••">
         </label>
         <div class="msg err" role="alert"></div>
         <div class="actions">
-          <button type="submit" class="danger-solid">Xác nhận xóa</button>
+          <button type="submit" class="danger-solid">${esc(nut)}</button>
           <button type="button" data-cancel>Hủy</button>
         </div>
       </form>`;

@@ -2,6 +2,17 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.11.11.26 – Nhập liệu theo tab TĐ1 / TĐ2 / TĐ3 (Doanh thu, HĐ đầu vào, Dự trù)
+- Nút TĐ1 / TĐ2 / TĐ3 ở trang Doanh thu, Chi phí = chế độ nhập (dùng chung với Báo cáo), có thanh hướng dẫn, cột TĐ đang chọn được tô màu.
+  - TĐ1: thêm / sửa / xóa HĐ, PL với giá trị ký (form "Thêm HĐ/PL" chỉ hiện ở TĐ1; thêm PL HĐ đầu vào chỉ ở TĐ1).
+  - TĐ2: nút ± Điều chỉnh – mỗi lần 1 đợt, chọn "Tăng / giảm (±)" hoặc "Chốt giá trị mới" (tự tính phần chênh so với TĐ2 hiện tại).
+  - TĐ3: nhập số quyết toán từng văn bản (Lưu QT) -> văn bản KHOÁ cả TĐ1, TĐ2; HĐ và mọi PL có số -> HĐ ĐÓNG (không thêm PL).
+    Mở khoá: nút 🔓 ở tab TĐ3, cần Passcode -> bỏ số quyết toán của văn bản (ghi nhật ký), HĐ mở lại.
+- Dự trù: TĐ1 + Dự trù · TĐ2 + Điều chỉnh · TĐ3 + Quyết toán (nhập xong khoá nhóm; mở khoá = xóa số quyết toán, cần Passcode).
+- Máy chủ: PUT/DELETE `/api/doanh-thu/:id/qt`, `/api/tp-hd-pl/:id/qt` (qua duyệt, nhật ký); chặn sửa văn bản / dòng / nhóm đã có số quyết toán (báo trước bước duyệt).
+  Sửa dòng HĐ đầu vào ở TĐ1 giữ nguyên số quyết toán (`giu_qt`).
+- Hộp Passcode: chữ trên nút theo việc (Mở khoá / Xác nhận xóa).
+
 ## V03.11.11.26 – SỬA LỖI LỚN ô nhập tiền (gõ quá 4 chữ số bị cắt số) + đơn vị hiển thị trong hộp chi tiết
 - Lỗi (từ V21.10.11.26): gõ từng phím, ô đang "5.000" gõ thêm 0 thành "5.0000" -> bị đọc là số thập phân 5,0 -> còn 5. Mọi ô tiền gõ tay > 4 chữ số bị cắt
   (dán số / gõ công thức không bị). Sửa `parseMoney`: chỉ có chữ số + dấu chấm thì dấu chấm luôn là dấu nghìn.

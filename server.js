@@ -285,6 +285,10 @@ const DUYET_TRUOC = [
   ['PUT', /^\/dieu-chinh\/(\d+)$/, 'Đợt điều chỉnh', 'dieu_chinh', 'r', QUYEN.hd],
   ['DELETE', /^\/dieu-chinh\/(\d+)$/, 'Đợt điều chỉnh', 'dieu_chinh', 'r', QUYEN.hd],
   ['PUT', /^\/doanh-thu\/(\d+)\/quyet-toan$/, 'Quyết toán HĐ', 'qt_dt', 'r', QUYEN.hd],
+  ['PUT', /^\/doanh-thu\/(\d+)\/qt$/, 'Quyết toán văn bản (TĐ3)', 'qt_vb', 'r', QUYEN.hd],
+  ['DELETE', /^\/doanh-thu\/(\d+)\/qt$/, 'Mở khoá quyết toán (TĐ3)', 'qt_vb', 'r', QUYEN.hd],
+  ['PUT', /^\/tp-hd-pl\/(\d+)\/qt$/, 'Quyết toán HĐ đầu vào (TĐ3)', 'qt_tp', 'r', QUYEN.hd],
+  ['DELETE', /^\/tp-hd-pl\/(\d+)\/qt$/, 'Mở khoá quyết toán HĐ đầu vào (TĐ3)', 'qt_tp', 'r', QUYEN.hd],
   ['PUT', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
   ['DELETE', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
   ['PUT', /^\/du-an\/(\d+)\/bh$/, 'DT-CP dự kiến · BH/Khác', 'bh', 'p', Q_ANY],
@@ -296,6 +300,7 @@ const KIEM = { // kiểm tra dữ liệu ngay lúc gửi (lỗi báo ngay cho ng
   thau_phu: (b, m) => (m === 'POST' ? (() => { const t = validateTp(b), l = validateTpLine({ ...(b.hd || {}), ma_loai: 'HĐ' });
     return { data: { ...t.data, gia_tri: l.data.gia_tri, ngay: l.data.ngay }, errors: [...t.errors, ...l.errors] }; })() : validateTp(b)),
   tp_hd_pl: (b) => validateTpLine(b), tp_thanh_toan: (b) => validateTpPay(b),
+  qt_vb: (b) => soQt(b), qt_tp: (b) => soQt(b),
   du_tru: (b, m) => validateDuTru(b, m === 'PUT'), dieu_chinh: (b, m) => validateDieuChinh(b, m === 'PUT'), qt_dt: (b) => validateQuyetToan(b),
 };
 // ===================== KHOÁ QUYẾT TOÁN HĐ CĐT (V02.11.11.26) =====================
@@ -306,12 +311,69 @@ async function nhomHd(duAnId, soMa) { // các văn bản HĐ / PL cùng Số mã
   const ds = (await store.listRevenue(duAnId)).filter((r) => r.loai === 'hd' && normMa(r.so_ma) === normMa(soMa));
   return { ds, head: ds.find((r) => r.ma_loai === 'HĐ') || null };
 }
+// Số quyết toán 1 văn bản: số nguyên ≥ 0 (đồng, trước VAT)
+function soQt(b) {
+  const raw = String(b?.gt_qt ?? '').replace(/[.,\s]/g, '');
+  const v = Number(raw), errors = [];
+  if (raw === '' || !Number.isInteger(v) || v < 0) errors.push('Nhập số quyết toán (đồng, trước VAT)');
+  else if (v > 1e15) errors.push('Số quyết toán vượt giới hạn cho phép');
+  if (b?.ngay_qt && !/^\d{4}-\d{2}-\d{2}$/.test(String(b.ngay_qt))) errors.push('Ngày quyết toán không hợp lệ');
+  return { data: { gt_qt: v, ngay_qt: b?.ngay_qt || null }, errors };
+}
+const VB_KHOA_MSG = (so) => `${so} đã có số quyết toán (TĐ3) – văn bản đang khoá (cả TĐ1, TĐ2). Muốn sửa: ở tab TĐ3 bấm 🔓 Mở khoá (cần Passcode).`;
 const KHOA_MSG = (so) => `HĐ ${so} đã chốt quyết toán – đang khoá toàn bộ hợp đồng. Muốn sửa: mở hộp Quyết toán, bỏ chốt (cần Passcode).`;
 api.use(wrap(async (req, res, next) => {
   if (!req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
   const p = req.path, b = req.body || {};
   let m;
   const khoaCua = async (r) => { if (!r || r.loai !== 'hd') return null; const g = await nhomHd(r.du_an_id, r.so_ma); return g.head?.qt_dong ? g.head : null; };
+  // Văn bản HĐ / PL doanh thu đã có số quyết toán -> khoá văn bản (TĐ1, TĐ2, TĐ3)
+  const vbDt = async (id) => { const r = await store.getRevenue(Number(id)); if (!r || r.loai !== 'hd') return null; const g = await nhomHd(r.du_an_id, r.so_ma); return { r: g.ds.find((x) => x.id === r.id) || r, g }; };
+  const coQt = (x) => x && x.gt_qt !== null && x.gt_qt !== undefined && x.gt_qt !== '';
+  if ((m = p.match(/^\/doanh-thu\/(\d+)\/qt$/))) {
+    const v = await vbDt(m[1]); if (!v) return bad(res, 'Không tìm thấy HĐ / PL', 404);
+    if (req.method === 'PUT' && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423);
+    if (req.method === 'DELETE') { if (!coQt(v.r)) return bad(res, `${v.r.so_hieu} chưa có số quyết toán – không cần mở khoá`); if (!(await requirePasscode(req, res))) return; }
+    return next();
+  }
+  if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/doanh-thu\/(\d+)$/))) {
+    const v = await vbDt(m[1]); if (v && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423);
+  }
+  if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'dt') { const v = await vbDt(b.vb_id); if (v && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423); }
+  if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/dieu-chinh\/(\d+)$/))) {
+    const d = await store.getDieuChinh(Number(m[1]));
+    if (d?.loai === 'dt') { const v = await vbDt(d.vb_id); if (v && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423); }
+    if (d?.loai === 'tp') { const l = await store.getTpLine(d.vb_id); if (l && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423); }
+  }
+  // HĐ đầu vào: dòng HĐ / PL đã có số quyết toán -> khoá dòng; mọi dòng đã có số -> đóng HĐ (không thêm PL)
+  if ((m = p.match(/^\/tp-hd-pl\/(\d+)\/qt$/))) {
+    const l = await store.getTpLine(Number(m[1])); if (!l) return bad(res, 'Không tìm thấy dòng HĐ/PL', 404);
+    if (req.method === 'PUT' && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423);
+    if (req.method === 'DELETE') { if (l.gia_tri_qt === null) return bad(res, `${l.ma_loai} chưa có số quyết toán – không cần mở khoá`); if (!(await requirePasscode(req, res))) return; }
+    return next();
+  }
+  if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/tp-hd-pl\/(\d+)$/))) {
+    const l = await store.getTpLine(Number(m[1])); if (l && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423);
+  }
+  if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'tp') { const l = await store.getTpLine(Number(b.vb_id)); if (l && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423); }
+  if (req.method === 'POST' && (m = p.match(/^\/thau-phu\/(\d+)\/hd-pl$/))) {
+    const t = await store.getTp(Number(m[1]));
+    const ls = t ? (await store.listTp(t.du_an_id)).lines.filter((l) => l.tp_id === t.id) : [];
+    if (ls.length && ls.every((l) => l.gia_tri_qt !== null && l.gia_tri_qt !== undefined)) return bad(res, `HĐ ${t.so_ma} đã quyết toán hết HĐ và PL – đã đóng, không thêm phụ lục. Muốn thêm: mở khoá 1 văn bản ở tab TĐ3 (cần Passcode).`, 423);
+  }
+  // Dự trù: nhóm đã có quyết toán (TĐ3) -> khoá nhóm; mở khoá = xóa dòng quyết toán (cần Passcode)
+  if ((m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && req.method === 'POST') {
+    const ds = (await store.listDuTru(Number(m[1]))).filter((x) => x.nhom === b.nhom);
+    if (ds.some((x) => x.loai === 'qt')) return bad(res, 'Nhóm này đã có số quyết toán (TĐ3) – đang khoá. Muốn sửa: ở tab TĐ3 bấm 🔓 Mở khoá (cần Passcode).', 423);
+  }
+  if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/du-tru\/(\d+)$/))) {
+    const x = await store.getDuTru(Number(m[1]));
+    if (x) {
+      const coQtNhom = (await store.listDuTru(x.du_an_id)).some((y) => y.nhom === x.nhom && y.loai === 'qt');
+      if (x.loai === 'qt' && req.method === 'DELETE') { if (!(await requirePasscode(req, res))) return; return next(); }
+      if (coQtNhom) return bad(res, 'Nhóm này đã có số quyết toán (TĐ3) – đang khoá. Muốn sửa: ở tab TĐ3 bấm 🔓 Mở khoá (cần Passcode).', 423);
+    }
+  }
   // Chốt / mở chốt quyết toán
   if (req.method === 'PUT' && (m = p.match(/^\/doanh-thu\/(\d+)\/quyet-toan$/))) {
     const head = await store.getRevenue(Number(m[1]));
@@ -378,13 +440,15 @@ api.use(wrap(async (req, res, next) => {
   if (kind === 'td') noi_dung = method === 'DELETE' ? `Xóa số liệu TĐ${m[2]}` : `Chốt / sửa TĐ${m[2]}: DT ${audit.money(soTien(body.dt))} · CP ${audit.money(soTien(body.cp))}${body.ngay ? ' · ngày ' + String(body.ngay).split('-').reverse().join('/') : ''}`;
   else if (kind === 'bh') noi_dung = ['DT-CP dự kiến / BH-Khác', body.ns_cp !== undefined && `DT-CP dự kiến: ${audit.money(soTien(body.ns_cp))}`, body.bh_khac !== undefined && `BH/Khác: ${audit.money(soTien(body.bh_khac))}`].filter(Boolean).join(' | ');
   else if (kind === 'dieu_chinh' && method === 'POST') { const v = await vanBanOf(body.loai, Number(body.vb_id)); noi_dung = `Đợt điều chỉnh ${body.loai === 'tp' ? 'HĐ đầu vào' : 'doanh thu'} ${v?.so_hieu || ''} · ${data.so_tien > 0 ? '+' : ''}${audit.money(data.so_tien)}${data.noi_dung ? ' · ' + data.noi_dung : ''}`; }
+  else if ((kind === 'qt_vb' || kind === 'qt_tp') && method === 'PUT') noi_dung = `${audit.describe(kind, before)} | Nhập số quyết toán ${audit.money(data.gt_qt)} -> khoá văn bản`;
+  else if (kind === 'qt_vb' || kind === 'qt_tp') noi_dung = `${audit.describe(kind, before)} | Mở khoá: bỏ số quyết toán`;
   else if (kind === 'qt_dt') noi_dung = `${audit.describe('qt_dt', before)} | ${data.dong ? 'Đóng' : 'Mở'} quyết toán${data.ngay_qt ? ' ngày ' + String(data.ngay_qt).split('-').reverse().join('/') : ''} · ${data.items.filter((x) => x.gt_qt !== null).length}/${data.items.length} văn bản có số QT`;
   else if (kind === 'sddk') noi_dung = `${du_an_id ? 'Số dư đầu kỳ dự án' : 'Số dư đầu kỳ chung (công ty)'}: ${audit.money(soTien(body.so_tien))}`;
   else if (method === 'POST') noi_dung = audit.describe(kind, { ...data, tp: data?.so_ma || '', hd: '', so_hieu: [data?.ma_loai, data?.so_ma || data?.so_hieu].filter(Boolean).join(' ') }) || doi_tuong;
   else if (method === 'PUT') { const d = audit.diff(kind, before, { ...before, ...data }); noi_dung = audit.describe(kind, before) + (d ? ` | ${d}` : ''); }
   else noi_dung = audit.describe(kind, before);
   if (kind === 'thau_phu' && method === 'POST' && data?.gia_tri !== undefined) noi_dung += ` · HĐ gốc ${audit.money(data.gia_tri)}`;
-  const tien = kind === 'qt_dt' ? data.items.reduce((a, x) => a + (x.gt_qt || 0), 0) : method === 'DELETE' ? (before?.gia_tri ?? before?.so_tien ?? null)
+  const tien = (kind === 'qt_vb' || kind === 'qt_tp') ? (method === 'PUT' ? data.gt_qt : before?.gt_qt ?? null) : kind === 'qt_dt' ? data.items.reduce((a, x) => a + (x.gt_qt || 0), 0) : method === 'DELETE' ? (before?.gia_tri ?? before?.so_tien ?? null)
     : kind === 'td' ? soTien(body.cp) : kind === 'sddk' ? soTien(body.so_tien) : kind === 'bh' ? soTien(body.bh_khac)
       : (data?.gia_tri ?? data?.so_tien ?? null);
   const du_an = du_an_id ? (await store.listProjects()).find((p) => p.id === du_an_id)?.ma_du_an || '' : before?.ma_du_an || '';
@@ -1049,6 +1113,45 @@ api.get('/doanh-thu-tong', wrap(async (_req, res) => {
     items, tong: summarize(items), tien_ve, tong_tien_ve: summarizeTienVe(tien_ve) });
 }));
 
+// ---------- TĐ3: số quyết toán từng văn bản (nhập là khoá; HĐ + mọi PL có số -> đóng HĐ) ----------
+api.put('/doanh-thu/:id/qt', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const r = id && (await store.getRevenue(id));
+  if (!r || r.loai !== 'hd') return bad(res, 'Không tìm thấy HĐ / PL', 404);
+  const { data, errors } = soQt(req.body || {});
+  if (errors.length) return bad(res, errors);
+  const g = await nhomHd(r.du_an_id, r.so_ma);
+  const du = g.ds.every((x) => x.id === id || (x.gt_qt !== null && x.gt_qt !== undefined));
+  const ngay = g.head?.ngay_qt || data.ngay_qt || new Date().toISOString().slice(0, 10);
+  await store.setQuyetToanDt(g.head?.id || 0, { ngay_qt: g.head ? ngay : null, dong: Boolean(g.head) && du, items: [{ id, gt_qt: data.gt_qt }] }, req.user.id);
+  res.json({ ok: true, dong: Boolean(g.head) && du });
+}));
+api.delete('/doanh-thu/:id/qt', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const r = id && (await store.getRevenue(id));
+  if (!r || r.loai !== 'hd') return bad(res, 'Không tìm thấy HĐ / PL', 404);
+  const g = await nhomHd(r.du_an_id, r.so_ma);
+  await store.setQuyetToanDt(g.head?.id || 0, { ngay_qt: g.head?.ngay_qt || null, dong: false, items: [{ id, gt_qt: null }] }, req.user.id);
+  res.json({ ok: true });
+}));
+api.put('/tp-hd-pl/:id/qt', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const l = id && (await store.getTpLine(id));
+  if (!l) return bad(res, 'Không tìm thấy dòng HĐ/PL', 404);
+  if (await lockedErr(res, l.tp_id)) return;
+  const { data, errors } = soQt(req.body || {});
+  if (errors.length) return bad(res, errors);
+  await store.setTpLineQt(id, data.gt_qt, req.user.id);
+  res.json({ ok: true });
+}));
+api.delete('/tp-hd-pl/:id/qt', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const l = id && (await store.getTpLine(id));
+  if (!l) return bad(res, 'Không tìm thấy dòng HĐ/PL', 404);
+  await store.setTpLineQt(id, null, req.user.id);
+  res.json({ ok: true });
+}));
+
 // ---------- Dự trù chi phí theo nhóm (Đợt B): TĐ1 dự trù · TĐ2 điều chỉnh / ngoài dự trù · TĐ3 quyết toán ----------
 api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   const id = parseId(req.params.id);
@@ -1409,6 +1512,7 @@ api.put('/tp-hd-pl/:id', canHd, wrap(async (req, res) => {
   const { data, errors } = validateTpLine(req.body || {});
   if (errors.length) return bad(res, errors);
   if ((cur.ma_loai === 'HĐ') !== (data.ma_loai === 'HĐ')) return bad(res, 'Không đổi được dòng HĐ gốc thành PL (và ngược lại)');
+  if (req.body?.giu_qt) data.gia_tri_qt = cur.gia_tri_qt ?? null; // nhập theo tab TĐ1: không đụng số quyết toán
   await store.updateTpLine(id, data, req.user.id);
   res.json({ id });
 }));

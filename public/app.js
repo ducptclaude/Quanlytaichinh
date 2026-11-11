@@ -407,6 +407,7 @@ function buildRevenueSections() {
   wrap.innerHTML = Object.entries(REV_LABEL).map(([loai, L]) => `
     <div class="card rev-card" data-loai="${loai}">
       ${loai === 'qt' ? `<div class="toolbar tv-head"><h2>${L.title}</h2><button type="button" class="sm" id="qt-toggle-all">Mở tất cả</button></div>` : `<h2>${L.title}</h2>`}
+      ${loai === 'hd' ? '<div data-td-mode class="td-mode"></div><div class="msg" id="td-hd-msg" role="alert"></div>' : ''}
       ${can('hd') ? `
       <form class="grid-form rev-form" data-loai="${loai}" novalidate>
         <input type="hidden" name="id">
@@ -429,7 +430,7 @@ function buildRevenueSections() {
         <div class="msg" role="alert"></div>
       </form>` : ''}
       <div class="table-wrap">
-        <table class="rev-table">
+        <table class="rev-table ${loai === 'hd' ? 'td-mode-tbl' : ''}">
           <thead><tr>
             <th class="num">#</th><th>${loai === 'hd' ? 'Số HĐ / Phụ lục' : 'Số HĐ / Đợt – Hồ sơ'}</th><th>${loai === 'hd' ? 'Ngày ký' : 'Ngày'}</th>
             ${loai === 'hd' ? `<th class="num td-col" title="Ký – giá trị lúc ký (trước VAT)">TĐ1</th><th class="num td-col" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm (trước VAT)">TĐ2</th><th class="num td-col" title="Quyết toán – giá trị quyết toán (trước VAT). Chưa có = TĐ2">TĐ3</th><th class="num">VAT</th>`
@@ -645,7 +646,18 @@ function tenDotKeTiep(hdId) {
 // ---------- Thời điểm đang làm việc (TĐ1 / TĐ2 / TĐ3) – dùng chung Báo cáo (BST.i_td) và Nhập liệu ----------
 const TD_PICK = [[1, 'Ký HĐ'], [2, 'Điều chỉnh'], [3, 'Quyết toán']];
 const tdDangChon = () => { const n = Number(typeof BST !== 'undefined' ? BST.i_td : 1); return [1, 2, 3].includes(n) ? n : 1; };
+// Chế độ nhập theo TĐ đang chọn: TĐ1 giá trị ký · TĐ2 điều chỉnh (nhiều lần) · TĐ3 số quyết toán (có số = khoá)
+const TD_MODE_TXT = {
+  1: '<b>TĐ1 – Giá trị ký ban đầu:</b> thêm / sửa HĐ, PL với giá trị lúc ký. Không ảnh hưởng TĐ2, TĐ3.',
+  2: '<b>TĐ2 – Điều chỉnh:</b> bấm <b>± Điều chỉnh</b> ở văn bản để nhập tăng / giảm hoặc chốt giá trị mới – nhập được nhiều lần (mỗi lần 1 đợt). Chưa điều chỉnh = TĐ1.',
+  3: '<b>TĐ3 – Quyết toán:</b> nhập số quyết toán từng HĐ / PL. Có số = <b>khoá</b> văn bản (cả TĐ1, TĐ2); HĐ và mọi PL có số = <b>đóng</b> HĐ. Chưa có số = TĐ2, vẫn nhập tiếp được. Mở khoá cần Passcode.',
+};
+function renderTdMode() {
+  const k = tdDangChon();
+  $$('[data-td-mode]').forEach((el) => { el.innerHTML = TD_MODE_TXT[k]; el.className = 'td-mode td-mode-' + k; });
+}
 function renderTdPick() {
+  renderTdMode();
   const n = tdDangChon();
   $$('[data-td-pick]').forEach((el) => {
     el.innerHTML = TD_PICK.map(([k, t]) => `<button type="button" data-tdpick="${k}" class="${k === n ? 'on' : ''}" title="Đang nhập cho TĐ${k} – ${t}. Dùng chung với Báo cáo"><b>TĐ${k}</b> ${t}</button>`).join('');
@@ -660,6 +672,12 @@ document.addEventListener('click', (e) => {
   if (cForm?.elements.td && !cForm.elements.id.value) cForm.elements.td.value = String(tdDangChon());
   const tab = ['revenue', 'cost'].find((x) => !$('#tab-' + x).hidden);
   showMsg($(tab === 'cost' ? '#c-msg' : '#r-new-msg') || document.createElement('div'), '');
+  // đổi chế độ nhập: vẽ lại bảng + hộp chi tiết đang mở
+  if (tab === 'revenue' && revData) renderRevenue();
+  if (tab === 'cost' && costData) renderCost();
+  if ($('#tp-dlg')?.open) renderTpDlg();
+  if ($('#dc-dlg')?.open) renderDc();
+  if ($('#dtr-dlg')?.open) renderDtr();
 });
 function renderRevenue() {
   renderTdPick();
@@ -687,6 +705,8 @@ function renderRevenue() {
     const card = $(`.rev-card[data-loai="${loai}"]`);
     const rows = items.filter((r) => r.loai === loai);
     if (loai === 'hd') {
+      const f = $('.rev-form', card); if (f) f.hidden = canRv('hd') && tdDangChon() !== 1;
+      $('table', card).dataset.tdOn = tdDangChon();
       $('tbody', card).innerHTML = rows.length ? hdGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
     } else $('tbody', card).innerHTML = rows.length ? qtGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
     const t = tong[loai];
@@ -699,6 +719,7 @@ function renderRevenue() {
         <td class="num">${dvm(t.sau_vat)}<div class="td-note">tại TĐ2</div></td>
         <td colspan="${canRv('hd') ? 3 : 2}"></td>
       </tr>`;
+      $$('input.qt-in', card).forEach(attachMoneyInput);
       continue;
     }
     $('tfoot', card).innerHTML = `
@@ -815,25 +836,30 @@ const tdDelta = (v, truoc) => { const d = Math.round(v - truoc); return d ? `<di
 // Dòng thuộc HĐ đã chốt quyết toán (khoá toàn bộ HĐ)
 const hdKhoa = (r) => r && r.loai === 'hd' && revData.items.some((h) => h.loai === 'hd' && h.ma_loai === 'HĐ' && h.qt_dong && hdKey(h) === hdKey(r));
 function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null } = {}) {
-  const x = vbTd(r), dong = head?.qt_dong || r.qt_dong, khoa = hdKhoa(r);
+  const x = vbTd(r), dong = head?.qt_dong || r.qt_dong, khoa = hdKhoa(r) || x.coQt, md = tdDangChon();
   const ds = r.dot || [];
   const thieu = dong && !x.coQt;
   const t3 = !child && g && !g.pls.length ? grpTd(g).t3 : x.t3; // HĐ không có PL: TĐ3 theo cả HĐ (kể cả hồ sơ QT cũ ở mục 2)
-  const qtTag = !child && r.qt_dong ? ` <span class="st st-hoan-thanh" title="Đã chốt quyết toán – khoá toàn bộ HĐ và các PL">🔒 Đã QT${r.ngay_qt ? ' ' + dmy(r.ngay_qt) : ''}</span>` : '';
+  const qtTag = !child && r.qt_dong ? ` <span class="st st-hoan-thanh" title="HĐ và mọi PL đã có số quyết toán – đã đóng (khoá toàn bộ)">🔒 Đã đóng QT${r.ngay_qt ? ' ' + dmy(r.ngay_qt) : ''}</span>` : '';
   return `
     <tr class="${child ? 'hd-child' : 'hd-head'}" data-rid="${r.id}" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
       <td class="num muted">${stt}</td>
       <td class="${child ? 'indent' : ''}">${toggle}${child ? '<span class="tree">└</span>' : ''}<span class="kind-tag ${r.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${esc(r.ma_loai || '')}</span> ${can('hd') ? `<b class="so-ma-pick" data-soma="${esc(r.so_ma || '')}" title="Nhấp đúp để thêm phụ lục cho ${esc(r.so_ma || '')}">${esc(r.so_ma || r.so_hieu)}</b>` : `<b>${esc(r.so_ma || r.so_hieu)}</b>`}${qtTag}${!child && r.tam_tinh ? ' <span class="st st-tam-tinh" title="HĐ chưa quyết toán – giá trị tạm tính">Tạm tính</span>' : ''}</td>
       <td>${dmy(r.ngay)}</td>
       <td class="num">${dvm(x.t1)}</td>
-      <td class="num">${canRv('hd') ? `<button type="button" class="link-btn" data-rdot="${r.id}" title="Xem / thêm đợt điều chỉnh tăng / giảm">${dvm(x.t2)}</button>` : dvm(x.t2)}${tdDelta(x.t2, x.t1)}${ds.length ? `<div class="td-note muted">${ds.length} đợt</div>` : ''}</td>
-      <td class="num ${x.coQt || (g && !g.pls.length && t3 !== x.t2) ? '' : 'muted'}">${dvm(t3)}${tdDelta(t3, x.t2)}${thieu ? '<div class="td-note warn-text" title="Đã đóng quyết toán nhưng văn bản này chưa có số quyết toán – tạm lấy TĐ2">⚠ chưa có số QT</div>' : ''}</td>
+      <td class="num">${canRv('hd') && md === 2 && !khoa ? `<button type="button" class="link-btn" data-rdot="${r.id}" title="Xem / thêm điều chỉnh">${dvm(x.t2)}</button>` : dvm(x.t2)}${tdDelta(x.t2, x.t1)}${ds.length ? `<div class="td-note muted">${ds.length} đợt</div>` : ''}</td>
+      <td class="num ${x.coQt || (g && !g.pls.length && t3 !== x.t2) ? '' : 'muted'}">${canRv('hd') && md === 3 && !x.coQt && !hdKhoa(r)
+        ? `<input class="money num qt-in" data-qtin="${r.id}" placeholder="${dvNum(x.t2, 'dong')}" title="Nhập số quyết toán (đồng, trước VAT). Lưu xong văn bản bị khoá">`
+        : `${x.coQt ? '🔒 ' : ''}${dvm(t3)}`}${tdDelta(t3, x.t2)}${thieu ? '<div class="td-note warn-text" title="Đã đóng quyết toán nhưng văn bản này chưa có số quyết toán – tạm lấy TĐ2">⚠ chưa có số QT</div>' : ''}</td>
       <td class="num">${vatBadge(r.vat)}</td>
       <td class="num strong">${dvm(r.sau_vat)}</td>
       <td class="wrap">${esc(r.ghi_chu)}</td>
       <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
-      ${canRv('hd') ? `<td class="row-actions">${khoa ? `${!child && r.ma_loai === 'HĐ' ? `<button data-rqt="${r.id}" title="Đã chốt quyết toán – xem / mở khoá (cần Passcode)">🔒 Đã chốt QT</button>` : '<span class="muted small" title="HĐ đã chốt quyết toán – khoá toàn bộ">🔒 Khoá</span>'}`
-        : `<button data-rdot="${r.id}" title="Đợt điều chỉnh tăng / giảm (TĐ2)">± Đợt</button>${!child && r.ma_loai === 'HĐ' ? `<button data-rqt="${r.id}" title="Quyết toán HĐ và các PL (TĐ3)">Quyết toán</button>` : ''}<button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button>`}</td>` : ''}
+      ${canRv('hd') ? `<td class="row-actions">${khoa
+        ? (md === 3 && x.coQt ? `<button data-rmokhoa="${r.id}" title="Bỏ số quyết toán để sửa lại (cần Passcode)">🔓 Mở khoá</button>` : '<span class="muted small" title="Đã có số quyết toán – khoá văn bản (TĐ1, TĐ2, TĐ3)">🔒 Khoá</span>')
+        : md === 1 ? `<button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button>`
+          : md === 2 ? `<button data-rdot="${r.id}" title="Nhập tăng / giảm hoặc chốt giá trị mới (TĐ2)">± Điều chỉnh</button>`
+            : `<button class="primary" data-rqtsave="${r.id}" title="Lưu số quyết toán – văn bản sẽ bị khoá">Lưu QT</button>`}</td>` : ''}
     </tr>${ds.map((d, k) => `
     <tr class="dc-row" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
       <td></td><td class="indent${child ? '2' : ''}" colspan="3"><span class="tree">↳</span> Đợt ${k + 1}${d.ngay ? ' · ' + dmy(d.ngay) : ''}${d.noi_dung ? ' · ' + esc(d.noi_dung) : ''}</td>
@@ -918,7 +944,25 @@ async function saveRevenue(f) {
 }
 
 async function onRevTableClick(e) {
-  const { redit, rdel, grp, qtgrp, qtadd, rdot, rqt } = e.target.dataset;
+  const { redit, rdel, grp, qtgrp, qtadd, rdot, rqt, rqtsave, rmokhoa } = e.target.dataset;
+  const tdMsg = (t, ty) => showMsg($('#td-hd-msg'), t, ty);
+  if (rqtsave) {
+    const el = $(`.rev-card [data-qtin="${rqtsave}"]`); el?.dispatchEvent(new Event('blur'));
+    const v = parseMoney(el?.value), r = revData.items.find((x) => x.id === Number(rqtsave));
+    if (v === '' || v === '-' || Number(v) < 0) return tdMsg(`Nhập số quyết toán cho ${r?.so_hieu || ''}`, 'err');
+    if (!confirm(`Lưu số quyết toán ${money(v)} đ cho ${r?.so_hieu}? Văn bản sẽ bị KHOÁ (muốn sửa phải mở khoá bằng Passcode).`)) return;
+    try { const o = await api(`/api/doanh-thu/${rqtsave}/qt`, { method: 'PUT', body: JSON.stringify({ gt_qt: v }) }); await loadRevenue(); tdMsg(o?.dong ? `Đã lưu – HĐ ${r?.so_ma} đã quyết toán hết, đã đóng (khoá toàn bộ)` : `Đã lưu số quyết toán ${r?.so_hieu} – văn bản đã khoá`); }
+    catch (err) { tdMsg(err.message, 'err'); }
+    return;
+  }
+  if (rmokhoa) {
+    const r = revData.items.find((x) => x.id === Number(rmokhoa));
+    const pc = await askPasscode(`Mở khoá quyết toán ${r?.so_hieu || ''}?`, 'Bỏ số quyết toán của văn bản này để sửa lại (có ghi nhật ký). HĐ sẽ mở lại nếu đang đóng.', '🔓 Mở khoá');
+    if (pc === null) return;
+    try { await api(`/api/doanh-thu/${rmokhoa}/qt`, { method: 'DELETE', body: JSON.stringify({ passcode: pc }) }); await loadRevenue(); tdMsg(`Đã mở khoá ${r?.so_hieu}`); }
+    catch (err) { tdMsg(err.message, 'err'); }
+    return;
+  }
   if (rdot) return openDc('dt', Number(rdot));
   if (rqt) return openQtDt(Number(rqt));
   if (qtgrp !== undefined) {
@@ -2105,18 +2149,21 @@ function renderTpDlg() {
     const hdSau = draft ? 0 : l.sau_vat;
     const qtSau = draft ? 0 : l.qt_sau_vat;
     const t1 = Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2 = Number(l.gia_tri) || 0;
+    const md = tdDangChon(), lk = !draft && nnV(l.gia_tri_qt) !== null; // có số quyết toán = khoá dòng
+    const ok1 = editL && md === 1 && !lk, ok3 = editL && md === 3 && !lk;
     return `<tr data-k="${draft ? 'dl' + l.key : 'l' + l.id}" data-dc="${draft ? 0 : t2 - t1}" class="${draft ? 'tv-draft' : l.ma_loai === 'HĐ' ? 'tp-hd-row' : 'tp-pl-row'}">
       <td>${l.ma_loai === 'HĐ' ? '' : '<span class="tree">└</span>'}<span class="kind-tag ${l.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${l.ma_loai}</span> <b>${esc(c.so_ma)}</b>${draft ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</td>
-      <td>${inp('ngay', draft ? '' : isoToDmy(l.ngay), 'class="date-dmy"', editL)}</td>
-      <td>${inp('gia_tri', gtStr, 'class="money num" placeholder="0 · giảm: số âm"', editL)}</td>
-      <td class="num">${draft ? '<span class="muted small">lưu dòng trước</span>' : `${editL ? `<button type="button" class="link-btn" data-tpdot="${l.id}" title="Xem / thêm đợt điều chỉnh tăng / giảm">${dvm(t2)}</button>` : dvm(t2)}${tdDelta(t2, t1)}${(l.dot || []).length ? `<div class="td-note muted">${l.dot.length} đợt</div>` : ''}${editL ? `<div><button type="button" class="sm" data-tpdot="${l.id}">± Đợt</button></div>` : ''}`}</td>
-      <td>${inp('vat', draft ? '' : l.vat || '', 'type="number" min="0" max="100" step="1" class="vat-in" placeholder="0"', editL)}</td>
+      <td>${inp('ngay', draft ? '' : isoToDmy(l.ngay), 'class="date-dmy"', ok1 || draft)}</td>
+      <td>${inp('gia_tri', gtStr, 'class="money num" placeholder="0 · giảm: số âm"', ok1 || draft)}</td>
+      <td class="num">${draft ? '<span class="muted small">lưu dòng trước</span>' : `${editL && md === 2 && !lk ? `<button type="button" class="link-btn" data-tpdot="${l.id}" title="Xem / thêm điều chỉnh">${dvm(t2)}</button>` : dvm(t2)}${tdDelta(t2, t1)}${(l.dot || []).length ? `<div class="td-note muted">${l.dot.length} đợt</div>` : ''}${editL && md === 2 && !lk ? `<div><button type="button" class="sm" data-tpdot="${l.id}">± Điều chỉnh</button></div>` : ''}`}</td>
+      <td>${inp('vat', draft ? '' : l.vat || '', 'type="number" min="0" max="100" step="1" class="vat-in" placeholder="0"', ok1 || draft)}</td>
       <td class="num strong" data-calc="hd">${dvm(hdSau)}</td>
-      <td>${inp('gia_tri_qt', qtStr, 'class="money num" placeholder="= giá trị HĐ/PL"', editL)}</td>
+      <td>${lk ? `<span class="num-lk" title="Đã có số quyết toán – dòng đang khoá">🔒 ${dvm(l.gia_tri_qt)}</span>` : inp('gia_tri_qt', qtStr, 'class="money num" placeholder="= TĐ2"', ok3)}</td>
       <td class="num strong" data-calc="qt">${dvm(qtSau) + (!draft && !l.da_qt ? '<div class="muted small">chưa QT</div>' : '')}</td>
-      <td>${inp('ghi_chu', draft ? '' : l.ghi_chu, 'maxlength="500"', editL)}</td>
-      <td class="row-actions">${editL ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button>${
-        l.ma_loai === 'HĐ' ? '' : `<button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>`}` : ''}</td>
+      <td>${inp('ghi_chu', draft ? '' : l.ghi_chu, 'maxlength="500"', ok1 || draft)}</td>
+      <td class="row-actions">${!editL ? '' : lk ? (md === 3 ? '<button class="sm" data-tpmoqt>🔓 Mở khoá</button>' : '<span class="muted small">🔒 Khoá</span>')
+        : draft || md === 1 ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button>${l.ma_loai === 'HĐ' ? '' : `<button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>`}`
+          : md === 3 ? '<button class="primary sm" data-save hidden>Lưu QT</button>' : ''}</td>
     </tr>`;
   };
   const payLabel = (p, draft) => (p.loai === 'dot' || p.loai === 'quyet_toan'
@@ -2158,6 +2205,7 @@ function renderTpDlg() {
     </div>
 
     <h4>Giá trị HĐ / PL</h4>
+    <div data-td-mode class="td-mode"></div>
     <div class="table-wrap"><table class="tp-dtl">
       <thead><tr><th>Số HĐ/PL</th><th>Ngày ký</th><th class="num" title="Ký – giá trị lúc ký">TĐ1<br><span class="muted small">trước VAT</span></th><th class="num" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm">TĐ2<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">TĐ2<br><span class="muted small">sau VAT</span></th>
         <th class="num" title="Quyết toán – giá trị HT/QT. Trống = TĐ2">TĐ3<br><span class="muted small">trước VAT</span></th><th class="num">HT/QT<br><span class="muted small">sau VAT</span></th><th>Ghi chú</th><th></th></tr></thead>
@@ -2166,7 +2214,7 @@ function renderTpDlg() {
         <td class="num">${dvm(c.hd_sau_vat)}</td><td class="num tp-sum-mo" title="Tổng giá trị HT/QT trước VAT">${dvm(c.qt_gia_tri)}</td>
         <td class="num">${dvm(c.qt_sau_vat)}</td><td colspan="2"></td></tr></tfoot>
     </table></div>
-    ${editL ? `<div class="tv-tools"><button class="sm" data-addpl="${nextPl}">+ Thêm ${nextPl}</button>
+    ${editL && tdDangChon() === 1 && !(c.lines.length && c.lines.every((l) => nnV(l.gia_tri_qt) !== null)) ? `<div class="tv-tools"><button class="sm" data-addpl="${nextPl}">+ Thêm ${nextPl}</button>
       <span class="muted small">TĐ1 = giá trị ký · tăng / giảm sau ký: bấm <b>± Đợt</b> · ô HT/QT (TĐ3) để trống = chưa quyết toán (lấy bằng TĐ2)</span></div>` : ''}
 
     <h4 class="tp-sep">Giá trị thanh toán</h4>
@@ -2188,6 +2236,7 @@ function renderTpDlg() {
     $$('input.money', dlg).forEach(attachMoneyInput);
     $$('input.date-dmy', dlg).forEach(attachDateInput);
   }
+  renderTdMode();
   // Ô nhà thầu / hạng mục trong bảng chi tiết: danh sách gợi ý từ bộ nhớ
   const fDt = $('[data-k="info"] [data-f="doi_tac"]', dlg), fHm = $('[data-k="info"] [data-f="hang_muc"]', dlg);
   if (fDt && fHm) {
@@ -2234,6 +2283,14 @@ async function onTpDlgClick(e) {
     tpMoKhoa.add(c.id); renderTpDlg(); return showMsg(msg(), 'Đã mở khóa – có thể điều chỉnh. Đóng bảng chi tiết sẽ khóa lại.');
   }
   if (t.dataset.tpdot) return openDc('tp', Number(t.dataset.tpdot));
+  if (t.dataset.tpmoqt !== undefined) {
+    const l = c.lines.find((x) => 'l' + x.id === t.closest('[data-k]')?.dataset.k); if (!l) return;
+    const pc = await askPasscode(`Mở khoá quyết toán ${l.ma_loai} ${c.so_ma}?`, 'Bỏ số quyết toán của dòng này để sửa lại (có ghi nhật ký).', '🔓 Mở khoá');
+    if (pc === null) return;
+    try { await api(`/api/tp-hd-pl/${l.id}/qt`, { method: 'DELETE', body: JSON.stringify({ passcode: pc }) }); await loadCost(); showMsg($('#tp-msg'), `Đã mở khoá ${l.ma_loai}`); }
+    catch (err) { showMsg($('#tp-msg'), err.message, 'err'); }
+    return;
+  }
   if (t.dataset.addpl) { tpDrafts.lines.push({ key: ++tpSeq, ma_loai: t.dataset.addpl }); return renderTpDlg(); }
   if (t.dataset.addpay) {
     const loai = t.dataset.addpay;
@@ -2269,7 +2326,14 @@ async function onTpDlgClick(e) {
     if (k.startsWith('l') || k.startsWith('dl')) {
       const draft = k.startsWith('dl');
       const cur = draft ? tpDrafts.lines.find((d) => 'dl' + d.key === k) : c.lines.find((l) => 'l' + l.id === k);
-      const body = { ma_loai: cur.ma_loai, ngay, gia_tri: parseMoney(v('gia_tri')), vat: v('vat'), gia_tri_qt: parseMoney(v('gia_tri_qt')), ghi_chu: v('ghi_chu') };
+      if (!draft && tdDangChon() === 3) { // TĐ3: lưu số quyết toán -> khoá dòng
+        const q = parseMoney(v('gia_tri_qt'));
+        if (q === '' || q === '-' || Number(q) < 0) return showMsg(msg(), 'Nhập số quyết toán', 'err');
+        if (!confirm(`Lưu số quyết toán ${money(q)} đ cho ${cur.ma_loai} ${c.so_ma}? Dòng sẽ bị KHOÁ (muốn sửa phải mở khoá bằng Passcode).`)) return;
+        if (await call(`/api/tp-hd-pl/${cur.id}/qt`, 'PUT', { gt_qt: q })) await after(`Đã lưu số quyết toán ${cur.ma_loai} – dòng đã khoá`);
+        return;
+      }
+      const body = { ma_loai: cur.ma_loai, ngay, gia_tri: parseMoney(v('gia_tri')), vat: v('vat'), gia_tri_qt: parseMoney(v('gia_tri_qt')), ghi_chu: v('ghi_chu'), giu_qt: true };
       if (await call(draft ? `/api/thau-phu/${c.id}/hd-pl` : `/api/tp-hd-pl/${cur.id}`, draft ? 'POST' : 'PUT', body)) {
         if (draft) tpDrafts.lines = tpDrafts.lines.filter((d) => d !== cur);
         await after(`Đã lưu ${cur.ma_loai}`);
@@ -2965,11 +3029,11 @@ function dcVanBan() {
   if (!dcCur) return null;
   if (dcCur.loai === 'dt') {
     const r = revData.items.find((x) => x.id === dcCur.id);
-    return r && { ten: `${r.ma_loai} ${r.so_ma || r.so_hieu}`, sub: 'Doanh thu · HĐ chủ đầu tư' + (hdKhoa(r) ? ' · 🔒 đã chốt quyết toán' : ''), t1: Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2: Number(r.gia_tri) || 0, dot: r.dot || [], ok: canRv('hd') && !hdKhoa(r) };
+    return r && { ten: `${r.ma_loai} ${r.so_ma || r.so_hieu}`, sub: 'Doanh thu · HĐ chủ đầu tư' + (hdKhoa(r) ? ' · 🔒 đã chốt quyết toán' : ''), t1: Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2: Number(r.gia_tri) || 0, dot: r.dot || [], ok: canRv('hd') && !hdKhoa(r) && !vbTd(r).coQt };
   }
   for (const c of costData.thau_phu || []) {
     const l = c.lines.find((x) => x.id === dcCur.id);
-    if (l) return { ten: `${l.ma_loai} ${c.so_ma}`, sub: `HĐ đầu vào · ${tpTen(c)}`, t1: Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2: Number(l.gia_tri) || 0, dot: l.dot || [], ok: can('hd') && !(c.khoa && !tpMoKhoa.has(c.id)) };
+    if (l) return { ten: `${l.ma_loai} ${c.so_ma}`, sub: `HĐ đầu vào · ${tpTen(c)}`, t1: Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2: Number(l.gia_tri) || 0, dot: l.dot || [], ok: can('hd') && !(c.khoa && !tpMoKhoa.has(c.id)) && nnV(l.gia_tri_qt) === null };
   }
   return null;
 }
@@ -2980,6 +3044,7 @@ function dlgShell(id, onClick) {
     document.body.appendChild(dlg);
     dlg.addEventListener('click', onClick);
     dlg.addEventListener('input', (e) => { const tr = e.target.closest('tr[data-k]'); if (tr) { const b = $('[data-save]', tr); if (b) b.hidden = false; } });
+    dlg.addEventListener('change', (e) => { if (e.target.dataset.f === 'kieu') { const i = $('[data-f="so_tien"]', e.target.closest('tr')); if (i) i.placeholder = e.target.value === 'chot' ? 'Giá trị mới (VD 1.050tr)' : '+ tăng · − giảm (số âm)'; } });
     dlg.addEventListener('keydown', (e) => { const tr = e.target.closest('tr[data-k]'); if (e.key === 'Enter' && tr) { e.preventDefault(); $('[data-save]', tr)?.click(); } });
   }
   return dlg;
@@ -2997,7 +3062,7 @@ function renderDc() {
   const ok = v.ok;
   const inp = (f, val, attrs = '') => `<input data-f="${f}" value="${esc(val ?? '')}" ${attrs} ${ok ? '' : 'disabled'}>`;
   const row = (d, k) => `<tr data-k="${d ? d.id : 'new'}" class="${d ? '' : 'tv-draft'}">
-      <td><b>${d ? 'Đợt ' + (k + 1) : 'Đợt ' + (v.dot.length + 1)}</b>${d ? '' : ' <span class="st st-tam-tinh">Mới</span>'}</td>
+      <td><b>${d ? 'Đợt ' + (k + 1) : 'Đợt ' + (v.dot.length + 1)}</b>${d ? '' : ` <span class="st st-tam-tinh">Mới</span><select data-f="kieu" class="dc-kieu" title="Tăng / giảm: gõ phần chênh (+/−) · Chốt: gõ giá trị mới, hệ thống tự tính phần chênh so với TĐ2 hiện tại"><option value="dc">Tăng / giảm (±)</option><option value="chot">Chốt giá trị mới</option></select>`}</td>
       <td>${inp('ngay', d ? isoToDmy(d.ngay) : '', 'class="date-dmy"')}</td>
       <td>${inp('noi_dung', d ? d.noi_dung : '', 'maxlength="500" placeholder="VD: Phát sinh tăng khối lượng móng"')}</td>
       <td>${inp('so_tien', d ? money(d.so_tien) : '', 'class="money num" placeholder="+ tăng · − giảm (số âm)"')}</td>
@@ -3038,9 +3103,16 @@ async function onDcClick(e) {
     if (t.dataset.save !== undefined) {
       const ngay = dmyToIso(v('ngay'));
       if (ngay === null) return showMsg(msg(), 'Ngày không hợp lệ, nhập dd/mm/yyyy', 'err');
-      const so_tien = parseMoney(v('so_tien'));
+      let so_tien = parseMoney(v('so_tien')), noi_dung = v('noi_dung');
+      if (k === 'new' && v('kieu') === 'chot') { // chốt giá trị mới -> phần chênh so với TĐ2 hiện tại
+        if (so_tien === '' || so_tien === '-') return showMsg(msg(), 'Nhập giá trị chốt mới', 'err');
+        const vb = dcVanBan(), moi = Number(so_tien);
+        so_tien = String(moi - vb.t2);
+        if (!noi_dung) noi_dung = `Chốt giá trị mới ${money(moi)}`;
+        if (!Number(so_tien)) return showMsg(msg(), 'Giá trị chốt bằng TĐ2 hiện tại – không có thay đổi', 'err');
+      }
       if (!Number(so_tien)) return showMsg(msg(), 'Nhập số tiền tăng (+) hoặc giảm (số âm)', 'err');
-      const body = { loai: dcCur.loai, vb_id: dcCur.id, ngay, noi_dung: v('noi_dung'), so_tien };
+      const body = { loai: dcCur.loai, vb_id: dcCur.id, ngay, noi_dung, so_tien };
       await api(k === 'new' ? '/api/dieu-chinh' : `/api/dieu-chinh/${k}`, { method: k === 'new' ? 'POST' : 'PUT', body: JSON.stringify(body) });
       await dcReload(); showMsg(msg(), k === 'new' ? 'Đã thêm đợt điều chỉnh' : 'Đã lưu đợt điều chỉnh');
     }
@@ -3141,6 +3213,7 @@ function renderDuTru() {
   card.hidden = costAll || !Array.isArray(rows);
   if (card.hidden) return;
   const ok = can('hd');
+  $('.dtr-table').dataset.tdOn = tdDangChon();
   const codes = [...new Set(rows.map((r) => r.nhom))].sort((a, b) => NHOM().findIndex((x) => x.code === a) - NHOM().findIndex((x) => x.code === b));
   const tot = [0, 0, 0];
   $('#dtr-tbody').innerHTML = codes.length ? codes.map((code) => {
@@ -3176,7 +3249,8 @@ let dtrNhom = null, dtrDraft = null;
 function openDtr(code, moi = false) {
   dtrNhom = code;
   const rows = (costData.du_tru || []).filter((r) => r.nhom === code);
-  dtrDraft = moi || !rows.length ? (rows.some((r) => r.loai === 'ky') ? 'dc' : 'ky') : null; // nhóm mới: mở sẵn dòng dự trù TĐ1
+  const md = tdDangChon(), khoaN = rows.some((r) => r.loai === 'qt');
+  dtrDraft = (moi || !rows.length) && !khoaN ? ({ 1: 'ky', 2: 'dc', 3: 'qt' })[md] : null; // mở sẵn dòng mới theo TĐ đang chọn
   const dlg = dlgShell('dtr-dlg', onDtrClick);
   renderDtr();
   if (!dlg.open) dlg.showModal();
@@ -3190,6 +3264,7 @@ function renderDtr() {
   const vat0 = n?.khong_vat ? 0 : (rows.find((r) => r.loai === 'ky')?.vat ?? 10);
   const inp = (f, val, attrs = '') => `<input data-f="${f}" value="${esc(val ?? '')}" ${attrs} ${ok ? '' : 'disabled'}>`;
   let dot = 0;
+  const md = tdDangChon(), khoaN = rows.some((y) => y.loai === 'qt'); // nhóm đã có quyết toán = khoá
   const row = (r) => {
     const loai = r ? r.loai : dtrDraft, ten = loai === 'dc' ? `TĐ2 · Đợt ${r ? ++dot : rows.filter((y) => y.loai === 'dc').length + 1}` : DTR_LOAI[loai];
     const vat = r ? r.vat : vat0, gt = r ? Number(r.so_tien) || 0 : 0;
@@ -3200,7 +3275,9 @@ function renderDtr() {
       <td>${inp('so_tien', r ? money(r.so_tien) : '', `class="money num" placeholder="${loai === 'dc' ? '+ tăng · − giảm (số âm)' : '0'}"`)}</td>
       <td>${inp('vat', vat, `type="number" min="0" max="100" step="1" class="vat-in" ${n?.khong_vat ? 'disabled' : ''}`)}</td>
       <td class="num">${r ? dvm(gt + Math.round((gt * (Number(vat) || 0)) / 100)) : ''}</td>
-      <td class="row-actions">${ok ? `<button class="primary sm" data-save ${r ? 'hidden' : ''}>${r ? 'Lưu' : 'Thêm'}</button>${r ? '<button class="danger sm" data-del>Xóa</button>' : '<button class="sm" data-bo>Bỏ</button>'}` : ''}</td>
+      <td class="row-actions">${!ok ? '' : r && khoaN ? (r.loai === 'qt' && md === 3 ? '<button class="sm" data-del title="Xóa số quyết toán để mở khoá nhóm (cần Passcode)">🔓 Mở khoá</button>' : '<span class="muted small">🔒 Khoá</span>')
+        : r && { ky: 1, dc: 2, qt: 3 }[r.loai] !== md ? '<span class="muted small" title="Sửa ở tab TĐ tương ứng">–</span>'
+          : `<button class="primary sm" data-save ${r ? 'hidden' : ''}>${r ? 'Lưu' : 'Thêm'}</button>${r ? '<button class="danger sm" data-del>Xóa</button>' : '<button class="sm" data-bo>Bỏ</button>'}`}</td>
     </tr>`;
   };
   const ord = { ky: 0, dc: 1, qt: 2 };
@@ -3220,10 +3297,12 @@ function renderDtr() {
       <thead><tr><th>Thời điểm</th><th>Ngày</th><th>Nội dung</th><th class="num">Số tiền <br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">Sau VAT</th><th></th></tr></thead>
       <tbody>${sorted.map(row).join('')}${ok && dtrDraft ? row(null) : ''}${!rows.length && !dtrDraft ? '<tr><td colspan="7" class="empty">Chưa có dự trù</td></tr>' : ''}</tbody>
     </table></div>
-    ${ok ? `<div class="tv-tools"><button class="sm" data-dtradd="ky">+ Dự trù (TĐ1)</button><button class="sm" data-dtradd="dc">+ Đợt điều chỉnh (TĐ2)</button><button class="sm" data-dtradd="qt">+ Quyết toán (TĐ3)</button>
-      <span class="muted small">Chưa có dự trù TĐ1 mà thêm đợt TĐ2 = chi phí ngoài dự trù</span></div>` : ''}
+    <div data-td-mode class="td-mode"></div>
+    ${ok && !khoaN ? `<div class="tv-tools">${md === 1 ? '<button class="sm" data-dtradd="ky">+ Dự trù (TĐ1)</button>' : md === 2 ? '<button class="sm" data-dtradd="dc">+ Điều chỉnh (TĐ2)</button>' : '<button class="sm" data-dtradd="qt">+ Quyết toán (TĐ3) – nhập xong sẽ khoá nhóm</button>'}
+      <span class="muted small">${md === 2 ? 'Chưa có dự trù TĐ1 mà điều chỉnh ở TĐ2 = chi phí ngoài dự trù' : ''}</span></div>` : ''}
     <div class="msg" id="dtr-msg" role="alert"></div>`;
   if (ok) { $$('input.money', dlg).forEach(attachMoneyInput); $$('input.date-dmy', dlg).forEach(attachDateInput); }
+  renderTdMode();
 }
 async function onDtrClick(e) {
   const t = e.target, dlg = $('#dtr-dlg'), msg = () => $('#dtr-msg');
@@ -3237,14 +3316,18 @@ async function onDtrClick(e) {
     if (t.dataset.save !== undefined) {
       const ngay = dmyToIso(v('ngay'));
       if (ngay === null) return showMsg(msg(), 'Ngày không hợp lệ, nhập dd/mm/yyyy', 'err');
+      if (k === 'new' && dtrDraft === 'qt' && !confirm('Lưu số quyết toán? Nhóm sẽ bị KHOÁ (muốn sửa phải mở khoá bằng Passcode).')) return;
       const body = { nhom: dtrNhom, loai: k === 'new' ? dtrDraft : undefined, ngay, noi_dung: v('noi_dung'), so_tien: parseMoney(v('so_tien')), vat: v('vat') || 0 };
       await api(k === 'new' ? `/api/du-an/${revProjectId}/du-tru` : `/api/du-tru/${k}`, { method: k === 'new' ? 'POST' : 'PUT', body: JSON.stringify(body) });
       if (k === 'new') dtrDraft = null;
       await loadCost(); renderDtr(); showMsg(msg(), k === 'new' ? 'Đã thêm dự trù' : 'Đã lưu dự trù');
     }
     if (t.dataset.del !== undefined) {
-      if (!confirm('Xóa dòng dự trù này?')) return;
-      await api(`/api/du-tru/${k}`, { method: 'DELETE' });
+      const r0 = (costData.du_tru || []).find((x) => x.id === Number(k));
+      let pc = null;
+      if (r0?.loai === 'qt') { pc = await askPasscode('Mở khoá nhóm dự trù?', 'Xóa số quyết toán của nhóm để sửa lại (có ghi nhật ký).', '🔓 Mở khoá'); if (pc === null) return; }
+      else if (!confirm('Xóa dòng dự trù này?')) return;
+      await api(`/api/du-tru/${k}`, { method: 'DELETE', body: pc ? JSON.stringify({ passcode: pc }) : undefined });
       await loadCost(); renderDtr(); showMsg(msg(), 'Đã xóa dự trù');
     }
   } catch (err) { showMsg(msg(), err.message, 'err'); }
