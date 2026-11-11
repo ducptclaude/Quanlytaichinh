@@ -3350,7 +3350,8 @@ tr.dc-row td { font-size: 12px; color: var(--muted); padding-top: 2px; padding-b
 tr.dc-row td.indent { padding-left: 34px; } tr.dc-row td.indent2 { padding-left: 60px; }
 tr.dc-row td.td-up, tr.dc-row td.td-down { font-weight: 600; }
 .rev-table th.td-col { white-space: nowrap; }
-dialog.dc-dlg { max-width: 860px; }
+dialog.dc-dlg { max-width: min(1100px, calc(100vw - 24px)); width: min(1100px, calc(100vw - 24px)); }
+#dc-dlg .tp-dtl td:nth-child(3) input, #dtr-dlg .tp-dtl td:nth-child(3) input { min-width: 260px; }
 .dc-dlg label.chk { display: flex; align-items: center; gap: 8px; flex-direction: row; }
 .dc-dlg label.chk input { width: auto; }
 
@@ -3416,3 +3417,4 @@ select.dc-kieu { display: block; margin-top: 6px; width: 100%; min-width: 150px;
 #c-form .td-an { display: none !important; }
 .dv-dong { font-weight: 600; color: var(--teal); }
 .dc-hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--muted); }
+@media (max-width: 700px) { #dc-dlg .tp-dtl td:nth-child(3) input, #dtr-dlg .tp-dtl td:nth-child(3) input { min-width: 160px; } }

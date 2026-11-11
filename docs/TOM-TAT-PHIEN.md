@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.11.11.26 – Mở rộng hộp nhập liệu (điều chỉnh, quyết toán, dự trù) để không phải cuộn ngang
+- Hộp rộng tối đa 1.100px (co theo màn hình): bảng vừa khung ở máy tính 1280 / 1366px. Ô Nội dung rộng tối thiểu 260px (điện thoại 160px, vuốt ngang trong khung).
+
 ## V07.11.11.26 – Hộp nhập liệu hiện số bằng đồng (khớp ô nhập); gõ "+" đầu số; sửa đợt điều chỉnh dễ thấy
 - Hộp điều chỉnh, quyết toán, dự trù, chi tiết HĐ đầu vào: mọi số (thẻ, lũy kế, sau VAT, mũi tên) hiện bằng ĐỒNG đầy đủ, ghi "Đơn vị: đồng" ở đầu hộp
   (trước đây theo ô Đơn vị -> lệch với ô nhập). Bảng ngoài trang vẫn theo ô Đơn vị.
