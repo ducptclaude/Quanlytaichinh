@@ -74,7 +74,13 @@ if ($('#dv-pick')) {
     try { localStorage.setItem('dv_tien', DV_CHON); } catch {}
     const cur = $$('main > .tab-panel').find((x) => !x.hidden)?.id.replace('tab-', '');
     if (cur === 'report' && typeof renderKeepPos === 'function') return renderKeepPos(null); // báo cáo: vẽ lại tại chỗ, giữ kỳ / mục đang mở
-    if (cur && loaders[cur]) Promise.resolve(loaders[cur]()).catch((err) => alert(err.message));
+    const veHop = () => { // hộp chi tiết đang mở: vẽ lại theo đơn vị mới
+      if ($('#tp-dlg')?.open && typeof renderTpDlg === 'function') renderTpDlg();
+      if ($('#dc-dlg')?.open) renderDc();
+      if ($('#qtdt-dlg')?.open) renderQtDt();
+      if ($('#dtr-dlg')?.open) renderDtr();
+    };
+    if (cur && loaders[cur]) Promise.resolve(loaders[cur]()).then(veHop).catch((err) => alert(err.message));
   });
 }
 const closeMenus = () => $$('.tab-grp.open').forEach((g) => { g.classList.remove('open'); $('[data-grp-toggle]', g).setAttribute('aria-expanded', 'false'); });
@@ -2103,11 +2109,11 @@ function renderTpDlg() {
       <td>${l.ma_loai === 'HĐ' ? '' : '<span class="tree">└</span>'}<span class="kind-tag ${l.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${l.ma_loai}</span> <b>${esc(c.so_ma)}</b>${draft ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</td>
       <td>${inp('ngay', draft ? '' : isoToDmy(l.ngay), 'class="date-dmy"', editL)}</td>
       <td>${inp('gia_tri', gtStr, 'class="money num" placeholder="0 · giảm: số âm"', editL)}</td>
-      <td class="num">${draft ? '<span class="muted small">lưu dòng trước</span>' : `${editL ? `<button type="button" class="link-btn" data-tpdot="${l.id}" title="Xem / thêm đợt điều chỉnh tăng / giảm">${money(t2)}</button>` : money(t2)}${tdDelta(t2, t1)}${(l.dot || []).length ? `<div class="td-note muted">${l.dot.length} đợt</div>` : ''}${editL ? `<div><button type="button" class="sm" data-tpdot="${l.id}">± Đợt</button></div>` : ''}`}</td>
+      <td class="num">${draft ? '<span class="muted small">lưu dòng trước</span>' : `${editL ? `<button type="button" class="link-btn" data-tpdot="${l.id}" title="Xem / thêm đợt điều chỉnh tăng / giảm">${dvm(t2)}</button>` : dvm(t2)}${tdDelta(t2, t1)}${(l.dot || []).length ? `<div class="td-note muted">${l.dot.length} đợt</div>` : ''}${editL ? `<div><button type="button" class="sm" data-tpdot="${l.id}">± Đợt</button></div>` : ''}`}</td>
       <td>${inp('vat', draft ? '' : l.vat || '', 'type="number" min="0" max="100" step="1" class="vat-in" placeholder="0"', editL)}</td>
-      <td class="num strong" data-calc="hd">${money(hdSau)}</td>
+      <td class="num strong" data-calc="hd">${dvm(hdSau)}</td>
       <td>${inp('gia_tri_qt', qtStr, 'class="money num" placeholder="= giá trị HĐ/PL"', editL)}</td>
-      <td class="num strong" data-calc="qt">${money(qtSau) + (!draft && !l.da_qt ? '<div class="muted small">chưa QT</div>' : '')}</td>
+      <td class="num strong" data-calc="qt">${dvm(qtSau) + (!draft && !l.da_qt ? '<div class="muted small">chưa QT</div>' : '')}</td>
       <td>${inp('ghi_chu', draft ? '' : l.ghi_chu, 'maxlength="500"', editL)}</td>
       <td class="row-actions">${editL ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button>${
         l.ma_loai === 'HĐ' ? '' : `<button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>`}` : ''}</td>
@@ -2156,9 +2162,9 @@ function renderTpDlg() {
       <thead><tr><th>Số HĐ/PL</th><th>Ngày ký</th><th class="num" title="Ký – giá trị lúc ký">TĐ1<br><span class="muted small">trước VAT</span></th><th class="num" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm">TĐ2<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">TĐ2<br><span class="muted small">sau VAT</span></th>
         <th class="num" title="Quyết toán – giá trị HT/QT. Trống = TĐ2">TĐ3<br><span class="muted small">trước VAT</span></th><th class="num">HT/QT<br><span class="muted small">sau VAT</span></th><th>Ghi chú</th><th></th></tr></thead>
       <tbody>${c.lines.map((l) => lineRow(l, false)).join('')}${tpDrafts.lines.map((d) => lineRow(d, true)).join('')}</tbody>
-      <tfoot><tr><td colspan="2">TỔNG</td>${(() => { const [a, b] = tpTdTong(c.lines); return `<td class="num tp-sum-mo" title="Tổng TĐ1 – giá trị ký, trước VAT">${money(a)}</td><td class="num tp-sum-mo" title="Tổng TĐ2 – sau điều chỉnh, trước VAT">${money(b)}${tdDelta(b, a)}</td>`; })()}<td></td>
-        <td class="num">${money(c.hd_sau_vat)}</td><td class="num tp-sum-mo" title="Tổng giá trị HT/QT trước VAT">${money(c.qt_gia_tri)}</td>
-        <td class="num">${money(c.qt_sau_vat)}</td><td colspan="2"></td></tr></tfoot>
+      <tfoot><tr><td colspan="2">TỔNG</td>${(() => { const [a, b] = tpTdTong(c.lines); return `<td class="num tp-sum-mo" title="Tổng TĐ1 – giá trị ký, trước VAT">${dvm(a)}</td><td class="num tp-sum-mo" title="Tổng TĐ2 – sau điều chỉnh, trước VAT">${dvm(b)}${tdDelta(b, a)}</td>`; })()}<td></td>
+        <td class="num">${dvm(c.hd_sau_vat)}</td><td class="num tp-sum-mo" title="Tổng giá trị HT/QT trước VAT">${dvm(c.qt_gia_tri)}</td>
+        <td class="num">${dvm(c.qt_sau_vat)}</td><td colspan="2"></td></tr></tfoot>
     </table></div>
     ${editL ? `<div class="tv-tools"><button class="sm" data-addpl="${nextPl}">+ Thêm ${nextPl}</button>
       <span class="muted small">TĐ1 = giá trị ký · tăng / giảm sau ký: bấm <b>± Đợt</b> · ô HT/QT (TĐ3) để trống = chưa quyết toán (lấy bằng TĐ2)</span></div>` : ''}
@@ -2168,7 +2174,7 @@ function renderTpDlg() {
       <thead><tr><th>Nội dung</th><th>Ngày</th><th class="num">Số tiền</th><th>Ghi chú</th><th></th></tr></thead>
       <tbody>${c.pays.map((p) => payRow(p, false)).join('')}${tpDrafts.pays.map((p) => payRow(p, true)).join('')}
         ${!c.pays.length && !tpDrafts.pays.length ? '<tr><td colspan="5" class="empty">Chưa có thanh toán</td></tr>' : ''}</tbody>
-      <tfoot><tr><td colspan="2">TỔNG THANH TOÁN</td><td class="num">${money(c.da_tt)}</td><td colspan="2"></td></tr></tfoot>
+      <tfoot><tr><td colspan="2">TỔNG THANH TOÁN</td><td class="num">${dvm(c.da_tt)}</td><td colspan="2"></td></tr></tfoot>
     </table></div>
     ${edit ? `<div class="tv-tools">
       ${editP ? `<button class="sm" data-addpay="tam_ung">+ Tạm ứng</button>
@@ -2208,8 +2214,8 @@ function onTpDlgInput(e) {
     // cập nhật sau VAT ngay khi gõ
     const v = (f) => $(`[data-f="${f}"]`, tr)?.value ?? '';
     const dc = Number(tr.dataset.dc) || 0, g2 = String((Number(parseMoney(v('gia_tri'))) || 0) + dc); // TĐ2 = giá trị ký + các đợt
-    $('[data-calc="hd"]', tr).textContent = money(tpCalc(g2, v('vat')));
-    $('[data-calc="qt"]', tr).textContent = money(tpCalc(v('gia_tri_qt') || g2, v('vat')));
+    $('[data-calc="hd"]', tr).innerHTML = dvm(tpCalc(g2, v('vat')));
+    $('[data-calc="qt"]', tr).innerHTML = dvm(tpCalc(v('gia_tri_qt') || g2, v('vat')));
   }
 }
 
@@ -2914,13 +2920,13 @@ async function dyPanel() {
     const tong = rows.reduce((a, x) => a + (x.hanh_dong === 'Xóa' ? 0 : Number(x.so_tien) || 0), 0);
     const tg = (d) => new Date(d).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
     const mo = el.querySelector('details')?.open ?? true;
-    el.innerHTML = `<details ${mo ? 'open' : ''}><summary><span class="dy-p-ic">⏳</span> <b>${rows.length}</b> nội dung chờ duyệt${tong ? ` · ${money(tong)} đ` : ''}
+    el.innerHTML = `<details ${mo ? 'open' : ''}><summary><span class="dy-p-ic">⏳</span> <b>${rows.length}</b> nội dung chờ duyệt${tong ? ` · ${dvT(tong)}${dvKey('dong') === 'dong' ? ' đ' : ''}` : ''}
         <span class="dy-p-note">CHƯA tính vào tổng – chỉ ghi vào số liệu khi Quản trị / Lãnh đạo duyệt</span></summary>
       <div class="table-wrap"><table class="dy-p-table"><thead><tr><th>Thời gian</th><th>Người nhập</th><th>Thao tác</th><th>Nội dung</th><th class="num">Số tiền</th><th></th></tr></thead>
       <tbody>${rows.map((x) => `<tr><td class="muted small">${tg(x.at)}</td><td>${esc(x.ho_ten_nhap || x.nguoi_nhap)}</td>
         <td><span class="dy-hd dy-hd-${x.hanh_dong === 'Xóa' ? 'xoa' : x.hanh_dong === 'Thêm' ? 'them' : 'sua'}">${esc(x.hanh_dong)}</span></td>
         <td class="dy-nd">${String(x.noi_dung || '').split(' | ').map((d, i) => `<div class="${i ? 'dy-diff' : ''}">${esc(d)}</div>`).join('')}${x.loi ? `<div class="small dy-loi">⚠ ${esc(x.loi)}</div>` : ''}</td>
-        <td class="num">${x.so_tien == null ? '' : money(x.so_tien)}</td><td class="dy-btns">${dyNut(x)}</td></tr>`).join('')}</tbody></table></div></details>`;
+        <td class="num">${x.so_tien == null ? '' : dvm(x.so_tien)}</td><td class="dy-btns">${dyNut(x)}</td></tr>`).join('')}</tbody></table></div></details>`;
   }
 }
 window.addEventListener('bks-cho-duyet', (e) => { dyToast('⏳ ' + (e.detail?.thong_bao || 'Đã gửi duyệt')); DY.nhanLuc = 0; setTimeout(() => { dyPanel(); dyPoll(); }, 300); });
@@ -3153,7 +3159,7 @@ function renderDuTru() {
     </tr>`;
   }).join('') : `<tr><td colspan="7" class="empty">Chưa có dự trù. ${ok ? 'Chọn nhóm bên dưới rồi bấm <b>+ Dự trù</b>.' : ''}</td></tr>`;
   $('#dtr-tfoot').innerHTML = codes.length ? `<tr><td>TỔNG DỰ TRÙ</td><td class="num">${dvm(tot[0])}</td><td class="num">${dvm(tot[1])}${tdDelta(tot[1], tot[0])}</td><td class="num">${dvm(tot[2])}${tdDelta(tot[2], tot[1])}</td><td colspan="3"></td></tr>` : '';
-  $('#dtr-total').textContent = dvm(tot[1]);
+  $('#dtr-total').innerHTML = dvm(tot[1]);
   const tools = $('#dtr-tools');
   tools.innerHTML = ok ? `<label class="tv-hd-pick">Nhóm <select id="dtr-pick">${NHOM().map((n) => `<option value="${n.code}">${esc(n.ten)}</option>`).join('')}</select></label>
     <button type="button" class="sm" data-dtrnew>+ Dự trù</button>` : '';

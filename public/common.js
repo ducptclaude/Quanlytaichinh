@@ -130,9 +130,14 @@ function docSo(tok) {
   return am ? -so : so;
 }
 // Có phải công thức không: bắt đầu bằng "=" hoặc có phép tính giữa các số (1.000 + 2.000, 1000*10%, (100-20)/2 …)
-const laCongThuc = (s) => { const t = String(s ?? '').trim(); return t.startsWith('=') || /\d\s*[+*/x×÷:]\s*[\d(]/i.test(t) || /\d[\s ]*-[\s ]*[\d(]/.test(t) || /%/.test(t); };
+// Số kèm đơn vị: 1,5 tỷ · 180tr · 180 triệu · 500k · 500 nghìn (đổi ra đồng)
+const dvHeSo = (dv) => { const d = dv.toLowerCase(); return /^t[ỷỉyi]$/.test(d) ? 1e9 : /^(tri[ệe]u|tr)$/.test(d) ? 1e6 : 1e3; };
+const RE_DV_GO = /(\d[\d.,]*)\s*(t[ỷỉ]|ty\b|ti\b|tri[ệe]u|tr\b|ngh[ìi]n|ng[àa]n|k\b)/gi;
+const coDonVi = (t) => { RE_DV_GO.lastIndex = 0; return RE_DV_GO.test(String(t ?? '')); };
+const laCongThuc = (s) => { const t = String(s ?? '').trim(); return coDonVi(t) || t.startsWith('=') || /\d\s*[+*/x×÷:]\s*[\d(]/i.test(t) || /\d[\s ]*-[\s ]*[\d(]/.test(t) || /%/.test(t); };
 // Tính công thức (không dùng eval): + − × ÷, ngoặc, % (10% = 0,1); số theo kiểu Excel / Word ở trên. Lỗi -> NaN
 function tinhCongThuc(s) {
+  s = String(s ?? '').replace(RE_DV_GO, (m0, so, dv) => { return `(${so}*${dvHeSo(dv)})`; });
   let t = String(s ?? '').trim().replace(/^=/, '').replace(/[₫đ]|vn[dđ]|đồng|dong/gi, '')
     .replace(/(\d)[\s ]+(?=\d{3}\b)/g, '$1').replace(/[×xX]/g, '*').replace(/[÷:]/g, '/').replace(/[−–]/g, '-').replace(/\s+/g, '');
   const tk = t.match(/\d[\d.,]*|[-+*/()%]/g);
@@ -156,17 +161,29 @@ const parseMoney = (s) => {
   const t = String(s ?? '').trim();
   if (!t) return '';
   if (t === '-') return '-';
-  const v = laCongThuc(t) ? tinhCongThuc(t) : docSo(t.replace(/^-/, '')) * (t.startsWith('-') ? -1 : 1);
+  const v = laCongThuc(t) ? tinhCongThuc(t)
+    : /^-?\d[\d.]*$/.test(t) ? Number(t.replace(/\./g, '')) // chỉ chữ số + dấu chấm: dấu chấm = dấu nghìn (kiểu Việt Nam)
+      : docSo(t.replace(/^-/, '')) * (t.startsWith('-') ? -1 : 1);
   if (Number.isFinite(v)) return String(Math.round(v));
   if (laCongThuc(t)) return ''; // công thức sai: coi như chưa nhập -> báo lỗi, không lấy bừa số
   const neg = t.startsWith('-'); // dự phòng: chỉ lấy chữ số
   const digits = t.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
   return digits ? (neg ? '-' : '') + digits : (neg ? '-' : '');
 };
+const MAX_TIEN = 1e15; // giới hạn 1 triệu tỷ đồng (như máy chủ)
+function baoQuaLon(input, v) {
+  const qua = Number.isFinite(v) && Math.abs(v) > MAX_TIEN;
+  input.classList.toggle('cong-thuc-loi', qua);
+  if (qua) input.title = 'Số quá lớn – tối đa 1.000.000.000.000.000 đồng (1 triệu tỷ). Ô tiền luôn tính bằng ĐỒNG; có thể gõ 1,5 tỷ / 180tr / 500k';
+  return qua;
+}
+// Đang gõ dở số có dấu phẩy / chữ (1,5 tỷ · 180tr · công thức): giữ nguyên, rời ô / Enter mới quy ra số
+const dangGoDo = (v) => laCongThuc(v) || /[^\d.\s-]/.test(String(v ?? '').trim());
 function formatMoneyInput(input) {
-  if (laCongThuc(input.value)) { input.classList.add('cong-thuc'); return; } // đang gõ công thức: giữ nguyên, tính khi rời ô / Enter
+  if (dangGoDo(input.value)) { input.classList.add('cong-thuc'); return; } // đang gõ công thức: giữ nguyên, tính khi rời ô / Enter
   input.classList.remove('cong-thuc', 'cong-thuc-loi');
   const raw = parseMoney(input.value);
+  baoQuaLon(input, Number(raw));
   const fromEnd = input.value.length - (input.selectionStart ?? input.value.length);
   input.value = raw === '' || raw === '-' ? raw : moneyFmt.format(Number(raw));
   const pos = Math.max(0, input.value.length - fromEnd);
@@ -174,11 +191,12 @@ function formatMoneyInput(input) {
 }
 // Rời ô / Enter: tính công thức -> ghi kết quả (sai công thức: viền đỏ, giữ nguyên để sửa)
 function chotCongThuc(input) {
-  if (!laCongThuc(input.value)) return;
+  if (!dangGoDo(input.value)) return;
   const v = tinhCongThuc(input.value);
-  if (!Number.isFinite(v)) { input.classList.add('cong-thuc-loi'); input.title = 'Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000'; return; }
+  if (!Number.isFinite(v)) { input.classList.add('cong-thuc-loi'); input.title = 'Công thức không hợp lệ – VD: =1.250.000*12, 2.500.000+350.000, 1,5 tỷ, 180tr'; return; }
   input.classList.remove('cong-thuc', 'cong-thuc-loi'); input.title = '';
   input.value = moneyFmt.format(Math.round(v));
+  baoQuaLon(input, v);
   input.dispatchEvent(new Event('input', { bubbles: true })); // cập nhật số sau VAT, nút Lưu…
 }
 function attachMoneyInput(input) {
@@ -186,7 +204,7 @@ function attachMoneyInput(input) {
   input.dataset.money = '1';
   input.setAttribute('inputmode', 'text'); // cho gõ được + − × ÷ = ( )
   input.setAttribute('autocomplete', 'off');
-  if (!input.title) input.title = 'Gõ số, dán từ Excel / Word, hoặc gõ công thức (VD: =1.250.000*12, 2.500.000+350.000, =1000000*10%)';
+  if (!input.title) input.title = 'Đơn vị: ĐỒNG. Gõ số, dán từ Excel / Word, gõ theo đơn vị (1,5 tỷ · 180tr · 500k) hoặc công thức (=1.250.000*12, =1000000*10%)';
   input.addEventListener('input', () => formatMoneyInput(input));
   input.addEventListener('blur', () => chotCongThuc(input));
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') chotCongThuc(input); });

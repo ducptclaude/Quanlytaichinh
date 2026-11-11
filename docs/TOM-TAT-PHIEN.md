@@ -2,6 +2,15 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.11.11.26 – SỬA LỖI LỚN ô nhập tiền (gõ quá 4 chữ số bị cắt số) + đơn vị hiển thị trong hộp chi tiết
+- Lỗi (từ V21.10.11.26): gõ từng phím, ô đang "5.000" gõ thêm 0 thành "5.0000" -> bị đọc là số thập phân 5,0 -> còn 5. Mọi ô tiền gõ tay > 4 chữ số bị cắt
+  (dán số / gõ công thức không bị). Sửa `parseMoney`: chỉ có chữ số + dấu chấm thì dấu chấm luôn là dấu nghìn.
+- Gõ theo đơn vị: 1,5 tỷ · 180tr · 180 triệu · 500k · 2 tỷ + 300tr (đổi ra đồng khi rời ô). Ô có chữ / dấu phẩy giữ nguyên lúc đang gõ.
+- Số > 1 triệu tỷ: viền đỏ + ghi chú ngay khi gõ (máy chủ vẫn chặn như cũ).
+- Hộp chi tiết HĐ đầu vào: số (không phải ô nhập) theo đơn vị đang chọn; đổi đơn vị -> vẽ lại cả hộp đang mở (HĐ đầu vào, đợt điều chỉnh, quyết toán, dự trù).
+- Khung Dự trù: tổng TĐ2 hiện mã thay vì số -> sửa. Bảng chờ duyệt trong Doanh thu / Chi phí theo đơn vị.
+- Kiểm tra: gõ từng phím vào mọi ô tiền (36/36), quét 5 trang × 5 đơn vị + 3 hộp chi tiết (0 lỗi hiển thị, 0 lỗi trang).
+
 ## V02.11.11.26 – Chốt quyết toán HĐ CĐT: đủ số mới chốt, chốt rồi khoá toàn bộ HĐ
 - Chốt (đánh dấu ở hộp Quyết toán): HĐ hoặc bất kỳ PL nào chưa có số quyết toán -> KHÔNG chốt, thông báo rõ văn bản thiếu (ô thiếu viền đỏ).
   Chưa chốt vẫn lưu được số quyết toán từng phần (văn bản trống tạm lấy TĐ2).
