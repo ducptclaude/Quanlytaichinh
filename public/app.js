@@ -2039,7 +2039,7 @@ function costKpiTd() {
   lab.textContent = `Tổng chi phí TĐ${k} · sau VAT`;
   t.textContent = dvT(a.tong);
   const tong = costData.tong;
-  $('#c-k-sub').innerHTML = `${b ? ss(a.tong, b.tong) + '<br>' : ''}HĐ đầu vào ${dvT(a.hd)} · chi phí đã ghi ${dvT(a.ghi)}${a.goi ? ` · gói / dự trù ${dvT(a.goi)}` : ''}` +
+  $('#c-k-sub').innerHTML = `${b ? ss(a.tong, b.tong) + '<br>' : ''}HĐ đầu vào ${dvT(a.hd)} · chi phí đã ghi ${dvT(a.ghi)}${a.goi ? ` · dự trù ${dvT(a.goi)}` : ''}` +
     (tong.ngoai_cp?.so_dong ? `<br>Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}` : '') +
     (tong.vay?.so_dong ? `<br>Không gồm tiền vay nhận về (tiền vào): ${dvT(tong.vay.sau_vat)}` : '');
 }
@@ -2346,14 +2346,14 @@ function renderTpCard() {
       <td colspan="2" class="muted small">${g.k ? '' : 'Mở chi tiết HĐ để gắn'}</td>
     </tr>` + (open ? tpLoaiRows(g, n) : '');
   }).join('') + leHtml : goiHtml + leHtml || `<tr><td colspan="9" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
-  $('#tp-tfoot').innerHTML = `<tr><td></td><td colspan="2">${filtered ? `TỔNG ĐANG LỌC (${T.so_hd}/${tatCa.length} HĐ)` : listHd.length !== list.length ? `TỔNG HĐ NGOÀI GÓI (${T.so_hd} HĐ)` : `TỔNG HĐ ĐẦU VÀO (${T.so_hd} HĐ)`}</td>
+  $('#tp-tfoot').innerHTML = `<tr><td></td><td colspan="2">${filtered ? `TỔNG ĐANG LỌC (${T.so_hd}/${tatCa.length} HĐ)` : listHd.length !== list.length ? `TỔNG HĐ ĐẦU VÀO <span class="muted small">(không thuộc gói · ${T.so_hd} HĐ)</span>` : `TỔNG HĐ ĐẦU VÀO (${T.so_hd} HĐ)`}</td>
     ${c45(listHd, T.qt_sau_vat)}<td class="num c-tt">${mtr(T.da_tt)}</td>
     <td class="num ${T.con_lai < 0 ? 'neg' : ''} c-tt">${mtr(T.con_lai)}</td><td colspan="2"></td></tr>` + (leTot ? `<tr class="tp-grand"><td></td><td colspan="2">TỔNG GỒM MUA LẺ <span class="muted small">(khớp bảng chi phí bên dưới)</span></td>
     <td class="num">${mtr(tdSum(listHd, kTd) + leTot)}</td>${kTd === 1 ? `<td class="num muted">${pc1(tdSum(listHd, 1) + leTot)}</td>` : ssCell(tdSum(listHd, kTd), tdSum(listHd, kTd - 1))}<td class="num c-tt">${mtr(T.da_tt + leTot)}</td>
     <td class="num ${T.con_lai < 0 ? 'neg' : ''} c-tt">${mtr(T.con_lai)}</td><td colspan="2"></td></tr>` : '')
-    + (gCodes.length ? `<tr class="tp-goi-tong"><td></td><td colspan="2">TỔNG GÓI CHI PHÍ <span class="muted small">(dự trù – tạm tính)</span></td>
+    + (gCodes.length ? `<tr class="tp-goi-tong"><td></td><td colspan="2">${kTd === 1 ? 'TỔNG DỰ TRÙ <span class="muted small">(gói chi phí – tạm tính)</span>' : 'TỔNG GÓI CHI PHÍ <span class="muted small">(dự trù + HĐ đầu vào đã gắn)</span>'}</td>
     <td class="num">${mtr(gSum(kTd))}</td>${cell2(gSum(kTd), kTd > 1 ? gSum(kTd - 1) : 0)}<td class="num c-tt">${mtr(gTT)}</td><td class="num c-tt">${mtr(gCL)}</td><td colspan="2"></td></tr>
-    <tr class="tp-grand"><td></td><td colspan="2">TỔNG CỘNG TĐ${kTd} <span class="muted small">(HĐ + gói${leTot ? ' + mua lẻ' : ''})</span></td>
+    <tr class="tp-grand"><td></td><td colspan="2">TỔNG CHI PHÍ TĐ${kTd} <span class="muted small">(HĐ đầu vào + ${kTd === 1 ? 'dự trù' : 'gói chi phí'}${leTot ? ' + mua lẻ' : ''})</span></td>
     <td class="num">${mtr(tdSum(listHd, kTd) + leTot + gSum(kTd))}</td>${cell2(tdSum(listHd, kTd) + gSum(kTd), kTd > 1 ? tdSum(listHd, kTd - 1) + gSum(kTd - 1) : 0)}
     <td class="num c-tt">${mtr(T.da_tt + gTT + leTot)}</td><td class="num c-tt">${mtr(T.con_lai + gCL)}</td><td colspan="2"></td></tr>` : '');
   if (kTd === 1) $$('#tp-tbody td.c-tt, #tp-tfoot td.c-tt').forEach((td) => { td.innerHTML = '<span class="muted" title="Thanh toán phát sinh từ TĐ2 – xem ở tab TĐ2 / TĐ3">—</span>'; });

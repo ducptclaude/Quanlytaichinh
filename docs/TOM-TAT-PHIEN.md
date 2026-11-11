@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V27.11.11.26 – Dòng tổng bảng Chi phí dùng từ như Báo cáo
+- "TỔNG HĐ NGOÀI GÓI" → "TỔNG HĐ ĐẦU VÀO (không thuộc gói · n HĐ)"; TĐ1 "TỔNG DỰ TRÙ (gói chi phí – tạm tính)", TĐ2/3 "TỔNG GÓI CHI PHÍ (dự trù + HĐ đầu vào đã gắn)"; "TỔNG CỘNG TĐk" → "TỔNG CHI PHÍ TĐk (HĐ đầu vào + dự trù / gói chi phí)"; thẻ tổng "gói / dự trù" → "dự trù". Số không đổi. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V26.11.11.26 – Gói chi phí thu gọn được các HĐ, không lặp danh sách đối tác
 - Mỗi gói đã gắn HĐ có nút ▸/▾ riêng; mặc định thu gọn (gọn bảng). Thu gọn: cột Đối tác ghi danh sách đối tác; mở ra: ghi "n HĐ – xem từng dòng bên dưới" (không lặp). Nút "Mở / Thu gọn tất cả" gồm cả các gói. Tester 4.518 ĐẠT, 0 LỖI.
 
