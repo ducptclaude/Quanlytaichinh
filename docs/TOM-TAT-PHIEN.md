@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V32.11.11.26 – Bảng HĐ đầu vào (trang Chi phí) thiết kế lại gọn 3 tầng
+- Tầng: HĐ CĐT → Loại (Thầu phụ / Vật tư / Nhân công / MMTB / nhóm khác) → Gói hoặc HĐ ngoài gói; HĐ đã gắn gói nằm dưới gói (thu gọn mặc định, chỉ mở HĐ CĐT + Loại).
+- Cột: # · Hạng mục / HĐ · Đối tác · TĐ trước (ẩn ở TĐ1) · TĐ đang chọn · ± (TĐ1: tỷ trọng) · Đã TT · Còn lại · nút. Bỏ cột Hạng mục / ghi chú (rê chuột vào số HĐ để xem), bỏ chữ lặp ("Không phụ lục", "so giá trị ký"…); "+n PL" chỉ khi có PL; HĐ trong gói cột TĐ1 ghi "ký …".
+- Gói Tạm tính tô vàng nhạt. Nút ở dòng Loại: Sửa gói (TĐ1) / ± Nhóm (TĐ2) / QT nhóm (TĐ3). Ô chọn HĐ CĐT của gói chuyển vào hộp gói (lưu ngay khi chọn).
+- Dòng tổng còn 1: TỔNG CHI PHÍ TĐk + diễn giải (HĐ ngoài gói · gói chi phí · mua lẻ).
+- Điện thoại: ẩn cột # và Đối tác (đối tác ghi dưới tên), cột Hạng mục / HĐ ghim bên trái, các cột số cuộn ngang.
+- Kiểm tra: dòng tổng = tổng các HĐ CĐT ở 13 dự án × 3 TĐ (39/39); dự án thử 1.450 / 1.500 / 1.500 = Báo cáo; 1366px không cuộn ngang; tester 4.518 ĐẠT, 0 LỖI.
+
 ## V31.11.11.26 – Doanh thu TĐ2: nhấp đúp Số HĐ / PL → chọn ở form điều chỉnh
 - Tab TĐ2 trang Doanh thu: nhấp đúp số HĐ / PL trong bảng 1 → form "TĐ2 – Điều chỉnh" phía trên chọn đúng văn bản đó, cuộn tới, đặt con trỏ ở ô Số tiền, khung nháy sáng. Văn bản đã chốt QT → báo không điều chỉnh được. TĐ1 giữ như cũ (điền sẵn PL kế tiếp). Tester 4.518 ĐẠT, 0 LỖI.
 

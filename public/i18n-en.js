@@ -1,6 +1,19 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Hạng mục / Hợp đồng": "Item / Contract",
+"TĐ trước": "Previous",
+"Sửa gói": "Edit packages",
+"± Nhóm": "± Group",
+"QT nhóm": "Group final",
+"Gắn HĐ CĐT: bấm Sửa gói": "Link employer contract: click Edit packages",
+"Phát sinh": "Additional",
+"chưa có gói / HĐ": "no packages / contracts",
+"Điều chỉnh cả nhóm (nhiều đợt)": "Adjust the whole group (multiple rounds)",
+"Thêm / sửa / xóa gói của nhóm": "Add / edit / delete the group's packages",
+"Quyết toán cả nhóm": "Group final account",
+"Gói thuộc HĐ chủ đầu tư nào": "Employer contract of this package",
+"ký": "signed",
 "Văn bản này đã chốt quyết toán – không điều chỉnh được": "This document has a settled final account – it cannot be adjusted",
 "Chọn HĐ CĐT cho gói ở cột bên phải": "Choose the employer contract for each package in the right column",
 "Gói thuộc HĐ chủ đầu tư nào – chọn để chuyển": "Employer contract of this package – choose to move",
@@ -1523,6 +1536,38 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"{} gói · {} HĐ",
+"{} packages · {} contracts"
+],
+[
+"{} gói",
+"{} packages"
+],
+[
+"HĐ đầu vào ngoài gói {} · gói chi phí {}",
+"Procurement contracts outside packages {} · cost packages {}"
+],
+[
+"HĐ đầu vào ngoài gói {} · gói chi phí {} · mua lẻ {}",
+"Procurement contracts outside packages {} · cost packages {} · retail purchases {}"
+],
+[
+"HĐ đầu vào ngoài gói {} · dự trù (gói) {}",
+"Procurement contracts outside packages {} · budget (packages) {}"
+],
+[
+"HĐ đầu vào ngoài gói {} · dự trù (gói) {} · mua lẻ {}",
+"Procurement contracts outside packages {} · budget (packages) {} · retail purchases {}"
+],
+[
+"+{} PL",
+"+{} addenda"
+],
+[
+"({}/{} HĐ ngoài gói)",
+"({}/{} contracts outside packages)"
+],
 [
 "Nhấp đúp để chọn {} {} ở form điều chỉnh TĐ2 phía trên",
 "Double-click to select {} {} in the M2 adjustment form above"
