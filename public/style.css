@@ -3463,3 +3463,6 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 
 #tp-dc-form { margin: 4px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: color-mix(in srgb, #2a5bd7 4%, var(--bg-ffffff)); }
 #tp-dc-form .dc-tieu-de { grid-column: 1 / -1; }
+
+.tp-dot-ds td.pos { color: var(--ok, #16a34a); font-weight: 600; }
+.tp-dot-ds td.neg { font-weight: 600; }

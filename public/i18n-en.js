@@ -1,6 +1,12 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Các đợt điều chỉnh TĐ2": "M2 adjustment rounds",
+"Chưa có đợt điều chỉnh – TĐ2 = TĐ1": "No adjustments yet – M2 = M1",
+"TỔNG ĐIỀU CHỈNH": "TOTAL ADJUSTMENTS",
+"TĐ2 lũy kế": "M2 cumulative",
+"Tăng (+) / giảm (−)": "Increase (+) / decrease (−)",
+"Sửa / thêm": "Edit / add",
 "TĐ2 – Điều chỉnh HĐ đầu vào": "M2 – Procurement contract adjustment",
 "nhập nhiều lần, mỗi lần 1 đợt (thầu phụ, vật tư, nhân công, MMTB)": "enter as many times as needed, one round each (subcontract, materials, labour, machinery)",
 "Văn bản (HĐ / PL đầu vào) *": "Document (procurement contract / addendum) *",

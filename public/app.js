@@ -2577,6 +2577,21 @@ function renderTpDlg() {
     ${editL && tdDangChon() === 1 && !(c.lines.length && c.lines.every((l) => nnV(l.gia_tri_qt) !== null)) ? `<div class="tv-tools"><button class="sm" data-addpl="${nextPl}">+ Thêm ${nextPl}</button>
       <span class="muted small">TĐ1 = giá trị ký · tăng / giảm sau ký: bấm <b>± Đợt</b> · ô HT/QT (TĐ3) để trống = chưa quyết toán (lấy bằng TĐ2)</span></div>` : ''}
 
+    ${tdDangChon() > 1 ? (() => { // Danh sách các đợt điều chỉnh TĐ2 (theo dõi) – từ TĐ2 trở đi
+      const ds = c.lines.filter((l) => (l.dot || []).length);
+      const tong = ds.reduce((a, l) => a + l.dot.reduce((b, d) => b + (Number(d.so_tien) || 0), 0), 0);
+      const okDc = (l) => editL && tdDangChon() === 2 && nnV(l.gia_tri_qt) === null;
+      const rows = ds.map((l) => { let lk = Number(l.gia_tri_ky ?? l.gia_tri) || 0; return l.dot.map((d, k) => { const v = Number(d.so_tien) || 0; lk += v;
+        return `<tr><td>${k ? '' : `<span class="kind-tag ${l.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${l.ma_loai}</span>`}</td><td><b>Đợt ${k + 1}</b></td><td>${esc(isoToDmy(d.ngay) || '')}</td><td>${esc(d.noi_dung || '')}</td>
+          <td class="num ${v < 0 ? 'neg' : 'pos'}">${v > 0 ? '▲ +' : '▼ −'}${dvm(Math.abs(v))}</td><td class="num">${d.vat ?? l.vat ?? 0}%</td><td class="num strong">${dvm(lk)}</td>
+          <td class="row-actions">${k === l.dot.length - 1 && okDc(l) ? `<button type="button" class="sm" data-tpdot="${l.id}">Sửa / thêm</button>` : ''}</td></tr>`; }).join(''); }).join('');
+      return `<h4 class="tp-sep">Các đợt điều chỉnh TĐ2 <span class="muted small">(${ds.reduce((a, l) => a + l.dot.length, 0)} đợt)</span></h4>
+    <div class="table-wrap"><table class="tp-dtl tp-dot-ds">
+      <thead><tr><th>HĐ/PL</th><th>Đợt</th><th>Ngày</th><th>Nội dung</th><th class="num">Tăng (+) / giảm (−)<br><span class="muted small">trước VAT</span></th><th class="num">VAT</th><th class="num">TĐ2 lũy kế<br><span class="muted small">trước VAT</span></th><th></th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="8" class="empty">Chưa có đợt điều chỉnh – TĐ2 = TĐ1</td></tr>'}</tbody>
+      ${ds.length ? `<tfoot><tr><td colspan="4">TỔNG ĐIỀU CHỈNH</td><td class="num ${tong < 0 ? 'neg' : ''}">${tong > 0 ? '+' : ''}${dvm(tong)}</td><td></td><td class="num">${dvm(tpTdTong(c.lines)[1])}</td><td></td></tr></tfoot>` : ''}
+    </table></div>`; })() : ''}
+
     <h4 class="tp-sep">Giá trị thanh toán</h4>
     <div class="table-wrap"><table class="tp-dtl">
       <thead><tr><th>Nội dung</th><th>Ngày</th><th class="num">Số tiền</th><th>Ghi chú</th><th></th></tr></thead>

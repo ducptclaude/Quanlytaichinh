@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V22.11.11.26 – Ghi rõ các đợt điều chỉnh TĐ2 trong chi tiết HĐ đầu vào
+- Khung chi tiết HĐ (tab TĐ2 / TĐ3) thêm bảng **"Các đợt điều chỉnh TĐ2"**: HĐ/PL · Đợt · Ngày · Nội dung · ± (▲▼) · VAT · TĐ2 lũy kế sau từng đợt · dòng Tổng điều chỉnh; nút "Sửa / thêm" (TĐ2) mở danh sách đợt. TĐ1 không hiện. Số liệu không đổi.
+- Kiểm tra: HĐTP-01 350 → +50 (400) → −20 (380), tổng +30; tester 4.518 ĐẠT, 0 LỖI; điện thoại không tràn ngang.
+
 ## V21.11.11.26 – Vật tư / Nhân công / MMTB vào gói như Thầu phụ + form điều chỉnh TĐ2 nhập nhiều lần cho HĐ đầu vào
 - Lỗi: TĐ2 ép Vật tư / Nhân công / MMTB thành "dòng mua lẻ" (ẩn Hình thức) -> không tạo được HĐ gắn gói. Sửa (`fillHinhThuc`, `setCostMode`):
   TĐ1: 1 ô "Cách nhập" 3 lựa chọn (Gói · HĐ đã có nhà cung cấp · Dòng mua lẻ), ẩn ô Hình thức; TĐ2: Hình thức HĐ (ô Gói) / Dòng chi phí, nhóm còn gói tạm tính -> mặc định HĐ; TĐ3: chỉ mua lẻ.
