@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Các đợt": "Adjustments",
+"Điều chỉnh (sau VAT)": "Adjustment (after VAT)",
+"theo HĐ / PL": "per contract / addendum",
 "Văn bản (HĐ / PL) *": "Document (contract / addendum) *",
 "Cách nhập": "Entry type",
 "Số tiền tăng (+) / giảm (−) *": "Increase (+) / decrease (−) amount *",

@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V14.11.11.26 – Form TĐ2 cân 5 cột + ô VAT; VAT riêng cho từng đợt điều chỉnh
+- Form TĐ2: Văn bản · Cách nhập · Số tiền · VAT (%) / Điều chỉnh (sau VAT) · Ngày · Nội dung · nút. VAT tự điền theo HĐ / PL, sửa được;
+  ghi chú "VAT x% (theo PL..)" hoặc "khác VAT của PL..". Hộp các đợt có thêm cột VAT %.
+- Kho dữ liệu (chỉ THÊM): `dieu_chinh.vat` (trống = VAT của văn bản). Tiền VAT tại TĐ2: không đợt nào VAT riêng -> như cũ (số cũ không đổi);
+  có đợt VAT riêng -> cộng tiền VAT theo từng mức (`tienVatTd2` ở lib/revenue.js; báo cáo dùng `sv2Of`). Bảng / thẻ Sau VAT TĐ2 lấy số máy chủ.
+
 ## V13.11.11.26 – Doanh thu: 3 thẻ trên cùng chạy theo TĐ đang chọn
 - Thẻ HĐ/PL: "HĐ/PL sau VAT · TĐk …" = giá trị tại TĐk (khớp dòng TỔNG của bảng) + ▲▼ so TĐ trước.
 - Thẻ HT/QT và Tiền về (số thực tế, không chia theo TĐ): thêm "đạt x% HĐ TĐk"; tiền về thêm "còn phải thu" = HĐ TĐk − tiền về.

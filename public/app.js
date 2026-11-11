@@ -413,11 +413,13 @@ function buildRevenueSections() {
         <label class="span-2">Văn bản (HĐ / PL) *<select name="vb_id"></select></label>
         <label>Cách nhập<select name="kieu"><option value="dc">Tăng / giảm (±)</option><option value="chot">Chốt giá trị mới</option></select></label>
         <label><span class="dc-so-lab">Số tiền tăng (+) / giảm (−) *</span><input name="so_tien" class="money" placeholder="VD: +50tr hoặc -30.000.000"><span class="calc-note dc-preview"></span></label>
+        <label>VAT (%)<input name="vat" type="number" min="0" max="100" step="1" placeholder="theo HĐ / PL"></label>
+        <label>Điều chỉnh (sau VAT)<output class="calc" name="sau_vat">0</output><span class="calc-note dc-vat-note"></span></label>
         <label>Ngày<input name="ngay" class="date-dmy"></label>
         <label class="span-2">Nội dung<input name="noi_dung" maxlength="300" placeholder="VD: Phát sinh tăng khối lượng móng"></label>
         <div class="actions">
           <button type="submit" class="primary">Ghi điều chỉnh</button>
-          <button type="button" class="dc-form-xem" title="Xem / sửa / xóa các đợt đã nhập của văn bản này">Xem các đợt</button>
+          <button type="button" class="dc-form-xem" title="Xem / sửa / xóa các đợt đã nhập của văn bản này">Các đợt</button>
         </div>
       </form>` : ''}
       ${can('hd') ? `
@@ -719,7 +721,7 @@ function renderRevenue() {
   const hd = tong.hd, qt = tong.qt;
   // 3 thẻ trên cùng chạy theo TĐ đang chọn: HĐ/PL sau VAT tại TĐk (± so TĐ trước); HT/QT, tiền về (số thực tế) so với HĐ tại TĐk
   const kT = tdDangChon(), hdR = items.filter((r) => r.loai === 'hd');
-  const svK = (k) => hdR.reduce((a, r) => { const x = vbTd(r); return a + svTd([x.t1, x.t2, x.t3][k - 1], r.vat); }, 0);
+  const svK = (k) => hdR.reduce((a, r) => a + svVb(r, k), 0);
   const hdK = svK(kT), hdTruoc = kT > 1 ? svK(kT - 1) : null;
   const pctK = (v) => (hdK ? `${((v / hdK) * 100).toFixed(1).replace('.', ',')}%` : '—');
   $('#r-k-hd-lab').textContent = `HĐ/PL sau VAT · TĐ${kT} ${TD_TEN_NL[kT]}`;
@@ -751,7 +753,7 @@ function renderRevenue() {
       <tr>
         <td></td><td colspan="2">TỔNG ${REV_LABEL[loai].short}${t.tam_tinh ? ' <span class="st st-tam-tinh" title="Có HĐ chưa quyết toán">Có tạm tính</span>' : ''}</td>
         <td class="num td-col-on">${dvm(tk[k - 1])}</td>${k > 1 ? tdSoSanh(tk[k - 1], tk[k - 2]) : ''}<td></td>
-        <td class="num">${dvm(rows.reduce((a2, r) => { const x = vbTd(r); return a2 + svTd([x.t1, x.t2, x.t3][k - 1], r.vat); }, 0))}<div class="td-note">tại TĐ${k}</div></td>
+        <td class="num">${dvm(rows.reduce((a2, r) => a2 + svVb(r, k), 0))}<div class="td-note">tại TĐ${k}</div></td>
         <td colspan="${canRv('hd') ? 3 : 2}"></td>
       </tr>`;
       $$('input.qt-in', card).forEach(attachMoneyInput);
@@ -871,6 +873,7 @@ const tdDeltaG = (v, truoc, f = dvm) => { const d = Math.round(v - truoc); retur
 const tdDelta = (v, truoc) => tdDeltaG(v, truoc);
 // Giá trị sau VAT của 1 số trước VAT (cùng cách làm tròn VAT của hệ thống)
 const svTd = (gt, vat) => (Number(gt) || 0) + calcVat(Number(gt) || 0, Number(vat) || 0);
+const svVb = (r, k) => { const x = vbTd(r); return k === 1 ? svTd(x.t1, r.vat) : k === 3 && x.coQt ? svTd(x.t3, r.vat) : Number(r.sau_vat) || 0; };
 // Bảng nhập liệu: chỉ hiện cột TĐ đang chọn + cột "So với TĐ trước" (TĐ1: không có cột so sánh)
 const TD_TEN_NL = { 1: 'Ký', 2: 'Điều chỉnh', 3: 'Quyết toán' };
 const tdSoCot = () => (tdDangChon() === 1 ? 1 : 2);
@@ -903,7 +906,7 @@ function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null }
         ? `<input class="money num qt-in" data-qtin="${r.id}" placeholder="${dvNum(x.t2, 'dong')}" title="Nhập số quyết toán (đồng, trước VAT). Lưu xong văn bản bị khoá">`
         : `${x.coQt ? '🔒 ' : ''}${dvm(t3)}`}${thieu ? '<div class="td-note warn-text" title="Đã đóng quyết toán nhưng văn bản này chưa có số quyết toán – tạm lấy TĐ2">⚠ chưa có số QT</div>' : ''}</td>${tdSoSanh(t3, x.t2)}`}
       <td class="num">${vatBadge(r.vat)}</td>
-      <td class="num strong" title="Sau VAT tại TĐ${md}">${dvm(svTd([x.t1, x.t2, t3][md - 1], r.vat))}</td>
+      <td class="num strong" title="Sau VAT tại TĐ${md}">${dvm(md === 3 && g && !g.pls.length && !x.coQt && t3 !== x.t2 ? svTd(t3, r.vat) : svVb(r, md))}</td>
       <td class="wrap">${esc(r.ghi_chu)}</td>
       <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
       ${canRv('hd') ? `<td class="row-actions">${khoa
@@ -3094,7 +3097,7 @@ function dcVanBan() {
   if (!dcCur) return null;
   if (dcCur.loai === 'dt') {
     const r = revData.items.find((x) => x.id === dcCur.id);
-    return r && { ten: `${r.ma_loai} ${r.so_ma || r.so_hieu}`, sub: 'Doanh thu · HĐ chủ đầu tư' + (hdKhoa(r) ? ' · 🔒 đã chốt quyết toán' : ''), t1: Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2: Number(r.gia_tri) || 0, dot: r.dot || [], ok: canRv('hd') && !hdKhoa(r) && !vbTd(r).coQt };
+    return r && { vat: Number(r.vat) || 0, coVat: true, ten: `${r.ma_loai} ${r.so_ma || r.so_hieu}`, sub: 'Doanh thu · HĐ chủ đầu tư' + (hdKhoa(r) ? ' · 🔒 đã chốt quyết toán' : ''), t1: Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2: Number(r.gia_tri) || 0, dot: r.dot || [], ok: canRv('hd') && !hdKhoa(r) && !vbTd(r).coQt };
   }
   for (const c of costData.thau_phu || []) {
     const l = c.lines.find((x) => x.id === dcCur.id);
@@ -3132,6 +3135,7 @@ function renderDc() {
       <td>${inp('ngay', d ? isoToDmy(d.ngay) : '', 'class="date-dmy"')}</td>
       <td>${inp('noi_dung', d ? d.noi_dung : '', 'maxlength="500" placeholder="VD: Phát sinh tăng khối lượng móng"')}</td>
       <td>${inp('so_tien', d ? money(d.so_tien) : '', 'class="money num" placeholder="+ tăng · − giảm (số âm)"')}</td>
+      ${v.coVat ? `<td>${inp('vat', d ? (d.vat ?? v.vat) : v.vat, 'type="number" min="0" max="100" step="1" class="vat-in"')}</td>` : ''}
       <td class="row-actions">${ok ? `<button class="${d ? '' : 'primary '}sm" data-save title="${d ? 'Sửa ngày / nội dung / số tiền rồi bấm Lưu' : ''}">${d ? 'Lưu' : 'Thêm đợt'}</button>${d ? '<button class="danger sm" data-del>Xóa</button>' : ''}` : ''}</td>
     </tr>`;
   let lk = v.t1;
@@ -3146,9 +3150,9 @@ function renderDc() {
       <div class="kpi"><div class="label">TĐ2 · Sau điều chỉnh</div><div class="value">${dvm(v.t2)}</div><div class="sub">= TĐ1 + các đợt</div></div>
     </div>
     <div class="table-wrap"><table class="tp-dtl">
-      <thead><tr><th>Đợt</th><th>Ngày</th><th>Nội dung</th><th class="num">Số tiền tăng (+) / giảm (−) <br><span class="muted small">trước VAT</span></th><th></th></tr></thead>
-      <tbody>${v.dot.map((d, k) => row(d, k)).join('')}${ok ? row(null) : ''}${!v.dot.length && !ok ? '<tr><td colspan="5" class="empty">Chưa có đợt điều chỉnh</td></tr>' : ''}</tbody>
-      <tfoot><tr><td colspan="3">TĐ2 lũy kế: ${[`TĐ1 ${dvm(v.t1)}`, ...v.dot.map((d, k) => { lk += Number(d.so_tien) || 0; return `Đợt ${k + 1} → ${dvm(lk)}`; })].join(' · ')}</td><td class="num">${dvm(v.t2)}</td><td></td></tr></tfoot>
+      <thead><tr><th>Đợt</th><th>Ngày</th><th>Nội dung</th><th class="num">Số tiền tăng (+) / giảm (−) <br><span class="muted small">trước VAT</span></th>${v.coVat ? '<th>VAT %</th>' : ''}<th></th></tr></thead>
+      <tbody>${v.dot.map((d, k) => row(d, k)).join('')}${ok ? row(null) : ''}${!v.dot.length && !ok ? `<tr><td colspan="${v.coVat ? 6 : 5}" class="empty">Chưa có đợt điều chỉnh</td></tr>` : ''}</tbody>
+      <tfoot><tr><td colspan="3">TĐ2 lũy kế: ${[`TĐ1 ${dvm(v.t1)}`, ...v.dot.map((d, k) => { lk += Number(d.so_tien) || 0; return `Đợt ${k + 1} → ${dvm(lk)}`; })].join(' · ')}</td><td class="num">${dvm(v.t2)}</td>${v.coVat ? '<td></td>' : ''}<td></td></tr></tfoot>
     </table></div>
     ${ok && v.dot.length ? '<p class="dc-hint">Sửa đợt đã nhập: sửa trực tiếp ngày, nội dung, số tiền rồi bấm <b>Lưu</b> · bấm <b>Xóa</b> để bỏ đợt</p>' : ''}
     <div class="msg" id="dc-msg" role="alert"></div>`;
@@ -3179,7 +3183,8 @@ async function onDcClick(e) {
         if (!Number(so_tien)) return showMsg(msg(), 'Giá trị chốt bằng TĐ2 hiện tại – không có thay đổi', 'err');
       }
       if (!Number(so_tien)) return showMsg(msg(), 'Nhập số tiền tăng (+) hoặc giảm (số âm)', 'err');
-      const body = { loai: dcCur.loai, vb_id: dcCur.id, ngay, noi_dung, so_tien };
+      const vb0 = dcVanBan(), vt = String(v('vat') ?? '').trim();
+      const body = { loai: dcCur.loai, vb_id: dcCur.id, ngay, noi_dung, so_tien, ...(vb0?.coVat ? { vat: vt === '' || Number(vt) === vb0.vat ? null : vt } : {}) };
       await api(k === 'new' ? '/api/dieu-chinh' : `/api/dieu-chinh/${k}`, { method: k === 'new' ? 'POST' : 'PUT', body: JSON.stringify(body) });
       await dcReload(); showMsg(msg(), k === 'new' ? 'Đã thêm đợt điều chỉnh' : 'Đã lưu đợt điều chỉnh');
     }
@@ -3411,11 +3416,25 @@ function renderDcForm(rows) {
   df.elements.vb_id.innerHTML = ds.length ? ds.map((r) => `<option value="${r.id}">${esc(r.ma_loai === 'HĐ' ? 'HĐ' : '\u00a0\u00a0\u00a0└ ' + r.ma_loai)} ${esc(r.so_ma || r.so_hieu)} — TĐ2 hiện tại ${money(r.gia_tri)} đ</option>`).join('')
     : '<option value="">(không có văn bản nào nhập được – đã khoá hết)</option>';
   if (ds.some((r) => String(r.id) === keep)) df.elements.vb_id.value = keep;
+  dcFormVat();
   dcFormPreview();
+}
+// VAT mặc định = VAT của văn bản đang chọn (đổi văn bản -> điền lại)
+function dcFormVat() {
+  const df = $('#dc-form'); if (!df) return;
+  const r = revData.items.find((x) => x.id === Number(df.elements.vb_id.value));
+  if (r && df.dataset.vatVb !== String(r.id)) { df.elements.vat.value = r.vat ?? ''; df.dataset.vatVb = String(r.id); }
 }
 function dcFormPreview() {
   const df = $('#dc-form'); if (!df) return;
+  dcFormVat();
   const r = revData.items.find((x) => x.id === Number(df.elements.vb_id.value));
+  { // phần điều chỉnh sau VAT (theo VAT nhập ở form)
+    const v0 = parseMoney(df.elements.so_tien.value), chot0 = df.elements.kieu.value === 'chot';
+    const dd = r && v0 !== '' && v0 !== '-' ? (chot0 ? Number(v0) - r.gia_tri : Number(v0)) : 0, vt = Number(df.elements.vat.value) || 0;
+    df.elements.sau_vat.value = (dd > 0 ? '+' : '') + money(dd + calcVat(dd, vt));
+    $('.dc-vat-note', df).textContent = !r ? '' : vt ? `VAT ${vt}%${Number(r.vat) === vt ? ' (theo ' + r.ma_loai + ')' : ' – khác VAT của ' + r.ma_loai + ' (' + (r.vat || 0) + '%)'}` : 'Chưa có VAT';
+  }
   const chot = df.elements.kieu.value === 'chot';
   $('.dc-so-lab', df).textContent = chot ? 'Giá trị chốt mới (TĐ2) *' : 'Số tiền tăng (+) / giảm (−) *';
   df.elements.so_tien.placeholder = chot ? 'VD: 1.050tr' : 'VD: +50tr hoặc -30.000.000';
@@ -3437,8 +3456,9 @@ async function saveDcForm() {
   if (!d) return msg(chot ? 'Giá trị chốt bằng TĐ2 hiện tại – không có thay đổi' : 'Số tiền phải khác 0', 'err');
   const noi_dung = df.elements.noi_dung.value.trim() || (chot ? `Chốt giá trị mới ${money(v)}` : 'Điều chỉnh');
   try {
-    await api('/api/dieu-chinh', { method: 'POST', body: JSON.stringify({ loai: 'dt', vb_id: r.id, ngay, noi_dung, so_tien: String(d) }) });
-    df.elements.so_tien.value = ''; df.elements.noi_dung.value = '';
+    const vt = df.elements.vat.value.trim(), vat = vt === '' || Number(vt) === Number(r.vat || 0) ? null : vt; // bằng VAT văn bản -> để trống
+    await api('/api/dieu-chinh', { method: 'POST', body: JSON.stringify({ loai: 'dt', vb_id: r.id, ngay, noi_dung, so_tien: String(d), vat }) });
+    df.elements.so_tien.value = ''; df.elements.noi_dung.value = ''; delete df.dataset.vatVb;
     await loadRevenue();
     msg(`Đã ghi điều chỉnh ${d > 0 ? '+' : ''}${money(d)} đ cho ${r.so_hieu} (TĐ2)`);
   } catch (err) { msg(err.message, 'err'); }
