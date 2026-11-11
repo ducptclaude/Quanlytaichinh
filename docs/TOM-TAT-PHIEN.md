@@ -2,6 +2,17 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V16.11.11.26 – Gói chi phí (TĐ1 tạm tính → TĐ2 gắn HĐ thật / phát sinh → TĐ3 quyết toán) + bảng HĐ đầu vào theo TĐ
+- Người dùng duyệt đề xuất (Revi). Số liệu hệ thống GIỮ NGUYÊN: chưa gắn gói thì cách tính y như cũ (đã so toàn bộ số báo cáo dữ liệu mẫu trước / sau: giống hệt).
+- Gói = mỗi dòng dự trù TĐ1 (tên VD "Thầu phụ 1 – Kết cấu", nhóm, giá trị, VAT). Kho dữ liệu (chỉ THÊM): `du_tru.tinh_trang` ('' tạm tính · 'xd' · 'dong'),
+  `tp_hop_dong.goi_id` (HĐ thay giá trị gói), `tp_hop_dong.phat_sinh` (HĐ ngoài TĐ1).
+- Quy tắc (`lib/report.js` tpLine / duTruNhom, giống `public/app.js` tpTdSv / dtrTd): HĐ gắn gói hoặc phát sinh -> TĐ1 của HĐ = 0;
+  gói đã gắn HĐ hoặc đã đóng -> chỉ tính ở TĐ1 (TĐ2 / TĐ3 lấy theo HĐ). Thử DEMO-05: gói 1 tỷ +1|+1|+1 · gắn HĐ 0,9 -> 1|0,9|0,9 · phát sinh 0,3 -> 0|0,3|0,3 · đóng gói 0,5 -> 0,5|0|0.
+- Trang Chi phí: bảng "1. Hợp đồng đầu vào" chạy theo TĐ đang chọn (TĐ1: cột TĐ1 · Ký + HT/QT; TĐ2 / TĐ3: cột TĐk + ± so TĐ trước, chi phí tăng đỏ ▲);
+  form tạo HĐ đầu vào cho phép ở TĐ2 khi chọn Gói chi phí hoặc "Phát sinh ngoài TĐ1" (TĐ3 vẫn chặn); nhãn "Gói: …" / "Phát sinh ngoài TĐ1" trên dòng HĐ;
+  hộp dự trù nhóm: nhãn Tạm tính / Đã gắn HĐ / Đã đóng + nút Đóng gói / Mở lại gói ở TĐ2. API dùng lại đường cũ (qua Duyệt, có nhật ký).
+- Kiểm tra: bộ nhớ tạm + PostgreSQL (nâng cấp từ kho cũ); tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-11.11.26-13h26`.
+
 ## V15.11.11.26 – Nút của các form nhập thẳng hàng với ô nhập
 - Trước: nút canh theo đáy hàng -> tụt ~20px khi ô bên cạnh có dòng ghi chú ("Chưa có VAT"…). Nay canh theo đỉnh ô nhập (máy tính ≥ 700px),
   áp dụng mọi form (HĐ/PL, HT/QT, điều chỉnh TĐ2, Chi phí). Điện thoại: nút vẫn ở hàng riêng.

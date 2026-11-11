@@ -1,6 +1,14 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Gói chi phí (TĐ2) *": "Cost package (M2) *",
+"— Chọn gói chi phí —": "— Select cost package —",
+"➕ Phát sinh ngoài TĐ1 (TĐ1 = 0)": "➕ New item outside M1 (M1 = 0)",
+"(Nhóm này chưa có gói dự trù TĐ1)": "(No M1 budget package in this group)",
+"Phát sinh ngoài TĐ1": "Outside M1",
+"Đã đóng": "Closed",
+"Đóng gói": "Close package",
+"Mở lại gói": "Reopen package",
 "Các đợt": "Adjustments",
 "Điều chỉnh (sau VAT)": "Adjustment (after VAT)",
 "theo HĐ / PL": "per contract / addendum",
@@ -1453,6 +1461,22 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Gói: {}",
+"Package: {}"
+],
+[
+"Đã gắn HĐ: {}",
+"Contract linked: {}"
+],
+[
+"{} · tạm tính {} đ · đã gắn {} HĐ",
+"{} · provisional {} VND · {} contract(s) linked"
+],
+[
+"{} · tạm tính {} đ",
+"{} · provisional {} VND"
+],
 ["HĐ/PL sau VAT · TĐ{} Ký", "Contract/addendum after VAT · M{} Signed"],
 ["HĐ/PL sau VAT · TĐ{} Điều chỉnh", "Contract/addendum after VAT · M{} Adjusted"],
 ["HĐ/PL sau VAT · TĐ{} Quyết toán", "Contract/addendum after VAT · M{} Final account"],

@@ -3436,3 +3436,12 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 #dc-form .actions { align-self: start; }
 /* Nút của form: thẳng hàng với ô nhập cùng hàng (không tụt xuống khi ô bên cạnh có dòng ghi chú) */
 @media (min-width: 700px) { .grid-form > .actions { align-self: start; padding-top: 19px; } }
+
+/* Gói chi phí: nhãn trên dòng HĐ đầu vào */
+.tp-goi, .tp-ps { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+.tp-goi { background: #e8f0fe; color: #2a5bd7; border: 1px solid #c4d6fb; }
+.tp-ps { background: #fff4d6; color: #9a6400; border: 1px solid #f3d27a; }
+:root[data-theme="dark"] .tp-goi { background: rgba(147,187,255,.14); color: #b8d0ff; border-color: rgba(147,187,255,.35); }
+:root[data-theme="dark"] .tp-ps { background: rgba(247,199,104,.12); color: #f7d38a; border-color: rgba(247,199,104,.35); }
+#dtr-dlg .tp-dtl input.date-dmy { width: 118px; min-width: 0; }
+#dtr-dlg .tp-dtl td:first-child { white-space: normal; min-width: 150px; }

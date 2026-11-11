@@ -1160,10 +1160,24 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   if (errors.length) return bad(res, errors);
   res.status(201).json(await store.createDuTru(id, data, req.user.id));
 }));
+// Gói chi phí phải là dòng dự trù TĐ1 của cùng dự án, chưa đóng
+async function checkGoi(goiId, duAnId) {
+  const g = await store.getDuTru(goiId);
+  if (!g || g.du_an_id !== duAnId || g.loai !== 'ky') return 'Gói chi phí không thuộc dự án này (chọn dòng dự trù TĐ1)';
+  if (g.tinh_trang === 'dong') return 'Gói chi phí đã đóng – mở lại gói trước khi gắn HĐ';
+  return null;
+}
 api.put('/du-tru/:id', canHd, wrap(async (req, res) => {
   const id = parseId(req.params.id);
   const cur = id && (await store.getDuTru(id));
   if (!cur) return bad(res, 'Không tìm thấy dòng dự trù', 404);
+  // Chỉ đổi tình trạng gói (tạm tính / đã xác định / đóng) – không gửi số tiền
+  if (req.body && 'tinh_trang' in req.body && !('so_tien' in req.body)) {
+    const tt = ['', 'xd', 'dong'].includes(req.body.tinh_trang) ? req.body.tinh_trang : null;
+    if (tt === null || cur.loai !== 'ky') return bad(res, 'Tình trạng gói không hợp lệ (chỉ dòng dự trù TĐ1)');
+    await store.setDuTruTT(id, tt);
+    return res.json({ ok: true });
+  }
   const { data, errors } = validateDuTru({ ...req.body, nhom: cur.nhom, loai: cur.loai }, true);
   if (!errors.length && cur.loai === 'dc' && data.so_tien === 0) errors.push('Đợt điều chỉnh: nhập số tăng (+) hoặc giảm (−) khác 0');
   if (!errors.length && cur.loai !== 'dc' && data.so_tien < 0) errors.push('Dự trù / quyết toán không được âm');
@@ -1457,6 +1471,7 @@ api.post('/du-an/:id/thau-phu', canHd, wrap(async (req, res) => {
   const errors = [...t.errors, ...l.errors];
   if (errors.length) return bad(res, errors);
   if (t.data.hd_cdt_id) { const e = await checkHeadRef(t.data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
+  if (t.data.goi_id) { const e = await checkGoi(t.data.goi_id, id); if (e) return bad(res, e); }
   res.status(201).json(await store.createTp(id, t.data, l.data, req.user.id));
 }));
 
@@ -1482,7 +1497,10 @@ api.put('/thau-phu/:id', canHd, wrap(async (req, res) => {
   if (!('hd_cdt_id' in body)) data.hd_cdt_id = tp.hd_cdt_id ?? null; // không gửi -> giữ nguyên liên kết
   if (!('hang_muc' in body)) data.hang_muc = tp.hang_muc || '';   // không gửi -> giữ nguyên hạng mục
   if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, tp.du_an_id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
+  if (data.goi_id) { const e = await checkGoi(data.goi_id, tp.du_an_id); if (e) return bad(res, e); }
+  const goi = { goi_id: data.goi_id, phat_sinh: data.phat_sinh }; delete data.goi_id; delete data.phat_sinh;
   await store.updateTp(tp.id, data, req.user.id);
+  await store.setTpGoi(tp.id, goi);
   res.json({ id: tp.id });
 }));
 
