@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.11.11.26 – Tab TĐ2: form nhập điều chỉnh ngay trên bảng (thay nút ± Điều chỉnh ở từng dòng)
+- Form: Văn bản (HĐ / PL chưa khoá, kèm TĐ2 hiện tại) · Cách nhập (Tăng / giảm ± | Chốt giá trị mới) · Số tiền · Ngày · Nội dung;
+  xem trước "TĐ2 mới = … · ▲▼ so với hiện tại". Nút "Xem các đợt" mở hộp xem / sửa / xóa đợt đã nhập.
+- Bảng: bỏ nút ± Điều chỉnh ở từng dòng (hết bị cắt chữ ở mép phải); bấm số TĐ2 của dòng -> chọn sẵn văn bản trong form + mở hộp các đợt.
+
 ## V11.11.11.26 – Bảng HĐ/PL cân đối: bỏ chữ "n đợt", mọi dòng cao bằng nhau
 - Bỏ "n đợt" dưới số TĐ2 (bảng Doanh thu + hộp HĐ đầu vào) – số đợt xem ở dòng ↳ Đợt bên dưới hoặc rê chuột vào số TĐ2.
 - Dòng HĐ / PL cao đều 50px, nút thao tác gọn hơn.

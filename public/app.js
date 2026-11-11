@@ -408,6 +408,18 @@ function buildRevenueSections() {
     <div class="card rev-card" data-loai="${loai}">
       ${loai === 'qt' ? `<div class="toolbar tv-head"><h2>${L.title}</h2><button type="button" class="sm" id="qt-toggle-all">Mở tất cả</button></div>` : `<h2>${L.title}</h2>`}
       ${loai === 'hd' ? '<div data-td-mode class="td-mode"></div><div class="msg" id="td-hd-msg" role="alert"></div>' : ''}
+      ${loai === 'hd' && can('hd') ? `
+      <form class="grid-form dc-form" id="dc-form" novalidate hidden>
+        <label class="span-2">Văn bản (HĐ / PL) *<select name="vb_id"></select></label>
+        <label>Cách nhập<select name="kieu"><option value="dc">Tăng / giảm (±)</option><option value="chot">Chốt giá trị mới</option></select></label>
+        <label><span class="dc-so-lab">Số tiền tăng (+) / giảm (−) *</span><input name="so_tien" class="money" placeholder="VD: +50tr hoặc -30.000.000"><span class="calc-note dc-preview"></span></label>
+        <label>Ngày<input name="ngay" class="date-dmy"></label>
+        <label class="span-2">Nội dung<input name="noi_dung" maxlength="300" placeholder="VD: Phát sinh tăng khối lượng móng"></label>
+        <div class="actions">
+          <button type="submit" class="primary">Ghi điều chỉnh</button>
+          <button type="button" class="dc-form-xem" title="Xem / sửa / xóa các đợt đã nhập của văn bản này">Xem các đợt</button>
+        </div>
+      </form>` : ''}
       ${can('hd') ? `
       <form class="grid-form rev-form" data-loai="${loai}" novalidate>
         <input type="hidden" name="id">
@@ -472,6 +484,14 @@ function buildRevenueSections() {
     $('.rev-cancel', f).addEventListener('click', () => resetRevForm(f));
   });
   wrap.addEventListener('click', onRevTableClick);
+  const df = $('#dc-form');
+  if (df) {
+    attachMoneyInput(df.elements.so_tien); attachDateInput(df.elements.ngay);
+    const xem = () => dcFormPreview();
+    ['input', 'change'].forEach((ev) => df.addEventListener(ev, xem));
+    df.addEventListener('submit', (e) => { e.preventDefault(); saveDcForm(); });
+    $('.dc-form-xem', df).addEventListener('click', () => { const id = Number(df.elements.vb_id.value); if (id) openDc('dt', id); });
+  }
   // Nhấp đúp vào Số mã trong bảng mục 1 -> điền sẵn form với PL kế tiếp
   wrap.addEventListener('dblclick', (e) => {
     const el = e.target.closest('.so-ma-pick');
@@ -653,7 +673,7 @@ const tdDangChon = () => { const n = Number(typeof BST !== 'undefined' ? BST.i_t
 // Chế độ nhập theo TĐ đang chọn: TĐ1 giá trị ký · TĐ2 điều chỉnh (nhiều lần) · TĐ3 số quyết toán (có số = khoá)
 const TD_MODE_TXT = {
   1: '<b>TĐ1 – Giá trị ký ban đầu:</b> thêm / sửa HĐ, PL với giá trị lúc ký. Không ảnh hưởng TĐ2, TĐ3.',
-  2: '<b>TĐ2 – Điều chỉnh:</b> bấm <b>± Điều chỉnh</b> ở văn bản để nhập tăng / giảm hoặc chốt giá trị mới – nhập được nhiều lần (mỗi lần 1 đợt). Chưa điều chỉnh = TĐ1.',
+  2: '<b>TĐ2 – Điều chỉnh:</b> chọn HĐ / PL, nhập tăng / giảm hoặc chốt giá trị mới – nhập được nhiều lần (mỗi lần 1 đợt). Chưa điều chỉnh = TĐ1. Bấm vào số TĐ2 để xem / sửa các đợt đã nhập.',
   3: '<b>TĐ3 – Quyết toán:</b> nhập số quyết toán từng HĐ / PL. Có số = <b>khoá</b> văn bản (cả TĐ1, TĐ2); HĐ và mọi PL có số = <b>đóng</b> HĐ. Chưa có số = TĐ2, vẫn nhập tiếp được. Mở khoá cần Passcode.',
 };
 function renderTdMode() {
@@ -711,6 +731,7 @@ function renderRevenue() {
     const rows = items.filter((r) => r.loai === loai);
     if (loai === 'hd') {
       const f = $('.rev-form', card); if (f) f.hidden = canRv('hd') && tdDangChon() !== 1;
+      renderDcForm(rows);
       { const th = $('thead .td-th-slot', card) || $('thead th.td-col-on', card); if (th) { $$('thead th.td-col', card).forEach((x) => x !== th && x.remove()); th.outerHTML = tdThHtml(); } }
       $('tbody', card).innerHTML = rows.length ? hdGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
     } else $('tbody', card).innerHTML = rows.length ? qtGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
@@ -880,7 +901,7 @@ function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null }
       ${canRv('hd') ? `<td class="row-actions">${khoa
         ? (md === 3 && x.coQt ? `<button data-rmokhoa="${r.id}" title="Bỏ số quyết toán để sửa lại (cần Passcode)">🔓 Mở khoá</button>` : '<span class="muted small" title="Đã có số quyết toán – khoá văn bản (TĐ1, TĐ2, TĐ3)">🔒 Khoá</span>')
         : md === 1 ? `<button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button>`
-          : md === 2 ? `<button data-rdot="${r.id}" title="Nhập tăng / giảm hoặc chốt giá trị mới (TĐ2)">± Điều chỉnh</button>`
+          : md === 2 ? ''
             : `<button class="primary" data-rqtsave="${r.id}" title="Lưu số quyết toán – văn bản sẽ bị khoá">Lưu QT</button>`}</td>` : ''}
     </tr>${md !== 2 ? '' : ds.map((d, k) => `
     <tr class="dc-row" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
@@ -986,7 +1007,7 @@ async function onRevTableClick(e) {
     catch (err) { tdMsg(err.message, 'err'); }
     return;
   }
-  if (rdot) return openDc('dt', Number(rdot));
+  if (rdot) { const df = $('#dc-form'); if (df && [...df.elements.vb_id.options].some((o) => o.value === rdot)) { df.elements.vb_id.value = rdot; dcFormPreview(); } return openDc('dt', Number(rdot)); }
   if (rqt) return openQtDt(Number(rqt));
   if (qtgrp !== undefined) {
     const k = Number(qtgrp);
@@ -3370,4 +3391,47 @@ async function onDtrClick(e) {
       await loadCost(); renderDtr(); showMsg(msg(), 'Đã xóa dự trù');
     }
   } catch (err) { showMsg(msg(), err.message, 'err'); }
+}
+
+// ---------- Form nhập điều chỉnh TĐ2 (đặt trên bảng mục 1, chỉ hiện ở tab TĐ2) ----------
+function renderDcForm(rows) {
+  const df = $('#dc-form'); if (!df) return;
+  df.hidden = !(canRv('hd') && tdDangChon() === 2);
+  if (df.hidden) return;
+  const keep = df.elements.vb_id.value;
+  const ds = hdGroups(rows).flatMap((g) => [g.head, ...g.pls].filter(Boolean)).filter((r) => !vbTd(r).coQt && !hdKhoa(r));
+  df.elements.vb_id.innerHTML = ds.length ? ds.map((r) => `<option value="${r.id}">${esc(r.ma_loai === 'HĐ' ? 'HĐ' : '\u00a0\u00a0\u00a0└ ' + r.ma_loai)} ${esc(r.so_ma || r.so_hieu)} — TĐ2 hiện tại ${money(r.gia_tri)} đ</option>`).join('')
+    : '<option value="">(không có văn bản nào nhập được – đã khoá hết)</option>';
+  if (ds.some((r) => String(r.id) === keep)) df.elements.vb_id.value = keep;
+  dcFormPreview();
+}
+function dcFormPreview() {
+  const df = $('#dc-form'); if (!df) return;
+  const r = revData.items.find((x) => x.id === Number(df.elements.vb_id.value));
+  const chot = df.elements.kieu.value === 'chot';
+  $('.dc-so-lab', df).textContent = chot ? 'Giá trị chốt mới (TĐ2) *' : 'Số tiền tăng (+) / giảm (−) *';
+  df.elements.so_tien.placeholder = chot ? 'VD: 1.050tr' : 'VD: +50tr hoặc -30.000.000';
+  const v = parseMoney(df.elements.so_tien.value), el = $('.dc-preview', df);
+  if (!r || v === '' || v === '-') { el.textContent = r ? `TĐ2 hiện tại: ${money(r.gia_tri)} đ` : ''; return; }
+  const moi = chot ? Number(v) : r.gia_tri + Number(v), d = moi - r.gia_tri;
+  el.innerHTML = `TĐ2 mới = <b>${money(moi)}</b> đ · ${d > 0 ? '<span class="td-up">▲ +' : d < 0 ? '<span class="td-down">▼ ' : '<span>'}${money(d)}</span> so với hiện tại`;
+}
+async function saveDcForm() {
+  const df = $('#dc-form'), msg = (t, ty) => showMsg($('#td-hd-msg'), t, ty);
+  const r = revData.items.find((x) => x.id === Number(df.elements.vb_id.value));
+  if (!r) return msg('Chọn văn bản HĐ / PL', 'err');
+  df.elements.so_tien.dispatchEvent(new Event('blur'));
+  const ngay = dmyToIso(df.elements.ngay.value);
+  if (ngay === null) return msg('Ngày không hợp lệ, nhập theo dạng dd/mm/yyyy', 'err');
+  const v = parseMoney(df.elements.so_tien.value);
+  if (v === '' || v === '-') return msg(df.elements.kieu.value === 'chot' ? 'Nhập giá trị chốt mới' : 'Nhập số tiền tăng (+) hoặc giảm (−)', 'err');
+  const chot = df.elements.kieu.value === 'chot', d = chot ? Number(v) - r.gia_tri : Number(v);
+  if (!d) return msg(chot ? 'Giá trị chốt bằng TĐ2 hiện tại – không có thay đổi' : 'Số tiền phải khác 0', 'err');
+  const noi_dung = df.elements.noi_dung.value.trim() || (chot ? `Chốt giá trị mới ${money(v)}` : 'Điều chỉnh');
+  try {
+    await api('/api/dieu-chinh', { method: 'POST', body: JSON.stringify({ loai: 'dt', vb_id: r.id, ngay, noi_dung, so_tien: String(d) }) });
+    df.elements.so_tien.value = ''; df.elements.noi_dung.value = '';
+    await loadRevenue();
+    msg(`Đã ghi điều chỉnh ${d > 0 ? '+' : ''}${money(d)} đ cho ${r.so_hieu} (TĐ2)`);
+  } catch (err) { msg(err.message, 'err'); }
 }

@@ -1,6 +1,15 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Văn bản (HĐ / PL) *": "Document (contract / addendum) *",
+"Cách nhập": "Entry type",
+"Số tiền tăng (+) / giảm (−) *": "Increase (+) / decrease (−) amount *",
+"Giá trị chốt mới (TĐ2) *": "New agreed value (M2) *",
+"Ghi điều chỉnh": "Record adjustment",
+"Xem các đợt": "View adjustments",
+"Chọn văn bản HĐ / PL": "Select a contract / addendum",
+"Nhập giá trị chốt mới": "Enter the new agreed value",
+"Số tiền phải khác 0": "Amount must not be 0",
 "Đơn vị: đồng": "Unit: VND",
 "Sửa đợt đã nhập: sửa trực tiếp ngày, nội dung, số tiền rồi bấm": "Edit an existing adjustment: change the date, description or amount directly, then click",
 "để bỏ đợt": "to remove it",
@@ -1441,6 +1450,9 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["TĐ2 mới = {} đ · {} so với hiện tại", "New M2 = {} VND · {} vs current"],
+["TĐ2 hiện tại: {} đ", "Current M2: {} VND"],
+["Đã ghi điều chỉnh {} đ cho {} (TĐ2)", "Recorded adjustment {} VND for {} (M2)"],
 ["TĐ{} · Ký", "M{} · Signed"],
 ["TĐ{} · Điều chỉnh", "M{} · Adjusted"],
 ["TĐ{} · Quyết toán", "M{} · Final account"],

@@ -3427,3 +3427,6 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 /* Bảng HĐ/PL: mọi dòng cao bằng nhau, nút thao tác gọn */
 .rev-card[data-loai="hd"] tr.hd-head > td, .rev-card[data-loai="hd"] tr.hd-child > td { height: 50px; vertical-align: middle; }
 .rev-card[data-loai="hd"] tr.hd-head .row-actions button, .rev-card[data-loai="hd"] tr.hd-child .row-actions button { padding: 4px 10px; font-size: 12.5px; line-height: 1.3; }
+#dc-form { margin-bottom: 16px; }
+#dc-form .actions { flex-wrap: nowrap; }
+#dc-form .actions button { white-space: nowrap; }
