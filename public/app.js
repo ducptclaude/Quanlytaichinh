@@ -903,19 +903,7 @@ function hdGroupsHtml(rows) {
     if (g.head) html += hdRowHtml(g.head, n, { toggle, g });
     else html += `<tr class="hd-head hd-orphan"><td class="num muted">${n}</td><td colspan="${canRv('hd') ? 10 : 9}">${toggle}${canRv('hd') ? `<b class="so-ma-pick" data-soma="${esc(g.so_ma)}" title="Nhấp đúp để thêm dòng cho ${esc(g.so_ma)}">${esc(g.so_ma)}</b>` : `<b>${esc(g.so_ma)}</b>`} <span class="st st-tam-tinh">Chưa có HĐ gốc</span></td></tr>`;
     if (!closed) g.pls.forEach((r, i) => { html += hdRowHtml(r, `${n}.${i + 1}`, { child: true, head: g.head }); });
-    if (g.pls.length) {
-      const sum = (f) => members.reduce((s, r) => s + r[f], 0);
-      const tt = members.some((r) => r.tam_tinh), gt = grpTd(g);
-      html += `
-        <tr class="hd-sub">
-          <td></td>
-          <td colspan="2">Cộng ${esc(g.so_ma)} <span class="muted small">(${g.head ? 'HĐ + ' : ''}${g.pls.length} PL)</span>${tt ? ' <span class="st st-tam-tinh" title="HĐ chưa quyết toán – giá trị tạm tính">Tạm tính</span>' : ''}
-            ${gt.cu ? '<div class="td-note muted">TĐ3 = hồ sơ quyết toán ở mục 2</div>' : ''}${gt.thieu ? `<div class="td-note warn-text">⚠ ${gt.thieu} văn bản chưa có số QT – tạm lấy TĐ2</div>` : ''}</td>
-          <td class="num">${dvm(gt.t1)}</td><td class="num">${dvm(gt.t2)}${tdDelta(gt.t2, gt.t1)}</td><td class="num">${dvm(gt.t3)}${tdDelta(gt.t3, gt.t2)}</td><td></td>
-          <td class="num">${dvm(sum('sau_vat'))}</td>
-          <td colspan="${canRv('hd') ? 3 : 2}"></td>
-        </tr>`;
-    }
+    // (bỏ dòng "Cộng <Số HĐ>" theo yêu cầu – tổng chung ở dòng TỔNG HĐ/PL cuối bảng)
     return html;
   }).join('');
 }

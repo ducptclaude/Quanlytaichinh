@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.11.11.26 – Doanh thu mục 1: bỏ dòng "Cộng <Số HĐ>" (HĐ + PL) dưới mỗi hợp đồng
+- Tổng chung vẫn ở dòng TỔNG HĐ/PL cuối bảng. Lưu ý văn bản chưa có số QT vẫn hiện ở ô TĐ3 của từng văn bản.
+
 ## V08.11.11.26 – Mở rộng hộp nhập liệu (điều chỉnh, quyết toán, dự trù) để không phải cuộn ngang
 - Hộp rộng tối đa 1.100px (co theo màn hình): bảng vừa khung ở máy tính 1280 / 1366px. Ô Nội dung rộng tối thiểu 260px (điện thoại 160px, vuốt ngang trong khung).
 
