@@ -3424,3 +3424,6 @@ select.dc-kieu { display: block; margin-top: 6px; width: 100%; min-width: 150px;
 td.td-col-on { background: rgba(15, 163, 163, .07); font-weight: 600; }
 td.td-ss { white-space: nowrap; font-weight: 600; }
 td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
+/* Bảng HĐ/PL: mọi dòng cao bằng nhau, nút thao tác gọn */
+.rev-card[data-loai="hd"] tr.hd-head > td, .rev-card[data-loai="hd"] tr.hd-child > td { height: 50px; vertical-align: middle; }
+.rev-card[data-loai="hd"] tr.hd-head .row-actions button, .rev-card[data-loai="hd"] tr.hd-child .row-actions button { padding: 4px 10px; font-size: 12.5px; line-height: 1.3; }

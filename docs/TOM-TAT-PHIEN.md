@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.11.11.26 – Bảng HĐ/PL cân đối: bỏ chữ "n đợt", mọi dòng cao bằng nhau
+- Bỏ "n đợt" dưới số TĐ2 (bảng Doanh thu + hộp HĐ đầu vào) – số đợt xem ở dòng ↳ Đợt bên dưới hoặc rê chuột vào số TĐ2.
+- Dòng HĐ / PL cao đều 50px, nút thao tác gọn hơn.
+
 ## V10.11.11.26 – Bảng nhập liệu chỉ hiện cột TĐ đang chọn + cột so sánh với TĐ trước
 - Doanh thu mục 1 và khung Dự trù: TĐ1 -> cột "TĐ1 · Ký"; TĐ2 -> "TĐ2 · Điều chỉnh" + "± so TĐ1"; TĐ3 -> "TĐ3 · Quyết toán" + "± so TĐ2".
   Cột so sánh: mũi tên ▲▼ + số + % (bằng nhau: "="). Dòng tổng cũng vậy.
