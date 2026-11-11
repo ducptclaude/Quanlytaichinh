@@ -806,12 +806,14 @@ const nnV = (x) => (x === null || x === undefined || x === '' ? null : Number(x)
 const vbTd = (r) => { const t1 = Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2 = Number(r.gia_tri) || 0, q = nnV(r.gt_qt); return { t1, t2, t3: q ?? t2, coQt: q !== null }; };
 // Mũi tên chênh lệch so với thời điểm trước (bằng nhau: không ghi gì)
 const tdDelta = (v, truoc) => { const d = Math.round(v - truoc); return d ? `<div class="td-note ${d > 0 ? 'td-up' : 'td-down'}">${d > 0 ? '▲ +' : '▼ '}${dvm(d)}</div>` : ''; };
+// Dòng thuộc HĐ đã chốt quyết toán (khoá toàn bộ HĐ)
+const hdKhoa = (r) => r && r.loai === 'hd' && revData.items.some((h) => h.loai === 'hd' && h.ma_loai === 'HĐ' && h.qt_dong && hdKey(h) === hdKey(r));
 function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null } = {}) {
-  const x = vbTd(r), dong = head?.qt_dong || r.qt_dong;
+  const x = vbTd(r), dong = head?.qt_dong || r.qt_dong, khoa = hdKhoa(r);
   const ds = r.dot || [];
   const thieu = dong && !x.coQt;
   const t3 = !child && g && !g.pls.length ? grpTd(g).t3 : x.t3; // HĐ không có PL: TĐ3 theo cả HĐ (kể cả hồ sơ QT cũ ở mục 2)
-  const qtTag = !child && r.qt_dong ? ` <span class="st st-hoan-thanh" title="Đã đóng quyết toán cả HĐ và các PL">Đã QT${r.ngay_qt ? ' ' + dmy(r.ngay_qt) : ''}</span>` : '';
+  const qtTag = !child && r.qt_dong ? ` <span class="st st-hoan-thanh" title="Đã chốt quyết toán – khoá toàn bộ HĐ và các PL">🔒 Đã QT${r.ngay_qt ? ' ' + dmy(r.ngay_qt) : ''}</span>` : '';
   return `
     <tr class="${child ? 'hd-child' : 'hd-head'}" data-rid="${r.id}" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
       <td class="num muted">${stt}</td>
@@ -824,7 +826,8 @@ function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null }
       <td class="num strong">${dvm(r.sau_vat)}</td>
       <td class="wrap">${esc(r.ghi_chu)}</td>
       <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
-      ${canRv('hd') ? `<td class="row-actions"><button data-rdot="${r.id}" title="Đợt điều chỉnh tăng / giảm (TĐ2)">± Đợt</button>${!child && r.ma_loai === 'HĐ' ? `<button data-rqt="${r.id}" title="Quyết toán HĐ và các PL (TĐ3)">Quyết toán</button>` : ''}<button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button></td>` : ''}
+      ${canRv('hd') ? `<td class="row-actions">${khoa ? `${!child && r.ma_loai === 'HĐ' ? `<button data-rqt="${r.id}" title="Đã chốt quyết toán – xem / mở khoá (cần Passcode)">🔒 Đã chốt QT</button>` : '<span class="muted small" title="HĐ đã chốt quyết toán – khoá toàn bộ">🔒 Khoá</span>'}`
+        : `<button data-rdot="${r.id}" title="Đợt điều chỉnh tăng / giảm (TĐ2)">± Đợt</button>${!child && r.ma_loai === 'HĐ' ? `<button data-rqt="${r.id}" title="Quyết toán HĐ và các PL (TĐ3)">Quyết toán</button>` : ''}<button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button>`}</td>` : ''}
     </tr>${ds.map((d, k) => `
     <tr class="dc-row" ${child ? `data-grp-child="${esc(hdKey(r))}"` : ''}>
       <td></td><td class="indent${child ? '2' : ''}" colspan="3"><span class="tree">↳</span> Đợt ${k + 1}${d.ngay ? ' · ' + dmy(d.ngay) : ''}${d.noi_dung ? ' · ' + esc(d.noi_dung) : ''}</td>
@@ -2956,7 +2959,7 @@ function dcVanBan() {
   if (!dcCur) return null;
   if (dcCur.loai === 'dt') {
     const r = revData.items.find((x) => x.id === dcCur.id);
-    return r && { ten: `${r.ma_loai} ${r.so_ma || r.so_hieu}`, sub: 'Doanh thu · HĐ chủ đầu tư', t1: Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2: Number(r.gia_tri) || 0, dot: r.dot || [], ok: canRv('hd') };
+    return r && { ten: `${r.ma_loai} ${r.so_ma || r.so_hieu}`, sub: 'Doanh thu · HĐ chủ đầu tư' + (hdKhoa(r) ? ' · 🔒 đã chốt quyết toán' : ''), t1: Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2: Number(r.gia_tri) || 0, dot: r.dot || [], ok: canRv('hd') && !hdKhoa(r) };
   }
   for (const c of costData.thau_phu || []) {
     const l = c.lines.find((x) => x.id === dcCur.id);
@@ -3055,16 +3058,17 @@ function renderQtDt() {
   const dlg = $('#qtdt-dlg'), h = revData.items.find((x) => x.id === qtDtHead);
   if (!dlg || !h) return;
   const ms = [h, ...revData.items.filter((x) => x.loai === 'hd' && x.id !== h.id && hdKey(x) === hdKey(h))];
-  const ok = canRv('hd');
+  const khoa = Boolean(h.qt_dong), ok = canRv('hd') && !khoa;
   dlg.innerHTML = `
     <div class="tp-dlg-head">
-      <div><div class="muted small">Doanh thu · Quyết toán (TĐ3)</div><h3>HĐ ${esc(h.so_ma || h.so_hieu)} ${h.qt_dong ? '<span class="st st-hoan-thanh">Đã QT</span>' : '<span class="st">Chưa QT</span>'}</h3></div>
+      <div><div class="muted small">Doanh thu · Quyết toán (TĐ3)</div><h3>HĐ ${esc(h.so_ma || h.so_hieu)} ${khoa ? '<span class="st st-hoan-thanh">🔒 Đã chốt quyết toán</span>' : '<span class="st">Chưa QT</span>'}</h3></div>
       <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button>
     </div>
     <div class="grid-form qt-head">
       <label>Ngày quyết toán<input data-f="ngay_qt" class="date-dmy" value="${esc(isoToDmy(h.ngay_qt))}" ${ok ? '' : 'disabled'}></label>
-      <label class="chk span-2"><input type="checkbox" data-f="dong" ${h.qt_dong ? 'checked' : ''} ${ok ? '' : 'disabled'}> Đóng quyết toán cả HĐ (HĐ + ${ms.length - 1} PL) – văn bản để trống tạm lấy TĐ2 và có lưu ý</label>
+      <label class="chk span-2"><input type="checkbox" data-f="dong" ${khoa ? 'checked' : ''} ${ok ? '' : 'disabled'}> Chốt quyết toán & khoá toàn bộ HĐ (HĐ + ${ms.length - 1} PL) – cần đủ số quyết toán cho HĐ và tất cả phụ lục</label>
     </div>
+    ${khoa ? `<div class="lock-bar">🔒 Đã chốt quyết toán${h.ngay_qt ? ' ngày ' + dmy(h.ngay_qt) : ''} – <b>khoá toàn bộ HĐ</b> (sửa / xóa HĐ, PL, đợt điều chỉnh, thêm PL mới).${canRv('hd') ? ' <button type="button" class="sm" data-qtmokhoa>🔓 Mở khoá</button>' : ''}</div>` : ''}
     <div class="table-wrap"><table class="tp-dtl">
       <thead><tr><th>Văn bản</th><th class="num" title="Ký">TĐ1</th><th class="num" title="Điều chỉnh">TĐ2</th><th class="num" title="Quyết toán – trước VAT, trống = TĐ2">TĐ3<br><span class="muted small">nhập số quyết toán</span></th></tr></thead>
       <tbody>${ms.map((r) => { const x = vbTd(r); return `<tr data-id="${r.id}">
@@ -3072,22 +3076,38 @@ function renderQtDt() {
         <td class="num">${dvm(x.t1)}</td><td class="num">${dvm(x.t2)}${tdDelta(x.t2, x.t1)}</td>
         <td><input data-f="gt_qt" class="money num" value="${x.coQt ? money(r.gt_qt) : ''}" placeholder="${money(x.t2)}" ${ok ? '' : 'disabled'}></td></tr>`; }).join('')}</tbody>
     </table></div>
-    ${ok ? '<div class="tv-tools"><span class="muted small">Hồ sơ HT/QT ở mục 2 vẫn giữ để theo dõi đợt thanh toán. TĐ3 của HĐ = tổng giá trị quyết toán các văn bản.</span><span class="spacer"></span><button class="primary sm" data-save>Lưu quyết toán</button></div>' : ''}
+    ${ok ? '<div class="tv-tools"><span class="muted small">Chưa chốt: lưu số quyết toán từng phần (văn bản trống tạm lấy TĐ2). Chốt: cần đủ số cho HĐ + mọi PL. Hồ sơ HT/QT ở mục 2 vẫn giữ để theo dõi thanh toán.</span><span class="spacer"></span><button class="primary sm" data-save>Lưu quyết toán</button></div>' : ''}
     <div class="msg" id="qtdt-msg" role="alert"></div>`;
   if (ok) { $$('input.money', dlg).forEach(attachMoneyInput); $$('input.date-dmy', dlg).forEach(attachDateInput); }
 }
 async function onQtDtClick(e) {
   const t = e.target, dlg = $('#qtdt-dlg'), msg = () => $('#qtdt-msg');
   if (t.dataset.close !== undefined) return dlg.close();
+  const itemsOf = () => $$('tbody tr[data-id]', dlg).map((tr) => ({ id: Number(tr.dataset.id), gt_qt: parseMoney($('[data-f="gt_qt"]', tr).value) }));
+  if (t.dataset.qtmokhoa !== undefined) { // mở khoá quyết toán: cần Passcode
+    const h = revData.items.find((x) => x.id === qtDtHead);
+    const pc = await askPasscode(`Mở khoá quyết toán HĐ ${h?.so_ma || ''}?`, 'Bỏ chốt quyết toán để sửa HĐ / PL / đợt điều chỉnh. Số quyết toán đã nhập vẫn giữ.');
+    if (pc === null) return;
+    try {
+      await api(`/api/doanh-thu/${qtDtHead}/quyet-toan`, { method: 'PUT', body: JSON.stringify({ ngay_qt: h?.ngay_qt || null, dong: false, items: itemsOf(), passcode: pc }) });
+      await loadRevenue(); renderQtDt(); showMsg(msg(), 'Đã mở khoá quyết toán');
+    } catch (err) { showMsg(msg(), err.message, 'err'); }
+    return;
+  }
   if (t.dataset.save === undefined) return;
   const ngay_qt = dmyToIso($('[data-f="ngay_qt"]', dlg).value);
   if (ngay_qt === null) return showMsg(msg(), 'Ngày không hợp lệ, nhập dd/mm/yyyy', 'err');
   const dong = $('[data-f="dong"]', dlg).checked;
-  if (dong && !ngay_qt) return showMsg(msg(), 'Đóng quyết toán: nhập Ngày quyết toán', 'err');
-  const items = $$('tbody tr[data-id]', dlg).map((tr) => ({ id: Number(tr.dataset.id), gt_qt: parseMoney($('[data-f="gt_qt"]', tr).value) }));
+  if (dong && !ngay_qt) return showMsg(msg(), 'Chốt quyết toán: nhập Ngày quyết toán', 'err');
+  const items = itemsOf();
+  if (dong) { // chốt: HĐ + mọi PL phải có số quyết toán
+    const thieu = $$('tbody tr[data-id]', dlg).filter((tr) => !String($('[data-f="gt_qt"]', tr).value).trim()).map((tr) => tr.querySelector('.kind-tag')?.textContent || '');
+    $$('tbody tr[data-id]', dlg).forEach((tr) => $('[data-f="gt_qt"]', tr).classList.toggle('invalid', !String($('[data-f="gt_qt"]', tr).value).trim()));
+    if (thieu.length) return showMsg(msg(), `Chưa chốt quyết toán: ${thieu.join(', ')} chưa có số quyết toán. Nhập đủ cho HĐ và tất cả phụ lục rồi chốt lại.`, 'err');
+  }
   try {
     await api(`/api/doanh-thu/${qtDtHead}/quyet-toan`, { method: 'PUT', body: JSON.stringify({ ngay_qt, dong, items }) });
-    await loadRevenue(); renderQtDt(); showMsg(msg(), 'Đã lưu quyết toán');
+    await loadRevenue(); renderQtDt(); showMsg(msg(), dong ? 'Đã chốt quyết toán – khoá toàn bộ HĐ' : 'Đã lưu quyết toán');
   } catch (err) { showMsg(msg(), err.message, 'err'); }
 }
 

@@ -1,6 +1,14 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"🔒 Đã chốt QT": "🔒 Final account closed",
+"🔒 Khoá": "🔒 Locked",
+"🔒 Đã chốt quyết toán": "🔒 Final account closed",
+"🔓 Mở khoá": "🔓 Unlock",
+"Đã chốt quyết toán – khoá toàn bộ HĐ": "Final account closed – whole contract locked",
+"Đã mở khoá quyết toán": "Final account unlocked",
+"Chốt quyết toán: nhập Ngày quyết toán": "Closing the final account: enter the final account date",
+"Chưa chốt: lưu số quyết toán từng phần (văn bản trống tạm lấy TĐ2). Chốt: cần đủ số cho HĐ + mọi PL. Hồ sơ HT/QT ở mục 2 vẫn giữ để theo dõi thanh toán.": "Not closed: save partial final account values (blank documents use M2). Closing requires values for the contract and every addendum. Section 2 records are kept to track payments.",
 "2. Dự trù chi phí theo nhóm": "2. Cost estimate by group",
 "Chi tiết đã có": "Recorded details",
 "Lưu ý": "Notes",
@@ -1417,6 +1425,8 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["Chốt quyết toán & khoá toàn bộ HĐ (HĐ + {} PL) – cần đủ số quyết toán cho HĐ và tất cả phụ lục", "Close the final account & lock the whole contract (contract + {} addenda) – requires values for the contract and every addendum"],
+["Chưa chốt quyết toán: {} chưa có số quyết toán. Nhập đủ cho HĐ và tất cả phụ lục rồi chốt lại.", "Not closed: {} has no final account value. Enter values for the contract and every addendum, then close again."],
 ["Dự trù {}", "Estimate {}"],
 ["⚠ {} nhóm cộng dồn nhiều nguồn", "⚠ {} group(s) combined from several sources"],
 ["TĐ2: {}", "M2: {}"],

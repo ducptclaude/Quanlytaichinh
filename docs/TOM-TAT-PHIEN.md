@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.11.11.26 – Chốt quyết toán HĐ CĐT: đủ số mới chốt, chốt rồi khoá toàn bộ HĐ
+- Chốt (đánh dấu ở hộp Quyết toán): HĐ hoặc bất kỳ PL nào chưa có số quyết toán -> KHÔNG chốt, thông báo rõ văn bản thiếu (ô thiếu viền đỏ).
+  Chưa chốt vẫn lưu được số quyết toán từng phần (văn bản trống tạm lấy TĐ2).
+- Đã chốt -> khoá toàn bộ HĐ: chặn sửa / xóa HĐ, PL, đợt điều chỉnh, thêm PL mới (báo "đã chốt quyết toán"); bảng mục 1 hiện 🔒.
+  Tiền về và hồ sơ HT/QT mục 2 vẫn nhập được. Mở khoá: nút 🔓 Mở khoá trong hộp Quyết toán, cần Passcode; số QT đã nhập giữ nguyên.
+- Kiểm tra chạy TRƯỚC bước duyệt (người nhập được báo ngay; bản ghi khi duyệt cũng bị chặn như nhau).
+
 ## V01.11.11.26 – Đợt B: dự trù chi phí theo nhóm; tiêu đề cột chỉ ghi TĐ1 / TĐ2 / TĐ3
 - Kho dữ liệu (chỉ THÊM): bảng `du_tru` (dự án, nhóm, loai ky = TĐ1 dự trù · dc = TĐ2 đợt điều chỉnh ± · qt = TĐ3 quyết toán, ngày, nội dung, số tiền, VAT).
 - Mỗi nhóm: TĐ1 = Σ dự trù · TĐ2 = TĐ1 + Σ đợt (chưa có TĐ1 = "Ngoài dự trù") · TĐ3 = Σ quyết toán (chưa có = TĐ2). Nhóm không VAT (lương, ngoại giao, tài chính) tự VAT 0.

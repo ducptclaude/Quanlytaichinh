@@ -298,6 +298,53 @@ const KIEM = { // kiểm tra dữ liệu ngay lúc gửi (lỗi báo ngay cho ng
   tp_hd_pl: (b) => validateTpLine(b), tp_thanh_toan: (b) => validateTpPay(b),
   du_tru: (b, m) => validateDuTru(b, m === 'PUT'), dieu_chinh: (b, m) => validateDieuChinh(b, m === 'PUT'), qt_dt: (b) => validateQuyetToan(b),
 };
+// ===================== KHOÁ QUYẾT TOÁN HĐ CĐT (V02.11.11.26) =====================
+// Chốt quyết toán chỉ khi HĐ và MỌI phụ lục đã có số quyết toán; đã chốt -> khoá toàn bộ HĐ (HĐ, PL, đợt điều chỉnh, thêm PL mới).
+// Mở khoá: bỏ chốt ở hộp Quyết toán, cần Passcode. Chạy trước bước duyệt -> người nhập được báo ngay, bản ghi khi duyệt cũng bị chặn như nhau.
+const normMa = (x) => String(x ?? '').trim().toLowerCase();
+async function nhomHd(duAnId, soMa) { // các văn bản HĐ / PL cùng Số mã + dòng HĐ gốc
+  const ds = (await store.listRevenue(duAnId)).filter((r) => r.loai === 'hd' && normMa(r.so_ma) === normMa(soMa));
+  return { ds, head: ds.find((r) => r.ma_loai === 'HĐ') || null };
+}
+const KHOA_MSG = (so) => `HĐ ${so} đã chốt quyết toán – đang khoá toàn bộ hợp đồng. Muốn sửa: mở hộp Quyết toán, bỏ chốt (cần Passcode).`;
+api.use(wrap(async (req, res, next) => {
+  if (!req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
+  const p = req.path, b = req.body || {};
+  let m;
+  const khoaCua = async (r) => { if (!r || r.loai !== 'hd') return null; const g = await nhomHd(r.du_an_id, r.so_ma); return g.head?.qt_dong ? g.head : null; };
+  // Chốt / mở chốt quyết toán
+  if (req.method === 'PUT' && (m = p.match(/^\/doanh-thu\/(\d+)\/quyet-toan$/))) {
+    const head = await store.getRevenue(Number(m[1]));
+    if (!head || head.loai !== 'hd' || head.ma_loai !== 'HĐ') return next();
+    const g = await nhomHd(head.du_an_id, head.so_ma);
+    const dong = b.dong === true || b.dong === 'true', daChot = Boolean(g.head?.qt_dong);
+    if (daChot && dong) return bad(res, KHOA_MSG(head.so_ma), 423);
+    if (daChot && !dong) { if (!(await requirePasscode(req, res))) return; return next(); } // mở khoá
+    if (dong) {
+      const co = new Map((Array.isArray(b.items) ? b.items : []).map((x) => [Number(x?.id), String(x?.gt_qt ?? '').trim()]));
+      const thieu = g.ds.filter((r) => !co.get(r.id));
+      if (thieu.length) return bad(res, `Chưa chốt quyết toán: ${thieu.map((r) => r.ma_loai === 'HĐ' ? 'HĐ' : r.ma_loai).join(', ')} của HĐ ${head.so_ma} chưa có số quyết toán. Nhập đủ số quyết toán cho HĐ và tất cả phụ lục rồi chốt lại.`);
+    }
+    return next();
+  }
+  // Sửa / xóa dòng HĐ / PL của HĐ đã chốt
+  if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/doanh-thu\/(\d+)$/))) {
+    const h = await khoaCua(await store.getRevenue(Number(m[1]))); if (h) return bad(res, KHOA_MSG(h.so_ma), 423);
+  }
+  // Thêm PL mới cho HĐ đã chốt
+  if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/doanh-thu$/)) && b.loai === 'hd' && b.so_ma) {
+    const g = await nhomHd(Number(m[1]), b.so_ma); if (g.head?.qt_dong) return bad(res, KHOA_MSG(g.head.so_ma), 423);
+  }
+  // Đợt điều chỉnh của văn bản thuộc HĐ đã chốt
+  if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'dt') {
+    const h = await khoaCua(await store.getRevenue(Number(b.vb_id))); if (h) return bad(res, KHOA_MSG(h.so_ma), 423);
+  }
+  if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/dieu-chinh\/(\d+)$/))) {
+    const d = await store.getDieuChinh(Number(m[1]));
+    if (d?.loai === 'dt') { const h = await khoaCua(await store.getRevenue(d.vb_id)); if (h) return bad(res, KHOA_MSG(h.so_ma), 423); }
+  }
+  next();
+}));
 const soTien = (x) => { const n = Number(String(x ?? '').replace(/[.,\s]/g, '')); return Number.isFinite(n) && String(x ?? '').trim() !== '' ? n : null; };
 api.use(wrap(async (req, res, next) => {
   if (req.noiBo !== undefined || !req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
