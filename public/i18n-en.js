@@ -1,6 +1,12 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"TỔNG GÓI CHI PHÍ": "TOTAL COST PACKAGES",
+"(dự trù – tạm tính)": "(budget – provisional)",
+"Điều chỉnh cả nhóm: bấm Nhập": "Group adjustment: click Enter",
+"Quyết toán nhóm: bấm Nhập": "Group final account: click Enter",
+"Mở lại": "Reopen",
+"Điều chỉnh cả nhóm": "Group adjustment",
 "Dòng chi phí (chứng từ thực tế)": "Cost line (actual voucher)",
 "Gói chi phí – dự trù (tạm tính)": "Cost package – budget (provisional)",
 "Gói chi phí – dự trù theo nhóm": "Cost packages – budget by group",
@@ -1483,6 +1489,30 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"TỔNG CỘNG TĐ{}",
+"GRAND TOTAL M{}"
+],
+[
+"(HĐ + gói + mua lẻ)",
+"(contracts + packages + direct purchases)"
+],
+[
+"(HĐ + gói)",
+"(contracts + packages)"
+],
+[
+"({} gói · {} tạm tính)",
+"({} packages · {} provisional)"
+],
+[
+"{} đợt (TĐ2)",
+"{} adjustments (M2)"
+],
+[
+"VAT {}%",
+"VAT {}%"
+],
 [
 "({} gói · {} còn tạm tính · không cộng vào Tổng HĐ bên dưới)",
 "({} packages · {} still provisional · not in the contract total below)"

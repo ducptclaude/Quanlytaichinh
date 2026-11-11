@@ -3448,3 +3448,10 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 
 .goi-an { display: none !important; }
 .tp-goi-head td { background: color-mix(in srgb, #2a5bd7 6%, var(--bg-ffffff)); }
+
+/* Gói: tên + nhãn tình trạng cùng 1 hàng, dòng gọn */
+.tp-goi-l { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tp-goi-l .st { margin: 0; font-size: 11px; padding: 1px 8px; }
+.tp-goi-row td { padding-top: 7px; padding-bottom: 7px; }
+.tp-goi-head td { background: color-mix(in srgb, #2a5bd7 7%, var(--bg-ffffff)); }
+.tp-goi-tong td { font-weight: 700; background: color-mix(in srgb, #2a5bd7 5%, var(--bg-ffffff)); }

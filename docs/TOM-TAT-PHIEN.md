@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V19.11.11.26 – Bảng HĐ đầu vào: gói gom gọn – mỗi nhóm gói là 1 nhóm chính ở đầu bảng
+- Bỏ tầng "G" lồng nhau: mỗi nhóm có gói (Thầu phụ, Vật tư, Nhân công…) = 1 dòng nhóm chính G1, G2… (như nhóm HĐ CĐT), đặt ĐẦU bảng, mở / thu riêng từng nhóm.
+- Mỗi gói 1 dòng: tên + nhãn tình trạng cùng hàng, cột ghi chú chỉ "VAT x%" (rê chuột xem trước VAT). Nút Nhập ở dòng nhóm, Đóng gói / Mở lại ở dòng gói (TĐ2).
+- Dòng tổng: thêm "TỔNG GÓI CHI PHÍ (dự trù – tạm tính)" và "TỔNG CỘNG TĐk (HĐ + gói + mua lẻ)". Số liệu không đổi; tester 4.518 ĐẠT, 0 LỖI.
+
 ## V18.11.11.26 – Gộp "2. Dự trù chi phí theo nhóm" vào bảng 1 (khối G – Gói chi phí); gói cho mọi nhóm
 - Khung "2. Dự trù chi phí theo nhóm" ẨN (`renderDuTru` – mã cũ giữ). Mọi chức năng chuyển sang bảng "1. Hợp đồng đầu vào", khối **G – Gói chi phí – dự trù theo nhóm**:
   dòng nhóm (tổng TĐk, ± so TĐ trước, số gói / đợt, 🔒 đã QT nhóm, ⚠ cộng dồn, nút **Nhập** = hộp gói của nhóm: sửa gói TĐ1, mở sẵn dòng đợt điều chỉnh ở TĐ2 / quyết toán ở TĐ3)
