@@ -837,7 +837,11 @@ function hdGroups(rows) {
 const nnV = (x) => (x === null || x === undefined || x === '' ? null : Number(x));
 const vbTd = (r) => { const t1 = Number(r.gia_tri_ky ?? r.gia_tri) || 0, t2 = Number(r.gia_tri) || 0, q = nnV(r.gt_qt); return { t1, t2, t3: q ?? t2, coQt: q !== null }; };
 // Mũi tên chênh lệch so với thời điểm trước (bằng nhau: không ghi gì)
-const tdDelta = (v, truoc) => { const d = Math.round(v - truoc); return d ? `<div class="td-note ${d > 0 ? 'td-up' : 'td-down'}">${d > 0 ? '▲ +' : '▼ '}${dvm(d)}</div>` : ''; };
+const tdDeltaG = (v, truoc, f = dvm) => { const d = Math.round(v - truoc); return d ? `<div class="td-note ${d > 0 ? 'td-up' : 'td-down'}">${d > 0 ? '▲ +' : '▼ '}${f(d)}</div>` : ''; };
+const tdDelta = (v, truoc) => tdDeltaG(v, truoc);
+// Hộp nhập liệu: mọi số hiện bằng ĐỒNG đầy đủ cho khớp với ô nhập (không theo đơn vị hiển thị của trang)
+const dDong = (n) => fmt.format(Math.round(Number(n) || 0));
+const NOTE_DONG = '<span class="dv-dong" title="Ô nhập và số trong hộp này luôn tính bằng đồng (không đổi theo ô Đơn vị)">Đơn vị: đồng</span>';
 // Dòng thuộc HĐ đã chốt quyết toán (khoá toàn bộ HĐ)
 const hdKhoa = (r) => r && r.loai === 'hd' && revData.items.some((h) => h.loai === 'hd' && h.ma_loai === 'HĐ' && h.qt_dong && hdKey(h) === hdKey(r));
 function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null } = {}) {
@@ -2153,6 +2157,7 @@ function closeTp() {
 const tpCalc = (gt, vat) => { const g = Number(parseMoney(gt)) || 0; const v = Number(vat) || 0; return g + calcVat(g, v); };
 
 function renderTpDlg() {
+  const dvm = dDong, tdDelta = (a, b) => tdDeltaG(a, b, dDong); // số theo đồng (khớp ô nhập)
   const c = costData.thau_phu.find((x) => x.id === tpDlgId);
   const dlg = $('#tp-dlg');
   if (!c) return closeTp();
@@ -2212,7 +2217,7 @@ function renderTpDlg() {
   dlg.innerHTML = `
     <div class="tp-dlg-head">
       <div>
-        <div class="muted small">Hợp đồng ${tpTen(c)} · ${esc(c.ma_du_an || costData.du_an.ma_du_an)}</div>
+        <div class="muted small">Hợp đồng ${tpTen(c)} · ${esc(c.ma_du_an || costData.du_an.ma_du_an)} · ${NOTE_DONG}</div>
         <h3>${esc(c.so_ma)} ${locked ? '<span class="st st-lock">🔒 Thanh toán đủ · Khóa số</span>' : moKhoa ? '<span class="st st-tam-tinh">🔓 Đang mở khóa</span>' : c.da_qt ? '<span class="st st-hoan-thanh">Đã QT</span>' : '<span class="st">Chưa QT</span>'}</h3>
       </div>
       <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button>
@@ -2293,8 +2298,8 @@ function onTpDlgInput(e) {
     // cập nhật sau VAT ngay khi gõ
     const v = (f) => $(`[data-f="${f}"]`, tr)?.value ?? '';
     const dc = Number(tr.dataset.dc) || 0, g2 = String((Number(parseMoney(v('gia_tri'))) || 0) + dc); // TĐ2 = giá trị ký + các đợt
-    $('[data-calc="hd"]', tr).innerHTML = dvm(tpCalc(g2, v('vat')));
-    $('[data-calc="qt"]', tr).innerHTML = dvm(tpCalc(v('gia_tri_qt') || g2, v('vat')));
+    $('[data-calc="hd"]', tr).innerHTML = dDong(tpCalc(g2, v('vat')));
+    $('[data-calc="qt"]', tr).innerHTML = dDong(tpCalc(v('gia_tri_qt') || g2, v('vat')));
   }
 }
 
@@ -3073,7 +3078,7 @@ function dlgShell(id, onClick) {
     dlg = document.createElement('dialog'); dlg.id = id; dlg.className = 'tp-dlg dc-dlg';
     document.body.appendChild(dlg);
     dlg.addEventListener('click', onClick);
-    dlg.addEventListener('input', (e) => { const tr = e.target.closest('tr[data-k]'); if (tr) { const b = $('[data-save]', tr); if (b) b.hidden = false; } });
+    dlg.addEventListener('input', (e) => { const tr = e.target.closest('tr[data-k]'); if (tr) { const b = $('[data-save]', tr); if (b) { b.hidden = false; b.classList.add('primary'); } } });
     dlg.addEventListener('change', (e) => { if (e.target.dataset.f === 'kieu') { const i = $('[data-f="so_tien"]', e.target.closest('tr')); if (i) i.placeholder = e.target.value === 'chot' ? 'Giá trị mới (VD 1.050tr)' : '+ tăng · − giảm (số âm)'; } });
     dlg.addEventListener('keydown', (e) => { const tr = e.target.closest('tr[data-k]'); if (e.key === 'Enter' && tr) { e.preventDefault(); $('[data-save]', tr)?.click(); } });
   }
@@ -3087,6 +3092,7 @@ function openDc(loai, id) {
   setTimeout(() => $('tr[data-k="new"] [data-f="so_tien"]', dlg)?.focus(), 50);
 }
 function renderDc() {
+  const dvm = dDong, tdDelta = (a, b) => tdDeltaG(a, b, dDong); // số theo đồng (khớp ô nhập)
   const dlg = $('#dc-dlg'); const v = dcVanBan();
   if (!dlg || !v) return;
   const ok = v.ok;
@@ -3096,12 +3102,12 @@ function renderDc() {
       <td>${inp('ngay', d ? isoToDmy(d.ngay) : '', 'class="date-dmy"')}</td>
       <td>${inp('noi_dung', d ? d.noi_dung : '', 'maxlength="500" placeholder="VD: Phát sinh tăng khối lượng móng"')}</td>
       <td>${inp('so_tien', d ? money(d.so_tien) : '', 'class="money num" placeholder="+ tăng · − giảm (số âm)"')}</td>
-      <td class="row-actions">${ok ? `<button class="primary sm" data-save ${d ? 'hidden' : ''}>${d ? 'Lưu' : 'Thêm đợt'}</button>${d ? '<button class="danger sm" data-del>Xóa</button>' : ''}` : ''}</td>
+      <td class="row-actions">${ok ? `<button class="${d ? '' : 'primary '}sm" data-save title="${d ? 'Sửa ngày / nội dung / số tiền rồi bấm Lưu' : ''}">${d ? 'Lưu' : 'Thêm đợt'}</button>${d ? '<button class="danger sm" data-del>Xóa</button>' : ''}` : ''}</td>
     </tr>`;
   let lk = v.t1;
   dlg.innerHTML = `
     <div class="tp-dlg-head">
-      <div><div class="muted small">${esc(v.sub)} · Đợt điều chỉnh (TĐ2)</div><h3>${esc(v.ten)}</h3></div>
+      <div><div class="muted small">${esc(v.sub)} · Đợt điều chỉnh (TĐ2) · ${NOTE_DONG}</div><h3>${esc(v.ten)}</h3></div>
       <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button>
     </div>
     <div class="kpis tp-kpis">
@@ -3114,6 +3120,7 @@ function renderDc() {
       <tbody>${v.dot.map((d, k) => row(d, k)).join('')}${ok ? row(null) : ''}${!v.dot.length && !ok ? '<tr><td colspan="5" class="empty">Chưa có đợt điều chỉnh</td></tr>' : ''}</tbody>
       <tfoot><tr><td colspan="3">TĐ2 lũy kế: ${[`TĐ1 ${dvm(v.t1)}`, ...v.dot.map((d, k) => { lk += Number(d.so_tien) || 0; return `Đợt ${k + 1} → ${dvm(lk)}`; })].join(' · ')}</td><td class="num">${dvm(v.t2)}</td><td></td></tr></tfoot>
     </table></div>
+    ${ok && v.dot.length ? '<p class="dc-hint">Sửa đợt đã nhập: sửa trực tiếp ngày, nội dung, số tiền rồi bấm <b>Lưu</b> · bấm <b>Xóa</b> để bỏ đợt</p>' : ''}
     <div class="msg" id="dc-msg" role="alert"></div>`;
   if (ok) { $$('input.money', dlg).forEach(attachMoneyInput); $$('input.date-dmy', dlg).forEach(attachDateInput); }
 }
@@ -3163,13 +3170,14 @@ function openQtDt(id) {
   if (!dlg.open) dlg.showModal();
 }
 function renderQtDt() {
+  const dvm = dDong, tdDelta = (a, b) => tdDeltaG(a, b, dDong); // số theo đồng (khớp ô nhập)
   const dlg = $('#qtdt-dlg'), h = revData.items.find((x) => x.id === qtDtHead);
   if (!dlg || !h) return;
   const ms = [h, ...revData.items.filter((x) => x.loai === 'hd' && x.id !== h.id && hdKey(x) === hdKey(h))];
   const khoa = Boolean(h.qt_dong), ok = canRv('hd') && !khoa;
   dlg.innerHTML = `
     <div class="tp-dlg-head">
-      <div><div class="muted small">Doanh thu · Quyết toán (TĐ3)</div><h3>HĐ ${esc(h.so_ma || h.so_hieu)} ${khoa ? '<span class="st st-hoan-thanh">🔒 Đã chốt quyết toán</span>' : '<span class="st">Chưa QT</span>'}</h3></div>
+      <div><div class="muted small">Doanh thu · Quyết toán (TĐ3) · ${NOTE_DONG}</div><h3>HĐ ${esc(h.so_ma || h.so_hieu)} ${khoa ? '<span class="st st-hoan-thanh">🔒 Đã chốt quyết toán</span>' : '<span class="st">Chưa QT</span>'}</h3></div>
       <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button>
     </div>
     <div class="grid-form qt-head">
@@ -3287,6 +3295,7 @@ function openDtr(code, moi = false) {
   if (dtrDraft) setTimeout(() => $('#dtr-dlg tr[data-k="new"] [data-f="so_tien"]')?.focus(), 50);
 }
 function renderDtr() {
+  const dvm = dDong, tdDelta = (a, b) => tdDeltaG(a, b, dDong); // số theo đồng (khớp ô nhập)
   const dlg = $('#dtr-dlg'); if (!dlg) return;
   const n = NHOM().find((x) => x.code === dtrNhom), ok = can('hd');
   const rows = (costData.du_tru || []).filter((r) => r.nhom === dtrNhom);
@@ -3307,14 +3316,14 @@ function renderDtr() {
       <td class="num">${r ? dvm(gt + Math.round((gt * (Number(vat) || 0)) / 100)) : ''}</td>
       <td class="row-actions">${!ok ? '' : r && khoaN ? (r.loai === 'qt' && md === 3 ? '<button class="sm" data-del title="Xóa số quyết toán để mở khoá nhóm (cần Passcode)">🔓 Mở khoá</button>' : '<span class="muted small">🔒 Khoá</span>')
         : r && { ky: 1, dc: 2, qt: 3 }[r.loai] !== md ? '<span class="muted small" title="Sửa ở tab TĐ tương ứng">–</span>'
-          : `<button class="primary sm" data-save ${r ? 'hidden' : ''}>${r ? 'Lưu' : 'Thêm'}</button>${r ? '<button class="danger sm" data-del>Xóa</button>' : '<button class="sm" data-bo>Bỏ</button>'}`}</td>
+          : `<button class="${r ? '' : 'primary '}sm" data-save title="${r ? 'Sửa ngày / nội dung / số tiền rồi bấm Lưu' : ''}">${r ? 'Lưu' : 'Thêm'}</button>${r ? '<button class="danger sm" data-del>Xóa</button>' : '<button class="sm" data-bo>Bỏ</button>'}`}</td>
     </tr>`;
   };
   const ord = { ky: 0, dc: 1, qt: 2 };
   const sorted = [...rows].sort((a, b) => ord[a.loai] - ord[b.loai] || String(a.ngay || '').localeCompare(String(b.ngay || '')) || a.id - b.id);
   dlg.innerHTML = `
     <div class="tp-dlg-head">
-      <div><div class="muted small">Chi phí · Dự trù theo nhóm · ${esc(costData.du_an?.ma_du_an || '')}</div><h3>${esc(n?.ten || dtrNhom)} ${x.ngoai ? '<span class="st st-tam-tinh">Ngoài dự trù</span>' : ''}</h3></div>
+      <div><div class="muted small">Chi phí · Dự trù theo nhóm · ${esc(costData.du_an?.ma_du_an || '')} · ${NOTE_DONG}</div><h3>${esc(n?.ten || dtrNhom)} ${x.ngoai ? '<span class="st st-tam-tinh">Ngoài dự trù</span>' : ''}</h3></div>
       <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button>
     </div>
     <div class="kpis tp-kpis">

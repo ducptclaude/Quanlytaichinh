@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.11.11.26 – Hộp nhập liệu hiện số bằng đồng (khớp ô nhập); gõ "+" đầu số; sửa đợt điều chỉnh dễ thấy
+- Hộp điều chỉnh, quyết toán, dự trù, chi tiết HĐ đầu vào: mọi số (thẻ, lũy kế, sau VAT, mũi tên) hiện bằng ĐỒNG đầy đủ, ghi "Đơn vị: đồng" ở đầu hộp
+  (trước đây theo ô Đơn vị -> lệch với ô nhập). Bảng ngoài trang vẫn theo ô Đơn vị.
+- Ô tiền: "+3500000" = số dương, tự định dạng "+3.500.000" (trước đây bị hiểu là công thức, không định dạng).
+- Đợt điều chỉnh / dòng dự trù đã nhập: nút Lưu luôn hiện (đậm lên khi có thay đổi) + dòng hướng dẫn sửa trực tiếp ngày, nội dung, số tiền.
+
 ## V06.11.11.26 – Chi phí: HĐ đầu vào mới chỉ tạo ở tab TĐ1
 - TĐ2 / TĐ3: nhóm Thầu phụ ẩn ô nhập + nút, hiện hướng dẫn (tạo mới ở TĐ1; điều chỉnh / quyết toán HĐ đã có: nhấp đúp Số HĐ ở bảng 1).
   Vật tư / MMTB / Nhân công: ẩn ô Hình thức, chỉ thêm dòng chi phí mua lẻ. Bấm lưu kiểu HĐ ở TĐ2/3 bị chặn ("chỉ tạo ở tab TĐ1").

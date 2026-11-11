@@ -158,7 +158,7 @@ function tinhCongThuc(s) {
 }
 // Giá trị (đồng, số nguyên dạng chuỗi) từ nội dung ô: số / số dán / công thức. '' = trống, '-' = đang gõ dấu âm
 const parseMoney = (s) => {
-  const t = String(s ?? '').trim();
+  const t = String(s ?? '').trim().replace(/^\+\s*/, ''); // +3.500.000 = số dương
   if (!t) return '';
   if (t === '-') return '-';
   const v = laCongThuc(t) ? tinhCongThuc(t)
@@ -178,14 +178,14 @@ function baoQuaLon(input, v) {
   return qua;
 }
 // Đang gõ dở số có dấu phẩy / chữ (1,5 tỷ · 180tr · công thức): giữ nguyên, rời ô / Enter mới quy ra số
-const dangGoDo = (v) => laCongThuc(v) || /[^\d.\s-]/.test(String(v ?? '').trim());
+const dangGoDo = (v) => { const t = String(v ?? '').trim().replace(/^\+/, ''); return laCongThuc(t) || /[^\d.\s-]/.test(t); };
 function formatMoneyInput(input) {
   if (dangGoDo(input.value)) { input.classList.add('cong-thuc'); return; } // đang gõ công thức: giữ nguyên, tính khi rời ô / Enter
   input.classList.remove('cong-thuc', 'cong-thuc-loi');
-  const raw = parseMoney(input.value);
+  const raw = parseMoney(input.value), cong = /^\s*\+/.test(input.value);
   baoQuaLon(input, Number(raw));
   const fromEnd = input.value.length - (input.selectionStart ?? input.value.length);
-  input.value = raw === '' || raw === '-' ? raw : moneyFmt.format(Number(raw));
+  input.value = raw === '' || raw === '-' ? (cong && raw === '' ? '+' : raw) : (cong && Number(raw) > 0 ? '+' : '') + moneyFmt.format(Number(raw));
   const pos = Math.max(0, input.value.length - fromEnd);
   try { input.setSelectionRange(pos, pos); } catch {}
 }

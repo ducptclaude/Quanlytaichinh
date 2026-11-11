@@ -3414,3 +3414,5 @@ input.qt-in { width: 100%; min-width: 120px; }
 .num-lk { white-space: nowrap; font-weight: 600; }
 select.dc-kieu { display: block; margin-top: 6px; width: 100%; min-width: 150px; font-size: 12.5px; }
 #c-form .td-an { display: none !important; }
+.dv-dong { font-weight: 600; color: var(--teal); }
+.dc-hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--muted); }

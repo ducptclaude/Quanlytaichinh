@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Đơn vị: đồng": "Unit: VND",
+"Sửa đợt đã nhập: sửa trực tiếp ngày, nội dung, số tiền rồi bấm": "Edit an existing adjustment: change the date, description or amount directly, then click",
+"để bỏ đợt": "to remove it",
 "HĐ đầu vào mới chỉ tạo ở tab TĐ1": "New procurement contracts can only be created in the M1 tab",
 "Ghi điều chỉnh → TĐ2": "Record adjustment → M2",
 "Passcode (8 số)": "Passcode (8 digits)",
