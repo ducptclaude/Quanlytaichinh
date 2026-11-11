@@ -1,6 +1,13 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"TĐ2 – Điều chỉnh HĐ đầu vào": "M2 – Procurement contract adjustment",
+"nhập nhiều lần, mỗi lần 1 đợt (thầu phụ, vật tư, nhân công, MMTB)": "enter as many times as needed, one round each (subcontract, materials, labour, machinery)",
+"Văn bản (HĐ / PL đầu vào) *": "Document (procurement contract / addendum) *",
+"(chưa có HĐ đầu vào nào nhập được – tạo HĐ ở form trên)": "(no procurement contract available – create one in the form above)",
+"Gói chi phí – chưa rõ nhà cung cấp / HĐ (tạm tính)": "Cost package – supplier / contract not yet known (provisional)",
+"HĐ đã có nhà cung cấp (đã xác định)": "Contract with known supplier (confirmed)",
+"Dòng chi phí mua lẻ (chứng từ thực tế)": "Direct purchase line (actual voucher)",
 "TỔNG GÓI CHI PHÍ": "TOTAL COST PACKAGES",
 "(dự trù – tạm tính)": "(budget – provisional)",
 "Điều chỉnh cả nhóm: bấm Nhập": "Group adjustment: click Enter",

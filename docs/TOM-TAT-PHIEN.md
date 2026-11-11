@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V21.11.11.26 – Vật tư / Nhân công / MMTB vào gói như Thầu phụ + form điều chỉnh TĐ2 nhập nhiều lần cho HĐ đầu vào
+- Lỗi: TĐ2 ép Vật tư / Nhân công / MMTB thành "dòng mua lẻ" (ẩn Hình thức) -> không tạo được HĐ gắn gói. Sửa (`fillHinhThuc`, `setCostMode`):
+  TĐ1: 1 ô "Cách nhập" 3 lựa chọn (Gói · HĐ đã có nhà cung cấp · Dòng mua lẻ), ẩn ô Hình thức; TĐ2: Hình thức HĐ (ô Gói) / Dòng chi phí, nhóm còn gói tạm tính -> mặc định HĐ; TĐ3: chỉ mua lẻ.
+- Trang Chi phí, tab TĐ2: form "TĐ2 – Điều chỉnh HĐ đầu vào" trên bảng 1 (`renderTpDcForm`, `saveTpDc`) – chọn văn bản HĐ / PL (theo loại, ghi gói),
+  Tăng/giảm ± hoặc Chốt giá trị mới, VAT, ngày, nội dung -> POST `/api/dieu-chinh` loai `tp` (qua Duyệt, nhật ký); nút "Các đợt" mở hộp sửa / xóa đợt.
+- Kiểm tra: gói VT 300 / NC 400 / TP 300 -> HĐ 320 / 380 / 350 -> điều chỉnh TP +50, −20, VT +10 -> gói 330 ▲30 · 380 ▼20 · 380 ▲80; tổng 1.090 tr = Báo cáo.
+  Tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-11.11.26-14h00`.
+
 ## V20.11.11.26 – Chi phí: bảng + 4 thẻ chạy theo TĐ, HĐ đã gắn nằm dưới gói, tách rõ nội dung từng TĐ
 - HĐ gắn gói hiện NGAY DƯỚI gói (↳ HĐ …); dòng gói TĐ2 / TĐ3 = tổng HĐ đã gắn, ± so TĐ1 của chính gói (VD Kết cấu 300 -> 350 ▲50). Không lặp ở nhóm HĐ CĐT;
   dòng tổng "TỔNG HĐ NGOÀI GÓI". Nút Đóng gói ẩn khi gói đã có HĐ. Cảnh báo ⚠ cộng dồn chỉ khi còn HĐ KHÔNG gắn gói / mua lẻ (máy chủ `duTruMoc` + `dtrChiTiet`).

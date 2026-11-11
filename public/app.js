@@ -1499,9 +1499,17 @@ const costTpMode = () => {
 function fillHinhThuc() {
   const e = cForm.elements, hdv = !e.id.value && HDV.includes(e.nhom.value) && e.nhom.value !== 'thau_phu';
   // Có cả 2 quyền mới cho chọn; chỉ 1 quyền -> tự chọn đúng hình thức được phép
-  $('#c-ht-wrap').hidden = !(hdv && can('hd') && can('tien')) || tdDangChon() !== 1;
-  if (hdv && !(can('hd') && can('tien'))) e.hinh_thuc.value = can('hd') ? 'hd' : 'le';
-  if (hdv && tdDangChon() !== 1) e.hinh_thuc.value = 'le'; // TĐ2 / TĐ3: chỉ thêm dòng chi phí mua lẻ, HĐ đầu vào mới tạo ở TĐ1
+  const td = tdDangChon(), caHai = can('hd') && can('tien');
+  // TĐ1: Vật tư / Nhân công / MMTB chọn bằng 1 ô "Cách nhập" (Gói · HĐ · mua lẻ) -> ẩn ô Hình thức, suy ra từ Cách nhập
+  // TĐ2: cho chọn HĐ (gắn gói / phát sinh) hoặc dòng mua lẻ – nhóm có gói đang tạm tính thì mặc định HĐ · TĐ3: chỉ mua lẻ
+  $('#c-ht-wrap').hidden = !(hdv && caHai && td === 2);
+  if (hdv && !caHai) e.hinh_thuc.value = can('hd') ? 'hd' : 'le';
+  else if (hdv && td === 1) e.hinh_thuc.value = e.cach?.value === 'le' ? 'le' : 'hd';
+  else if (hdv && td === 2 && e.nhom.dataset.htNhom !== e.nhom.value) {
+    const gan = new Set((costData?.thau_phu || []).map((c) => c.goi_id).filter(Boolean));
+    e.hinh_thuc.value = (costData?.du_tru || []).some((r) => r.loai === 'ky' && r.nhom === e.nhom.value && r.tinh_trang !== 'dong' && !gan.has(r.id)) ? 'hd' : 'le';
+  } else if (hdv && td === 3) e.hinh_thuc.value = 'le';
+  if (hdv) e.nhom.dataset.htNhom = e.nhom.value;
 }
 function setCostMode() {
   fillHinhThuc();
@@ -1517,7 +1525,8 @@ function setCostMode() {
       ? `<b>Đang ở TĐ2:</b> HĐ ${esc((TPN()[cForm.elements.nhom.value] || '').toLowerCase())} mới phải chọn <b>Gói chi phí</b>: gắn vào 1 gói dự trù TĐ1 (HĐ <b>thay</b> giá trị tạm tính của gói) hoặc <b>Phát sinh ngoài TĐ1</b> (TĐ1 = 0, VD vệ sinh công nghiệp).`
       : chan
       ? `<b>Đang ở TĐ${tdDangChon()}:</b> HĐ ${esc((TPN()[cForm.elements.nhom.value] || '').toLowerCase())} mới chỉ tạo ở tab <b>TĐ1</b>. Điều chỉnh / quyết toán HĐ đã có: nhấp đúp Số HĐ ở bảng "1. Hợp đồng đầu vào".`
-      : `<b>Đang ở TĐ${tdDangChon()}:</b> chỉ thêm dòng chi phí mua lẻ. HĐ đầu vào mới tạo ở tab <b>TĐ1</b>.`;
+      : tdDangChon() === 2 ? `<b>Đang ở TĐ2:</b> chọn Hình thức <b>Hợp đồng</b> để tạo HĐ thật và gắn vào gói (như thầu phụ), hoặc <b>Dòng chi phí</b> để ghi mua lẻ.`
+        : `<b>Đang ở TĐ3:</b> chỉ thêm dòng chi phí mua lẻ. HĐ mới tạo ở tab <b>TĐ1</b> / <b>TĐ2</b>.`;
   }
   $$('.c-tp', cForm).forEach((el) => (el.hidden = !tp));
   { const gw = $('#c-goi-wrap'); if (gw) { gw.hidden = !(tp && tdDangChon() === 2); if (!gw.hidden) { const sel = cForm.elements.goi, keep = sel.value; sel.innerHTML = goiOptions(cForm.elements.nhom.value); if ([...sel.options].some((o) => o.value === keep)) sel.value = keep; } } }
@@ -1551,10 +1560,15 @@ function setCostMode() {
   const cw = $('#c-cach-wrap'), cs = cForm.elements.cach;
   cw.hidden = !(tdDangChon() === 1 && !cForm.elements.id.value);
   if (!cw.hidden) {
-    const want = tp ? 'goi,hd' : 'le,goi';
-    if ([...cs.options].map((o) => o.value).join() !== want) cs.innerHTML = tp
-      ? '<option value="goi">Gói chi phí – chưa rõ nhà thầu / HĐ (tạm tính)</option><option value="hd">HĐ đã có nhà thầu (đã xác định)</option>'
-      : '<option value="le">Dòng chi phí (chứng từ thực tế)</option><option value="goi">Gói chi phí – dự trù (tạm tính)</option>';
+    const le3 = LE_NHOM.includes(cForm.elements.nhom.value) && can('hd') && can('tien'); // vật tư / nhân công / MMTB: 3 cách
+    const want = le3 ? 'goi,hd,le' : tp ? 'goi,hd' : 'le,goi', keep = cs.value;
+    if ([...cs.options].map((o) => o.value).join() !== want) {
+      cs.innerHTML = le3
+        ? '<option value="goi">Gói chi phí – chưa rõ nhà cung cấp / HĐ (tạm tính)</option><option value="hd">HĐ đã có nhà cung cấp (đã xác định)</option><option value="le">Dòng chi phí mua lẻ (chứng từ thực tế)</option>'
+        : tp ? '<option value="goi">Gói chi phí – chưa rõ nhà thầu / HĐ (tạm tính)</option><option value="hd">HĐ đã có nhà thầu (đã xác định)</option>'
+          : '<option value="le">Dòng chi phí (chứng từ thực tế)</option><option value="goi">Gói chi phí – dự trù (tạm tính)</option>';
+      if ([...cs.options].some((o) => o.value === keep)) cs.value = keep;
+    }
   }
   const goiMode = costGoiMode();
   $('#c-goiten-wrap').hidden = !goiMode;
@@ -2087,9 +2101,86 @@ function tpTdSv(c, k) {
     return a + v + Math.round((v * (Number(l.vat) || 0)) / 100);
   }, 0);
 }
+// ---------- Form điều chỉnh TĐ2 cho HĐ đầu vào (nhiều lần, giống Doanh thu): chọn văn bản HĐ / PL -> ± hoặc chốt giá trị mới ----------
+function tpDcVanBan() {
+  const out = [];
+  for (const c of costData?.thau_phu || []) {
+    if (c.khoa) continue;
+    for (const l of c.lines || []) {
+      if (l.gia_tri_qt !== null && l.gia_tri_qt !== undefined && l.gia_tri_qt !== '') continue; // đã có số QT -> khoá
+      out.push({ id: l.id, c, l, t2: Number(l.gia_tri) || 0, vat: l.vat });
+    }
+  }
+  return out;
+}
+function renderTpDcForm() {
+  let df = $('#tp-dc-form');
+  if (!df) {
+    const card = $('#tp-card'), anchor = card?.querySelector('.tp-filter'); if (!anchor) return;
+    df = document.createElement('form');
+    df.id = 'tp-dc-form'; df.className = 'grid-form dc-form'; df.noValidate = true; df.hidden = true;
+    df.innerHTML = `<div class="span-2 dc-tieu-de"><b>TĐ2 – Điều chỉnh HĐ đầu vào</b> <span class="muted small">nhập nhiều lần, mỗi lần 1 đợt (thầu phụ, vật tư, nhân công, MMTB)</span></div>
+      <label class="span-2">Văn bản (HĐ / PL đầu vào) *<select name="vb_id"></select></label>
+      <label>Cách nhập<select name="kieu"><option value="dc">Tăng / giảm (±)</option><option value="chot">Chốt giá trị mới</option></select></label>
+      <label><span class="dc-so-lab">Số tiền tăng (+) / giảm (−) *</span><input name="so_tien" class="money" placeholder="VD: +50tr hoặc -30.000.000"><span class="calc-note dc-preview"></span></label>
+      <label>VAT (%)<input name="vat" type="number" min="0" max="100" step="1" placeholder="theo HĐ / PL"></label>
+      <label>Ngày<input name="ngay" class="date-dmy"></label>
+      <label class="span-2">Nội dung<input name="noi_dung" maxlength="300" placeholder="VD: Phát sinh tăng khối lượng cốt thép"></label>
+      <div class="actions"><button type="submit" class="primary">Ghi điều chỉnh</button><button type="button" class="dc-form-xem" title="Xem / sửa / xóa các đợt đã nhập của văn bản này">Các đợt</button></div>
+      <div class="msg span-2" id="tp-dc-msg" role="alert"></div>`;
+    anchor.before(df);
+    attachMoneyInput(df.elements.so_tien); attachDateInput(df.elements.ngay);
+    ['input', 'change'].forEach((ev) => df.addEventListener(ev, tpDcPreview));
+    df.addEventListener('submit', (e) => { e.preventDefault(); saveTpDc(); });
+    $('.dc-form-xem', df).addEventListener('click', () => { const id = Number(df.elements.vb_id.value); if (id) openDc('tp', id); });
+  }
+  df.hidden = !(can('hd') && !costAll && tdDangChon() === 2);
+  if (df.hidden) return;
+  const keep = df.elements.vb_id.value, ds = tpDcVanBan();
+  const nhomTen = (k) => TPN()[k] || k;
+  const byNhom = HDV.map((k) => [k, ds.filter((x) => (x.c.nhom || 'thau_phu') === k)]).filter(([, a]) => a.length);
+  df.elements.vb_id.innerHTML = ds.length ? byNhom.map(([k, a]) => `<optgroup label="${esc(nhomTen(k))}">${a.map((x) => `<option value="${x.id}">${esc(x.c.so_ma)} · ${esc(x.l.ma_loai)}${x.c.doi_tac ? ' · ' + esc(x.c.doi_tac) : ''}${x.c.goi_id ? ' · gói ' + esc(goiTen(x.c.goi_id)) : ''} — TĐ2 hiện tại ${money(x.t2)} đ</option>`).join('')}</optgroup>`).join('')
+    : '<option value="">(chưa có HĐ đầu vào nào nhập được – tạo HĐ ở form trên)</option>';
+  if (ds.some((x) => String(x.id) === keep)) df.elements.vb_id.value = keep;
+  tpDcPreview();
+}
+function tpDcPreview() {
+  const df = $('#tp-dc-form'); if (!df) return;
+  const x = tpDcVanBan().find((y) => y.id === Number(df.elements.vb_id.value));
+  if (x && df.dataset.vatVb !== String(x.id)) { df.elements.vat.value = x.vat ?? ''; df.dataset.vatVb = String(x.id); }
+  const chot = df.elements.kieu.value === 'chot';
+  $('.dc-so-lab', df).textContent = chot ? 'Giá trị chốt mới (TĐ2) *' : 'Số tiền tăng (+) / giảm (−) *';
+  df.elements.so_tien.placeholder = chot ? 'VD: 1.050tr' : 'VD: +50tr hoặc -30.000.000';
+  const v = parseMoney(df.elements.so_tien.value), el = $('.dc-preview', df);
+  if (!x || v === '' || v === '-') { el.textContent = x ? `TĐ2 hiện tại: ${money(x.t2)} đ` : ''; return; }
+  const moi = chot ? Number(v) : x.t2 + Number(v), d = moi - x.t2;
+  el.innerHTML = `TĐ2 mới = <b>${money(moi)}</b> đ · ${d > 0 ? '<span class="td-up">▲ +' : d < 0 ? '<span class="td-down">▼ ' : '<span>'}${money(d)}</span> so với hiện tại`;
+}
+async function saveTpDc() {
+  const df = $('#tp-dc-form'), msg = (t, ty) => showMsg($('#tp-dc-msg'), t, ty);
+  const x = tpDcVanBan().find((y) => y.id === Number(df.elements.vb_id.value));
+  if (!x) return msg('Chọn văn bản HĐ / PL đầu vào', 'err');
+  df.elements.so_tien.dispatchEvent(new Event('blur'));
+  const ngay = dmyToIso(df.elements.ngay.value);
+  if (ngay === null) return msg('Ngày không hợp lệ, nhập theo dạng dd/mm/yyyy', 'err');
+  const v = parseMoney(df.elements.so_tien.value);
+  if (v === '' || v === '-') return msg(df.elements.kieu.value === 'chot' ? 'Nhập giá trị chốt mới' : 'Nhập số tiền tăng (+) hoặc giảm (−)', 'err');
+  const chot = df.elements.kieu.value === 'chot', d = chot ? Number(v) - x.t2 : Number(v);
+  if (!d) return msg(chot ? 'Giá trị chốt bằng TĐ2 hiện tại – không có thay đổi' : 'Số tiền phải khác 0', 'err');
+  const noi_dung = df.elements.noi_dung.value.trim() || (chot ? `Chốt giá trị mới ${money(v)}` : 'Điều chỉnh');
+  try {
+    const vt = df.elements.vat.value.trim(), vat = vt === '' || Number(vt) === Number(x.vat || 0) ? null : vt;
+    await api('/api/dieu-chinh', { method: 'POST', body: JSON.stringify({ loai: 'tp', vb_id: x.id, ngay, noi_dung, so_tien: String(d), vat }) });
+    df.elements.so_tien.value = ''; df.elements.noi_dung.value = ''; delete df.dataset.vatVb;
+    const ten = `${x.l.ma_loai} ${x.c.so_ma}`;
+    await loadCost();
+    msg(`Đã ghi điều chỉnh ${d > 0 ? '+' : ''}${money(d)} đ cho ${ten} (TĐ2)`);
+  } catch (err) { msg(err.message, 'err'); }
+}
 function renderTpCard() {
   const tatCa = costData.thau_phu;
   const kTd = tdDangChon();
+  renderTpDcForm();
   { const fg = $('#tp-loc')?.closest('.tp-fg'); if (fg) fg.hidden = kTd !== 3; if (kTd !== 3) tpFilter.loc = ''; } // lọc quyết toán = việc của TĐ3
   const tdSum = (rows, k) => rows.reduce((a, c) => a + tpTdSv(c, k), 0);
   // Ô thứ 2: TĐ1 -> giá trị HT/QT như cũ; TĐ2 / TĐ3 -> tăng / giảm so với TĐ trước (chi phí tăng = đỏ)
@@ -2300,7 +2391,7 @@ $('#tp-tbody').addEventListener('click', (e) => {
   renderTpCard();
 });
 $('#tp-q').addEventListener('input', (e) => { tpFilter.q = e.target.value; if (costData) renderTpCard(); });
-cForm?.elements.cach?.addEventListener('change', () => setCostMode());
+cForm?.elements.cach?.addEventListener('change', () => { setCostMode(); setCostMode(); }); // lần 2: Hình thức (vật tư / nhân công / MMTB) theo Cách nhập vừa chọn
 // Đổi loại HĐ ngay trên bảng
 $('#tp-tbody').addEventListener('change', async (e) => {
   const sel = e.target.closest('[data-tpkind]');
