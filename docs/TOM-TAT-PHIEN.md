@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V15.11.11.26 – Nút của các form nhập thẳng hàng với ô nhập
+- Trước: nút canh theo đáy hàng -> tụt ~20px khi ô bên cạnh có dòng ghi chú ("Chưa có VAT"…). Nay canh theo đỉnh ô nhập (máy tính ≥ 700px),
+  áp dụng mọi form (HĐ/PL, HT/QT, điều chỉnh TĐ2, Chi phí). Điện thoại: nút vẫn ở hàng riêng.
+
 ## V14.11.11.26 – Form TĐ2 cân 5 cột + ô VAT; VAT riêng cho từng đợt điều chỉnh
 - Form TĐ2: Văn bản · Cách nhập · Số tiền · VAT (%) / Điều chỉnh (sau VAT) · Ngày · Nội dung · nút. VAT tự điền theo HĐ / PL, sửa được;
   ghi chú "VAT x% (theo PL..)" hoặc "khác VAT của PL..". Hộp các đợt có thêm cột VAT %.

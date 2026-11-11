@@ -3433,4 +3433,6 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 
 /* Form điều chỉnh TĐ2: 5 cột cân như form TĐ1 */
 @media (min-width: 1100px) { #dc-form { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-#dc-form .actions { align-self: end; }
+#dc-form .actions { align-self: start; }
+/* Nút của form: thẳng hàng với ô nhập cùng hàng (không tụt xuống khi ô bên cạnh có dòng ghi chú) */
+@media (min-width: 700px) { .grid-form > .actions { align-self: start; padding-top: 19px; } }
