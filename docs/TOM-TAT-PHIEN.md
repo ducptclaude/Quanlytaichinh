@@ -2,6 +2,15 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.11.11.26 – Đợt B: dự trù chi phí theo nhóm; tiêu đề cột chỉ ghi TĐ1 / TĐ2 / TĐ3
+- Kho dữ liệu (chỉ THÊM): bảng `du_tru` (dự án, nhóm, loai ky = TĐ1 dự trù · dc = TĐ2 đợt điều chỉnh ± · qt = TĐ3 quyết toán, ngày, nội dung, số tiền, VAT).
+- Mỗi nhóm: TĐ1 = Σ dự trù · TĐ2 = TĐ1 + Σ đợt (chưa có TĐ1 = "Ngoài dự trù") · TĐ3 = Σ quyết toán (chưa có = TĐ2). Nhóm không VAT (lương, ngoại giao, tài chính) tự VAT 0.
+- Chi phí dự án tại mỗi TĐ = HĐ đầu vào + chi phí đã ghi + dự trù (cộng dồn). Nhóm có từ 2 nguồn (HĐ đầu vào / mua lẻ / dự trù) -> lưu ý "⚠ cộng dồn".
+  Dự trù khối B1 trừ vào LN gộp. Áp dụng ở Báo cáo mục I, IV và số TĐ1 tự tính (dự án chưa chốt TĐ1).
+- API: POST `/api/du-an/:id/du-tru`, PUT/DELETE `/api/du-tru/:id` (qua duyệt, có nhật ký); GET chi phí trả thêm `du_tru`.
+- Trang Chi phí: khung "2. Dự trù chi phí theo nhóm" (TĐ1/TĐ2/TĐ3, chi tiết đã có, lưu ý) + hộp nhập theo nhóm (+ Dự trù / + Đợt / + Quyết toán).
+- Tiêu đề cột bảng Doanh thu, HĐ đầu vào, Dự trù: chỉ ghi TĐ1 · TĐ2 · TĐ3; rê chuột hiện Ký / Điều chỉnh / Quyết toán.
+
 ## V25.10.11.26 — Điện thoại: giữ nguyên dạng bảng (bỏ đổi bảng thành thẻ)
 - Người dùng: dạng thẻ khó đọc → `public/common.js` `mcardInit` TẮT (bật lại: `window.BANG_THE = true`). CSS thẻ cũ còn trong `style.css` nhưng không dùng (bảng không còn lớp `m-card`).
 - ≤ 900px: bảng vuốt ngang trong khung bảng (trang không kéo ngang), chữ bảng 12px, ô gọn, bóng mờ mép phải báo còn cột.

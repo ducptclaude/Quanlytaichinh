@@ -220,6 +220,26 @@
           <p class="muted small">Nhấp đúp vào <b>Số hợp đồng</b> (hoặc bấm Chi tiết) để nhập HĐ/PL, giá trị HT/QT và thanh toán. Đơn vị theo ô <b>Đơn vị</b> trên cùng (mặc định triệu đồng), sau VAT (rê chuột vào số để xem số đồng đầy đủ); HT/QT chưa nhập = bằng giá trị HĐ/PL (chưa quyết toán).</p>
         </div>
 
+        <!-- Đợt B: dự trù chi phí theo nhóm (TĐ1 dự trù · TĐ2 điều chỉnh / ngoài dự trù · TĐ3 quyết toán) -->
+        <div class="card" id="dtr-card" hidden>
+          <div class="toolbar tv-head">
+            <h2 title="Chưa có HĐ / chứng từ chi tiết thì lấy dự trù">2. Dự trù chi phí theo nhóm</h2>
+            <div class="tv-total">TĐ2: <b id="dtr-total">0</b></div>
+          </div>
+          <div class="table-wrap">
+            <table class="dtr-table">
+              <thead><tr>
+                <th>Nhóm chi phí</th><th class="num td-col" title="Dự trù ban đầu">TĐ1</th><th class="num td-col" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm (gồm ngoài dự trù)">TĐ2</th><th class="num td-col" title="Quyết toán – chưa có = TĐ2">TĐ3</th>
+                <th class="num" title="HĐ đầu vào (TĐ2) + chi phí đã ghi của nhóm, trước VAT">Chi tiết đã có</th><th>Lưu ý</th><th></th>
+              </tr></thead>
+              <tbody id="dtr-tbody"></tbody>
+              <tfoot id="dtr-tfoot"></tfoot>
+            </table>
+          </div>
+          <div class="tv-tools" id="dtr-tools"></div>
+          <p class="muted small">Đơn vị: đồng, trước VAT. Chi phí của dự án tại mỗi TĐ = HĐ đầu vào + chi phí đã ghi + dự trù (cộng dồn). Nhóm vừa có chi tiết vừa có dự trù: hệ thống vẫn cộng dồn và báo <b>⚠ cộng dồn</b> để kiểm tra tránh tính trùng. Nhóm chưa có dự trù TĐ1 mà phát sinh ở TĐ2 = <b>ngoài dự trù</b>.</p>
+        </div>
+
         <!-- B1 / B2 / B3: dựng từ danh mục khối chi phí -->
         <div class="card c-blocks-bar">
           <button type="button" class="primary" id="c-blocks-toggle" aria-expanded="false">Hiện bảng chi tiết chi phí ▾</button>

@@ -5,7 +5,7 @@ const store = require('./lib/db');
 const auth = require('./lib/auth');
 const security = require('./lib/security');
 const audit = require('./lib/audit');
-const { validateDieuChinh, validateQuyetToan } = require('./lib/validate');
+const { validateDieuChinh, validateQuyetToan, validateDuTru } = require('./lib/validate');
 const { TP_NHOM, TRANG_THAI, ROLES, QUYEN, validateProject, validateUser, validateSettings, validateContact, validateTarget, validateRevenue, validateTienVe, validateCost, validateTp, validateTpLine, validateTpPay, passwordErrors, passcodeErrors } = require('./lib/validate');
 const { buildContracts, summarizeContracts } = require('./lib/subcontract');
 const { KHOI_CHI_PHI, NHOM_CHI_PHI, summarizeCost, sortCost, costLine } = require('./lib/cost');
@@ -278,6 +278,9 @@ const DUYET_TRUOC = [
   ['POST', /^\/thau-phu\/(\d+)\/thanh-toan$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'tp', QUYEN.tien],
   ['PUT', /^\/tp-thanh-toan\/(\d+)$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'r', QUYEN.tien],
   ['DELETE', /^\/tp-thanh-toan\/(\d+)$/, 'Thầu phụ – thanh toán', 'tp_thanh_toan', 'r', QUYEN.tien],
+  ['POST', /^\/du-an\/(\d+)\/du-tru$/, 'Dự trù chi phí', 'du_tru', 'p', QUYEN.hd],
+  ['PUT', /^\/du-tru\/(\d+)$/, 'Dự trù chi phí', 'du_tru', 'r', QUYEN.hd],
+  ['DELETE', /^\/du-tru\/(\d+)$/, 'Dự trù chi phí', 'du_tru', 'r', QUYEN.hd],
   ['POST', /^\/dieu-chinh$/, 'Đợt điều chỉnh', 'dieu_chinh', 'vb', QUYEN.hd],
   ['PUT', /^\/dieu-chinh\/(\d+)$/, 'Đợt điều chỉnh', 'dieu_chinh', 'r', QUYEN.hd],
   ['DELETE', /^\/dieu-chinh\/(\d+)$/, 'Đợt điều chỉnh', 'dieu_chinh', 'r', QUYEN.hd],
@@ -293,7 +296,7 @@ const KIEM = { // kiểm tra dữ liệu ngay lúc gửi (lỗi báo ngay cho ng
   thau_phu: (b, m) => (m === 'POST' ? (() => { const t = validateTp(b), l = validateTpLine({ ...(b.hd || {}), ma_loai: 'HĐ' });
     return { data: { ...t.data, gia_tri: l.data.gia_tri, ngay: l.data.ngay }, errors: [...t.errors, ...l.errors] }; })() : validateTp(b)),
   tp_hd_pl: (b) => validateTpLine(b), tp_thanh_toan: (b) => validateTpPay(b),
-  dieu_chinh: (b, m) => validateDieuChinh(b, m === 'PUT'), qt_dt: (b) => validateQuyetToan(b),
+  du_tru: (b, m) => validateDuTru(b, m === 'PUT'), dieu_chinh: (b, m) => validateDieuChinh(b, m === 'PUT'), qt_dt: (b) => validateQuyetToan(b),
 };
 const soTien = (x) => { const n = Number(String(x ?? '').replace(/[.,\s]/g, '')); return Number.isFinite(n) && String(x ?? '').trim() !== '' ? n : null; };
 api.use(wrap(async (req, res, next) => {
@@ -799,10 +802,10 @@ api.get('/dashboard', wrap(async (_req, res) => {
 async function reportProjects({ withCost = false } = {}) {
   const list = await store.listProjects();
   const du_an = await Promise.all(list.map(async (p) => {
-    const [rev, tienVe, cost, tp] = await Promise.all([
-      store.listRevenue(p.id), store.listTienVe(p.id), store.listCost(p.id), store.listTp(p.id)]);
+    const [rev, tienVe, cost, tp, duTru] = await Promise.all([
+      store.listRevenue(p.id), store.listTienVe(p.id), store.listCost(p.id), store.listTp(p.id), store.listDuTru(p.id)]);
     const lines = sortCost(cost).map(costLine);
-    const d = projectReport(p, { rev: sortRevenue(rev).map(calcLine), tienVe: sortTienVe(tienVe), cost: lines, tp: buildContracts(tp) });
+    const d = projectReport(p, { rev: sortRevenue(rev).map(calcLine), tienVe: sortTienVe(tienVe), cost: lines, tp: buildContracts(tp), duTru });
     if (withCost) d.chi_tiet_cp = costLinesFor(lines);
     return d;
   }));
@@ -997,6 +1000,32 @@ api.get('/doanh-thu-tong', wrap(async (_req, res) => {
   }
   res.json({ tat_ca: true, so_du_an: projects.length, du_an: { id: 0, ma_du_an: 'Tất cả', ten_du_an: `Tất cả dự án (${projects.length})`, chu_dau_tu: '' },
     items, tong: summarize(items), tien_ve, tong_tien_ve: summarizeTienVe(tien_ve) });
+}));
+
+// ---------- Dự trù chi phí theo nhóm (Đợt B): TĐ1 dự trù · TĐ2 điều chỉnh / ngoài dự trù · TĐ3 quyết toán ----------
+api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id || !(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
+  const { data, errors } = validateDuTru(req.body || {});
+  if (errors.length) return bad(res, errors);
+  res.status(201).json(await store.createDuTru(id, data, req.user.id));
+}));
+api.put('/du-tru/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.getDuTru(id));
+  if (!cur) return bad(res, 'Không tìm thấy dòng dự trù', 404);
+  const { data, errors } = validateDuTru({ ...req.body, nhom: cur.nhom, loai: cur.loai }, true);
+  if (!errors.length && cur.loai === 'dc' && data.so_tien === 0) errors.push('Đợt điều chỉnh: nhập số tăng (+) hoặc giảm (−) khác 0');
+  if (!errors.length && cur.loai !== 'dc' && data.so_tien < 0) errors.push('Dự trù / quyết toán không được âm');
+  if (errors.length) return bad(res, errors);
+  await store.updateDuTru(id, data, req.user.id);
+  res.json({ ok: true });
+}));
+api.delete('/du-tru/:id', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id || !(await store.getDuTru(id))) return bad(res, 'Không tìm thấy dòng dự trù', 404);
+  await store.deleteDuTru(id);
+  res.json({ ok: true });
 }));
 
 // ---------- Đợt điều chỉnh (TĐ2) của HĐ / PL và Quyết toán HĐ (TĐ3) – Đợt A ----------
@@ -1201,7 +1230,7 @@ api.get('/du-an/:id/chi-phi', wrap(async (req, res) => {
   // Danh sách HĐ chủ đầu tư (HĐ gốc) để gộp / gắn thầu phụ, theo thứ tự như tab Doanh thu
   const hd_cdt = sortRevenue((await store.listRevenue(id)).filter((r) => r.loai === 'hd' && r.ma_loai === 'HĐ'))
     .map((r) => ({ id: r.id, so_ma: r.so_ma, so_hieu: r.so_hieu, ngay: r.ngay }));
-  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]) });
+  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]), du_tru: await store.listDuTru(id) });
 }));
 
 // Chi phí tổng hợp TẤT CẢ dự án (chỉ xem): ghép dữ liệu từng dự án, tính tổng bằng cùng hàm như từng dự án

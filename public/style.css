@@ -3354,8 +3354,7 @@ dialog.dc-dlg { max-width: 860px; }
 .dc-dlg label.chk { display: flex; align-items: center; gap: 8px; flex-direction: row; }
 .dc-dlg label.chk input { width: auto; }
 
-/* =====================================================================
-   ĐIỆN THOẠI / MÁY TÍNH BẢNG (iPhone SE → Pro Max, Galaxy S / A / Z Fold / Z Flip, iPad, Galaxy Tab)
+/* ==============================================================   ĐIỆN THOẠI / MÁY TÍNH BẢNG (iPhone SE → Pro Max, Galaxy S / A / Z Fold / Z Flip, iPad, Galaxy Tab)
    - Cụm nút đầu trang (Xuất, Đơn vị, Ngôn ngữ, Sáng/Tối, Người dùng) xuống dòng gọn, không kéo ngang trang
    - Khung Đánh giá hoàn thành – thu tiền không rộng quá màn hình (Z Fold mở, iPad xoay ngang)
    ===================================================================== */
@@ -3393,3 +3392,9 @@ dialog.dc-dlg { max-width: 860px; }
   .table-wrap > table th, .table-wrap > table td { padding: 6px 7px; }
   .table-wrap > table thead th { font-size: 10.5px; }
 }
+=======
+/* Đợt B – dự trù chi phí theo nhóm */
+.dtr-table th.td-col { white-space: nowrap; }
+#dtr-dlg tr.dtr-qt td:first-child b { color: var(--teal); }
+#dtr-dlg tr.dtr-dc td:first-child b { color: var(--navy); }
+#dtr-tools .tv-hd-pick { max-width: 100%; } #dtr-tools select { max-width: min(260px, 60vw); }

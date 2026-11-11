@@ -426,7 +426,7 @@ function buildRevenueSections() {
         <table class="rev-table">
           <thead><tr>
             <th class="num">#</th><th>${loai === 'hd' ? 'Số HĐ / Phụ lục' : 'Số HĐ / Đợt – Hồ sơ'}</th><th>${loai === 'hd' ? 'Ngày ký' : 'Ngày'}</th>
-            ${loai === 'hd' ? `<th class="num td-col" title="Giá trị lúc ký (trước VAT)">TĐ1 · Ký</th><th class="num td-col" title="TĐ1 + các đợt điều chỉnh tăng / giảm (trước VAT)">TĐ2 · Điều chỉnh</th><th class="num td-col" title="Giá trị quyết toán (trước VAT). Chưa có = TĐ2">TĐ3 · Quyết toán</th><th class="num">VAT</th>`
+            ${loai === 'hd' ? `<th class="num td-col" title="Ký – giá trị lúc ký (trước VAT)">TĐ1</th><th class="num td-col" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm (trước VAT)">TĐ2</th><th class="num td-col" title="Quyết toán – giá trị quyết toán (trước VAT). Chưa có = TĐ2">TĐ3</th><th class="num">VAT</th>`
               : '<th class="num">Trước VAT</th><th class="num">VAT</th><th class="num">Tiền VAT</th>'}
             <th class="num">Sau VAT</th><th>Ghi chú</th><th>Người cập nhật</th>${can('hd') ? '<th></th>' : ''}
           </tr></thead>
@@ -1584,6 +1584,7 @@ async function saveCost() {
 
 // ---------- Bảng cây: Nhóm -> Hạng mục -> Chi tiết ----------
 function renderCost() {
+  renderDuTru();
   const { items, tong } = costData;
   const edit = can('tien') && !costAll;
   const daTag = (r) => (costAll && r.ma_du_an ? `<span class="c-da">${esc(r.ma_du_an)}</span>` : ''); // xem tổng hợp: ghi mã dự án
@@ -2149,8 +2150,8 @@ function renderTpDlg() {
 
     <h4>Giá trị HĐ / PL</h4>
     <div class="table-wrap"><table class="tp-dtl">
-      <thead><tr><th>Số HĐ/PL</th><th>Ngày ký</th><th class="num">TĐ1 · Giá trị ký<br><span class="muted small">trước VAT</span></th><th class="num">TĐ2 · Điều chỉnh<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">TĐ2<br><span class="muted small">sau VAT</span></th>
-        <th class="num">TĐ3 · HT/QT<br><span class="muted small">trước VAT</span></th><th class="num">HT/QT<br><span class="muted small">sau VAT</span></th><th>Ghi chú</th><th></th></tr></thead>
+      <thead><tr><th>Số HĐ/PL</th><th>Ngày ký</th><th class="num" title="Ký – giá trị lúc ký">TĐ1<br><span class="muted small">trước VAT</span></th><th class="num" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm">TĐ2<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">TĐ2<br><span class="muted small">sau VAT</span></th>
+        <th class="num" title="Quyết toán – giá trị HT/QT. Trống = TĐ2">TĐ3<br><span class="muted small">trước VAT</span></th><th class="num">HT/QT<br><span class="muted small">sau VAT</span></th><th>Ghi chú</th><th></th></tr></thead>
       <tbody>${c.lines.map((l) => lineRow(l, false)).join('')}${tpDrafts.lines.map((d) => lineRow(d, true)).join('')}</tbody>
       <tfoot><tr><td colspan="2">TỔNG</td>${(() => { const [a, b] = tpTdTong(c.lines); return `<td class="num tp-sum-mo" title="Tổng TĐ1 – giá trị ký, trước VAT">${money(a)}</td><td class="num tp-sum-mo" title="Tổng TĐ2 – sau điều chỉnh, trước VAT">${money(b)}${tdDelta(b, a)}</td>`; })()}<td></td>
         <td class="num">${money(c.hd_sau_vat)}</td><td class="num tp-sum-mo" title="Tổng giá trị HT/QT trước VAT">${money(c.qt_gia_tri)}</td>
@@ -3065,7 +3066,7 @@ function renderQtDt() {
       <label class="chk span-2"><input type="checkbox" data-f="dong" ${h.qt_dong ? 'checked' : ''} ${ok ? '' : 'disabled'}> Đóng quyết toán cả HĐ (HĐ + ${ms.length - 1} PL) – văn bản để trống tạm lấy TĐ2 và có lưu ý</label>
     </div>
     <div class="table-wrap"><table class="tp-dtl">
-      <thead><tr><th>Văn bản</th><th class="num">TĐ1 · Ký</th><th class="num">TĐ2 · Điều chỉnh</th><th class="num">TĐ3 · Giá trị quyết toán<br><span class="muted small">trước VAT · trống = TĐ2</span></th></tr></thead>
+      <thead><tr><th>Văn bản</th><th class="num" title="Ký">TĐ1</th><th class="num" title="Điều chỉnh">TĐ2</th><th class="num" title="Quyết toán – trước VAT, trống = TĐ2">TĐ3<br><span class="muted small">nhập số quyết toán</span></th></tr></thead>
       <tbody>${ms.map((r) => { const x = vbTd(r); return `<tr data-id="${r.id}">
         <td><span class="kind-tag ${r.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${esc(r.ma_loai)}</span> <b>${esc(r.so_ma || r.so_hieu)}</b></td>
         <td class="num">${dvm(x.t1)}</td><td class="num">${dvm(x.t2)}${tdDelta(x.t2, x.t1)}</td>
@@ -3087,5 +3088,138 @@ async function onQtDtClick(e) {
   try {
     await api(`/api/doanh-thu/${qtDtHead}/quyet-toan`, { method: 'PUT', body: JSON.stringify({ ngay_qt, dong, items }) });
     await loadRevenue(); renderQtDt(); showMsg(msg(), 'Đã lưu quyết toán');
+  } catch (err) { showMsg(msg(), err.message, 'err'); }
+}
+
+// ---------- Đợt B: dự trù chi phí theo nhóm ----------
+const DTR_LOAI = { ky: 'TĐ1 · Dự trù', dc: 'TĐ2 · Đợt điều chỉnh', qt: 'TĐ3 · Quyết toán' };
+// Dự trù 1 nhóm tại TĐ1 / TĐ2 / TĐ3 (trước VAT) – cùng cách tính với Báo cáo
+function dtrTd(rows) {
+  const S = (k) => rows.filter((r) => r.loai === k).reduce((a, r) => a + (Number(r.so_tien) || 0), 0);
+  const t1 = S('ky'), t2 = t1 + S('dc'), coQt = rows.some((r) => r.loai === 'qt');
+  return { t1, t2, t3: coQt ? S('qt') : t2, coQt, ngoai: t1 === 0 && t2 !== 0 };
+}
+// Chi tiết đã có của nhóm (trước VAT): HĐ đầu vào theo TĐ2 + chi phí đã ghi (không gồm vay / trả gốc)
+function dtrChiTiet(code) {
+  const n = NHOM().find((x) => x.code === code);
+  const tpC = (costData.thau_phu || []).filter((c) => (c.nhom || 'thau_phu') === code);
+  const tpV = tpC.reduce((a, c) => a + c.lines.reduce((b, l) => b + (Number(l.gia_tri) || 0), 0), 0);
+  const le = (costData.items || []).filter((r) => r.nhom === code && !n?.sub.find((x) => x.code === r.nhom_con)?.khong_tinh_cp);
+  const leV = le.reduce((a, r) => a + (Number(r.gia_tri) || 0), 0);
+  return { v: tpV + leV, nguon: [tpC.length && 'HĐ đầu vào', leV && 'mua lẻ'].filter(Boolean) };
+}
+function renderDuTru() {
+  const card = $('#dtr-card');
+  if (!card) return;
+  const rows = costData.du_tru;
+  card.hidden = costAll || !Array.isArray(rows);
+  if (card.hidden) return;
+  const ok = can('hd');
+  const codes = [...new Set(rows.map((r) => r.nhom))].sort((a, b) => NHOM().findIndex((x) => x.code === a) - NHOM().findIndex((x) => x.code === b));
+  const tot = [0, 0, 0];
+  $('#dtr-tbody').innerHTML = codes.length ? codes.map((code) => {
+    const n = NHOM().find((x) => x.code === code), x = dtrTd(rows.filter((r) => r.nhom === code)), ct = dtrChiTiet(code);
+    tot[0] += x.t1; tot[1] += x.t2; tot[2] += x.t3;
+    const note = [x.ngoai ? '<span class="st st-tam-tinh" title="Chưa có dự trù TĐ1 – phát sinh ở TĐ2">Ngoài dự trù</span>' : '',
+      ct.nguon.length ? `<span class="warn-text" title="Nhóm có cả ${ct.nguon.join(' + ')} và dự trù – đang cộng dồn, kiểm tra tránh tính trùng">⚠ cộng dồn</span>` : ''].filter(Boolean).join(' ');
+    return `<tr data-dtr="${esc(code)}">
+      <td><b>${esc(n?.ten || code)}</b></td>
+      <td class="num">${dvm(x.t1)}</td>
+      <td class="num">${dvm(x.t2)}${tdDelta(x.t2, x.t1)}</td>
+      <td class="num ${x.coQt ? '' : 'muted'}">${dvm(x.t3)}${tdDelta(x.t3, x.t2)}</td>
+      <td class="num">${ct.v ? dvm(ct.v) : '<span class="muted">–</span>'}</td>
+      <td>${note}</td>
+      <td class="row-actions"><button type="button" class="sm" data-dtropen="${esc(code)}">${ok ? 'Nhập / sửa' : 'Xem'}</button></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" class="empty">Chưa có dự trù. ${ok ? 'Chọn nhóm bên dưới rồi bấm <b>+ Dự trù</b>.' : ''}</td></tr>`;
+  $('#dtr-tfoot').innerHTML = codes.length ? `<tr><td>TỔNG DỰ TRÙ</td><td class="num">${dvm(tot[0])}</td><td class="num">${dvm(tot[1])}${tdDelta(tot[1], tot[0])}</td><td class="num">${dvm(tot[2])}${tdDelta(tot[2], tot[1])}</td><td colspan="3"></td></tr>` : '';
+  $('#dtr-total').textContent = dvm(tot[1]);
+  const tools = $('#dtr-tools');
+  tools.innerHTML = ok ? `<label class="tv-hd-pick">Nhóm <select id="dtr-pick">${NHOM().map((n) => `<option value="${n.code}">${esc(n.ten)}</option>`).join('')}</select></label>
+    <button type="button" class="sm" data-dtrnew>+ Dự trù</button>` : '';
+  if (!card.dataset.bound) {
+    card.dataset.bound = '1';
+    card.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t.dataset.dtropen) return openDtr(t.dataset.dtropen);
+      if (t.dataset.dtrnew !== undefined) return openDtr($('#dtr-pick').value, true);
+    });
+  }
+}
+let dtrNhom = null, dtrDraft = null;
+function openDtr(code, moi = false) {
+  dtrNhom = code;
+  const rows = (costData.du_tru || []).filter((r) => r.nhom === code);
+  dtrDraft = moi || !rows.length ? (rows.some((r) => r.loai === 'ky') ? 'dc' : 'ky') : null; // nhóm mới: mở sẵn dòng dự trù TĐ1
+  const dlg = dlgShell('dtr-dlg', onDtrClick);
+  renderDtr();
+  if (!dlg.open) dlg.showModal();
+  if (dtrDraft) setTimeout(() => $('#dtr-dlg tr[data-k="new"] [data-f="so_tien"]')?.focus(), 50);
+}
+function renderDtr() {
+  const dlg = $('#dtr-dlg'); if (!dlg) return;
+  const n = NHOM().find((x) => x.code === dtrNhom), ok = can('hd');
+  const rows = (costData.du_tru || []).filter((r) => r.nhom === dtrNhom);
+  const x = dtrTd(rows), ct = dtrChiTiet(dtrNhom);
+  const vat0 = n?.khong_vat ? 0 : (rows.find((r) => r.loai === 'ky')?.vat ?? 10);
+  const inp = (f, val, attrs = '') => `<input data-f="${f}" value="${esc(val ?? '')}" ${attrs} ${ok ? '' : 'disabled'}>`;
+  let dot = 0;
+  const row = (r) => {
+    const loai = r ? r.loai : dtrDraft, ten = loai === 'dc' ? `TĐ2 · Đợt ${r ? ++dot : rows.filter((y) => y.loai === 'dc').length + 1}` : DTR_LOAI[loai];
+    const vat = r ? r.vat : vat0, gt = r ? Number(r.so_tien) || 0 : 0;
+    return `<tr data-k="${r ? r.id : 'new'}" class="${r ? '' : 'tv-draft'} dtr-${loai}">
+      <td><b>${ten}</b>${r ? '' : ' <span class="st st-tam-tinh">Mới</span>'}</td>
+      <td>${inp('ngay', r ? isoToDmy(r.ngay) : '', 'class="date-dmy"')}</td>
+      <td>${inp('noi_dung', r ? r.noi_dung : '', `maxlength="300" placeholder="${loai === 'ky' ? 'VD: Dự trù thép, bê tông' : loai === 'dc' ? 'VD: Phát sinh tăng khối lượng' : 'VD: Quyết toán nhóm'}"`)}</td>
+      <td>${inp('so_tien', r ? money(r.so_tien) : '', `class="money num" placeholder="${loai === 'dc' ? '+ tăng · − giảm (số âm)' : '0'}"`)}</td>
+      <td>${inp('vat', vat, `type="number" min="0" max="100" step="1" class="vat-in" ${n?.khong_vat ? 'disabled' : ''}`)}</td>
+      <td class="num">${r ? dvm(gt + Math.round((gt * (Number(vat) || 0)) / 100)) : ''}</td>
+      <td class="row-actions">${ok ? `<button class="primary sm" data-save ${r ? 'hidden' : ''}>${r ? 'Lưu' : 'Thêm'}</button>${r ? '<button class="danger sm" data-del>Xóa</button>' : '<button class="sm" data-bo>Bỏ</button>'}` : ''}</td>
+    </tr>`;
+  };
+  const ord = { ky: 0, dc: 1, qt: 2 };
+  const sorted = [...rows].sort((a, b) => ord[a.loai] - ord[b.loai] || String(a.ngay || '').localeCompare(String(b.ngay || '')) || a.id - b.id);
+  dlg.innerHTML = `
+    <div class="tp-dlg-head">
+      <div><div class="muted small">Chi phí · Dự trù theo nhóm · ${esc(costData.du_an?.ma_du_an || '')}</div><h3>${esc(n?.ten || dtrNhom)} ${x.ngoai ? '<span class="st st-tam-tinh">Ngoài dự trù</span>' : ''}</h3></div>
+      <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button>
+    </div>
+    <div class="kpis tp-kpis">
+      <div class="kpi"><div class="label">TĐ1 · Dự trù</div><div class="value">${dvm(x.t1)}</div><div class="sub">trước VAT</div></div>
+      <div class="kpi"><div class="label">TĐ2 · Điều chỉnh</div><div class="value">${dvm(x.t2)}</div><div class="sub">${x.t2 - x.t1 ? `${x.t2 > x.t1 ? '+' : ''}${dvm(x.t2 - x.t1)} so với TĐ1` : '= TĐ1 + các đợt'}</div></div>
+      <div class="kpi"><div class="label">TĐ3 · Quyết toán</div><div class="value">${dvm(x.t3)}</div><div class="sub">${x.coQt ? 'theo số quyết toán' : 'chưa có = TĐ2'}</div></div>
+      <div class="kpi"><div class="label">Chi tiết đã có</div><div class="value">${dvm(ct.v)}</div><div class="sub">${ct.nguon.length ? ct.nguon.join(' + ') + ' · <span class="warn-text">cộng dồn</span>' : 'chưa có HĐ / chứng từ'}</div></div>
+    </div>
+    <div class="table-wrap"><table class="tp-dtl">
+      <thead><tr><th>Thời điểm</th><th>Ngày</th><th>Nội dung</th><th class="num">Số tiền <br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">Sau VAT</th><th></th></tr></thead>
+      <tbody>${sorted.map(row).join('')}${ok && dtrDraft ? row(null) : ''}${!rows.length && !dtrDraft ? '<tr><td colspan="7" class="empty">Chưa có dự trù</td></tr>' : ''}</tbody>
+    </table></div>
+    ${ok ? `<div class="tv-tools"><button class="sm" data-dtradd="ky">+ Dự trù (TĐ1)</button><button class="sm" data-dtradd="dc">+ Đợt điều chỉnh (TĐ2)</button><button class="sm" data-dtradd="qt">+ Quyết toán (TĐ3)</button>
+      <span class="muted small">Chưa có dự trù TĐ1 mà thêm đợt TĐ2 = chi phí ngoài dự trù</span></div>` : ''}
+    <div class="msg" id="dtr-msg" role="alert"></div>`;
+  if (ok) { $$('input.money', dlg).forEach(attachMoneyInput); $$('input.date-dmy', dlg).forEach(attachDateInput); }
+}
+async function onDtrClick(e) {
+  const t = e.target, dlg = $('#dtr-dlg'), msg = () => $('#dtr-msg');
+  if (t.dataset.close !== undefined) return dlg.close();
+  if (t.dataset.dtradd) { dtrDraft = t.dataset.dtradd; renderDtr(); return setTimeout(() => $('#dtr-dlg tr[data-k="new"] [data-f="so_tien"]')?.focus(), 30); }
+  const tr = t.closest('tr[data-k]'); if (!tr) return;
+  if (t.dataset.bo !== undefined) { dtrDraft = null; return renderDtr(); }
+  const v = (f) => $(`[data-f="${f}"]`, tr)?.value ?? '';
+  const k = tr.dataset.k;
+  try {
+    if (t.dataset.save !== undefined) {
+      const ngay = dmyToIso(v('ngay'));
+      if (ngay === null) return showMsg(msg(), 'Ngày không hợp lệ, nhập dd/mm/yyyy', 'err');
+      const body = { nhom: dtrNhom, loai: k === 'new' ? dtrDraft : undefined, ngay, noi_dung: v('noi_dung'), so_tien: parseMoney(v('so_tien')), vat: v('vat') || 0 };
+      await api(k === 'new' ? `/api/du-an/${revProjectId}/du-tru` : `/api/du-tru/${k}`, { method: k === 'new' ? 'POST' : 'PUT', body: JSON.stringify(body) });
+      if (k === 'new') dtrDraft = null;
+      await loadCost(); renderDtr(); showMsg(msg(), k === 'new' ? 'Đã thêm dự trù' : 'Đã lưu dự trù');
+    }
+    if (t.dataset.del !== undefined) {
+      if (!confirm('Xóa dòng dự trù này?')) return;
+      await api(`/api/du-tru/${k}`, { method: 'DELETE' });
+      await loadCost(); renderDtr(); showMsg(msg(), 'Đã xóa dự trù');
+    }
   } catch (err) { showMsg(msg(), err.message, 'err'); }
 }
