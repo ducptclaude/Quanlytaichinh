@@ -1,6 +1,16 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Dòng chi phí (chứng từ thực tế)": "Cost line (actual voucher)",
+"Gói chi phí – dự trù (tạm tính)": "Cost package – budget (provisional)",
+"Gói chi phí – dự trù theo nhóm": "Cost packages – budget by group",
+"Tạo gói: form trên, tab TĐ1": "Create packages: form above, M1 tab",
+"Điều chỉnh tăng / giảm cả nhóm: bấm Nhập": "Group increase / decrease: click Enter",
+"Quyết toán nhóm (khoá): bấm Nhập": "Group final account (locks): click Enter",
+"Sửa / xóa gói: bấm Nhập": "Edit / delete package: click Enter",
+"Nhập": "Enter",
+"theo QT nhóm": "per group final account",
+"Điều chỉnh cả nhóm (TĐ2)": "Group adjustment (M2)",
 "Cách nhập (TĐ1)": "Entry type (M1)",
 "Gói chi phí – chưa rõ nhà thầu / HĐ (tạm tính)": "Cost package – contractor / contract not yet known (provisional)",
 "HĐ đã có nhà thầu (đã xác định)": "Contract with known contractor (confirmed)",
@@ -1473,6 +1483,26 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"({} gói · {} còn tạm tính · không cộng vào Tổng HĐ bên dưới)",
+"({} packages · {} still provisional · not in the contract total below)"
+],
+[
+"Tạm tính {} đ trước VAT · VAT {}%",
+"Provisional {} VND before VAT · VAT {}%"
+],
+[
+"({} gói · {} đợt điều chỉnh)",
+"({} packages · {} adjustments)"
+],
+[
+"({} gói)",
+"({} packages)"
+],
+[
+"{} đợt – bấm Nhập ở dòng nhóm để xem",
+"{} adjustments – click Enter on the group row to view"
+],
 [
 "Đã tạo gói \"{}\" (tạm tính). Sang TĐ2: tạo HĐ thật và chọn gói này ở ô \"Gói chi phí\".",
 "Package \"{}\" created (provisional). In M2: create the real contract and pick this package in \"Cost package\"."

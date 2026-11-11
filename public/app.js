@@ -1547,21 +1547,28 @@ function setCostMode() {
   $('#c-ngay-label').textContent = tp ? 'Ngày ký HĐ' : 'Ngày';
   $('#c-gt-label').textContent = tp ? 'Giá trị HĐ (trước VAT) *' : 'Giá trị (trước VAT) *';
   $('button[type=submit]', cForm).textContent = cForm.elements.id.value ? 'Lưu thay đổi' : tp ? `Tạo HĐ ${(TPN()[cForm.elements.nhom.value] || '').toLowerCase()}` : 'Thêm dòng';
-  // TĐ1 + HĐ đầu vào: mặc định tạo GÓI (chưa rõ nhà thầu / HĐ) – ẩn Số HĐ, nhà thầu, HĐ CĐT, hạng mục
+  // TĐ1: chọn Cách nhập – HĐ đầu vào: Gói (mặc định) / HĐ đã có nhà thầu · nhóm khác: Dòng chi phí (mặc định) / Gói dự trù
+  const cw = $('#c-cach-wrap'), cs = cForm.elements.cach;
+  cw.hidden = !(tdDangChon() === 1 && !cForm.elements.id.value);
+  if (!cw.hidden) {
+    const want = tp ? 'goi,hd' : 'le,goi';
+    if ([...cs.options].map((o) => o.value).join() !== want) cs.innerHTML = tp
+      ? '<option value="goi">Gói chi phí – chưa rõ nhà thầu / HĐ (tạm tính)</option><option value="hd">HĐ đã có nhà thầu (đã xác định)</option>'
+      : '<option value="le">Dòng chi phí (chứng từ thực tế)</option><option value="goi">Gói chi phí – dự trù (tạm tính)</option>';
+  }
   const goiMode = costGoiMode();
-  $('#c-cach-wrap').hidden = !(tp && tdDangChon() === 1) || Boolean(cForm.elements.id.value);
   $('#c-goiten-wrap').hidden = !goiMode;
-  ['hd_cdt', 'so_tp', 'doi_tac', 'hang_muc'].forEach((n) => cForm.elements[n]?.closest('label')?.classList.toggle('goi-an', goiMode));
+  ['hd_cdt', 'so_tp', 'doi_tac', 'hang_muc', 'noi_dung', 'so_ct', 'nhom_con'].forEach((n) => cForm.elements[n]?.closest('label')?.classList.toggle('goi-an', goiMode));
   $('.tp-hint', cForm)?.classList.toggle('goi-an', goiMode);
   if (goiMode) {
     const nhom = cForm.elements.nhom.value, ten = cForm.elements.ten_goi;
-    if (!ten.value.trim()) ten.placeholder = `VD: ${TPN()[nhom] || 'Gói'} ${(costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom).length + 1} – Kết cấu`;
+    if (!ten.value.trim()) ten.placeholder = `VD: ${TPN()[nhom] || NHOM().find((x) => x.code === nhom)?.ten || 'Gói'} ${(costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom).length + 1}${tp ? ' – Kết cấu' : ''}`;
     $('#c-ngay-label').textContent = 'Ngày dự trù';
     $('#c-gt-label').textContent = 'Giá trị tạm tính (trước VAT) *';
     $('button[type=submit]', cForm).textContent = 'Tạo gói chi phí (tạm tính)';
   }
 }
-const costGoiMode = () => costTpMode() && tdDangChon() === 1 && !cForm.elements.id.value && (cForm.elements.cach?.value || 'goi') === 'goi';
+const costGoiMode = () => tdDangChon() === 1 && !cForm.elements.id.value && cForm.elements.cach?.value === 'goi' && !$('#c-cach-wrap').hidden;
 
 // ---------- Bộ nhớ gợi ý HĐ đầu vào: nhà thầu đã có + hạng mục từng thi công (mọi dự án) ----------
 let tpGoiY = null, tpGoiYAt = 0;
@@ -2093,24 +2100,51 @@ function renderTpCard() {
       <td class="num">${mtr(leSv(k))}</td>${kTd === 1 ? `<td class="num">${mtr(leSv(k))}</td>` : '<td class="num muted">=</td>'}<td class="num">${mtr(leSv(k))}</td><td class="num muted">${mtr(0)}</td>
       <td class="c-note tp-note">Đã chi theo chứng từ</td>
       <td class="row-actions tp-act"><button class="sm" data-leopen="${k}">Xem dòng</button></td></tr>`).join('');
-  const goiDs = (q || tpFilter.loc ? [] : (costData.du_tru || []).filter((r) => r.loai === 'ky' && (!tpFilter.nhom || r.nhom === tpFilter.nhom)));
+  // Khối G – Gói chi phí / dự trù theo nhóm (thay khung "2. Dự trù" cũ): nhóm -> từng gói TĐ1 + đợt điều chỉnh TĐ2; quyết toán nhóm TĐ3
+  //  Không cộng vào Tổng HĐ đầu vào (khác nguồn); cách tính giống Báo cáo (gói gắn HĐ / đã đóng chỉ tính ở TĐ1)
+  const nhTen = (code) => TPN()[code] || NHOM().find((x) => x.code === code)?.ten || code;
+  const svL = (r) => { const v = Number(r.so_tien) || 0; return v + Math.round((v * (Number(r.vat) || 0)) / 100); };
   const ganG = new Set(tatCa.map((c) => c.goi_id).filter(Boolean));
-  const goiSv = (r, k) => { const sv = (Number(r.so_tien) || 0) + Math.round(((Number(r.so_tien) || 0) * (Number(r.vat) || 0)) / 100); return k === 1 || (!ganG.has(r.id) && r.tinh_trang !== 'dong') ? sv : 0; };
-  const goiSum = (k) => goiDs.reduce((a, r) => a + goiSv(r, k), 0);
+  const moG = (r) => !ganG.has(r.id) && r.tinh_trang !== 'dong';
+  const dtrAll = q || tpFilter.loc ? [] : (costData.du_tru || []).filter((r) => !tpFilter.nhom || r.nhom === tpFilter.nhom);
+  const gCodes = [...new Set(dtrAll.map((r) => r.nhom))].sort((x, y) => NHOM().findIndex((n) => n.code === x) - NHOM().findIndex((n) => n.code === y));
+  const nhomSv = (code, k) => { const rs = dtrAll.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
+    const t2 = S('ky', moG) + S('dc'); return k === 1 ? S('ky') : k === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2; };
+  const gSum = (k) => gCodes.reduce((t, c) => t + nhomSv(c, k), 0);
+  const goiSv = (r, k) => (k === 1 || moG(r) ? svL(r) : 0);
+  const cell2 = (x, y, strong = '') => (kTd === 1 ? '<td class="num muted">—</td>' : ssCell(x, y, strong));
   const goiMo = !tpOpen.has('goi-dong');
-  const goiHtml = !goiDs.length ? '' : `<tr class="tv-head-row tp-goi-head">
+  const nhaThau = (r) => { const hd = tatCa.filter((c) => c.goi_id === r.id); return hd.length ? esc(hd.map((c) => c.doi_tac || c.so_ma).join(', ')) : '<span class="muted">Chưa rõ nhà thầu</span>'; };
+  const goiHtml = !gCodes.length ? '' : `<tr class="tv-head-row tp-goi-head">
       <td class="num">G</td>
       <td colspan="2"><button class="grp-toggle" data-tpgoi="1" title="${goiMo ? 'Thu gọn' : 'Mở các gói'}">${goiMo ? '▾' : '▸'}</button>
-        <span class="kind-tag tp-goi">Gói</span> <b>Gói chi phí – dự trù TĐ1</b> <span class="muted small">(${goiDs.length} gói · ${goiDs.filter((r) => !ganG.has(r.id) && r.tinh_trang !== 'dong').length} còn tạm tính · không cộng vào Tổng HĐ, đã tính ở khung Dự trù)</span></td>
-      <td class="num strong">${mtr(goiSum(kTd))}</td>${kTd === 1 ? '<td class="num muted">—</td>' : ssCell(goiSum(kTd), goiSum(kTd - 1), 'strong')}
-      <td class="num muted">—</td><td class="num muted">—</td><td colspan="2" class="muted small">TĐ2: gắn HĐ thật vào gói ở form trên</td></tr>` +
-    (goiMo ? goiDs.map((r, i) => `<tr class="tv-child tp-goi-row">
-      <td class="num muted">G.${i + 1}</td>
-      <td class="indent tp-hd"><div class="tp-l1"><span class="tp-kind tp-k-${esc(r.nhom)}">${esc(TP_NGAN[r.nhom] || r.nhom)}</span><b>${esc(r.noi_dung || 'Gói #' + r.id)}</b></div><div class="tp-l2">${goiChip(r)}</div></td>
-      <td class="c-dt tp-dt muted">${(() => { const hd = tatCa.filter((c) => c.goi_id === r.id); return hd.length ? esc(hd.map((c) => c.doi_tac || c.so_ma).join(', ')) : 'Chưa rõ nhà thầu'; })()}</td>
-      <td class="num">${mtr(goiSv(r, kTd))}</td>${kTd === 1 ? '<td class="num muted">—</td>' : ssCell(goiSv(r, kTd), goiSv(r, kTd - 1))}
-      <td class="num muted">—</td><td class="num muted">—</td><td class="c-note tp-note muted small">Tạm tính (trước VAT ${money(r.so_tien)} đ, VAT ${Number(r.vat) || 0}%)</td>
-      <td class="row-actions tp-act"><button class="sm" data-goinhom="${esc(r.nhom)}">Xem gói</button></td></tr>`).join('') : '');
+        <span class="kind-tag tp-goi">Gói</span> <b>Gói chi phí – dự trù theo nhóm</b> <span class="muted small">(${dtrAll.filter((r) => r.loai === 'ky').length} gói · ${dtrAll.filter((r) => r.loai === 'ky' && moG(r)).length} còn tạm tính · không cộng vào Tổng HĐ bên dưới)</span></td>
+      <td class="num strong">${mtr(gSum(kTd))}</td>${cell2(gSum(kTd), kTd > 1 ? gSum(kTd - 1) : 0, 'strong')}
+      <td class="num muted">—</td><td class="num muted">—</td><td colspan="2" class="muted small">Tạo gói: form trên, tab TĐ1</td></tr>` +
+    (goiMo ? gCodes.map((code, ni) => {
+      const rs = dtrAll.filter((r) => r.nhom === code), ky = rs.filter((r) => r.loai === 'ky'), dc = rs.filter((r) => r.loai === 'dc'), coQt = rs.some((r) => r.loai === 'qt');
+      const ng = dtrChiTiet(code).nguon, dcSv = dc.reduce((t, r) => t + svL(r), 0);
+      return `<tr class="tv-sub-row tp-loai-row tp-goi-nhom">
+        <td class="num muted">G.${ni + 1}</td>
+        <td colspan="2" class="indent"><b>${esc(nhTen(code))}</b> <span class="muted small">(${ky.length} gói${dc.length ? ` · ${dc.length} đợt điều chỉnh` : ''}${coQt ? ' · 🔒 đã quyết toán nhóm' : ''})</span>${ng.length ? ` <span class="warn-text" title="Nhóm có cả ${esc(ng.join(' + '))} và gói – đang cộng dồn, kiểm tra tránh tính trùng">⚠ cộng dồn</span>` : ''}</td>
+        <td class="num">${mtr(nhomSv(code, kTd))}</td>${cell2(nhomSv(code, kTd), kTd > 1 ? nhomSv(code, kTd - 1) : 0)}
+        <td class="num muted">—</td><td class="num muted">—</td>
+        <td class="c-note tp-note muted small">${kTd === 2 ? 'Điều chỉnh tăng / giảm cả nhóm: bấm Nhập' : kTd === 3 ? 'Quyết toán nhóm (khoá): bấm Nhập' : 'Sửa / xóa gói: bấm Nhập'}</td>
+        <td class="row-actions tp-act"><button class="sm" data-goinhom="${esc(code)}">${can('hd') && !costAll ? 'Nhập' : 'Xem'}</button></td></tr>` +
+      ky.map((r, i) => `<tr class="tv-child tp-goi-row">
+        <td class="num muted">G.${ni + 1}.${i + 1}</td>
+        <td class="indent tp-hd"><div class="tp-l1"><b>${esc(r.noi_dung || 'Gói #' + r.id)}</b></div><div class="tp-l2">${goiChip(r)}</div></td>
+        <td class="c-dt tp-dt">${nhaThau(r)}</td>
+        ${kTd === 3 && coQt ? '<td class="num muted" title="Nhóm đã quyết toán – TĐ3 tính theo số quyết toán của nhóm">theo QT nhóm</td><td class="num muted">—</td>' : `<td class="num">${mtr(goiSv(r, kTd))}</td>${cell2(goiSv(r, kTd), kTd > 1 ? goiSv(r, kTd - 1) : 0)}`}
+        <td class="num muted">—</td><td class="num muted">—</td>
+        <td class="c-note tp-note muted small">Tạm tính ${money(r.so_tien)} đ trước VAT · VAT ${Number(r.vat) || 0}%</td>
+        <td class="row-actions tp-act">${edit && kTd === 2 && !coQt ? `<button class="sm" data-goidong="${r.id}" data-tt="${r.tinh_trang === 'dong' ? '' : 'dong'}" title="${r.tinh_trang === 'dong' ? 'Tính lại gói vào TĐ2' : 'Gói không dùng nữa: TĐ2 = 0 (TĐ1 giữ nguyên)'}">${r.tinh_trang === 'dong' ? 'Mở lại gói' : 'Đóng gói'}</button>` : ''}</td></tr>`).join('') +
+      (dc.length ? `<tr class="tv-child tp-goi-row">
+        <td class="num muted">G.${ni + 1}.±</td>
+        <td class="indent tp-hd" colspan="2"><b>Điều chỉnh cả nhóm (TĐ2)</b> <span class="muted small">${dc.length} đợt – bấm Nhập ở dòng nhóm để xem</span></td>
+        <td class="num">${kTd === 1 ? mtr(0) : kTd === 3 && coQt ? '<span class="muted">theo QT nhóm</span>' : mtr(dcSv)}</td>${kTd === 2 ? ssCell(dcSv, 0) : '<td class="num muted">—</td>'}
+        <td class="num muted">—</td><td class="num muted">—</td><td colspan="2"></td></tr>` : '');
+    }).join('') : '');
   const childRow = (c, stt) => `
     <tr class="tv-child" data-tpid="${c.id}">
       <td class="num muted">${stt}</td>
@@ -2173,7 +2207,15 @@ $('#tp-toggle-all').addEventListener('click', () => {
 $('#tp-tbody').addEventListener('click', (e) => {
   if (e.target.dataset.tpgoi) { tpOpen.has('goi-dong') ? tpOpen.delete('goi-dong') : tpOpen.add('goi-dong'); return renderTpCard(); }
   const gn = e.target.dataset.goinhom;
-  if (gn) { const r = $(`#dtr-tbody tr[data-dtr="${gn}"]`); if (r) { r.scrollIntoView({ behavior: 'smooth', block: 'center' }); (r.querySelector('button') || r).click(); } return; }
+  if (gn) return openDtr(gn, tdDangChon() > 1 && can('hd') && !costAll); // TĐ2 / TĐ3: mở sẵn dòng đợt điều chỉnh / quyết toán · hộp gói / dự trù của nhóm: sửa gói (TĐ1), điều chỉnh nhóm (TĐ2), quyết toán nhóm (TĐ3)
+  const gd = e.target.dataset.goidong;
+  if (gd) { // Đóng / mở lại gói (TĐ2)
+    e.target.disabled = true;
+    api(`/api/du-tru/${gd}`, { method: 'PUT', body: JSON.stringify({ tinh_trang: e.target.dataset.tt }) })
+      .then(() => { showMsg($('#c-msg'), e.target.dataset.tt ? 'Đã đóng gói (TĐ2 = 0, TĐ1 giữ nguyên)' : 'Đã mở lại gói'); return loadCost(); })
+      .catch((err) => { e.target.disabled = false; alert(err.message); });
+    return;
+  }
   const le = e.target.closest('[data-leopen]')?.dataset.leopen;
   if (le) { // mở nhóm chi phí tương ứng ở cây chi phí và cuộn tới
     moKhoiCua(le); costOpen.add(le); NHOM().find((n) => n.code === le)?.sub.forEach((sc) => costOpen.add(`${le}:${sc.code}`));
@@ -3375,6 +3417,7 @@ function dtrChiTiet(code) {
 function renderDuTru() {
   const card = $('#dtr-card');
   if (!card) return;
+  card.hidden = true; return; // ĐÃ GỘP vào khối G – Gói chi phí của bảng "1. Hợp đồng đầu vào" (giữ mã cũ bên dưới để tham khảo)
   const rows = costData.du_tru;
   card.hidden = costAll || !Array.isArray(rows);
   if (card.hidden) return;

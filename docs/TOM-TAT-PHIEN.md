@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V18.11.11.26 – Gộp "2. Dự trù chi phí theo nhóm" vào bảng 1 (khối G – Gói chi phí); gói cho mọi nhóm
+- Khung "2. Dự trù chi phí theo nhóm" ẨN (`renderDuTru` – mã cũ giữ). Mọi chức năng chuyển sang bảng "1. Hợp đồng đầu vào", khối **G – Gói chi phí – dự trù theo nhóm**:
+  dòng nhóm (tổng TĐk, ± so TĐ trước, số gói / đợt, 🔒 đã QT nhóm, ⚠ cộng dồn, nút **Nhập** = hộp gói của nhóm: sửa gói TĐ1, mở sẵn dòng đợt điều chỉnh ở TĐ2 / quyết toán ở TĐ3)
+  -> từng gói (tình trạng, nhà thầu đã gắn, TĐk, nút Đóng / Mở lại gói ở TĐ2) -> dòng "Điều chỉnh cả nhóm (TĐ2)". Không cộng vào Tổng HĐ đầu vào.
+- Form TĐ1: ô "Cách nhập" cho MỌI nhóm – HĐ đầu vào: Gói (mặc định) / HĐ đã có nhà thầu · nhóm khác: Dòng chi phí (mặc định) / Gói dự trù.
+- Kiểm tra: DEMO-05 tạo 2 gói thầu phụ + 1 gói Tổ chức thi công, đóng gói, đợt −100 tr -> khối G = Báo cáo (TĐ1 3,348 · TĐ2 2,376 tỷ sau VAT);
+  iPhone 15 không tràn; tester 4.518 ĐẠT, 0 LỖI. Điểm khôi phục: `phien-11.11.26-13h36`.
+
 ## V17.11.11.26 – TĐ1 tạo GÓI chi phí ngay ở form (chưa rõ nhà thầu / HĐ) + khối Gói trong bảng HĐ đầu vào
 - Form "Thêm chi phí", nhóm HĐ đầu vào (thầu phụ, vật tư, MMTB, nhân công) ở TĐ1: ô "Cách nhập" – mặc định **Gói chi phí (tạm tính)**: chỉ Tên gói, ngày, giá trị, VAT, ghi chú
   (ẩn Số HĐ, nhà thầu, HĐ CĐT, hạng mục) -> tạo dòng dự trù TĐ1 của nhóm. Chọn "HĐ đã có nhà thầu" -> form HĐ như cũ. TĐ2: tạo HĐ + chọn gói (V16).
