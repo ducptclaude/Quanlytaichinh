@@ -3474,4 +3474,9 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 
 .tp-note select.goi-cdt { width: 140px; max-width: 100%; padding: 4px 6px; font-size: 12px; }
 
-.tp-goi-hdc { padding-left: 34px !important; }
+.tp-goi-hdc { padding-left: 66px !important; }
+
+.tp-goi-r { display: grid; grid-template-columns: 26px 1fr; align-items: start; gap: 6px; }
+.tp-goi-r .grp-sp { width: 22px; }
+.tp-goi-r .tp-l2 { margin-top: 3px; }
+.tp-goi-r .tp-l2 .st, .tp-goi-r .tp-l2 .goi-chip { margin-left: 0; }

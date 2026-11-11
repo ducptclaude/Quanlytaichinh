@@ -836,7 +836,7 @@ function bTongHopHtml(list, v, P) {
       const dtruK = list.reduce((a2, d) => a2 + (d.moc?.cp?.dtru?.[v]?.[k - 1] || 0), 0);
       const trung = list.flatMap((d) => (d.moc?.cp?.dtru_trung || []).map((t) => `${d.ma_du_an} · ${t.ten}: ${t.nguon.join(' + ')}`));
       const dtruLine = dtruK ? `Dự trù <b>${bTy(dtruK)}</b>` : '';
-      const trungLine = trung.length ? `<span class="warn-text" title="Cộng dồn nhiều nguồn – kiểm tra tránh tính trùng:\n${esc(trung.join('\n'))}">⚠ ${trung.length} nhóm cộng dồn nhiều nguồn</span>` : '';
+      const trungLine = ''; // V30: bỏ ghi chú "nhóm cộng dồn nhiều nguồn" (người dùng yêu cầu – rối)
       const luuY = (n, ten) => (n ? `<span class="warn-text" title="Đã đóng quyết toán nhưng ${n} văn bản chưa nhập số quyết toán – tạm lấy TĐ2">⚠ ${n} văn bản ${ten} chưa có số QT</span>` : '');
       const TEN = { 1: ['TĐ1 – Ký hợp đồng', 'Tại thời điểm ký hợp đồng (TĐ1)', 'dự kiến'], 2: ['TĐ2 – Điều chỉnh', 'TĐ1 + các đợt điều chỉnh tăng / giảm (TĐ2)', 'điều chỉnh'],
         3: ['TĐ3 – Quyết toán', 'Quyết toán – dự án chưa quyết toán lấy theo TĐ2 (TĐ3)', 'quyết toán'] }[k];

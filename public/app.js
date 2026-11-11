@@ -2296,7 +2296,7 @@ function renderTpCard() {
       <td class="num">${so}</td>
       <td colspan="2"><button class="grp-toggle" data-tpgoi="${b}:${esc(code)}" title="${mo ? 'Thu gọn' : 'Mở các gói'}">${mo ? '▾' : '▸'}</button>
         <span class="kind-tag tp-goi">Gói</span> <b>${esc(nhTen(code))}</b>
-        <span class="muted small">(${ky.length} gói${kTd === 1 ? '' : `${nTam ? ` · ${nTam} tạm tính` : ''}${hdN.length ? ` · ${hdN.length} HĐ đã gắn` : ''}${dc.length ? ` · ${dc.length} đợt điều chỉnh` : ''}`}${coQt && kTd === 3 ? ' · 🔒 đã QT' : ''})</span>${ng.length ? ` <span class="warn-text" title="Nhóm còn ${esc(ng.join(' + '))} KHÔNG gắn vào gói – đang cộng dồn với gói, kiểm tra tránh tính trùng">⚠ cộng dồn</span>` : ''}</td>
+        <span class="muted small">(${ky.length} gói${kTd === 1 ? '' : `${nTam ? ` · ${nTam} tạm tính` : ''}${hdN.length ? ` · ${hdN.length} HĐ đã gắn` : ''}${dc.length ? ` · ${dc.length} đợt điều chỉnh` : ''}`}${coQt && kTd === 3 ? ' · 🔒 đã QT' : ''})</span></td>
       <td class="num strong">${mtr(nhomSv(code, kTd))}</td>${cell2(nhomSv(code, kTd), kTd > 1 ? nhomSv(code, kTd - 1) : 0, 'strong')}
       ${soTien(hdN, 'da_tt', 'strong')}${soTien(hdN, 'con_lai', 'strong')}
       <td class="c-note tp-note muted small">${kTd === 2 ? 'Điều chỉnh cả nhóm: bấm Nhập' : kTd === 3 ? 'Quyết toán nhóm: bấm Nhập' : 'Sửa / xóa gói: bấm Nhập'}</td>
@@ -2304,7 +2304,7 @@ function renderTpCard() {
     (!mo ? '' : ky.map((r, i) => { const hd = hdCua(r), qtNhom = kTd === 3 && coQt && !hd.length, coCon = kTd > 1 && hd.length > 0, moG2 = coCon && tpOpen.has('gr:' + r.id);
       return `<tr class="tv-child tp-goi-row">
       <td class="num muted">${so}.${i + 1}</td>
-      <td class="indent tp-hd"><div class="tp-goi-l">${coCon ? `<button class="grp-toggle" data-tpgr="${r.id}" title="${moG2 ? 'Thu gọn các HĐ của gói' : 'Mở các HĐ của gói'}">${moG2 ? '▾' : '▸'}</button>` : ''}<b>${esc(r.noi_dung || 'Gói #' + r.id)}</b>${kTd === 1 ? ' <span class="st st-tam-tinh">Tạm tính</span>' : goiChip(r)}</div></td>
+      <td class="indent tp-hd"><div class="tp-goi-r">${coCon ? `<button class="grp-toggle" data-tpgr="${r.id}" title="${moG2 ? 'Thu gọn các HĐ của gói' : 'Mở các HĐ của gói'}">${moG2 ? '▾' : '▸'}</button>` : '<span class="grp-sp"></span>'}<div><b>${esc(r.noi_dung || 'Gói #' + r.id)}</b><div class="tp-l2">${kTd === 1 ? '<span class="st st-tam-tinh">Tạm tính</span>' : goiChip(r)}</div></div></div></td>
       <td class="c-dt tp-dt">${moG2 ? `<span class="muted small">${hd.length} HĐ – xem từng dòng bên dưới</span>` : nhaThau(r)}</td>
       ${qtNhom ? '<td class="num muted" title="Nhóm đã quyết toán – TĐ3 theo số quyết toán của nhóm">theo QT nhóm</td><td class="num muted">—</td>' : `<td class="num">${mtr(goiSv(r, kTd))}</td>${goiSs(r, hd)}`}
       ${soTien(hd, 'da_tt')}${soTien(hd, 'con_lai')}
@@ -3643,7 +3643,7 @@ function renderDuTru() {
     const n = NHOM().find((x) => x.code === code), x = dtrTd(rows.filter((r) => r.nhom === code)), ct = dtrChiTiet(code);
     tot[0] += x.t1; tot[1] += x.t2; tot[2] += x.t3;
     const note = [x.ngoai ? '<span class="st st-tam-tinh" title="Chưa có dự trù TĐ1 – phát sinh ở TĐ2">Ngoài dự trù</span>' : '',
-      ct.nguon.length ? `<span class="warn-text" title="Nhóm có cả ${ct.nguon.join(' + ')} và dự trù – đang cộng dồn, kiểm tra tránh tính trùng">⚠ cộng dồn</span>` : ''].filter(Boolean).join(' ');
+      ''].filter(Boolean).join(' ');
     return `<tr data-dtr="${esc(code)}">
       <td><b>${esc(n?.ten || code)}</b></td>
       <td class="num td-col-on ${kd === 3 && !x.coQt ? 'muted' : ''}">${kd === 3 && x.coQt ? '🔒 ' : ''}${dvm(vk(x))}</td>${kd > 1 ? tdSoSanh(vk(x), vt(x)) : ''}
@@ -3714,7 +3714,7 @@ function renderDtr() {
       <div class="kpi"><div class="label">TĐ1 · Dự trù</div><div class="value">${dvm(x.t1)}</div><div class="sub">trước VAT</div></div>
       <div class="kpi"><div class="label">TĐ2 · Điều chỉnh</div><div class="value">${dvm(x.t2)}</div><div class="sub">${x.t2 - x.t1 ? `${x.t2 > x.t1 ? '+' : ''}${dvm(x.t2 - x.t1)} so với TĐ1` : '= TĐ1 + các đợt'}</div></div>
       <div class="kpi"><div class="label">TĐ3 · Quyết toán</div><div class="value">${dvm(x.t3)}</div><div class="sub">${x.coQt ? 'theo số quyết toán' : 'chưa có = TĐ2'}</div></div>
-      <div class="kpi"><div class="label">Chi tiết đã có</div><div class="value">${dvm(ct.v)}</div><div class="sub">${ct.nguon.length ? ct.nguon.join(' + ') + ' · <span class="warn-text">cộng dồn</span>' : 'chưa có HĐ / chứng từ'}</div></div>
+      <div class="kpi"><div class="label">Chi tiết đã có</div><div class="value">${dvm(ct.v)}</div><div class="sub">${ct.nguon.length ? ct.nguon.join(' + ') : 'chưa có HĐ / chứng từ'}</div></div>
     </div>
     <div class="table-wrap"><table class="tp-dtl">
       <thead><tr><th>Thời điểm</th><th>Ngày</th><th>Nội dung</th><th class="num">Số tiền <br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">Sau VAT</th><th></th></tr></thead>

@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V30.11.11.26 – Căn dòng gói + bỏ ghi chú "cộng dồn"
+- Dòng gói: cột nút ▸ cố định (gói không có HĐ để trống cùng độ rộng), tên gói dòng trên, nhãn Tạm tính / Đã có HĐ dòng dưới → thẳng hàng; HĐ dưới gói thụt vào ngang tên gói.
+- Bỏ ghi chú "⚠ cộng dồn" (bảng Chi phí, cây chi phí, hộp gói) và "⚠ n nhóm cộng dồn nhiều nguồn" (Báo cáo). Chỉ bỏ chữ cảnh báo, cách tính không đổi. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V29.11.11.26 – HĐ đã gắn gói hiện nhãn như HĐ thường
 - Dòng HĐ dưới gói: "↳" + nhãn loại (Thầu phụ / Vật tư / Nhân công / MMTB) + Số HĐ + dòng "n phụ lục / Không phụ lục" (TĐ3 thêm tình trạng QT), giống HĐ ngoài gói; nhãn không đổi loại tại chỗ (loại theo gói). Tester 4.518 ĐẠT, 0 LỖI.
 
