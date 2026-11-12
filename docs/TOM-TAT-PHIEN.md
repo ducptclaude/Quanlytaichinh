@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.12.11.26 – Bảng chi tiết chi phí: cột Tỷ trọng = % doanh thu TĐ đang chọn
+- Cột "Tỷ trọng" đổi thành "% DT TĐk": giá trị sau VAT ÷ doanh thu sau VAT của TĐ đang chọn (cùng cách tính Báo cáo, máy chủ gửi kèm dt_td). Hiện ở mọi dòng: nhóm, hạng mục, HĐ CĐT, từng HĐ, từng dòng chi phí, dòng tổng khối. Dòng trả nợ gốc (không tính chi phí) để trống. Xem tất cả dự án: hiện “—”.
+- Kiểm tra: 12 dự án mẫu × 3 TĐ (36/36) đúng % theo doanh thu Báo cáo; tester 4.518 ĐẠT, 0 LỖI.
+
 ## V01.12.11.26 – Bảng HĐ đầu vào chỉ hiện nhóm chính; nhấp đúp mở bảng chi tiết
 - Bảng chính (trang Chi phí): chỉ HĐ CĐT → Loại (Thầu phụ / Vật tư…), 3 cột số: TĐ đang chọn · ± (TĐ1: tỷ trọng) · Còn lại. Nhãn "n tạm tính", "Phát sinh" ở dòng loại khi có. Dòng tổng: TỔNG CHI PHÍ TĐk (rê chuột xem tách HĐ / gói / mua lẻ).
 - Nhấp đúp dòng HĐ CĐT / Loại (điện thoại: chạm 1 lần) → hộp "Chi tiết HĐ đầu vào": bảng đầy đủ V32 (gói, HĐ trong gói mở sẵn, TĐ trước, ±, đã TT, còn lại, nút ± Nhóm / Đóng gói / Chi tiết). Trong hộp bấm số HĐ → bảng nhập HĐ.

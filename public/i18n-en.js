@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"% DT": "% Rev.",
 "Nhấp đúp vào ": "Double-click a ",
 "nhóm": "group",
 " (điện thoại: chạm) để xem bảng chi tiết đầy đủ: gói, HĐ, đã thanh toán, còn lại. Trong bảng chi tiết, bấm ": " (phone: tap) to see the full detail table: packages, contracts, paid, remaining. In the detail table, click the ",
@@ -1549,6 +1550,18 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"% DT TĐ{}",
+"% Rev. M{}"
+],
+[
+"Tỷ trọng so với doanh thu TĐ{} (sau VAT): {} đ",
+"Share of M{} revenue (after VAT): {} VND"
+],
+[
+"Chưa có doanh thu TĐ{}",
+"No M{} revenue yet"
+],
 [
 "{} tạm tính",
 "{} provisional"

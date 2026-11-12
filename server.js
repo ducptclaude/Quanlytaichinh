@@ -1402,9 +1402,13 @@ api.get('/du-an/:id/chi-phi', wrap(async (req, res) => {
   // Nhóm 1 Thầu phụ = giá trị HT/QT của các HĐTP (+ dòng thầu phụ nhập kiểu cũ nếu có)
   const tpAsCost = thau_phu.map((c) => ({ nhom: c.nhom || 'thau_phu', gia_tri: c.qt_gia_tri, tien_vat: c.qt_tien_vat, sau_vat: c.qt_sau_vat, tam_tinh: c.tam_tinh }));
   // Danh sách HĐ chủ đầu tư (HĐ gốc) để gộp / gắn thầu phụ, theo thứ tự như tab Doanh thu
-  const hd_cdt = sortRevenue((await store.listRevenue(id)).filter((r) => r.loai === 'hd' && r.ma_loai === 'HĐ'))
+  const [revAll, tienVe, du_tru] = await Promise.all([store.listRevenue(id), store.listTienVe(id), store.listDuTru(id)]);
+  const hd_cdt = sortRevenue(revAll.filter((r) => r.loai === 'hd' && r.ma_loai === 'HĐ'))
     .map((r) => ({ id: r.id, so_ma: r.so_ma, so_hieu: r.so_hieu, ngay: r.ngay }));
-  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]), du_tru: await store.listDuTru(id) });
+  // Doanh thu sau VAT tại TĐ1 / TĐ2 / TĐ3 (cùng cách tính Báo cáo) – để tính tỷ trọng chi phí so với doanh thu
+  const bc = projectReport(du_an, { rev: sortRevenue(revAll).map(calcLine), tienVe: sortTienVe(tienVe), cost: items, tp: thau_phu, duTru: du_tru });
+  const dt_td = [bc.moc?.dt?.goc?.sv || 0, bc.moc?.dt?.ps?.sv || 0, bc.moc?.dt?.qt?.sv || 0];
+  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]), du_tru, dt_td });
 }));
 
 // Chi phí tổng hợp TẤT CẢ dự án (chỉ xem): ghép dữ liệu từng dự án, tính tổng bằng cùng hàm như từng dự án
