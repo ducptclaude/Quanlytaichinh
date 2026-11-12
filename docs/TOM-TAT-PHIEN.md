@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V23.12.11.26 – Dashboard chạy đúng theo Báo cáo, dùng chung nút TĐ
+- Nút TĐ1 / TĐ2 / TĐ3 trên Dashboard = nút TĐ mục I Báo cáo (bấm bên nào bên kia đổi theo; chọn 1 dự án tự nhảy TĐ mới nhất). Tên nút giống Báo cáo: Ký HĐ · Điều chỉnh · Quyết toán.
+- 3 thẻ DT – CP – LN và khối I = đúng số mục I Báo cáo (TĐ1 = số chốt TĐ1, TĐ2/3 = mục IV), so với TĐ liền trước như mục I. Khối II = mục II, khối III + bảng Kế hoạch – Thực – Còn lại = mục III (mới nhất), khối IV = mục IV. Bảng dự án và Dashboard PDF theo cùng TĐ.
+- Đối chiếu: tất cả dự án và DEMO-05, cả 3 TĐ, thẻ Dashboard = thẻ Báo cáo. Kiểm tra tổng 4518 ĐẠT, 0 LỖI.
+
 ## V22.12.11.26 – Dashboard: Kế hoạch – Thực – Còn lại và mục III luôn lấy số mới nhất
 - Dashboard (và Dashboard PDF): bảng Kế hoạch – Thực – Còn lại và khối III Còn phải thu – chi không đổi theo nút TĐ nữa, luôn lấy số mới nhất (giống mục III Báo cáo). 3 ô DT – CP – LN và khối IV vẫn theo nút TĐ. Thử TĐ1/TĐ2/TĐ3: bảng giữ nguyên, khớp mục III Báo cáo. Tester 4.518 ĐẠT, 0 LỖI.
 
