@@ -29,7 +29,7 @@ function bDashRender(list, v, one) {
   // ---- Thanh chỉ số: nhóm DT – CP – LN theo TĐ đang chọn · nhóm dòng tiền thực tế ----
   const k = [1, 2, 3].includes(Number(BST.db_td)) ? Number(BST.db_td) : 3;
   const tk = MT['t' + k], ck = MT['c' + k], lk = MT['l' + k];
-  const { T: T3 } = bMuc3Data(list, v, rows, k); // mục III theo TĐ đang chọn của dashboard
+  const { T: T3 } = bMuc3Data(list, v, rows, 3); // V22.12: Kế hoạch – Thực – Còn lại và mục III luôn lấy số MỚI NHẤT (như mục III Báo cáo), không theo nút TĐ
   const tdLab = { 1: 'TĐ1 · hợp đồng', 2: 'TĐ2 · điều chỉnh', 3: 'TĐ3 · mới nhất' }[k];
   const vs = (a, b, good) => (k === 1 ? '<span class="db-eq">kế hoạch lúc ký hợp đồng</span>' : `${dlt(a, b, good)} so với TĐ1`);
   const kpi = (k, lab, val, sub, col) => `<div class="db-kpi" style="--db-c:${col}"><span class="db-kl">${lab}</span>
@@ -42,7 +42,7 @@ function bDashRender(list, v, one) {
   // Bảng Kế hoạch (mục I, TĐ đang chọn) · Thực (mục II) · Còn lại (mục III = Kế hoạch − Thực) × Doanh thu / Chi phí / Lợi nhuận
   const mxRow = (lab, col, a, b2, c) => `<tr><th scope="row"><i style="background:${col}"></i>${lab}</th><td>${n(a)}</td><td>${n(b2)}</td><td class="db-mx-con">${n(c)}</td></tr>`;
   const mx = `<div class="table-wrap"><table class="db-mx no-mcard">
-      <thead><tr><th></th><th>Kế hoạch<small>Mục I · TĐ${k}</small></th><th>Thực<small>Mục II · lũy kế</small></th><th>Còn lại<small>Mục III</small></th></tr></thead>
+      <thead><tr><th></th><th>Kế hoạch<small>Mới nhất</small></th><th>Thực<small>Mục II · lũy kế</small></th><th>Còn lại<small>Mục III</small></th></tr></thead>
       <tbody>${mxRow('Doanh thu', DBC.dt, T3.dt, T3.thu, T3.pt)}${mxRow('Chi phí', DBC.cp, T3.cp, T3.chi, T3.pc)}${mxRow('Lợi nhuận', DBC.ln, T3.dt - T3.cp, T3.thu - T3.chi, T3.con)}</tbody>
     </table></div>
     <div class="db-mx-note">Thực: doanh thu = dòng thu, chi phí = dòng chi · Còn lại = Kế hoạch − Thực · đơn vị ${TY()}</div>`;
@@ -74,9 +74,9 @@ function bDashRender(list, v, one) {
       `<ul class="db-lines">${line('Dòng thu', T.thu, mx2, DBC.thu)}${line('Dòng chi', T.chi, mx2, DBC.chi)}${line('Còn lại', T.con, mx2, DBC.ln)}</ul>
       <div class="db-note2">Đã thu <b>${pc(T.thu, T.hd_sv)}</b> doanh thu HĐ · không gồm tiền vay, trả nợ gốc</div>`),
     arrow(),
-    blk('III', 'b3', 'Còn phải thu – chi', `Theo TĐ${k} − dòng thu, dòng chi`, T3.con, 'Còn lại (thu − chi)',
+    blk('III', 'b3', 'Còn phải thu – chi', 'Số mới nhất − dòng thu, dòng chi', T3.con, 'Còn lại (thu − chi)',
       `<ul class="db-lines">${line('Còn phải thu', T3.pt, mx3, DBC.dt)}${line('Còn phải chi', T3.pc, mx3, DBC.cp)}${line('Còn lại', T3.con, mx3, DBC.ln)}</ul>
-      <div class="db-note2">Doanh thu TĐ${k} − dòng thu · chi phí TĐ${k} − dòng chi</div>`),
+      <div class="db-note2">Doanh thu mới nhất − dòng thu · chi phí mới nhất − dòng chi</div>`),
     arrow(),
     blk('IV', 'b4', 'Lợi nhuận TĐ1 → TĐ3', 'Hợp đồng → điều chỉnh → quyết toán', MT.l3, `LN mới nhất · ${dlt(MT.l3, MT.l1)}`,
       `<div class="db-steps">${step}</div>`),
@@ -121,7 +121,7 @@ function bDashRender(list, v, one) {
     </div>
     <div class="db-kpis">
       <section class="db-kg"><div class="db-kgh"><span>Doanh thu – Chi phí – Lợi nhuận</span>${tdSeg}</div><div class="db-kgr">${kpis}</div></section>
-      <section class="db-kg db-kg2"><div class="db-kgh"><span>Kế hoạch – Thực – Còn lại · TĐ${k}</span></div>${mx}</section>
+      <section class="db-kg db-kg2"><div class="db-kgh"><span>Kế hoạch – Thực – Còn lại · mới nhất</span></div>${mx}</section>
     </div>
     <div class="db-flow">${flow}</div>
     <div class="db-row2">

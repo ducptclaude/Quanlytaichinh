@@ -17,7 +17,7 @@ function dpHtml(list, v) {
   // Đầu trang như Dashboard: 3 chỉ số DT – CP – LN theo TĐ đang chọn trên Dashboard + bảng Kế hoạch (mục I) – Thực (mục II) – Còn lại (mục III)
   const k = [1, 2, 3].includes(Number(BST.db_td)) ? Number(BST.db_td) : 3;
   const tk = T['t' + k], ck = T['c' + k], lk = T['l' + k];
-  const M3 = bMuc3Data(list, v, C.rows, k).T;
+  const M3 = bMuc3Data(list, v, C.rows, 3).T; // Kế hoạch – Thực – Còn lại: luôn số mới nhất
   const vs = (cur, base, good) => (k === 1 ? '<span class="dp-eq">Kế hoạch lúc ký hợp đồng</span>' : d(cur, base, good));
   const kpi = (lab, val, unit, sub, col) => `<div class="dp-k" style="--c:${col}"><div class="dp-kl">${lab}</div><div class="dp-kv">${val}<small>${unit}</small></div><div class="dp-ks">${sub}</div></div>`;
   const kpis = [
@@ -26,7 +26,7 @@ function dpHtml(list, v) {
     kpi(`Lợi nhuận · TĐ${k}`, ty(lk), 'tỷ', `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · lúc ký ${pc(T.l1, T.t1)}`}`, DP.ln),
   ].join('');
   const mxR = (lab, col, a, b2, c) => `<tr><th><i style="background:${col}"></i>${lab}</th><td>${ty(a)}</td><td>${ty(b2)}</td><td class="dp-mxc">${ty(c)}</td></tr>`;
-  const mxT = `<table class="dp-mx"><thead><tr><th>Tỷ đồng</th><th>Kế hoạch <small>Mục I · TĐ${k}</small></th><th>Thực <small>Mục II · lũy kế</small></th><th class="dp-mxc">Còn lại <small>Mục III</small></th></tr></thead>
+  const mxT = `<table class="dp-mx"><thead><tr><th>Tỷ đồng</th><th>Kế hoạch <small>Mới nhất</small></th><th>Thực <small>Mục II · lũy kế</small></th><th class="dp-mxc">Còn lại <small>Mục III</small></th></tr></thead>
     <tbody>${mxR('Doanh thu', DP.dt, M3.dt, M3.thu, M3.pt)}${mxR('Chi phí', DP.cp, M3.cp, M3.chi, M3.pc)}${mxR('Lợi nhuận', DP.ln, M3.dt - M3.cp, M3.thu - M3.chi, M3.con)}</tbody></table>`;
   // Biểu đồ cột 3 thời điểm (thực tế) – trục từ 0
   const TV = [[T.t1, T.c1, T.l1], [T.t2, T.c2, T.l2], [T.t3, T.c3, T.l3]];

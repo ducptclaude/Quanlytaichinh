@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V22.12.11.26 – Dashboard: Kế hoạch – Thực – Còn lại và mục III luôn lấy số mới nhất
+- Dashboard (và Dashboard PDF): bảng Kế hoạch – Thực – Còn lại và khối III Còn phải thu – chi không đổi theo nút TĐ nữa, luôn lấy số mới nhất (giống mục III Báo cáo). 3 ô DT – CP – LN và khối IV vẫn theo nút TĐ. Thử TĐ1/TĐ2/TĐ3: bảng giữ nguyên, khớp mục III Báo cáo. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V21.12.11.26 – Cập nhật trang Hướng dẫn theo các điều chỉnh cuối
 - Hướng dẫn: nhập đợt HT/QT ngay trong bảng (Enter / Esc), nút "+ HĐ" cho gói chưa có HĐ, sửa giá trị ký HĐ gắn gói ở TĐ2, lưu xong giữ nguyên chỗ, Báo cáo tự nhảy TĐ mới nhất, bảng dự án → từng HĐ (+ dòng Chưa phân theo HĐ), mục III luôn lấy thời điểm mới nhất, Báo cáo theo công trình thu gọn mặc định. Mục III dùng bản V20 của phiên song song. Tester 4.518 ĐẠT, 0 LỖI.
 

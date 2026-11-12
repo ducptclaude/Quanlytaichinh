@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Số mới nhất − dòng thu, dòng chi": "Latest figures − collections, expenditure",
+"Doanh thu mới nhất − dòng thu · chi phí mới nhất − dòng chi": "Latest revenue − collections · latest cost − expenditure",
+"Kế hoạch – Thực – Còn lại · mới nhất": "Plan – Actual – Remaining · latest",
 "Doanh thu, chi phí ở thời điểm mới nhất của từng dự án trừ dòng thu, dòng chi thực tế (mục II)": "Revenue and cost at each project's latest milestone minus actual collections and expenditure (section II)",
 "TĐ mới nhất từng dự án": "Latest milestone per project",
 "TĐ mới nhất": "Latest milestone",
