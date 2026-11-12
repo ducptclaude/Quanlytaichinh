@@ -41,6 +41,7 @@
           <button data-tab="settings" role="menuitem" data-role="admin">Cài đặt</button>
         </div>
       </div>
+      <button data-tab="guide" title="Hướng dẫn sử dụng hệ thống">Hướng dẫn</button>
     </nav>
     <div class="user-box">
       <div class="tab-grp xuat-grp" data-grp="xuat" id="xuat-grp" hidden>
@@ -402,6 +403,250 @@
       </div>
       <div id="dy-bc-note" class="dy-bc-note no-print" hidden></div>
       <div id="b-report" class="report"></div>
+    </section>
+
+    <!-- ================= HƯỚNG DẪN (V08.12.11.26) ================= -->
+    <section id="tab-guide" class="tab-panel gd" hidden>
+      <div class="card gd-hero">
+        <div>
+          <h1>Hướng dẫn sử dụng</h1>
+          <p class="muted">Nhập đúng chỗ – đúng thời điểm – đúng đơn vị, số liệu báo cáo sẽ tự khớp. Bấm một mục bên dưới để xem.</p>
+        </div>
+        <nav class="gd-toc" aria-label="Mục lục hướng dẫn">
+          <a href="#gd-quytac" data-gd="gd-quytac"><b>1</b> Quy tắc nhập liệu &amp; số liệu</a>
+          <a href="#gd-dt" data-gd="gd-dt"><b>2</b> Nhập Doanh thu theo TĐ</a>
+          <a href="#gd-cp" data-gd="gd-cp"><b>3</b> Nhập Chi phí theo TĐ</a>
+          <a href="#gd-bc" data-gd="gd-bc"><b>4</b> Xuất báo cáo</a>
+          <a href="#gd-tn" data-gd="gd-tn"><b>5</b> Các tính năng</a>
+        </nav>
+      </div>
+
+      <!-- Bắt đầu nhanh -->
+      <div class="card">
+        <h2 class="gd-h2">Bắt đầu nhanh – 5 bước</h2>
+        <ol class="gd-flow">
+          <li><span class="gd-ico">🏗️</span><b>Tạo dự án</b><small>Nhập liệu › Dự án</small></li>
+          <li><span class="gd-ico">📄</span><b>Doanh thu TĐ1</b><small>HĐ + PL ký với Chủ đầu tư</small></li>
+          <li><span class="gd-ico">🧾</span><b>Chi phí TĐ1</b><small>Gói tạm tính / HĐ đầu vào</small></li>
+          <li><span class="gd-ico">🔁</span><b>TĐ2 → TĐ3</b><small>Điều chỉnh, rồi quyết toán</small></li>
+          <li><span class="gd-ico">📊</span><b>Báo cáo</b><small>Xem, xuất PDF / Excel</small></li>
+        </ol>
+      </div>
+
+      <!-- ================= 1. QUY TẮC ================= -->
+      <div class="card gd-sec" id="gd-quytac">
+        <h2 class="gd-h2"><span class="gd-no">1</span>Quy tắc nhập liệu &amp; số liệu</h2>
+
+        <h3 class="gd-h3">Ba thời điểm (TĐ) – xương sống của hệ thống</h3>
+        <div class="gd-td">
+          <div class="gd-td-c td1"><div class="gd-td-t">TĐ1 · Ký HĐ</div><p>Kế hoạch lúc ký: <b>giá trị HĐ + PL ký</b>, chi phí dự kiến (gói tạm tính, HĐ đầu vào đã ký).</p><small>Nhập ở tab <b>TĐ1</b></small></div>
+          <div class="gd-td-a">➜</div>
+          <div class="gd-td-c td2"><div class="gd-td-t">TĐ2 · Điều chỉnh</div><p><b>TĐ1 + các đợt tăng / giảm</b>. Gói được thay bằng HĐ thật; HĐ phát sinh ngoài TĐ1.</p><small>Nhập ở tab <b>TĐ2</b> – nhiều đợt</small></div>
+          <div class="gd-td-a">➜</div>
+          <div class="gd-td-c td3"><div class="gd-td-t">TĐ3 · Quyết toán</div><p><b>Số quyết toán</b> từng văn bản. Có số = <b>khoá</b> 🔒 (mở bằng Passcode).</p><small>Nhập ở tab <b>TĐ3</b></small></div>
+        </div>
+        <p class="gd-note">Ba nút <b>TĐ1 · TĐ2 · TĐ3</b> ở đầu trang Doanh thu / Chi phí vừa chọn <b>nơi nhập</b>, vừa chọn <b>số đang xem</b>. Nội dung mỗi TĐ tách riêng, không lẫn nhau.</p>
+
+        <h3 class="gd-h3">Quy tắc nhập số</h3>
+        <div class="gd-grid">
+          <div class="gd-rule"><span class="gd-ico">💰</span><b>Nhập bằng đồng, trước VAT</b><p>Hệ thống tự tính tiền VAT và giá trị sau VAT. Ô <b>Đơn vị</b> (Đồng / Triệu / Tỷ) chỉ đổi cách hiện, không đổi số.</p></div>
+          <div class="gd-rule"><span class="gd-ico">⌨️</span><b>Gõ nhanh</b><p><code>180tr</code> · <code>1,5 tỷ</code> · <code>500k</code> · <code>+50tr</code> (tăng) · <code>-30.000.000</code> (giảm) · <code>=120*2,5tr</code>. Dán thẳng số từ Excel / Word.</p></div>
+          <div class="gd-rule"><span class="gd-ico">📅</span><b>Ngày dd/mm/yyyy</b><p>VD <code>15/11/2026</code>. Ngày dùng để xếp đợt và tính dòng tiền theo kỳ.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🧩</span><b>Đúng chỗ – đúng TĐ</b><p>TĐ1: thêm HĐ / PL / gói. TĐ2: chỉ ghi <b>đợt điều chỉnh</b>, không sửa số ký. TĐ3: nhập <b>số quyết toán</b>.</p></div>
+          <div class="gd-rule"><span class="gd-ico">⏳</span><b>Tạm tính</b><p>HĐ chưa quyết toán là <span class="st st-tam-tinh">Tạm tính</span>: lấy giá trị HĐ + PL mới nhất. Trả đủ tiền mà chưa QT vẫn là tạm tính.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🔒</span><b>Khoá &amp; mở khoá</b><p>Có số QT → khoá văn bản. HĐ đầu vào đã QT và còn lại = 0 → khoá. Mở bằng nút <b>🔓 Mở khoá</b> + Passcode (có ghi nhật ký).</p></div>
+          <div class="gd-rule"><span class="gd-ico">✅</span><b>Phê duyệt</b><p>Thêm / sửa / xóa của người nhập liệu hiện ở tab <b>Duyệt</b>; Quản trị, Lãnh đạo nhập thì tự duyệt.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🏦</span><b>Không phải doanh thu / chi phí</b><p><b>Nhận tiền vay</b> và <b>trả nợ gốc</b> được tách riêng, không cộng vào doanh thu, chi phí.</p></div>
+        </div>
+
+        <h3 class="gd-h3">Cách tính các chỉ tiêu chính (sau VAT)</h3>
+        <div class="table-wrap"><table class="gd-tbl">
+          <thead><tr><th>Chỉ tiêu</th><th>Cách tính</th></tr></thead>
+          <tbody>
+            <tr><td><b>Doanh thu TĐk</b></td><td>Tổng HĐ + PL với Chủ đầu tư tại TĐk (TĐ2 = TĐ1 + các đợt điều chỉnh; TĐ3 = số quyết toán, chưa có = TĐ2)</td></tr>
+            <tr><td><b>Chi phí TĐk</b></td><td>HĐ đầu vào tại TĐk + gói / dự trù tại TĐk + chi phí đã ghi (chứng từ, mua lẻ)</td></tr>
+            <tr><td><b>Gói chi phí</b></td><td>TĐ1 = giá trị tạm tính · TĐ2, TĐ3 = tổng các HĐ đã gắn vào gói (chưa gắn: tạm tính; đã đóng: 0)</td></tr>
+            <tr><td><b>HĐ phát sinh ngoài TĐ1</b></td><td>TĐ1 = 0 · tính từ TĐ2</td></tr>
+            <tr><td><b>Lợi nhuận</b></td><td>Doanh thu − Chi phí (cùng TĐ)</td></tr>
+            <tr><td><b>Thực thu</b> (dòng thu)</td><td>Tiền về: tạm ứng + các đợt thanh toán + quyết toán</td></tr>
+            <tr><td><b>Thực chi</b> (dòng chi)</td><td>Chi phí đã chi + đã trả HĐ đầu vào (gồm tạm ứng)</td></tr>
+            <tr><td><b>Còn lại thực</b></td><td>Thực thu − Thực chi</td></tr>
+            <tr><td><b>Còn phải thu / phải chi</b></td><td>Doanh thu − Thực thu · Chi phí dự kiến − Thực chi</td></tr>
+            <tr><td><b>% doanh thu</b></td><td>Giá trị sau VAT ÷ Doanh thu sau VAT cùng TĐ</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="gd-h3">Đọc màu cho nhanh</h3>
+        <div class="gd-legend">
+          <div><b>Doanh thu</b><span class="gd-up-g">▲ tăng = tốt</span><span class="gd-dn-r">▼ giảm = lưu ý</span></div>
+          <div><b>Chi phí</b><span class="gd-up-r">▲ tăng = lưu ý</span><span class="gd-dn-g">▼ giảm = tốt</span></div>
+          <div><b>Tiến độ HT/QT</b>
+            <span class="gd-bar"><i style="width:40%"></i></span><small>đang làm</small>
+            <span class="gd-bar"><i class="du" style="width:100%"></i></span><small>đủ / vượt</small>
+            <span class="gd-bar"><i class="thieu" style="width:85%"></i></span><small>đã QT mà thiếu</small></div>
+          <div><b>Nhãn</b><span class="st st-tam-tinh">Tạm tính</span><span class="tp-ps">Phát sinh</span><span class="st st-hoan-thanh">🔒 Đã đóng QT</span></div>
+        </div>
+      </div>
+
+      <!-- ================= 2. DOANH THU ================= -->
+      <div class="card gd-sec" id="gd-dt">
+        <h2 class="gd-h2"><span class="gd-no">2</span>Nhập Doanh thu theo thời điểm <a class="gd-go" href="#" data-tab-go="revenue">Mở trang Doanh thu ›</a></h2>
+        <p class="muted">Trang Doanh thu có 3 bảng: <b>1. Hợp đồng / Phụ lục</b> · <b>2. Giá trị Hoàn thành / Quyết toán</b> · <b>3. Giá trị tiền về</b>. Chọn dự án ở ô trên cùng trước khi nhập.</p>
+        <div class="gd-steps">
+          <div class="gd-step td1">
+            <div class="gd-step-h"><span class="gd-pill td1">TĐ1</span>Ký hợp đồng</div>
+            <ol>
+              <li>Bấm tab <b>TĐ1 Ký HĐ</b>.</li>
+              <li>Form bảng 1: chọn <b>HĐ</b> (hoặc PL01, PL02…), nhập <b>Số HĐ</b>, ngày ký, giá trị <b>trước VAT</b>, VAT → <b>Thêm dòng</b>.</li>
+              <li>Thêm phụ lục nhanh: <b>nhấp đúp số HĐ</b> trong bảng → form điền sẵn PL kế tiếp.</li>
+            </ol>
+          </div>
+          <div class="gd-step td2">
+            <div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>Điều chỉnh (nhiều đợt)</div>
+            <ol>
+              <li>Bấm tab <b>TĐ2 Điều chỉnh</b> → khung <b>"TĐ2 – Điều chỉnh"</b> hiện trên bảng 1.</li>
+              <li>Chọn văn bản (hoặc <b>nhấp đúp số HĐ / PL</b> trong bảng để chọn nhanh).</li>
+              <li>Chọn <b>Tăng / giảm (±)</b> rồi gõ phần chênh, hoặc <b>Chốt giá trị mới</b> rồi gõ tổng mới → <b>Ghi điều chỉnh</b>. Mỗi lần ghi = 1 đợt.</li>
+              <li>Xem / sửa / xóa đợt: nút <b>Các đợt</b>. Cột <b>± so TĐ1</b> cho thấy tăng giảm.</li>
+            </ol>
+          </div>
+          <div class="gd-step td3">
+            <div class="gd-step-h"><span class="gd-pill td3">TĐ3</span>Quyết toán</div>
+            <ol>
+              <li>Bấm tab <b>TĐ3 Quyết toán</b>.</li>
+              <li>Ở cột TĐ3 từng HĐ / PL: gõ <b>số quyết toán</b> (trước VAT) → <b>Lưu QT</b> → văn bản khoá 🔒.</li>
+              <li>HĐ và mọi PL đều có số → HĐ <span class="st st-hoan-thanh">🔒 Đã đóng QT</span>.</li>
+              <li>Cần sửa: <b>🔓 Mở khoá</b> + Passcode (ở mọi tab TĐ).</li>
+            </ol>
+          </div>
+        </div>
+        <div class="gd-ex">
+          <div class="gd-ex-h">Ví dụ – HĐ 1011/2026/HĐDV (triệu đồng, trước VAT)</div>
+          <div class="table-wrap"><table class="gd-tbl gd-num">
+            <thead><tr><th>Văn bản</th><th>TĐ1 · ký</th><th>Đợt điều chỉnh</th><th>TĐ2</th><th>± so TĐ1</th><th>TĐ3 · quyết toán</th></tr></thead>
+            <tbody>
+              <tr><td>HĐ</td><td>1.000</td><td>−100 · +35 · +100</td><td>1.035</td><td class="gd-g">▲ +35</td><td>1.035 🔒</td></tr>
+              <tr><td>└ PL01</td><td>400</td><td>+600 · −100</td><td>900</td><td class="gd-g">▲ +500</td><td>900 🔒</td></tr>
+              <tr class="gd-sum"><td>Tổng</td><td>1.400</td><td></td><td>1.935</td><td class="gd-g">▲ +535</td><td>1.935</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="gd-grid gd-grid2">
+          <div class="gd-rule"><span class="gd-ico">🏁</span><b>Bảng 2 – Hoàn thành / Quyết toán</b><p>Ghi các đợt nghiệm thu: chọn <b>Số HĐ</b>, tên đợt (VD "Nghiệm thu đợt 1"), giá trị → <b>Thêm dòng</b>; hoặc nút <b>+ Đợt</b> ở dòng HĐ. Thanh tiến độ cho biết đã đạt bao nhiêu % giá trị HĐ, còn bao nhiêu.</p></div>
+          <div class="gd-rule"><span class="gd-ico">💵</span><b>Bảng 3 – Tiền về</b><p>Ở dòng HĐ bấm <b>+ TƯ</b> (tạm ứng), <b>+ Đợt</b> (thanh toán), <b>+ QT</b> (quyết toán – mỗi HĐ 1 lần). Gõ số tiền, ngày → <b>Lưu</b>. Tiền về là cơ sở tính <b>Thực thu</b>.</p></div>
+        </div>
+      </div>
+
+      <!-- ================= 3. CHI PHÍ ================= -->
+      <div class="card gd-sec" id="gd-cp">
+        <h2 class="gd-h2"><span class="gd-no">3</span>Nhập Chi phí theo thời điểm <a class="gd-go" href="#" data-tab-go="cost">Mở trang Chi phí ›</a></h2>
+        <p class="muted">Lúc ký HĐ với Chủ đầu tư thường chưa rõ nhà thầu → nhập theo <b>gói</b> (tạm tính). Có HĐ thật thì gắn HĐ vào gói, giá trị gói tự thay bằng HĐ.</p>
+        <div class="gd-steps">
+          <div class="gd-step td1">
+            <div class="gd-step-h"><span class="gd-pill td1">TĐ1</span>Dự kiến chi phí</div>
+            <ol>
+              <li>Tab <b>TĐ1</b> → form <b>Thêm chi phí</b>: chọn <b>Nhóm</b> (Thầu phụ, Vật tư, Nhân công, MMTB…) và <b>Thuộc HĐ chủ đầu tư</b>.</li>
+              <li><b>Cách nhập</b>:
+                <div class="gd-chips"><span>📦 Gói – chưa rõ nhà thầu (tạm tính)</span><span>🤝 HĐ đã có nhà cung cấp</span><span>🧾 Dòng mua lẻ (chứng từ)</span></div></li>
+              <li>Gói: đặt tên (VD "Thầu phụ 1 – Kết cấu"), giá trị tạm tính → <b>Tạo gói</b>.</li>
+            </ol>
+          </div>
+          <div class="gd-step td2">
+            <div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>HĐ thật &amp; điều chỉnh</div>
+            <ol>
+              <li>Tab <b>TĐ2</b> → Thêm chi phí, Hình thức <b>Hợp đồng</b>: chọn <b>Gói</b> mà HĐ thay thế, hoặc <b>Phát sinh ngoài TĐ1</b>.</li>
+              <li>Tăng / giảm HĐ: khung <b>"TĐ2 – Điều chỉnh HĐ đầu vào"</b> (nhiều đợt, như Doanh thu).</li>
+              <li>Điều chỉnh cả nhóm: nút <b>± Nhóm</b> trong bảng chi tiết. Gói không dùng nữa: <b>Đóng gói</b> (TĐ2 = 0).</li>
+            </ol>
+          </div>
+          <div class="gd-step td3">
+            <div class="gd-step-h"><span class="gd-pill td3">TĐ3</span>Quyết toán &amp; thanh toán</div>
+            <ol>
+              <li>Mở HĐ (bấm <b>số HĐ</b>) → ô <b>TĐ3</b> từng HĐ / PL: nhập số quyết toán → <b>Lưu QT</b>.</li>
+              <li>Quyết toán cả nhóm: nút <b>QT nhóm</b>. Ở TĐ3 chỉ thêm được <b>dòng mua lẻ</b>.</li>
+              <li>Thanh toán (mọi TĐ): trong HĐ bấm <b>+ Tạm ứng</b> · <b>+ Đợt thanh toán</b> · <b>+ Quyết toán</b>. Đã QT và còn lại = 0 → khoá.</li>
+            </ol>
+          </div>
+        </div>
+        <h3 class="gd-h3">Xem bảng HĐ đầu vào – 3 lớp</h3>
+        <ol class="gd-flow gd-flow3">
+          <li><span class="gd-ico">🗂️</span><b>Nhóm chính</b><small>HĐ CĐT › Thầu phụ / Vật tư… · TĐ · ± · Còn lại</small></li>
+          <li><span class="gd-ico">🖱️</span><b>Nhấp đúp nhóm</b><small>Bảng chi tiết: gói, HĐ, đã trả, còn lại (điện thoại: chạm)</small></li>
+          <li><span class="gd-ico">✍️</span><b>Bấm số HĐ</b><small>Bảng nhập: HĐ / PL, đợt điều chỉnh, thanh toán</small></li>
+        </ol>
+        <div class="gd-ex">
+          <div class="gd-ex-h">Ví dụ – Gói "Kết cấu" (triệu đồng, sau VAT)</div>
+          <div class="table-wrap"><table class="gd-tbl gd-num">
+            <thead><tr><th>Bước</th><th>Nội dung</th><th>Giá trị</th><th>± so TĐ1</th></tr></thead>
+            <tbody>
+              <tr><td><span class="gd-pill td1">TĐ1</span></td><td>Gói Kết cấu – tạm tính</td><td>300</td><td>—</td></tr>
+              <tr><td><span class="gd-pill td2">TĐ2</span></td><td>Ký 3 HĐ thật gắn vào gói: 75 + 100 + 200 = 375 (trong đó điều chỉnh +25)</td><td>375</td><td class="gd-r">▲ 75 <small>(ký +50 · điều chỉnh +25)</small></td></tr>
+              <tr><td><span class="gd-pill td3">TĐ3</span></td><td>Quyết toán từng HĐ (chưa nhập = lấy TĐ2)</td><td>375</td><td>=</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="gd-grid gd-grid2">
+          <div class="gd-rule"><span class="gd-ico">📒</span><b>Sổ chi phí (bảng chi tiết chi phí)</b><p>Ghi từng chứng từ theo khối Trực tiếp / Gián tiếp / Tài chính. Cột <b>% DT</b> = tỷ trọng so với doanh thu TĐ đang chọn; rê chuột thấy cả TĐ1 · TĐ2 · TĐ3.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🏷️</span><b>Gắn HĐ chủ đầu tư</b><p>Mỗi gói và HĐ đầu vào nên gắn <b>HĐ CĐT</b> để bảng xếp đúng nhóm và báo cáo theo HĐ. Đổi ở hộp gói (nút Sửa gói / ± Nhóm).</p></div>
+        </div>
+      </div>
+
+      <!-- ================= 4. BÁO CÁO ================= -->
+      <div class="card gd-sec" id="gd-bc">
+        <h2 class="gd-h2"><span class="gd-no">4</span>Xuất báo cáo <a class="gd-go" href="#" data-tab-go="report">Mở trang Báo cáo ›</a></h2>
+        <ol class="gd-flow">
+          <li><span class="gd-ico">🎯</span><b>Phạm vi</b><small>Tất cả dự án hoặc 1 dự án</small></li>
+          <li><span class="gd-ico">🗓️</span><b>Kỳ báo cáo</b><small>Tháng, quý, năm, lũy kế, tùy chọn</small></li>
+          <li><span class="gd-ico">🧮</span><b>Cơ sở VAT</b><small>Trước VAT / Sau VAT</small></li>
+          <li><span class="gd-ico">👁️</span><b>Hiển thị</b><small>Báo cáo hoặc Dashboard</small></li>
+          <li><span class="gd-ico">⤓</span><b>Xuất</b><small>Nút ⤓ Xuất góc phải trên</small></li>
+        </ol>
+        <div class="table-wrap"><table class="gd-tbl">
+          <thead><tr><th>Mục xuất</th><th>Dùng khi</th></tr></thead>
+          <tbody>
+            <tr><td><b>In / PDF</b></td><td>In hoặc lưu PDF đúng trang báo cáo đang xem</td></tr>
+            <tr><td><b>Dashboard PDF</b></td><td>Một trang A4 ngang tổng hợp – chọn "Lưu dưới dạng PDF" trong hộp in</td></tr>
+            <tr><td><b>Excel</b></td><td>Toàn bộ số liệu báo cáo, nhiều trang tính – để phân tích tiếp</td></tr>
+            <tr><td><b>Excel mẫu trình ký</b></td><td>Bảng tổng hợp doanh thu – chi phí theo mẫu trình ký (logo, font, bố cục chuẩn)</td></tr>
+            <tr><td><b>PowerPoint</b></td><td>Bộ slide trình chiếu báo cáo</td></tr>
+          </tbody>
+        </table></div>
+        <div class="gd-grid gd-grid2">
+          <div class="gd-rule"><span class="gd-ico">📑</span><b>Nội dung báo cáo</b><p><b>I.</b> Doanh thu – Chi phí – Lợi nhuận (theo TĐ) · <b>II.</b> Dòng tiền thực tế · <b>III.</b> Dòng tiền còn lại phải thu – chi · <b>IV.</b> Doanh thu hoàn thành – quyết toán. Bấm số để xem chi tiết.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🔐</span><b>Ai được xuất</b><p>Quản trị, Lãnh đạo, Ban Kiểm soát. Tài khoản <b>Chỉ xem</b> và <b>Khách</b> chỉ xem, không xuất.</p></div>
+        </div>
+      </div>
+
+      <!-- ================= 5. TÍNH NĂNG ================= -->
+      <div class="card gd-sec" id="gd-tn">
+        <h2 class="gd-h2"><span class="gd-no">5</span>Các tính năng của hệ thống</h2>
+        <div class="gd-grid">
+          <div class="gd-rule"><span class="gd-ico">📊</span><b>Báo cáo &amp; Dashboard</b><p>Số liệu tổng hợp nhiều dự án theo 3 TĐ, dòng tiền, cảnh báo. Trợ lý số liệu trả lời câu hỏi nhanh.</p></div>
+          <div class="gd-rule"><span class="gd-ico">✅</span><b>Duyệt</b><p>Lãnh đạo / Quản trị duyệt số liệu nhập; người nhập xem hồ sơ đã gửi, kết quả và lý do.</p></div>
+          <div class="gd-rule"><span class="gd-ico">✍️</span><b>Nhập liệu</b><p>Dự án · Doanh thu · Chi phí. Thanh chuyển nhanh giữa 3 trang ở đầu trang.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🛡️</span><b>Quản trị</b><p>Tài khoản &amp; vai trò, nhật ký hoạt động, Cài đặt (Passcode, tên công ty, dữ liệu mẫu).</p></div>
+          <div class="gd-rule"><span class="gd-ico">🔢</span><b>Đơn vị tiền</b><p>Ô <b>Đơn vị</b>: Tự động / Đồng / Nghìn / Triệu / Tỷ – áp dụng toàn hệ thống, chỉ đổi cách hiện.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🌐</span><b>Ngôn ngữ</b><p>Việt Nam / English. Dữ liệu người dùng nhập không dịch.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🌙</span><b>Giao diện sáng / tối</b><p>Nút 🌙 trên thanh đầu trang.</p></div>
+          <div class="gd-rule"><span class="gd-ico">📱</span><b>Điện thoại, máy tính bảng</b><p>Bảng tự gọn; vuốt ngang xem cột số; chạm thay cho nhấp đúp.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🧾</span><b>Nhật ký &amp; khoá số</b><p>Mọi thay đổi được ghi nhật ký; số đã quyết toán khoá, mở bằng Passcode.</p></div>
+          <div class="gd-rule"><span class="gd-ico">👤</span><b>Tài khoản khách</b><p>Chỉ xem, giới hạn 30 phút từ lần đăng nhập đầu, trên 1 thiết bị.</p></div>
+        </div>
+        <h3 class="gd-h3">Vai trò – ai làm gì</h3>
+        <div class="table-wrap"><table class="gd-tbl gd-role">
+          <thead><tr><th>Vai trò</th><th>Xem báo cáo</th><th>Nhập giá trị HĐ</th><th>Nhập tiền</th><th>Duyệt</th><th>Xuất</th></tr></thead>
+          <tbody>
+            <tr><td><b>Quản trị</b></td><td>✔</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td></tr>
+            <tr><td><b>Lãnh đạo</b></td><td>✔</td><td>—</td><td>—</td><td>✔</td><td>✔</td></tr>
+            <tr><td><b>Ban Kiểm soát</b></td><td>✔</td><td>—</td><td>—</td><td>—</td><td>✔</td></tr>
+            <tr><td><b>Quản lý dự án / QS</b></td><td>—</td><td>✔</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td><b>Kế toán dự án</b></td><td>—</td><td>—</td><td>✔</td><td>—</td><td>—</td></tr>
+            <tr><td><b>Nhập liệu (tất cả)</b></td><td>—</td><td>✔</td><td>✔</td><td>—</td><td>—</td></tr>
+            <tr><td><b>Chỉ xem</b></td><td>✔</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table></div>
+        <p class="gd-note"><b>Giá trị HĐ</b>: dự án, HĐ / PL, hoàn thành – quyết toán với CĐT, HĐ đầu vào. <b>Tiền</b>: tiền về, thanh toán HĐ đầu vào, chi phí, vay – trả nợ.</p>
+      </div>
     </section>
 
     <!-- ================= LIÊN HỆ ================= -->

@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Hướng dẫn": "Guide",
+"Hướng dẫn sử dụng hệ thống": "System user guide",
 "⚠ kiểm tra PL": "⚠ check addenda",
 "đủ giá trị HĐ": "full contract value",
 "Chưa QT (đã trả đủ)": "Not settled (fully paid)",

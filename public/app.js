@@ -61,7 +61,7 @@ function applyBranding(s) {
 // =====================================================================
 // Tab
 // =====================================================================
-const loaders = { duyet: () => loadDuyet(), projects: loadProjects, revenue: loadRevenueTab, cost: loadCostTab, users: () => (can('tai_khoan') ? loadUsers() : Promise.resolve()).then(() => loadLogs()), settings: loadSettings, profile: async () => {}, contact: loadContact, report: () => { BST.chi_tiet = false; return loadReport(); } }; // mỗi lần vào tab Báo cáo: chi tiết ẩn
+const loaders = { duyet: () => loadDuyet(), projects: loadProjects, revenue: loadRevenueTab, cost: loadCostTab, users: () => (can('tai_khoan') ? loadUsers() : Promise.resolve()).then(() => loadLogs()), settings: loadSettings, profile: async () => {}, guide: async () => {}, contact: loadContact, report: () => { BST.chi_tiet = false; return loadReport(); } }; // mỗi lần vào tab Báo cáo: chi tiết ẩn
 
 const NHAP_LIEU = ['projects', 'revenue', 'cost'];
 // Menu Xuất: chọn xong một mục thì đóng menu
@@ -3886,3 +3886,12 @@ async function saveDcForm() {
     msg(`Đã ghi điều chỉnh ${d > 0 ? '+' : ''}${money(d)} đ cho ${r.so_hieu} (TĐ2)`);
   } catch (err) { msg(err.message, 'err'); }
 }
+
+// ---------- Trang Hướng dẫn: mục lục cuộn tới mục (trừ thanh đầu trang) ----------
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('#tab-guide [data-gd]'); if (!a) return;
+  e.preventDefault();
+  const el = document.getElementById(a.dataset.gd); if (!el) return;
+  const top = el.getBoundingClientRect().top + scrollY - (document.querySelector('.topbar')?.offsetHeight || 0) - 12;
+  scrollTo({ top, behavior: 'smooth' });
+});

@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.12.11.26 – Tab Hướng dẫn
+- Nút "Hướng dẫn" trên thanh menu (mọi vai trò). Trang tĩnh (views/index.html #tab-guide, CSS .gd-*): mục lục 5 phần + Bắt đầu nhanh 5 bước; 1. Quy tắc nhập liệu & số liệu (3 TĐ, quy tắc nhập số, cách tính chỉ tiêu, chú giải màu); 2. Nhập Doanh thu TĐ1/2/3 (+ ví dụ HĐ 1011, bảng HT/QT, tiền về); 3. Nhập Chi phí TĐ1/2/3 (gói, HĐ thật, điều chỉnh, quyết toán, thanh toán, bảng 3 lớp, ví dụ gói Kết cấu); 4. Xuất báo cáo; 5. Tính năng + bảng vai trò. Nút "Mở trang …" chuyển thẳng tới trang nhập. Chưa dịch English (ghi ở CLAUDE.md). Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V07.12.11.26 – Doanh thu bảng HĐ / PL: nút Mở khoá (Passcode) ở mọi tab TĐ
 - Dòng HĐ / PL đang khoá (đã có số QT hoặc HĐ đã đóng QT) hiện nút "🔓 Mở khoá" ở cả TĐ1 / TĐ2 / TĐ3 (trước chỉ TĐ3, còn lại chỉ ghi "🔒 Khoá"). Văn bản có số QT: bỏ số QT của văn bản đó (HĐ đang đóng tự mở lại) – dùng API cũ, có nhật ký. HĐ đóng mà văn bản chưa có số: mở chốt HĐ (giữ số QT). Đều cần Passcode. Tester 4.518 ĐẠT, 0 LỖI.
 

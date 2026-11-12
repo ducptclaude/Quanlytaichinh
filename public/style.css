@@ -3585,3 +3585,73 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 /* Thu gọn hết nhóm -> ẩn các cột chỉ có ở dòng chi tiết; mở ra hiện lại */
 .tv-table.tv-gon .c-o { display: none; }
 .cost-table.c-gon th.c-o { display: none; }
+
+/* ================= Trang Hướng dẫn ================= */
+.gd .card { margin-bottom: 16px; }
+.gd-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; background: linear-gradient(135deg, color-mix(in srgb, var(--teal, #0f9d8a) 10%, var(--bg-ffffff)), var(--bg-ffffff)); }
+.gd-hero h1 { margin: 0 0 4px; font-size: 24px; }
+.gd-hero p { margin: 0; }
+.gd-toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.gd-toc a { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-ffffff); color: inherit; text-decoration: none; font-weight: 600; font-size: 13.5px; }
+.gd-toc a:hover { border-color: var(--teal, #0f9d8a); color: var(--teal, #0f9d8a); }
+.gd-toc a b, .gd-no { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--navy, #1f3a6e); color: #fff; font-size: 12px; flex: none; }
+.gd-h2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; font-size: 18px; }
+.gd-no { width: 28px; height: 28px; font-size: 14px; }
+.gd-go { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--teal, #0f9d8a); text-decoration: none; }
+.gd-h3 { margin: 18px 0 10px; font-size: 15px; }
+.gd-note { margin: 10px 0 0; padding: 10px 12px; border-left: 4px solid var(--teal, #0f9d8a); border-radius: 8px; background: color-mix(in srgb, var(--teal, #0f9d8a) 7%, var(--bg-ffffff)); font-size: 13.5px; }
+.gd-ico { font-size: 22px; line-height: 1; }
+/* Luồng bước */
+.gd-flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; counter-reset: gd; }
+.gd-flow li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 12px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-ffffff); counter-increment: gd; }
+.gd-flow li::before { content: counter(gd); position: absolute; top: 8px; right: 10px; font-size: 12px; font-weight: 800; color: var(--muted); }
+.gd-flow li small { color: var(--muted); font-size: 12px; }
+/* 3 thời điểm */
+.gd-td { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 8px; align-items: stretch; }
+.gd-td-a { align-self: center; font-size: 22px; color: var(--muted); }
+.gd-td-c { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); border-top-width: 4px; background: var(--bg-ffffff); }
+.gd-td-c p { margin: 6px 0; font-size: 13.5px; } .gd-td-c small { color: var(--muted); }
+.gd-td-t { font-weight: 800; }
+.td1 { border-top-color: #2a5bd7 !important; } .td2 { border-top-color: #0f9d8a !important; } .td3 { border-top-color: #7c3aed !important; }
+.gd-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 800; margin-right: 6px; }
+.gd-pill.td1 { background: #2a5bd7; } .gd-pill.td2 { background: #0f9d8a; } .gd-pill.td3 { background: #7c3aed; }
+/* Ô quy tắc */
+.gd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.gd-grid2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 12px; }
+.gd-rule { padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-ffffff); }
+.gd-rule > b { display: block; margin: 6px 0 4px; }
+.gd-rule p { margin: 0; font-size: 13px; color: var(--fg-475569); line-height: 1.5; }
+.gd code { padding: 1px 5px; border-radius: 5px; background: var(--bg-eef2f7); font-size: 12px; }
+/* Bước nhập theo TĐ */
+.gd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.gd-step { padding: 12px 14px; border: 1px solid var(--border); border-top-width: 4px; border-radius: 12px; background: var(--bg-ffffff); }
+.gd-step-h { font-weight: 800; margin-bottom: 6px; }
+.gd-step ol { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.55; }
+.gd-step li { margin-bottom: 4px; }
+.gd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.gd-chips span { padding: 3px 8px; border-radius: 8px; background: var(--bg-eef2f7); font-size: 12px; }
+/* Bảng, ví dụ */
+.gd-tbl { width: 100%; font-size: 13px; }
+.gd-tbl td, .gd-tbl th { padding: 8px 10px; vertical-align: top; }
+.gd-num td:not(:first-child):not(:nth-child(2)), .gd-num th:not(:first-child):not(:nth-child(2)) { text-align: right; white-space: nowrap; }
+.gd-role td:not(:first-child), .gd-role th:not(:first-child) { text-align: center; }
+.gd-sum td { font-weight: 800; }
+.gd-ex { margin-top: 14px; border: 1px dashed var(--border); border-radius: 12px; padding: 10px 12px; }
+.gd-ex-h { font-weight: 700; margin-bottom: 8px; font-size: 13.5px; }
+.gd-g { color: #16a34a; font-weight: 700; } .gd-r { color: #dc2626; font-weight: 700; }
+.gd-r small, .gd-g small { font-weight: 400; color: var(--muted); }
+/* Chú giải màu */
+.gd-legend { display: grid; gap: 8px; }
+.gd-legend > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
+.gd-legend > div > b { min-width: 110px; }
+.gd-up-g, .gd-dn-g { color: #16a34a; font-weight: 700; } .gd-up-r, .gd-dn-r { color: #dc2626; font-weight: 700; }
+.gd-bar { display: inline-block; width: 70px; height: 8px; border-radius: 99px; background: var(--bg-eef2f7); overflow: hidden; vertical-align: middle; }
+.gd-bar i { display: block; height: 100%; background: var(--teal, #0f9d8a); border-radius: 99px; }
+.gd-bar i.du { background: #16a34a; } .gd-bar i.thieu { background: #f59e0b; }
+.gd-legend small { color: var(--muted); margin-right: 8px; }
+@media (max-width: 900px) {
+  .gd-td { grid-template-columns: minmax(0, 1fr); } .gd-td-a { transform: rotate(90deg); justify-self: center; }
+  .gd-steps { grid-template-columns: minmax(0, 1fr); }
+  .gd-go { margin-left: 0; }
+}
+@media print { .gd-toc, .gd-go { display: none !important; } .gd .card { break-inside: avoid; } }
