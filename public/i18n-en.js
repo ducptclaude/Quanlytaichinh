@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Chưa phân theo HĐ": "Not allocated to a contract",
 "Giá trị trước VAT": "Value before VAT",
 "Nhập tên đợt / hồ sơ": "Enter the round / document name",
 "Nhập giá trị trước VAT của đợt": "Enter the round value before VAT",

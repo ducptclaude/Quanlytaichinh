@@ -814,6 +814,14 @@ function bTongHopHtml(list, v, P) {
   const dTo = to === bNowYm() ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : `${lastDay(to)}/${to.slice(5)}/${to.slice(0, 4)}`;
   const hd = (cols) => `<thead><tr><th class="num th-stt">STT</th><th>Mã DA</th><th>Tên dự án</th><th>Tình trạng</th>${cols.map((c) => `<th class="${c === 'Hoàn thành' ? 'th-ht' : 'num'}">${c}</th>`).join('')}</tr></thead>`;
   const foot = (cells) => `<tfoot><tr><td></td><td colspan="3">Tổng cộng (${rows.length} dự án)</td>${cells.map((c) => `<td class="num">${c}</td>`).join('')}</tr></tfoot>`;
+  // V14.12: nhóm dự án (dòng tổng, nút ▾ / ▸ dùng chung mục I, II, IV) -> từng HĐ chủ đầu tư (dòng con) -> dòng chưa phân theo HĐ
+  const gMo = (d) => !BST.iv_hd_dong?.includes(d.id);
+  const gPrj = (x, i) => { const hs = x.d.hds || []; return prj(x, i).replace(`<td class="th-ma"><b>`, `<td class="th-ma">${hs.length ? `<button type="button" class="iv-tg no-print" data-ivhd="${x.d.id}" title="${gMo(x.d) ? 'Thu gọn các HĐ' : 'Xem các HĐ của dự án'}">${gMo(x.d) ? '▾' : '▸'}</button>` : ''}<b>`); };
+  const gTen = (h, i, j) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="kind-tag kind-hd">HĐ</span> ${esc(h.so_ma || h.so_hieu)}${h.so_pl ? ` <span class="muted small">+${h.so_pl} PL</span>` : ''}</td><td>${h.da_qt ? '<span class="iv-qt" title="HĐ đã quyết toán">✓ QT</span>' : ''}</td>`;
+  const gKhac = (i, j, tip) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="iv-chung" title="${tip}">Chưa phân theo HĐ</span></td><td></td>`;
+  const gDt = (h, n) => (n === 3 ? h.td3?.[v] : h['td' + n]?.[v]) || 0;
+  const gCp = (h, n) => h.cp_td?.[v]?.[n - 1] || 0;
+  const gQd = (sv, gt, svTong) => (v === 'sv' || !svTong ? sv : Math.round(sv * (gt / svTong))); // tiền thật quy về trước VAT theo tỷ lệ của HĐ
   return `
     ${(() => { // Mục I: DT – CP – LN theo TĐ chọn (TĐ1 ký HĐ · TĐ2 điều chỉnh · TĐ3 quyết toán / mới nhất), mũi tên so với TĐ liền trước
       const k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1;
@@ -872,9 +880,21 @@ function bTongHopHtml(list, v, P) {
     </div>
     <div class="table-wrap"><table class="b-table th-table th-t1">
       ${hd(['Hoàn thành', 'Doanh thu', 'Chi phí', 'Lợi nhuận', '± LN so TĐ trước', 'Tỷ lệ LN'])}
-      <tbody>${RR.map((r, i) => `<tr>${prj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
+      <tbody>${RR.map((r, i) => {
+        const hs = r.x.d.hds || [];
+        const con = hs.map((h) => ({ h, dt: gDt(h, k), cp: gCp(h, k), b: k > 1 ? { dt: gDt(h, k - 1), cp: gCp(h, k - 1) } : null }));
+        const sum = (f, b) => con.reduce((a, c) => a + (b ? (c.b ? c.b[f] : 0) : c[f]), 0);
+        const khac = { dt: r.dt - sum('dt'), cp: r.cp - sum('cp'), b: k > 1 ? { dt: r.b.dt - sum('dt', 1), cp: r.b.cp - sum('cp', 1) } : null };
+        const dong = (c, ten) => `<tr class="iv-hd-row${ten ? '' : ' iv-chung-row'}">${ten || ''}<td class="th-ht">${c.h ? (() => { const p = c.h.da_qt ? 1 : c.h.so_dot && c.h.td3?.[v] ? (c.h.nt?.[v] || 0) / c.h.td3[v] : null;
+            return p === null ? '<span class="muted">—</span>' : `<span class="ht-wrap">${meter(Math.min(p, 1), 1, BCOL.dk)}<b class="ht-pct">${(p * 100).toFixed(1).replace('.', ',')}%</b></span>`; })() : ''}</td>
+          <td class="num">${bTy(c.dt)}</td><td class="num">${bTy(c.cp)}</td><td class="num ${c.dt - c.cp < 0 ? 'neg' : ''}">${bTy(c.dt - c.cp)}</td>${k > 1 ? dCell(c) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
+          <td class="num">${c.dt ? bpct(c.dt - c.cp, c.dt) : '—'}</td></tr>`;
+        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
-        <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}${k === 1 && !r.x.td1 ? '<sup class="th-tt" title="Chưa chốt TĐ1: lấy HĐ gốc và chi phí trên hệ thống">*</sup>' : ''}</b></td></tr>`).join('')}</tbody>
+        <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}${k === 1 && !r.x.td1 ? '<sup class="th-tt" title="Chưa chốt TĐ1: lấy HĐ gốc và chi phí trên hệ thống">*</sup>' : ''}</b></td></tr>` +
+        (hs.length && gMo(r.x.d) ? con.map((c, j) => dong(c, gTen(c.h, i, j))).join('') +
+          (Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? dong(khac, gKhac(i, hs.length, 'Phần không gắn được HĐ chủ đầu tư: chi phí chung (đã ghi, gián tiếp, tài chính, mua lẻ), HĐ / gói chưa gắn HĐ CĐT, điều chỉnh – quyết toán cả nhóm; TĐ1: chênh lệch với số đã chốt')) : '') : '');
+      }).join('')}</tbody>
       ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', bpct(TT.ln, TT.dt)])}
     </table></div>
     ${k === 1 ? `<p class="muted small f-note">Số dự kiến theo TĐ1 đã chốt (Doanh thu, Chi phí khi ký HĐ – nhập ở bảng TĐ của từng dự án). <b>(*)</b> Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = giá trị ký (TĐ1) của từng HĐ / PL + các đợt điều chỉnh tăng / giảm; chi phí = HĐ đầu vào theo TĐ2 và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán từng HĐ / PL; văn bản chưa có số quyết toán tạm lấy theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>`}`;
@@ -888,8 +908,16 @@ function bTongHopHtml(list, v, P) {
     </div>
     <div class="table-wrap"><table class="b-table th-table">
       ${hd(['Dòng thu', 'Dòng chi', 'Còn lại (Thu − Chi)'])}
-      <tbody>${rows.map((x, i) => `<tr>${prj(x, i)}<td class="num">${tlk('thu', x.thu, x.d.id)}</td><td class="num">${tlk('chi', x.chi, x.d.id)}</td>
-        <td class="num strong ${x.con < 0 ? 'neg' : 'pos'}">${tlk('con', x.con, x.d.id)}</td></tr>`).join('')}</tbody>
+      <tbody>${rows.map((x, i) => {
+        const hs = x.d.hds || [];
+        const con = hs.map((h) => { const thu = gQd(h.tien_ve || 0, h.td3?.gt || 0, h.td3?.sv || 0), chi = gQd(h.cp_td?.da_chi || 0, h.cp_td?.gt?.[2] || 0, h.cp_td?.sv?.[2] || 0); return { h, thu, chi }; });
+        const kh = { thu: x.thu - con.reduce((a, c) => a + c.thu, 0), chi: x.chi - con.reduce((a, c) => a + c.chi, 0) };
+        const dong = (c, ten, cls = '') => `<tr class="iv-hd-row ${cls}">${ten}<td class="num">${bTy(c.thu)}</td><td class="num">${bTy(c.chi)}</td><td class="num ${c.thu - c.chi < 0 ? 'neg' : ''}">${bTy(c.thu - c.chi)}</td></tr>`;
+        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(x, i)}<td class="num">${tlk('thu', x.thu, x.d.id)}</td><td class="num">${tlk('chi', x.chi, x.d.id)}</td>
+        <td class="num strong ${x.con < 0 ? 'neg' : 'pos'}">${tlk('con', x.con, x.d.id)}</td></tr>` +
+        (hs.length && gMo(x.d) ? con.map((c, j) => dong(c, gTen(c.h, i, j))).join('') +
+          (Math.abs(kh.thu) + Math.abs(kh.chi) >= 1e6 ? dong(kh, gKhac(i, hs.length, 'Tiền về chưa gắn HĐ, chi phí đã chi (gián tiếp, tài chính, mua lẻ…) và đã trả HĐ đầu vào chưa gắn HĐ chủ đầu tư'), 'iv-chung-row') : '') : '');
+      }).join('')}</tbody>
       ${foot([tlk('thu', T.thu), tlk('chi', T.chi), tlk('con', T.con)])}
     </table></div>
     <p class="muted small f-note tt-hint no-print">Bấm vào số <b>Dòng thu</b> / <b>Dòng chi</b> / <b>Còn lại</b> (ô lớn hoặc từng dự án) để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.</p>

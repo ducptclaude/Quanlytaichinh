@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V14.12.11.26 – Báo cáo mục I, II: dự án (tổng) + từng HĐ CĐT (con)
+- Mục I (DT – CP – LN theo TĐ) và mục II (Dòng tiền thực tế): dòng dự án có nút ▾ / ▸ (dùng chung với mục IV), dưới là từng HĐ CĐT: DT / CP / LN / ± LN so TĐ trước / tỷ lệ (mục I); dòng thu (tiền về của HĐ) / dòng chi (đã trả HĐ đầu vào của HĐ) / còn lại (mục II). Phần không gắn được HĐ hiện 1 dòng "Chưa phân theo HĐ" → tổng con luôn = dòng dự án. Số dự án không đổi. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V13.12.11.26 – Lưu số liệu không còn làm trang nhảy lên đầu; HT/QT nhập đợt ngay trong bảng
 - Nguyên nhân nhảy: sau mỗi lần lưu, tín hiệu "số liệu vừa đổi" tải lại CẢ trang Doanh thu / Chi phí (ẩn phần thân trong chốc lát → trang ngắn lại → cuộn về đầu). Nay chỉ tải lại số liệu (loadRevenue / loadCost) và giữ vị trí cuộn (taiLaiGiuViTri) – áp dụng cả sau duyệt / hủy.
 - Bảng 2 HT/QT: "+ Đợt" ở dòng HĐ và "+ Đợt tiếp theo / + Quyết toán" dưới bảng mở 1 dòng nhập ngay dưới HĐ (tên đợt điền sẵn, VAT theo HĐ, tự tính tiền VAT / sau VAT; Enter = Lưu, Esc = Bỏ) thay vì cuộn lên form. Đã thử 3 lần liên tiếp mỗi loại: khung bảng đứng yên. Tester 4.518 ĐẠT, 0 LỖI.
