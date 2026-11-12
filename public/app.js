@@ -817,7 +817,11 @@ function qtGroupsHtml(rows) {
     const daQt = g.rows.some((r) => normVn(r.so_hieu).includes('quyet toan'));
     const tamTinh = g.rows.some((r) => r.tam_tinh);
     const base = hdVal.get(g.k);
-    const pctHd = base ? ` · đạt ${(sum('sau_vat') / base * 100).toFixed(1).replace('.', ',')}% giá trị HĐ` : '';
+    // Ghi chú trực quan: thanh tiến độ % đạt so với giá trị HĐ (sau VAT) + phần còn lại
+    const daSv = sum('sau_vat'), pHd = base ? (daSv / base) * 100 : null, conSv = base ? base - daSv : 0;
+    const pctHd = pHd === null ? `<span class="muted small">${g.rows.length} đợt</span>` : `<div class="ht-prog" title="Đã hoàn thành / quyết toán ${dvT(daSv)} / giá trị HĐ + PL ${dvT(base)} (sau VAT)">
+        <span class="ht-bar"><i class="${pHd > 100.05 ? 'vuot' : pHd >= 99.95 ? 'du' : ''}" style="width:${Math.min(100, Math.max(0, pHd)).toFixed(1)}%"></i></span>
+        <b>${pHd.toFixed(1).replace('.', ',')}%</b><span class="muted small">${conSv > 0 ? `còn ${dvm(conSv)}` : conSv < 0 ? `vượt ${dvm(-conSv)}` : 'đủ giá trị HĐ'}</span></div>`;
     const head = `<tr class="tv-head-row ${g.k ? '' : 'tv-sub-warn'}">
       <td class="num">${n}</td>
       <td>${g.k ? `<button class="grp-toggle" data-qtgrp="${g.k}" title="${open ? 'Thu gọn' : 'Mở chi tiết'}">${open ? '▾' : '▸'}</button>
@@ -828,7 +832,7 @@ function qtGroupsHtml(rows) {
       <td class="num strong">${dvm(sum('gia_tri'))}</td><td></td>
       <td class="num strong">${dvm(sum('tien_vat'))}</td>
       <td class="num tv-head-sum">${dvm(sum('sau_vat'))}</td>
-      <td colspan="2" class="muted small">${g.rows.length} đợt${pctHd}</td>
+      <td colspan="2">${pctHd}</td>
       ${edit ? `<td class="row-actions">${g.k && !daQt ? `<button class="sm" data-qtadd="${g.k}" title="Thêm đợt nghiệm thu / quyết toán cho HĐ này">+ Đợt</button>` : ''}</td>` : ''}
     </tr>`;
     return head + (open ? g.rows.map((r, i) => `

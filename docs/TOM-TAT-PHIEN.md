@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.12.11.26 – Doanh thu bảng 2 (HT/QT): ghi chú dạng thanh tiến độ
+- Dòng HĐ ở bảng Giá trị Hoàn thành / Quyết toán: thay chữ "n đợt · đạt x% giá trị HĐ" bằng thanh tiến độ + % + "còn …" / "đủ giá trị HĐ" / "vượt …"; màu xanh ngọc (đang làm), xanh lá (đủ), đỏ (vượt). Rê chuột thấy đã HT/QT ÷ giá trị HĐ + PL (sau VAT). Số không đổi. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V04.12.11.26 – Bảng chi tiết chi phí: rê chuột ô % thấy % doanh thu TĐ1 · TĐ2 · TĐ3
 - Theo quyết định của anh: nút / chú thích khu vực giữ nguyên; cột "% DT TĐk" vẫn đổi theo tab; thêm rê chuột vào mọi ô % hiện đủ % so với doanh thu sau VAT của cả 3 TĐ. Số tiền không đổi. Tester 4.518 ĐẠT, 0 LỖI.
 

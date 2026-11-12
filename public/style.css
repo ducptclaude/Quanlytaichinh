@@ -3562,3 +3562,10 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
   #tp-card .tp-table td, #tp-card .tp-table th { padding-left: 6px; padding-right: 6px; }
 }
 .kpi .sub .kpi-pdt { border-bottom: 1px dotted currentColor; cursor: help; }
+
+/* Doanh thu – bảng HT/QT: thanh tiến độ % đạt giá trị HĐ */
+.ht-prog { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 12.5px; }
+.ht-bar { flex: none; width: 110px; height: 8px; border-radius: 99px; background: var(--bg-eef2f7); overflow: hidden; }
+.ht-bar i { display: block; height: 100%; border-radius: 99px; background: var(--teal, #0f9d8a); }
+.ht-bar i.du { background: #16a34a; } .ht-bar i.vuot { background: var(--danger, #dc2626); }
+.ht-prog b { font-variant-numeric: tabular-nums; min-width: 44px; }
