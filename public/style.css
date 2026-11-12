@@ -3673,3 +3673,5 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .th-table .iv-qt { font-size: 11px; font-weight: 700; color: #16a34a; }
 .th-table .iv-chung { font-style: italic; color: var(--fg-475569); }
 .th-table tr.iv-chung-row td { background: color-mix(in srgb, #f59e0b 5%, var(--bg-ffffff)); }
+.pc-mx-tg { border: 1px solid var(--border); background: var(--bg-ffffff); border-radius: 6px; width: 24px; height: 24px; padding: 0; margin-right: 8px; cursor: pointer; font-size: 11px; }
+.pc-td-bar:has(.pc-mx-tg) { justify-content: flex-start; gap: 4px; }

@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V18.12.11.26 – Báo cáo theo công trình: ẩn bảng "Ma trận kế hoạch 3 thời điểm"
+- Tab Tổng quan của báo cáo công trình: bảng ma trận kế hoạch TĐ1/TĐ2/TĐ3 mặc định ẩn, nút ▸ / ▾ để xem / ẩn (nhớ lựa chọn). Khi ẩn thì bản in cũng không có bảng này. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V17.12.11.26 – Báo cáo: "Xem thêm n dự án" đếm đúng theo dự án
 - Từ V14 bảng mục I–III có dòng HĐ con, nút "Xem thêm" đếm cả dòng con (VD 102 thay vì 2) và cắt giữa chừng dự án. Nay đếm theo dự án, dòng HĐ con ẩn / hiện theo dự án của nó. Đã so số mục II (dòng thu / chi / còn lại, trước & sau VAT) với bản V13: giống hệt. Tester 4.518 ĐẠT, 0 LỖI.
 

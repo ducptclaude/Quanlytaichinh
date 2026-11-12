@@ -2096,9 +2096,9 @@ function bTdBlock(d) {
     </table></div>`;
   })();
   return `<div class="pc-tds">
-    <div class="pc-td-bar no-print"><span>Ma trận <b>kế hoạch</b> theo hợp đồng tại 3 thời điểm · trước VAT</span>
+    <div class="pc-td-bar no-print"><button type="button" class="pc-mx-tg" data-pcmx aria-expanded="${Boolean(BST.pc_mx)}" title="${BST.pc_mx ? 'Ẩn bảng' : 'Xem bảng'}">${BST.pc_mx ? '▾' : '▸'}</button><span>Ma trận <b>kế hoạch</b> theo hợp đồng tại 3 thời điểm · trước VAT</span>${BST.pc_mx ? '' : '<span class="muted small"> · đang ẩn – bấm ▸ để xem</span>'}
 </div>
-    <div class="table-wrap td-wrap"><table class="td-mx no-mcard">
+    <div class="table-wrap td-wrap pc-mx-wrap" ${BST.pc_mx ? '' : 'hidden'}><table class="td-mx no-mcard">
       <thead><tr><th class="td-corner">Chỉ tiêu</th>${[1, 2, 3].map(head).join('')}</tr></thead>
       <tbody>${ROWS.map(([k, label, good, isPct, cls]) => `<tr class="${cls}"><th>${label}</th>${[1, 2, 3].map((n) => cell(n, k, good, isPct)).join('')}</tr>`).join('')}</tbody>
     </table></div>${thucRows}${bPcCpKhoi(d)}
@@ -2872,3 +2872,9 @@ $('#b-pptx').addEventListener('click', (e) => bBusy(e.target, async () => {
 
   await pptx.writeFile({ fileName: `BaoCao_${bFileScope()}_${bStamp()}.pptx` });
 }));
+
+// Báo cáo theo công trình: ẩn / hiện bảng "Ma trận kế hoạch 3 thời điểm" (mặc định ẩn, nhớ theo lựa chọn)
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-pcmx]'); if (!b) return;
+  BST.pc_mx = !BST.pc_mx; bSave(); renderKeepPos('[data-pcmx]');
+});

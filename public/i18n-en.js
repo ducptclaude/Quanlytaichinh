@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Ẩn bảng": "Hide table",
+"Xem bảng": "Show table",
+" · đang ẩn – bấm ▸ để xem": " · hidden – click ▸ to show",
 "+ HĐ": "+ Contract",
 "Tạo HĐ thật cho gói này (HĐ thay giá trị tạm tính của gói)": "Create the actual contract for this package (replaces the provisional value)",
 "Chưa phân theo HĐ": "Not allocated to a contract",
