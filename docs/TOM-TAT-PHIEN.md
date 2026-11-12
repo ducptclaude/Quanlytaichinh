@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.12.11.26 – Báo cáo IV: chi tiết doanh thu = dự án (dòng tổng) + các HĐ CĐT (dòng con)
+- Bảng "Chi tiết doanh thu với chủ đầu tư": mỗi dự án là dòng tổng (nền đậm, nút ▾ / ▸ thu gọn), dưới là từng HĐ: TĐ1, điều chỉnh theo văn bản, TĐ2, TĐ3 (mờ nếu HĐ chưa QT, "✓ QT" nếu đã QT), đã nhận, còn lại.
+- Máy chủ chỉ THÊM td1 / td2 / pl cho từng HĐ (lib/report.js), không đổi số cũ. Đối chiếu: tổng các HĐ con = dòng dự án ở TĐ1/TĐ2/TĐ3, trước & sau VAT, 13 dự án – khớp hết. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V10.12.11.26 – HĐ đầu vào gắn gói / phát sinh: sửa giá trị ký ở tab TĐ2
 - HĐ gắn gói hoặc phát sinh ngoài TĐ1 (ký ở TĐ2): trong bảng nhập chi tiết HĐ, tab TĐ2 cho sửa giá trị ký, ngày ký, VAT, ghi chú và thêm PL (cột đổi tên "Giá trị ký"). HĐ ký từ TĐ1 giữ như cũ (chỉ sửa ở TĐ1). TĐ1 của phần việc vẫn là giá trị gói. Đã kiểm tra: ký 350 → 330 + đợt +20 = TĐ2 350; Báo cáo TĐ1/TĐ2 400 / 450 đúng. Tester 4.518 ĐẠT, 0 LỖI.
 

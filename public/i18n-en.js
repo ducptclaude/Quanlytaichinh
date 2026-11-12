@@ -1,6 +1,10 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Thu gọn các HĐ": "Collapse contracts",
+"Xem các HĐ của dự án": "Show the project contracts",
+"HĐ đã quyết toán": "Contract final account settled",
+"✓ QT": "✓ Final",
 "Giá trị ký": "Signed value",
 "HĐ gắn gói / phát sinh: ký ở TĐ2 – TĐ1 của phần việc này là giá trị gói": "Package-linked / additional contract: signed at M2 – M1 of this work is the package value",
 "Hướng dẫn": "Guide",
@@ -1557,6 +1561,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"({} HĐ)",
+"({} contracts)"
+],
 [
 "QT thiếu {}",
 "Final short by {}"

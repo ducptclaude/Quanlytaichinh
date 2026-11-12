@@ -3655,3 +3655,11 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
   .gd-go { margin-left: 0; }
 }
 @media print { .gd-toc, .gd-go { display: none !important; } .gd .card { break-inside: avoid; } }
+
+/* Báo cáo IV – chi tiết doanh thu: dự án (dòng tổng) + các HĐ (dòng con) */
+.iv-table tr.iv-prj-row td { background: var(--bg-f3f7fd); border-top: 2px solid var(--bd-dbe6f5); }
+.iv-table tr.iv-hd-row td { font-size: 12.5px; }
+.iv-table .iv-tree { color: var(--muted); margin: 0 6px 0 8px; }
+.iv-table .iv-tg { border: 1px solid var(--border); background: var(--bg-ffffff); border-radius: 6px; width: 22px; height: 22px; padding: 0; margin-right: 6px; cursor: pointer; font-size: 11px; line-height: 1; }
+.iv-table .iv-qt { font-size: 11px; font-weight: 700; color: #16a34a; }
+@media print { .iv-table tr.iv-prj-row td { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }

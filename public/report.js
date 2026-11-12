@@ -1013,10 +1013,19 @@ function bMuc4Html(list, v) {
       `<tr><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">Tên dự án</th><th rowspan="2" class="num">TĐ1</th>
         <th colspan="${pls.length + 1}" class="grp iv-g2">TĐ2</th><th rowspan="2" class="num">TĐ3</th><th rowspan="2" class="num">Đã nhận</th>
         <th rowspan="2" class="num">Còn lại</th><th rowspan="2" class="num">BH/Khác</th><th rowspan="2">Ghi chú</th>${edit ? '<th rowspan="2" class="no-print"></th>' : ''}</tr>${plHead(pls)}`,
-      rows.map((x, i) => `<tr>${prj(x, i)}<td class="num">${m(x.t1)}</td>${plCols(pls, x.pl, x.t2)}
-        <td class="num strong">${m(x.t3, !x.qt)}</td><td class="num">${m(x.nhan)}</td><td class="num strong">${m(x.con, !x.qt)}</td>
+      rows.map((x, i) => { // dự án = dòng tổng · các HĐ với chủ đầu tư = dòng con (bấm ▸ / ▾ để mở / thu gọn)
+        const hds = x.d.hds || [], mo = !BST.iv_hd_dong?.includes(x.d.id);
+        const plH = (h) => Object.fromEntries((h.pl || []).reduce((a, p) => { const o = a.find((y) => y[0] === p.ma); if (o) o[1] += p[v]; else a.push([p.ma, p[v]]); return a; }, []));
+        const nhanH = (h) => (v === 'sv' || !h.td3?.sv ? h.tien_ve : Math.round(h.tien_ve * (h.td3.gt / h.td3.sv)));
+        return `<tr class="iv-prj-row"><td class="num th-stt">${i + 1}</td><td class="th-ma">${hds.length ? `<button type="button" class="iv-tg no-print" data-ivhd="${x.d.id}" title="${mo ? 'Thu gọn các HĐ' : 'Xem các HĐ của dự án'}">${mo ? '▾' : '▸'}</button>` : ''}<b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}"><b>${esc(x.d.ten_du_an)}</b>${hds.length ? ` <span class="muted small">(${hds.length} HĐ)</span>` : ''}</td>
+        <td class="num strong">${m(x.t1)}</td>${plCols(pls, x.pl, x.t2)}
+        <td class="num strong">${m(x.t3, !x.qt)}</td><td class="num strong">${m(x.nhan)}</td><td class="num strong">${m(x.con, !x.qt)}</td>
         <td class="num">${x.bh ? m(x.bh) : '<span class="muted">–</span>'}</td><td class="iv-gc">${esc(x.gc)}</td>
-        ${edit ? `<td class="no-print"><button type="button" class="td-btn" data-ivbh="${x.d.id}">Sửa</button></td>` : ''}</tr>`).join(''),
+        ${edit ? `<td class="no-print"><button type="button" class="td-btn" data-ivbh="${x.d.id}">Sửa</button></td>` : ''}</tr>` +
+        (mo ? hds.map((h, j) => { const t1 = h.td1?.[v] ?? 0, t2 = h.td2?.[v] ?? 0, t3 = h.td3?.[v] ?? t2, nh = nhanH(h);
+          return `<tr class="iv-hd-row"><td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="kind-tag kind-hd">HĐ</span> ${esc(h.so_ma || h.so_hieu)}${h.so_pl ? ` <span class="muted small">+${h.so_pl} PL</span>` : ''}${h.da_qt ? ' <span class="iv-qt" title="HĐ đã quyết toán">✓ QT</span>' : ''}</td>
+          <td class="num">${m(t1)}</td>${plCols(pls, plH(h), t2)}<td class="num">${m(t3, !h.da_qt)}</td><td class="num">${m(nh)}</td><td class="num">${m(t3 - nh, !h.da_qt)}</td><td></td><td></td>${edit ? '<td class="no-print"></td>' : ''}</tr>`; }).join('') : '');
+      }).join(''),
       `<tfoot><tr><td></td><td colspan="2">Tổng cộng (${rows.length} dự án)</td><td class="num">${bTy(T.t1)}</td>${pls.map(() => '<td></td>').join('')}<td class="num">${bTy(T.t2)}</td>
         ${tipCell('t3', 'TĐ3 – Quyết toán', bTy(T.t3))}<td class="num">${bTy(T.nhan)}</td>${tipCell('con', 'Còn lại = TĐ3 − Đã nhận', bTy(T.con))}<td class="num">${bTy(T.bh)}</td><td></td>${edit ? '<td class="no-print"></td>' : ''}</tr></tfoot>`,
       'TĐ2 cột 1, 2, 3… = điều chỉnh tăng / giảm theo văn bản HĐ, PL01, PL02… (âm = giảm) · Số mờ = chưa quyết toán, lấy theo TĐ2 · Còn lại = TĐ3 − Đã nhận · BH/Khác, Ghi chú nhập tay');
@@ -1648,6 +1657,8 @@ async function bGoWarn(daId, l) {
   setTimeout(() => bFlash(l.cid ? `[data-cid="${l.cid}"]` : l.tpgrp !== undefined ? `#tp-tbody [data-tpgrp="${l.tpgrp}"]` : `[data-cgrp="${l.nhom}"]`), 120);
 }
 $('#b-report').addEventListener('click', (e) => {
+  const ivh = e.target.closest('[data-ivhd]');
+  if (ivh) { const id = Number(ivh.dataset.ivhd), s = new Set(BST.iv_hd_dong || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_hd_dong = [...s]; bSave(); return renderKeepPos(`[data-ivhd="${id}"]`); }
   const w = e.target.closest('[data-wlink]');
   if (w) bGoWarn(Number(w.dataset.wda), JSON.parse(w.dataset.wlink)).catch((err) => alert(err.message));
 });
