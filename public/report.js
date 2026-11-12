@@ -1754,7 +1754,7 @@ const canEditPc = () => can('hd') || can('tien'); // quyền chi tiết: can(k) 
 
 function openProjectReport(id) {
   dongBoDuAn(id);
-  BST.project = String(id);
+  BST.project = String(id); BST.pc_mo = true;
   bSave();
   pcScrollTo = id;
   showTab('report');
@@ -1768,11 +1768,20 @@ function bDeltaS(cur, prev, good = true) {
 
 const KY_OPTS = [['thang', 'Tháng này'], ['quy', 'Quý này'], ['nam', 'Năm nay'], ['6t', '6 tháng gần nhất'], ['luyke', 'Lũy kế đến nay'], ['all', 'Toàn bộ thời gian (All time)'], ['tuychon', 'Tùy chọn...']];
 function bPcSection(list, v) {
+  // V19.12: mặc định thu gọn cả khu; mở ra -> hiện đúng dự án đang chọn ở Phạm vi, hoặc dự án đang nhập liệu (đồng bộ Doanh thu / Chi phí)
+  const dbId = Number(BST.project) || (BST.pc_all ? 0 : Number(typeof revProjectId !== 'undefined' ? revProjectId : 0)) || 0;
+  const dDb = dbId ? BC.du_an.find((x) => x.id === dbId) : null;
+  if (!BST.pc_mo) {
+    return `<section class="card b-sec pc-sec pc-sec-dong" id="pc-sec"><div class="f-head"><div class="pc-sec-title">
+      <button type="button" class="pc-sec-tg no-print" data-pcmo title="Mở báo cáo theo công trình">▸</button><h2>Báo cáo theo công trình</h2>
+      <span class="muted small">${dDb ? `${esc(dDb.ma_du_an)} – ${esc(dDb.ten_du_an)} · ` : ''}đang ẩn – bấm ▸ để mở</span></div></div></section>`;
+  }
+  if (!Number(BST.project) && dDb) list = [dDb]; // đang xem Tất cả: mở thẳng dự án đang làm việc
   const P = bPeriod(list);
-  const one = Boolean(Number(BST.project));
+  const one = list.length === 1 && Boolean(dDb || Number(BST.project));
   return `<section class="card b-sec pc-sec" id="pc-sec">
     <div class="f-head">
-      <div class="pc-sec-title">${one ? '<button type="button" class="sm no-print" id="pc-back" title="Quay lại tất cả công trình">← Về tổng quan</button>' : ''}<h2>Báo cáo theo công trình</h2></div>
+      <div class="pc-sec-title"><button type="button" class="pc-sec-tg no-print" data-pcmo title="Thu gọn báo cáo theo công trình">▾</button>${one ? '<button type="button" class="sm no-print" id="pc-back" title="Quay lại tất cả công trình">← Về tổng quan</button>' : ''}<h2>Báo cáo theo công trình</h2></div>
       <div class="pc-ky no-print">
         <button type="button" class="f-range f-range-btn" data-kypick title="Bấm để chọn kỳ báo cáo">📅 ${P.range} <span class="f-caret">▾</span></button>
       </div>
@@ -2096,9 +2105,9 @@ function bTdBlock(d) {
     </table></div>`;
   })();
   return `<div class="pc-tds">
-    <div class="pc-td-bar no-print"><button type="button" class="pc-mx-tg" data-pcmx aria-expanded="${Boolean(BST.pc_mx)}" title="${BST.pc_mx ? 'Ẩn bảng' : 'Xem bảng'}">${BST.pc_mx ? '▾' : '▸'}</button><span>Ma trận <b>kế hoạch</b> theo hợp đồng tại 3 thời điểm · trước VAT</span>${BST.pc_mx ? '' : '<span class="muted small"> · đang ẩn – bấm ▸ để xem</span>'}
+    <div class="pc-td-bar no-print"><span>Ma trận <b>kế hoạch</b> theo hợp đồng tại 3 thời điểm · trước VAT</span>
 </div>
-    <div class="table-wrap td-wrap pc-mx-wrap" ${BST.pc_mx ? '' : 'hidden'}><table class="td-mx no-mcard">
+    <div class="table-wrap td-wrap"><table class="td-mx no-mcard">
       <thead><tr><th class="td-corner">Chỉ tiêu</th>${[1, 2, 3].map(head).join('')}</tr></thead>
       <tbody>${ROWS.map(([k, label, good, isPct, cls]) => `<tr class="${cls}"><th>${label}</th>${[1, 2, 3].map((n) => cell(n, k, good, isPct)).join('')}</tr>`).join('')}</tbody>
     </table></div>${thucRows}${bPcCpKhoi(d)}
@@ -2338,7 +2347,9 @@ $('#b-report').addEventListener('click', (e) => {
   const kp = e.target.closest('[data-kypick]');
   if (kp) return $('.ky-pop') ? $('.ky-pop').remove() : bKyPopover(kp);
   if (e.target.id === 'b-detail-toggle') return bSetDetail(!BST.chi_tiet);
+  if (e.target.closest('[data-pcmo]')) { BST.pc_mo = !BST.pc_mo; if (BST.pc_mo) BST.pc_all = false; bSave(); renderKeepPos('#pc-sec'); return; }
   if (e.target.id === 'pc-back') {
+    if (!Number(BST.project)) { BST.pc_all = true; bSave(); return renderKeepPos('#pc-sec'); } // đang xem Tất cả: chuyển sang lưới tất cả công trình
     BST.project = ''; BST.chi_tiet = false; bSave(); renderReport(); // về tổng quan -> tự ẩn chi tiết
     return $('#pc-sec')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -2873,8 +2884,3 @@ $('#b-pptx').addEventListener('click', (e) => bBusy(e.target, async () => {
   await pptx.writeFile({ fileName: `BaoCao_${bFileScope()}_${bStamp()}.pptx` });
 }));
 
-// Báo cáo theo công trình: ẩn / hiện bảng "Ma trận kế hoạch 3 thời điểm" (mặc định ẩn, nhớ theo lựa chọn)
-document.addEventListener('click', (e) => {
-  const b = e.target.closest('[data-pcmx]'); if (!b) return;
-  BST.pc_mx = !BST.pc_mx; bSave(); renderKeepPos('[data-pcmx]');
-});

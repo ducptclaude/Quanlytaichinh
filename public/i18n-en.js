@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Mở báo cáo theo công trình": "Open project report",
+"Thu gọn báo cáo theo công trình": "Collapse project report",
+"đang ẩn – bấm ▸ để mở": "hidden – click ▸ to open",
 "Ẩn bảng": "Hide table",
 "Xem bảng": "Show table",
 " · đang ẩn – bấm ▸ để xem": " · hidden – click ▸ to show",
@@ -1571,6 +1574,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"{} – {} · đang ẩn – bấm ▸ để mở",
+"{} – {} · hidden – click ▸ to open"
+],
 [
 "Tạo HĐ cho gói \"{}\": nhập Số HĐ, nhà cung cấp, giá trị ký rồi bấm Thêm",
 "Contract for package \"{}\": enter the contract no., supplier, signed value, then click Add"

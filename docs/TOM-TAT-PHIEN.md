@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V19.12.11.26 – Báo cáo: cả khu "Báo cáo theo công trình" mặc định thu gọn, mở ra tự theo dự án
+- Bỏ nút ẩn ma trận (V18) – ma trận hiện như cũ. Cả khu "Báo cáo theo công trình" mặc định thu gọn (1 dòng, ghi dự án sẽ mở); ▸ mở / ▾ thu gọn, nhớ lựa chọn. Mở ra: hiện đúng dự án đang chọn ở Phạm vi, hoặc dự án đang làm ở Nhập liệu (Doanh thu / Chi phí) nếu Phạm vi = Tất cả; "← Về tổng quan" → lưới tất cả công trình. Mở từ trang Dự án vẫn mở thẳng khu này. Khi thu gọn, bản in không có khu này. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V18.12.11.26 – Báo cáo theo công trình: ẩn bảng "Ma trận kế hoạch 3 thời điểm"
 - Tab Tổng quan của báo cáo công trình: bảng ma trận kế hoạch TĐ1/TĐ2/TĐ3 mặc định ẩn, nút ▸ / ▾ để xem / ẩn (nhớ lựa chọn). Khi ẩn thì bản in cũng không có bảng này. Tester 4.518 ĐẠT, 0 LỖI.
 
