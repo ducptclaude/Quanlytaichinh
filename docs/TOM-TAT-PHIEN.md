@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V15.12.11.26 – Gói chi phí: nút "+ HĐ" tạo HĐ thật ngay từ bảng chi tiết
+- Bảng chi tiết HĐ đầu vào (nhấp đúp nhóm), tab TĐ2: mỗi gói chưa đóng có nút "+ HĐ" → đóng hộp, điền sẵn form Thêm chi phí (nhóm của gói, Hình thức = Hợp đồng, Gói = gói đó, HĐ CĐT của gói), con trỏ ở Số HĐ. Gói đã có HĐ vẫn thêm được HĐ khác. Thử: gói Vật tư KC → HĐ-VT-01 gắn đúng gói + HĐ CĐT. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V14.12.11.26 – Báo cáo mục I, II: dự án (tổng) + từng HĐ CĐT (con)
 - Mục I (DT – CP – LN theo TĐ) và mục II (Dòng tiền thực tế): dòng dự án có nút ▾ / ▸ (dùng chung với mục IV), dưới là từng HĐ CĐT: DT / CP / LN / ± LN so TĐ trước / tỷ lệ (mục I); dòng thu (tiền về của HĐ) / dòng chi (đã trả HĐ đầu vào của HĐ) / còn lại (mục II). Phần không gắn được HĐ hiện 1 dòng "Chưa phân theo HĐ" → tổng con luôn = dòng dự án. Số dự án không đổi. Tester 4.518 ĐẠT, 0 LỖI.
 

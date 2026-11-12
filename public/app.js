@@ -2380,7 +2380,7 @@ function renderTpCard() {
       <td class="c-dt tp-dt">${dt}</td>
       ${qtNhom ? `<td class="num muted c-prev">${mtr(goiSv(r, 2))}</td><td class="num muted" title="Nhóm đã quyết toán – TĐ3 theo số quyết toán của nhóm">theo QT nhóm</td><td class="num muted">—</td>` : so3(goiSv(r, kTd), kTd > 1 ? goiSv(r, kTd - 1) : 0)}
       ${hd.length ? tt2(sumOf(hd, 'da_tt'), sumOf(hd, 'con_lai')) : ttNone}
-      <td class="row-actions tp-act">${edit && kTd === 2 && !coQt && !hd.length ? `<button class="sm" data-goidong="${r.id}" data-tt="${r.tinh_trang === 'dong' ? '' : 'dong'}" title="${r.tinh_trang === 'dong' ? 'Tính lại gói vào TĐ2' : 'Gói không dùng nữa: TĐ2 = 0 (TĐ1 giữ nguyên)'}">${r.tinh_trang === 'dong' ? 'Mở lại' : 'Đóng gói'}</button>` : ''}</td></tr>` +
+      <td class="row-actions tp-act">${edit && kTd === 2 && !coQt && r.tinh_trang !== 'dong' ? `<button class="sm primary" data-goihd="${r.id}" title="Tạo HĐ thật cho gói này (HĐ thay giá trị tạm tính của gói)">+ HĐ</button>` : ''}${edit && kTd === 2 && !coQt && !hd.length ? `<button class="sm" data-goidong="${r.id}" data-tt="${r.tinh_trang === 'dong' ? '' : 'dong'}" title="${r.tinh_trang === 'dong' ? 'Tính lại gói vào TĐ2' : 'Gói không dùng nữa: TĐ2 = 0 (TĐ1 giữ nguyên)'}">${r.tinh_trang === 'dong' ? 'Mở lại' : 'Đóng gói'}</button>` : ''}</td></tr>` +
       (mo ? hd.map(hdGoiRow).join('') : '');
   };
   // Số liệu 1 loại (nhóm) trong 1 HĐ CĐT: gói + đợt điều chỉnh nhóm + HĐ ngoài gói
@@ -2463,6 +2463,8 @@ function onTpTableClick(e) {
   if (e.target.dataset.tpgoi) { const k = `goi:${e.target.dataset.tpgoi}:dong`; tpOpen.has(k) ? tpOpen.delete(k) : tpOpen.add(k); return renderTpCard(); }
   const gn = e.target.dataset.goinhom;
   if (gn) return openDtr(gn, tdDangChon() > 1 && can('hd') && !costAll); // TĐ2 / TĐ3: mở sẵn dòng đợt điều chỉnh / quyết toán · hộp gói / dự trù của nhóm: sửa gói (TĐ1), điều chỉnh nhóm (TĐ2), quyết toán nhóm (TĐ3)
+  const gh = e.target.dataset.goihd;
+  if (gh) return taoHdChoGoi(Number(gh));
   const gd = e.target.dataset.goidong;
   if (gd) { // Đóng / mở lại gói (TĐ2)
     e.target.disabled = true;
@@ -3946,3 +3948,18 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); tr.querySelector('[data-qtdsave]')?.click(); }
   if (e.key === 'Escape') { e.preventDefault(); qtDraft = null; renderRevenue(); }
 });
+
+// Gói chi phí (TĐ2): nút "+ HĐ" -> đóng hộp chi tiết, điền sẵn form Thêm chi phí: nhóm của gói, Hình thức = Hợp đồng, Gói = gói này, HĐ CĐT của gói
+function taoHdChoGoi(goiId) {
+  const g = (costData?.du_tru || []).find((r) => r.id === goiId); if (!g || !cForm) return;
+  $('#tpn-dlg')?.open && $('#tpn-dlg').close();
+  const e = cForm.elements;
+  if (e.id) e.id.value = '';
+  e.nhom.value = g.nhom; e.nhom.dispatchEvent(new Event('change', { bubbles: true })); setCostMode(); setCostMode();
+  if (e.hinh_thuc) { e.hinh_thuc.value = 'hd'; e.hinh_thuc.dispatchEvent(new Event('change', { bubbles: true })); setCostMode(); setCostMode(); }
+  if (e.goi && [...e.goi.options].some((o) => o.value === String(goiId))) { e.goi.value = String(goiId); e.goi.dispatchEvent(new Event('change', { bubbles: true })); }
+  if (e.hd_cdt && g.hd_cdt_id) e.hd_cdt.value = String(g.hd_cdt_id);
+  showMsg($('#c-msg'), `Tạo HĐ cho gói "${(g.noi_dung || '').split(' · ')[0]}": nhập Số HĐ, nhà cung cấp, giá trị ký rồi bấm Thêm`);
+  cForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => e.so_tp?.focus({ preventScroll: true }), 350);
+}
