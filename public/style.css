@@ -3569,3 +3569,8 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .ht-bar i { display: block; height: 100%; border-radius: 99px; background: var(--teal, #0f9d8a); }
 .ht-bar i.du { background: #16a34a; } .ht-bar i.vuot { background: var(--danger, #dc2626); }
 .ht-prog b { font-variant-numeric: tabular-nums; min-width: 44px; }
+
+.rev-table.qt-gon .c-o { display: none; }
+
+.rev-table:not(.qt-gon) .ht-bar { width: 64px; }
+.rev-table:not(.qt-gon) .ht-prog { gap: 6px; }

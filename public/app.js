@@ -446,10 +446,10 @@ function buildRevenueSections() {
       <div class="table-wrap">
         <table class="rev-table ${loai === 'hd' ? 'td-mode-tbl' : ''}">
           <thead><tr>
-            <th class="num">#</th><th>${loai === 'hd' ? 'Số HĐ / Phụ lục' : 'Số HĐ / Đợt – Hồ sơ'}</th><th>${loai === 'hd' ? 'Ngày ký' : 'Ngày'}</th>
+            <th class="num">#</th><th>${loai === 'hd' ? 'Số HĐ / Phụ lục' : 'Số HĐ / Đợt – Hồ sơ'}</th><th class="${loai === 'qt' ? 'c-o' : ''}">${loai === 'hd' ? 'Ngày ký' : 'Ngày'}</th>
             ${loai === 'hd' ? '<th class="num td-col td-th-slot">TĐ</th><th class="num">VAT</th>'
-              : '<th class="num">Trước VAT</th><th class="num">VAT</th><th class="num">Tiền VAT</th>'}
-            <th class="num">Sau VAT</th><th>Ghi chú</th><th>Người cập nhật</th>${can('hd') ? '<th></th>' : ''}
+              : '<th class="num">Trước VAT</th><th class="num c-o">VAT</th><th class="num">Tiền VAT</th>'}
+            <th class="num">Sau VAT</th><th>Ghi chú</th><th class="${loai === 'qt' ? 'c-o' : ''}">Người cập nhật</th>${can('hd') ? '<th></th>' : ''}
           </tr></thead>
           <tbody></tbody>
           <tfoot></tfoot>
@@ -772,12 +772,14 @@ function renderRevenue() {
     }
     $('tfoot', card).innerHTML = `
       <tr>
-        <td></td><td colspan="2">TỔNG ${REV_LABEL[loai].short}${t.tam_tinh ? ' <span class="st st-tam-tinh" title="Có HĐ chưa quyết toán">Có tạm tính</span>' : ''}</td>
-        <td class="num">${dvm(t.gia_tri)}</td><td></td>
+        <td></td><td>TỔNG ${REV_LABEL[loai].short}${t.tam_tinh ? ' <span class="st st-tam-tinh" title="Có HĐ chưa quyết toán">Có tạm tính</span>' : ''}</td><td class="c-o"></td>
+        <td class="num">${dvm(t.gia_tri)}</td><td class="c-o"></td>
         <td class="num">${dvm(t.tien_vat)}</td>
         <td class="num">${dvm(t.sau_vat)}</td>
-        <td colspan="${canRv('hd') ? 3 : 2}"></td>
+        <td></td><td class="c-o"></td>${canRv('hd') ? '<td></td>' : ''}
       </tr>`;
+    // Thu gọn hết các HĐ -> ẩn các cột chỉ có giá trị ở dòng chi tiết (Ngày, VAT, Người cập nhật); mở 1 HĐ -> hiện lại đủ
+    { const ks = qtGroupList(rows); $('table', card).classList.toggle('qt-gon', !ks.some((g) => !g.k || qtOpen.has(g.k))); }
   }
   updateQtToggleAll();
   renderTienVe();
@@ -828,24 +830,24 @@ function qtGroupsHtml(rows) {
         <span class="kind-tag kind-hd">HĐ</span> <b>${esc(g.head.so_ma || g.head.so_hieu)}</b>` : '<span class="st st-tam-tinh">Chưa gắn HĐ</span>'}
         <span class="muted small">(${g.rows.length} đợt)</span>
         ${daQt ? ' <span class="st st-hoan-thanh">Đã quyết toán</span>' : ''}${tamTinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>
-      <td></td>
-      <td class="num strong">${dvm(sum('gia_tri'))}</td><td></td>
+      <td class="c-o"></td>
+      <td class="num strong">${dvm(sum('gia_tri'))}</td><td class="c-o"></td>
       <td class="num strong">${dvm(sum('tien_vat'))}</td>
       <td class="num tv-head-sum">${dvm(sum('sau_vat'))}</td>
-      <td colspan="2">${pctHd}</td>
+      <td>${pctHd}</td><td class="c-o"></td>
       ${edit ? `<td class="row-actions">${g.k && !daQt ? `<button class="sm" data-qtadd="${g.k}" title="Thêm đợt nghiệm thu / quyết toán cho HĐ này">+ Đợt</button>` : ''}</td>` : ''}
     </tr>`;
     return head + (open ? g.rows.map((r, i) => `
       <tr class="tv-child" data-rid="${r.id}">
         <td class="num muted">${n}.${i + 1}</td>
         <td class="indent"><span class="tree">└</span><b>${esc(r.so_hieu)}</b></td>
-        <td>${dmy(r.ngay)}</td>
+        <td class="c-o">${dmy(r.ngay)}</td>
         <td class="num">${dvm(r.gia_tri)}</td>
-        <td class="num">${vatBadge(r.vat)}</td>
+        <td class="num c-o">${vatBadge(r.vat)}</td>
         <td class="num">${dvm(r.tien_vat)}</td>
         <td class="num strong">${dvm(r.sau_vat)}</td>
         <td class="wrap">${esc(r.ghi_chu)}</td>
-        <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
+        <td class="muted c-o">${esc(r.nguoi_cap_nhat || '')}</td>
         ${edit ? `<td class="row-actions"><button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button></td>` : ''}
       </tr>`).join('') : '');
   }).join('');
