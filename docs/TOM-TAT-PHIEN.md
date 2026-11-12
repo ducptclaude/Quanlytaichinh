@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V17.12.11.26 – Báo cáo: "Xem thêm n dự án" đếm đúng theo dự án
+- Từ V14 bảng mục I–III có dòng HĐ con, nút "Xem thêm" đếm cả dòng con (VD 102 thay vì 2) và cắt giữa chừng dự án. Nay đếm theo dự án, dòng HĐ con ẩn / hiện theo dự án của nó. Đã so số mục II (dòng thu / chi / còn lại, trước & sau VAT) với bản V13: giống hệt. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V16.12.11.26 – Nút "+ HĐ" chỉ hiện ở gói chưa có HĐ
 - Gói đã có HĐ gắn thì ẩn nút "+ HĐ" (thêm HĐ khác cho gói vẫn làm ở form Thêm chi phí). Tester 4.518 ĐẠT, 0 LỖI.
 

@@ -667,11 +667,13 @@ function bThuGonBang() {
     const tb = sec.querySelector('.th-table:not(.iv-table) tbody'); if (!tb) return;
     const rows = [...tb.rows].filter((r) => !r.classList.contains('th-more-row'));
     tb.querySelector('.th-more-row')?.remove();
-    if (rows.length <= TH_MAX) return;
+    // Đếm theo DỰ ÁN (dòng HĐ con đi theo dự án của nó, không tính vào số dòng)
+    const nDa = rows.filter((r) => !r.classList.contains('iv-hd-row')).length;
+    if (nDa <= TH_MAX) return;
     const mo = thMo.has(key);
-    rows.forEach((r, i) => { r.hidden = !mo && i >= TH_MAX; });
+    let i = -1; rows.forEach((r) => { if (!r.classList.contains('iv-hd-row')) i++; r.hidden = !mo && i >= TH_MAX; });
     const tr = document.createElement('tr'); tr.className = 'th-more-row';
-    tr.innerHTML = `<td colspan="${rows[0].cells.length}"><button type="button" class="th-more" data-thmore="${key}">${mo ? 'Thu gọn ▴' : `Xem thêm ${rows.length - TH_MAX} dự án ▾`}</button></td>`;
+    tr.innerHTML = `<td colspan="${rows[0].cells.length}"><button type="button" class="th-more" data-thmore="${key}">${mo ? 'Thu gọn ▴' : `Xem thêm ${nDa - TH_MAX} dự án ▾`}</button></td>`;
     tb.appendChild(tr);
   });
 }
