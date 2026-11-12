@@ -1,6 +1,19 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Nhấp đúp vào ": "Double-click a ",
+"nhóm": "group",
+" (điện thoại: chạm) để xem bảng chi tiết đầy đủ: gói, HĐ, đã thanh toán, còn lại. Trong bảng chi tiết, bấm ": " (phone: tap) to see the full detail table: packages, contracts, paid, remaining. In the detail table, click the ",
+"số HĐ": "contract number",
+" để mở bảng nhập HĐ/PL, điều chỉnh, thanh toán. Đơn vị theo ô ": " to open the contract / addendum, adjustment and payment entry form. Unit follows the ",
+" trên cùng, sau VAT.": " box at the top, after VAT.",
+"· nhấp đúp để xem chi tiết": "· double-click for details",
+"Chi tiết ›": "Details ›",
+"Không có HĐ": "No contract",
+"Nhấp đúp để xem chi tiết đầy đủ": "Double-click for full details",
+"TỔNG ĐANG LỌC": "FILTERED TOTAL",
+"Chưa có gói / HĐ": "No packages / contracts",
+"Nhấp đúp để mở bảng nhập": "Double-click to open the entry form",
 "Hạng mục / Hợp đồng": "Item / Contract",
 "TĐ trước": "Previous",
 "Sửa gói": "Edit packages",
@@ -1536,6 +1549,18 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"{} tạm tính",
+"{} provisional"
+],
+[
+"Chi tiết HĐ đầu vào · TĐ{} · {}, sau VAT",
+"Procurement contract details · M{} · {}, after VAT"
+],
+[
+"Nhấp đúp để xem chi tiết {}",
+"Double-click for {} details"
+],
 [
 "{} gói · {} HĐ",
 "{} packages · {} contracts"

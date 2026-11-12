@@ -1912,7 +1912,11 @@ const blockKeys = (khoi) => nhomOf(khoi).flatMap((n) => [n.code, ...n.sub.map((s
 
 $('#tab-cost').addEventListener('dblclick', (e) => {
   const el = e.target.closest('.tp-open');
-  if (el) { window.getSelection?.().removeAllRanges(); openTp(Number(el.dataset.tp)); }
+  if (el) { window.getSelection?.().removeAllRanges(); return openTp(Number(el.dataset.tp)); }
+  if (e.target.closest('button, select, input')) return;
+  const nh = e.target.closest('#tp-tbody tr[data-tpn]'); // nhóm chính -> hộp chi tiết đầy đủ
+  if (nh) { window.getSelection?.().removeAllRanges(); return openTpNhom(nh.dataset.tpn, nh.dataset.tpncode || ''); }
+  if (e.target.closest('#tp-tbody tr[data-tple]')) { const k = LE_NHOM.find((x) => (costData.items || []).some((r) => r.nhom === x)); if (k) { window.getSelection?.().removeAllRanges(); const b = document.createElement('i'); b.dataset.leopen = k; onTpTableClick({ target: b }); } }
 });
 
 $('#tab-cost').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-ckhoi]')) { e.preventDefault(); e.target.click(); } });
@@ -2189,6 +2193,39 @@ async function saveTpDc() {
     msg(`Đã ghi điều chỉnh ${d > 0 ? '+' : ''}${money(d)} đ cho ${ten} (TĐ2)`);
   } catch (err) { msg(err.message, 'err'); }
 }
+// ---------- V33: hộp chi tiết đầy đủ của 1 nhóm chính (HĐ CĐT, hoặc 1 loại trong HĐ CĐT) ----------
+let TPV = null, tpFullOpen = false, tpnCur = null;
+function openTpNhom(b, code) {
+  tpnCur = { b: Number(b) || 0, code: code || '' };
+  let dlg = $('#tpn-dlg');
+  if (!dlg) {
+    dlg = document.createElement('dialog'); dlg.id = 'tpn-dlg'; dlg.className = 'tp-dlg tpn-dlg';
+    document.body.appendChild(dlg);
+    dlg.addEventListener('click', (e) => { if (e.target.dataset.close !== undefined) return dlg.close(); onTpTableClick(e); });
+    dlg.addEventListener('cancel', (e) => { e.preventDefault(); dlg.close(); });
+  }
+  renderTpNhom();
+  if (!dlg.open) dlg.showModal();
+}
+function renderTpNhom() {
+  const dlg = $('#tpn-dlg'); if (!dlg || !TPV || !tpnCur) return;
+  const { kTd, loaiCodes, loaiData, loaiBlock, so3, tt2, nhTen } = TPV, { b, code } = tpnCur;
+  const codes = code ? [code] : loaiCodes(b);
+  tpFullOpen = true;
+  let rows = '';
+  try { rows = codes.map((cd, i) => loaiBlock(b, cd, `${i + 1}`)).join(''); } finally { tpFullOpen = false; }
+  const ds = codes.map((cd) => loaiData(b, cd)), v = (k) => ds.reduce((t, d) => t + d.v(k), 0);
+  const ten = `${b ? esc(hdCdtName(b)) : 'Chưa gắn HĐ CĐT'}${code ? ' · ' + esc(nhTen(code)) : ''}`;
+  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">Chi tiết HĐ đầu vào · TĐ${kTd} · ${esc(dvU('trieu').ten)}, sau VAT</div><h3>${ten}</h3></div>
+      <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
+    <div class="table-wrap"><table class="tp-table tp-full ${kTd === 1 ? 'tp-k1' : ''}"><thead><tr><th class="num">#</th><th>Hạng mục / Hợp đồng</th><th>Đối tác</th>
+      <th class="num c-prev">${kTd > 1 ? `TĐ${kTd - 1}<br><span class="muted small">sau VAT</span>` : ''}</th><th class="num td-col-on">TĐ${kTd} · ${TD_TEN_NL[kTd]}<br><span class="muted small">sau VAT</span></th>
+      <th class="num">${kTd === 1 ? 'Tỷ trọng' : `± so TĐ${kTd - 1}`}</th><th class="num">Đã thanh toán</th><th class="num">Còn lại</th><th></th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="9" class="empty">Chưa có gói / HĐ</td></tr>'}</tbody>
+      <tfoot><tr class="tp-grand"><td></td><td class="tp-hd tp-hd0">TỔNG</td><td></td>${so3(v(kTd), kTd > 1 ? v(kTd - 1) : 0, 'strong')}${tt2(ds.reduce((t, d) => t + d.tt, 0), ds.reduce((t, d) => t + d.cl, 0), 'strong')}<td></td></tr></tfoot></table></div>
+    <p class="muted small">Bấm vào <b>số HĐ</b> (hoặc nút Chi tiết) để mở bảng nhập HĐ/PL, điều chỉnh, thanh toán · ▸ ở gói: thu gọn / mở các HĐ của gói · nút ở dòng nhóm: sửa gói / điều chỉnh / quyết toán cả nhóm.</p>`;
+  if (kTd === 1) $$('td.c-tt', dlg).forEach((td) => { td.innerHTML = '<span class="muted">—</span>'; });
+}
 function renderTpCard() {
   const tatCa = costData.thau_phu;
   const kTd = tdDangChon();
@@ -2201,10 +2238,9 @@ function renderTpCard() {
   const tong1 = () => tdSum(listHd, 1) + (gCodes.length ? gSum(1) : 0) + leTot; // tổng TĐ1 để tính tỷ trọng
   const pc1 = (x) => { const t = tong1(); return t ? ((x / t) * 100).toFixed(1).replace('.', ',') + '%' : '—'; };
   const c45 = (rows, qtSv, strong = '') => `<td class="num ${strong}">${mtr(tdSum(rows, kTd))}</td>` + (kTd === 1 ? `<td class="num muted ${strong}">${pc1(tdSum(rows, 1))}</td>` : ssCell(tdSum(rows, kTd), tdSum(rows, kTd - 1), strong));
-  { const th = $('.tp-table thead tr'); if (th) { const c = th.cells;
-    c[3].innerHTML = kTd > 1 ? `TĐ${kTd - 1}<br><span class="muted small">sau VAT</span>` : ''; c[3].className = 'num c-prev';
-    c[4].innerHTML = `TĐ${kTd} · ${TD_TEN_NL[kTd]}<br><span class="muted small">sau VAT</span>`; c[4].className = 'num td-col-on';
-    c[5].innerHTML = kTd === 1 ? 'Tỷ trọng' : `± so TĐ${kTd - 1}`; } }
+  { const th = $('#tp-card .tp-table thead tr'); if (th) { const c = th.cells; // bảng chính: Nhóm · TĐk · ± · Còn lại
+    c[1].innerHTML = `TĐ${kTd}<span class="tp-c-tdten"> · ${TD_TEN_NL[kTd]}</span><br><span class="muted small">sau VAT</span>`; c[1].className = 'num td-col-on';
+    c[2].innerHTML = kTd === 1 ? 'Tỷ trọng' : `± so TĐ${kTd - 1}`; } }
   const daTag = (c) => (costAll && c.ma_du_an ? `<span class="c-da">${esc(c.ma_du_an)}</span>` : '');
   // Lọc theo loại HĐ: luôn hiện đủ 4 loại (kèm số lượng) để người dùng biết có thể tạo / chuyển loại
   const nhoms = HDV;
@@ -2296,7 +2332,7 @@ function renderTpCard() {
       ${so3(cur, prev, '', kTd === 2 && c.phat_sinh ? '—' : null)}
       ${tt2(c.da_tt, c.con_lai)}${actHd(c)}</tr>`; };
   const goiRow = (r, stt, coQt) => {
-    const hd = hdCua(r), qtNhom = kTd === 3 && coQt && !hd.length, coCon = kTd > 1 && hd.length > 0, mo = coCon && (autoOpen || tpOpen.has('gr:' + r.id));
+    const hd = hdCua(r), qtNhom = kTd === 3 && coQt && !hd.length, coCon = kTd > 1 && hd.length > 0, mo = coCon && (autoOpen || (tpFullOpen ? !tpOpen.has('grc:' + r.id) : tpOpen.has('gr:' + r.id)));
     const tam = kTd === 1 || (!hd.length && r.tinh_trang !== 'dong'), dong = kTd > 1 && r.tinh_trang === 'dong';
     const chip = tam ? '<span class="st st-tam-tinh">Tạm tính</span>' : dong ? '<span class="st st-tam-dung" title="Gói không dùng nữa: TĐ2, TĐ3 = 0 (TĐ1 giữ nguyên)">Đã đóng</span>' : '';
     const dt = coCon ? (hd.length === 1 ? esc(hd[0].doi_tac || hd[0].so_ma) : `<button type="button" class="link-btn" data-tpgr="${r.id}" title="${esc([...new Set(hd.map((c) => c.doi_tac || c.so_ma))].join(', '))}">${hd.length} HĐ ${mo ? '▾' : '▸'}</button>`)
@@ -2336,51 +2372,56 @@ function renderTpCard() {
       ${ttNone}<td></td></tr>` : '') +
         d.rows.map((c, i) => hdRow(c, `${stt}.${d.ky.length + i + 1}`)).join(''));
   };
-  const bodyHtml = bks.map((b, bi) => {
-    const n = bi + 1, codes = loaiCodes(b), ds = codes.map((code) => loaiData(b, code)), open = autoOpen || !tpOpen.has(`cdt:${b}:dong`);
-    const vB = (k) => ds.reduce((t, d) => t + d.v(k), 0), nGoi = ds.reduce((t, d) => t + d.ky.length, 0), nHd = ds.reduce((t, d) => t + d.hdG.length + d.rows.length, 0);
-    return `<tr class="tv-head-row tp-r-cdt ${b ? '' : 'tv-sub-warn'}"><td class="num">${n}</td>
-      <td class="tp-hd tp-hd0"><div class="tp-l1"><button class="grp-toggle" data-tpcdt="${b}" title="${open ? 'Thu gọn' : 'Mở'}">${open ? '▾' : '▸'}</button>${b ? `<span class="kind-tag kind-hd">HĐ CĐT</span><b>${esc(hdCdtName(b).replace(/^HĐ\s+/, ''))}</b>` : '<span class="st st-tam-tinh">Chưa gắn HĐ CĐT</span>'}</div></td>
-      <td class="c-dt tp-dt muted small">${[nGoi ? `${nGoi} gói` : '', nHd ? `${nHd} HĐ` : ''].filter(Boolean).join(' · ')}</td>
-      ${so3(vB(kTd), kTd > 1 ? vB(kTd - 1) : 0, 'strong')}${tt2(ds.reduce((t, d) => t + d.tt, 0), ds.reduce((t, d) => t + d.cl, 0), 'strong')}
-      <td class="muted small tp-act">${b ? '' : nGoi ? 'Gắn HĐ CĐT: bấm Sửa gói' : ''}</td></tr>` +
-      (open ? codes.map((code, li) => loaiBlock(b, code, `${n}.${li + 1}`)).join('') : '');
+  // V33: bảng chính chỉ hiện NHÓM CHÍNH (HĐ CĐT -> Loại). Nhấp đúp nhóm -> hộp chi tiết đầy đủ (gói, HĐ, TĐ trước, ±, đã TT, còn lại).
+  //  Trong hộp: bấm số HĐ -> bảng nhập liệu HĐ. Đang tìm / lọc QT: hiện luôn các HĐ khớp dưới nhóm.
+  const tienCl = (cl, strong = '') => (kTd === 1 ? '<td class="num muted">—</td>' : `<td class="num ${strong} ${cl < 0 ? 'neg' : ''}">${mtr(cl)}</td>`);
+  const ss2 = (cur, prev, strong = '') => (kTd === 1 ? `<td class="num muted ${strong}">${pc1(cur)}</td>` : ssCell(cur, prev, strong).replace('<td ', `<td title="TĐ${kTd - 1}: ${dvT(prev, 'trieu')} → TĐ${kTd}: ${dvT(cur, 'trieu')}" `));
+  const hdGon = (c) => `<tr class="tp-c-hd" data-tpid="${c.id}"><td class="tp-c-ten"><span class="tp-c-in2"></span><b class="tp-open so-ma-pick" data-tp="${c.id}" title="Nhấp đúp để mở bảng nhập">${esc(c.so_ma)}</b><span class="muted"> · ${esc(c.doi_tac || '')}</span></td>
+      <td class="num">${mtr(tpTdSv(c, kTd))}</td>${ss2(tpTdSv(c, kTd), kTd > 1 ? tpTdSv(c, kTd - 1) : 0)}${tienCl(c.con_lai)}</tr>`;
+  const bodyHtml = bks.map((b) => {
+    const codes = loaiCodes(b), ds = codes.map((code) => loaiData(b, code)), open = autoOpen || !tpOpen.has(`cdt:${b}:dong`);
+    const vB = (k) => ds.reduce((t, d) => t + d.v(k), 0), clB = ds.reduce((t, d) => t + d.cl, 0);
+    const nGoi = ds.reduce((t, d) => t + d.ky.length, 0), nHd = ds.reduce((t, d) => t + d.hdG.length + d.rows.length, 0);
+    return `<tr class="tp-c-cdt ${b ? '' : 'tp-c-warn'}" data-tpn="${b}" title="Nhấp đúp để xem chi tiết đầy đủ"><td class="tp-c-ten"><button class="grp-toggle" data-tpcdt="${b}" title="${open ? 'Thu gọn' : 'Mở'}">${open ? '▾' : '▸'}</button>${b ? `<span class="kind-tag kind-hd">HĐ CĐT</span><b>${esc(hdCdtName(b).replace(/^HĐ\s+/, ''))}</b>` : '<span class="st st-tam-tinh">Chưa gắn HĐ CĐT</span>'}<span class="tp-c-dem">${[nGoi ? `${nGoi} gói` : '', nHd ? `${nHd} HĐ` : ''].filter(Boolean).join(' · ')}</span></td>
+      <td class="num strong">${mtr(vB(kTd))}</td>${ss2(vB(kTd), kTd > 1 ? vB(kTd - 1) : 0, 'strong')}${tienCl(clB, 'strong')}</tr>` +
+      (!open ? '' : codes.map((code, i) => { const d = ds[i], nTam = kTd > 1 ? d.ky.filter((r) => !hdCua(r).length && r.tinh_trang !== 'dong').length : 0;
+        return `<tr class="tp-c-loai" data-tpn="${b}" data-tpncode="${esc(code)}" title="Nhấp đúp để xem chi tiết ${esc(nhTen(code))}"><td class="tp-c-ten"><span class="tp-c-in"></span><span class="tp-kind tp-k-${esc(code)}">${esc(nhTen(code))}</span>${nTam ? `<span class="st st-tam-tinh" title="${nTam} gói chưa có HĐ – giá trị tạm tính">${nTam} tạm tính</span>` : ''}${d.rows.some((c) => c.phat_sinh) ? '<span class="tp-ps" title="Có HĐ phát sinh ngoài TĐ1">Phát sinh</span>' : ''}<span class="tp-c-xem">Chi tiết ›</span></td>
+      <td class="num">${mtr(d.v(kTd))}</td>${ss2(d.v(kTd), kTd > 1 ? d.v(kTd - 1) : 0)}${tienCl(d.cl)}</tr>` +
+        (autoOpen ? [...d.hdG, ...d.rows].map(hdGon).join('') : ''); }).join(''));
   }).join('');
-  const nLe = bks.length + 1, moLe = autoOpen || tpOpen.has('le');
-  const leHtml = !leNhoms.length ? '' : `<tr class="tv-head-row tp-le-head"><td class="num">${nLe}</td>
-      <td class="tp-hd tp-hd0"><div class="tp-l1"><button class="grp-toggle" data-tpgrp="le" title="${moLe ? 'Thu gọn' : 'Mở chi tiết'}">${moLe ? '▾' : '▸'}</button><span class="kind-tag tp-le-tag">Mua lẻ</span><b>Không có HĐ</b></div></td>
-      <td class="c-dt tp-dt muted small">${leNhoms.reduce((a, k) => a + leOf(k).length, 0)} dòng chi phí</td>
-      ${so3(leTot, leTot, 'strong')}<td class="num strong c-tt">${mtr(leTot)}</td><td class="num c-tt">${mtr(0)}</td><td class="muted small tp-act">Nhập ở bảng chi phí bên dưới</td></tr>` +
-    (!moLe ? '' : leNhoms.map((k, i) => `<tr class="tv-child tp-r-hd"><td class="num muted">${nLe}.${i + 1}</td>
-      <td class="tp-hd"><div class="tp-l1"><span class="grp-sp"></span><span class="tp-kind tp-k-${k}">${TP_NGAN[k]}</span><b>Mua lẻ</b></div></td>
-      <td class="c-dt tp-dt muted">${leOf(k).length} dòng chứng từ</td>
-      ${so3(leSv(k), leSv(k))}<td class="num c-tt">${mtr(leSv(k))}</td><td class="num muted c-tt">${mtr(0)}</td>
-      <td class="row-actions tp-act"><button class="sm" data-leopen="${k}">Xem dòng</button></td></tr>`).join(''));
-  $('#tp-tbody').innerHTML = (bodyHtml + leHtml) || `<tr><td colspan="9" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
-  // Dòng tổng duy nhất: tổng chi phí TĐ + diễn giải (HĐ đầu vào ngoài gói · gói chi phí · mua lẻ) – cùng cách gọi Báo cáo
+  const leHtml = !leNhoms.length ? '' : `<tr class="tp-c-cdt tp-c-le" data-tple="1" title="Nhấp đúp để xem các dòng mua lẻ ở bảng chi phí"><td class="tp-c-ten"><span class="grp-sp"></span><span class="kind-tag tp-le-tag">Mua lẻ</span><b>Không có HĐ</b><span class="tp-c-dem">${leNhoms.reduce((a, k) => a + leOf(k).length, 0)} dòng</span></td>
+      <td class="num strong">${mtr(leTot)}</td>${ss2(leTot, leTot, 'strong')}${tienCl(0, 'strong')}</tr>`;
+  $('#tp-tbody').innerHTML = (bodyHtml + leHtml) || `<tr><td colspan="4" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
   const gT = (k) => (gCodes.length ? gSum(k) : 0), totK = (k) => tdSum(listHd, k) + gT(k) + leTot;
-  $('#tp-tfoot').innerHTML = `<tr class="tp-grand"><td></td><td class="tp-hd tp-hd0">${filtered ? `TỔNG ĐANG LỌC <span class="muted small">(${T.so_hd}/${tatCa.length} HĐ ngoài gói)</span>` : `TỔNG CHI PHÍ TĐ${kTd}`}</td>
-      <td class="c-dt tp-dt muted small tp-tong-sub">HĐ đầu vào ngoài gói ${mtr(tdSum(listHd, kTd))} · ${kTd === 1 ? 'dự trù (gói)' : 'gói chi phí'} ${mtr(gT(kTd))}${leTot ? ` · mua lẻ ${mtr(leTot)}` : ''}</td>
-    ${so3(totK(kTd), kTd > 1 ? totK(kTd - 1) : 0, 'strong')}${tt2(T.da_tt + gTT + leTot, T.con_lai + gCL, 'strong')}<td></td></tr>`;
-  $('.tp-table')?.classList.toggle('tp-k1', kTd === 1);
-  if (kTd === 1) $$('#tp-tbody td.c-tt, #tp-tfoot td.c-tt').forEach((td) => { td.innerHTML = '<span class="muted" title="Thanh toán phát sinh từ TĐ2 – xem ở tab TĐ2 / TĐ3">—</span>'; });
+  $('#tp-tfoot').innerHTML = `<tr class="tp-grand"><td class="tp-c-ten" title="HĐ đầu vào ngoài gói ${dvT(tdSum(listHd, kTd), 'trieu')} · ${kTd === 1 ? 'dự trù (gói)' : 'gói chi phí'} ${dvT(gT(kTd), 'trieu')}${leTot ? ` · mua lẻ ${dvT(leTot, 'trieu')}` : ''}">${filtered ? `TỔNG ĐANG LỌC` : `TỔNG CHI PHÍ TĐ${kTd}`}</td>
+    <td class="num strong">${mtr(totK(kTd))}</td>${ss2(totK(kTd), kTd > 1 ? totK(kTd - 1) : 0, 'strong')}${tienCl(T.con_lai + gCL, 'strong')}</tr>`;
+  // Hộp chi tiết dùng lại các hàm dựng dòng đầy đủ
+  TPV = { kTd, loaiCodes, loaiData, loaiBlock, so3, tt2, nhTen, edit };
+  if ($('#tpn-dlg')?.open) renderTpNhom();
   const btn = $('#tp-toggle-all');
-  btn.hidden = autoOpen || !(list.length || kyHien.length);
-  btn.textContent = [...tpOpen].some((k) => String(k).startsWith('gr:')) ? 'Thu gọn tất cả' : 'Mở tất cả';
+  btn.hidden = autoOpen || bks.length < 2;
+  btn.textContent = bks.some((b) => tpOpen.has(`cdt:${b}:dong`)) ? 'Mở tất cả' : 'Thu gọn tất cả';
   // Ô chọn HĐ CĐT ở form tạo HĐTP
   const sel = cForm?.elements.hd_cdt;
   if (sel) { const keep = Number(sel.value) || null; sel.innerHTML = hdCdtOptions(keep); }
 }
 
-$('#tp-toggle-all').addEventListener('click', () => {
-  // Mở tất cả: mở mọi HĐ CĐT / loại / gói (kể cả các HĐ trong gói) + Mua lẻ · Thu gọn tất cả: về mặc định (chỉ mở nhóm chính)
-  const mo = ![...tpOpen].some((k) => String(k).startsWith('gr:'));
-  [...tpOpen].forEach((k) => { if (String(k).startsWith('gr:') || String(k).endsWith(':dong') || k === 'le') tpOpen.delete(k); });
-  if (mo) { (costData.du_tru || []).filter((r) => r.loai === 'ky').forEach((r) => tpOpen.add('gr:' + r.id)); tpOpen.add('le'); }
+$('#tp-toggle-all').addEventListener('click', () => { // mở / thu gọn tất cả HĐ CĐT (bảng chính chỉ có nhóm chính)
+  const ks = [...new Set([...(costData.thau_phu || []).map((c) => c.hd_cdt_id || 0), ...(costData.du_tru || []).map((r) => r.hd_cdt_id || 0)])].map((b) => `cdt:${b}:dong`);
+  const mo = ks.some((k) => tpOpen.has(k));
+  ks.forEach((k) => (mo ? tpOpen.delete(k) : tpOpen.add(k)));
   renderTpCard();
 });
 $('#tp-tbody').addEventListener('click', (e) => {
-  if (e.target.dataset.tpgr) { const k = 'gr:' + e.target.dataset.tpgr; tpOpen.has(k) ? tpOpen.delete(k) : tpOpen.add(k); return renderTpCard(); }
+  if (matchMedia('(hover: none)').matches && !e.target.closest('button, select, input, .tp-open')) {
+    const nh = e.target.closest('tr[data-tpn]'); if (nh) return openTpNhom(nh.dataset.tpn, nh.dataset.tpncode || '');
+  }
+  onTpTableClick(e);
+});
+function onTpTableClick(e) {
+  const so = e.target.closest('#tpn-dlg .tp-open'); if (so) return openTp(Number(so.dataset.tp)); // trong hộp chi tiết: bấm số HĐ -> bảng nhập
+  const tpo = e.target.closest('#tpn-dlg [data-tpopen]'); if (tpo) return openTp(Number(tpo.dataset.tpopen));
+  if (e.target.dataset.tpgr) { const k = (e.target.closest('#tpn-dlg') ? 'grc:' : 'gr:') + e.target.dataset.tpgr; tpOpen.has(k) ? tpOpen.delete(k) : tpOpen.add(k); return renderTpCard(); }
   if (e.target.dataset.tpgoi) { const k = `goi:${e.target.dataset.tpgoi}:dong`; tpOpen.has(k) ? tpOpen.delete(k) : tpOpen.add(k); return renderTpCard(); }
   const gn = e.target.dataset.goinhom;
   if (gn) return openDtr(gn, tdDangChon() > 1 && can('hd') && !costAll); // TĐ2 / TĐ3: mở sẵn dòng đợt điều chỉnh / quyết toán · hộp gói / dự trù của nhóm: sửa gói (TĐ1), điều chỉnh nhóm (TĐ2), quyết toán nhóm (TĐ3)
@@ -2407,7 +2448,7 @@ $('#tp-tbody').addEventListener('click', (e) => {
   const n = k === 'le' ? 'le' : Number(k); // 'le' = nhóm Mua lẻ (không HĐ)
   tpOpen.has(n) ? tpOpen.delete(n) : tpOpen.add(n);
   renderTpCard();
-});
+}
 $('#tp-q').addEventListener('input', (e) => { tpFilter.q = e.target.value; if (costData) renderTpCard(); });
 cForm?.elements.cach?.addEventListener('change', () => { setCostMode(); setCostMode(); }); // lần 2: Hình thức (vật tư / nhân công / MMTB) theo Cách nhập vừa chọn
 // Đổi loại HĐ ngay trên bảng

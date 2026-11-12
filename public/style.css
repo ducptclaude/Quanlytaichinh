@@ -3523,3 +3523,41 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
   .tp-table td.tp-hd0 { padding-left: 6px; }
   .tp-table tr.tp-grand td:nth-child(2) { background: var(--bg-f3f7fd); }
 }
+
+/* V33: bảng chính chỉ nhóm chính */
+#tp-card .tp-table td, #tp-card .tp-table th { padding-top: 9px; padding-bottom: 9px; }
+#tp-card .tp-table td.tp-c-ten { white-space: nowrap; }
+#tp-card .tp-table td.tp-c-ten > * { vertical-align: middle; }
+#tp-card .tp-table td.tp-c-ten .kind-tag, #tp-card .tp-table td.tp-c-ten .tp-kind, #tp-card .tp-table td.tp-c-ten .st, #tp-card .tp-table td.tp-c-ten .tp-ps { margin-right: 8px; margin-left: 0; }
+#tp-card .tp-table .grp-toggle { margin-right: 8px; }
+#tp-card .tp-table .grp-sp { display: inline-block; width: 30px; }
+.tp-c-in { display: inline-block; width: 38px; }
+.tp-c-in2 { display: inline-block; width: 60px; }
+.tp-c-dem { margin-left: 4px; font-size: 11.5px; color: var(--muted); font-weight: 400; }
+#tp-card tr.tp-c-cdt td { background: var(--bg-f3f7fd); border-top: 2px solid var(--bd-dbe6f5); font-weight: 700; }
+#tp-card tr.tp-c-warn td { background: var(--bg-fffbeb); }
+#tp-card tr.tp-c-loai, #tp-card tr.tp-c-cdt { cursor: pointer; }
+#tp-card tr.tp-c-loai:hover td, #tp-card tr.tp-c-cdt:hover td { background: color-mix(in srgb, var(--teal, #0f9d8a) 8%, var(--bg-ffffff)); }
+.tp-c-xem { margin-left: 6px; font-size: 11.5px; color: var(--teal, #0f9d8a); font-weight: 600; opacity: 0; transition: opacity .15s; }
+#tp-card tr.tp-c-loai:hover .tp-c-xem { opacity: 1; }
+#tp-card tr.tp-c-hd td { font-size: 12.5px; }
+.tp-c-hint { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.tpn-dlg { width: min(1240px, 96vw); }
+@media (max-width: 760px) {
+  #tp-card .tp-table td.tp-c-ten { white-space: normal; }
+  .tp-c-in { width: 14px; } .tp-c-in2 { width: 24px; }
+  .tp-c-dem { display: block; margin: 2px 0 0 0; }
+  .tp-c-xem { opacity: 1; }
+  .tp-c-hint { display: none; }
+  #tp-card .tp-table th:first-child, #tp-card .tp-table td:first-child { display: table-cell; position: static; box-shadow: none; }
+  #tp-card .tp-table th:nth-child(2), #tp-card .tp-table td:nth-child(2), #tp-card .tp-table th:nth-child(3), #tp-card .tp-table td:nth-child(3) { display: table-cell; position: static; box-shadow: none; background: transparent; }
+  #tp-card tr.tp-c-cdt td { background: var(--bg-f3f7fd) !important; }
+}
+
+@media (max-width: 760px) {
+  #tp-card .tp-table th { white-space: normal; }
+  .tp-c-tdten, .tp-c-xem { display: none; }
+  #tp-card .tp-table td.tp-c-ten .kind-tag, #tp-card .tp-table td.tp-c-ten .tp-kind, #tp-card .tp-table td.tp-c-ten .st, #tp-card .tp-table td.tp-c-ten .tp-ps { margin-right: 4px; font-size: 10.5px; }
+  .tp-c-in { width: 6px; } .tp-c-in2 { width: 12px; }
+  #tp-card .tp-table td, #tp-card .tp-table th { padding-left: 6px; padding-right: 6px; }
+}

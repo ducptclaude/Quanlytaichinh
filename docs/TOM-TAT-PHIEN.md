@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.12.11.26 – Bảng HĐ đầu vào chỉ hiện nhóm chính; nhấp đúp mở bảng chi tiết
+- Bảng chính (trang Chi phí): chỉ HĐ CĐT → Loại (Thầu phụ / Vật tư…), 3 cột số: TĐ đang chọn · ± (TĐ1: tỷ trọng) · Còn lại. Nhãn "n tạm tính", "Phát sinh" ở dòng loại khi có. Dòng tổng: TỔNG CHI PHÍ TĐk (rê chuột xem tách HĐ / gói / mua lẻ).
+- Nhấp đúp dòng HĐ CĐT / Loại (điện thoại: chạm 1 lần) → hộp "Chi tiết HĐ đầu vào": bảng đầy đủ V32 (gói, HĐ trong gói mở sẵn, TĐ trước, ±, đã TT, còn lại, nút ± Nhóm / Đóng gói / Chi tiết). Trong hộp bấm số HĐ → bảng nhập HĐ.
+- Đang tìm / lọc QT: HĐ khớp hiện luôn dưới nhóm. Nút Mở / Thu gọn tất cả: các HĐ CĐT.
+- Kiểm tra: tổng = tổng các HĐ CĐT = tổng hộp chi tiết từng loại ở 13 dự án × 3 TĐ (39/39); dự án thử 1.450 / 1.500 / 1.500 = Báo cáo; điện thoại không phải kéo ngang; tester 4.518 ĐẠT, 0 LỖI.
+
 ## V32.11.11.26 – Bảng HĐ đầu vào (trang Chi phí) thiết kế lại gọn 3 tầng
 - Tầng: HĐ CĐT → Loại (Thầu phụ / Vật tư / Nhân công / MMTB / nhóm khác) → Gói hoặc HĐ ngoài gói; HĐ đã gắn gói nằm dưới gói (thu gọn mặc định, chỉ mở HĐ CĐT + Loại).
 - Cột: # · Hạng mục / HĐ · Đối tác · TĐ trước (ẩn ở TĐ1) · TĐ đang chọn · ± (TĐ1: tỷ trọng) · Đã TT · Còn lại · nút. Bỏ cột Hạng mục / ghi chú (rê chuột vào số HĐ để xem), bỏ chữ lặp ("Không phụ lục", "so giá trị ký"…); "+n PL" chỉ khi có PL; HĐ trong gói cột TĐ1 ghi "ký …".
