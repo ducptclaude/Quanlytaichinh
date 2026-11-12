@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.12.11.26 – Bảng chi tiết chi phí: rê chuột ô % thấy % doanh thu TĐ1 · TĐ2 · TĐ3
+- Theo quyết định của anh: nút / chú thích khu vực giữ nguyên; cột "% DT TĐk" vẫn đổi theo tab; thêm rê chuột vào mọi ô % hiện đủ % so với doanh thu sau VAT của cả 3 TĐ. Số tiền không đổi. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V03.12.11.26 – "Đã QT" chỉ khi thật sự quyết toán + 4 thẻ tổng theo % doanh thu
 - HĐ đầu vào trả đủ nhưng chưa quyết toán: không còn ghi "Đã QT" (lib/subcontract.js da_qt bỏ điều kiện trả đủ; thêm tra_du). Ảnh hưởng chỉ ở nhãn / số đếm: n_qt, so_tp_qt, tp_qt_thieu, trạng thái Excel ("Chưa QT (đã trả đủ)"), HĐ đó lại là tạm tính. Số tiền KHÔNG đổi (đối chiếu trước/sau: chỉ khác nhãn, đếm). Dòng tiền Dashboard theo ngày thanh toán giữ nguyên.
 - 4 thẻ trên trang Chi phí: "x% doanh thu" (doanh thu sau VAT cùng TĐ); rê chuột thấy % tổng chi phí. Tester 4.518 ĐẠT, 0 LỖI.

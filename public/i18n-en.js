@@ -1552,6 +1552,10 @@ window.BKS_EN = {
 },
 "patterns": [
 [
+"TĐ1: {} · TĐ2: {} · TĐ3: {} (so với doanh thu sau VAT)",
+"M1: {} · M2: {} · M3: {} (of revenue after VAT)"
+],
+[
 "{} doanh thu",
 "{} of revenue"
 ],

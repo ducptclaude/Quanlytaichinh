@@ -1783,6 +1783,8 @@ function renderCost() {
   // Cột Tỷ trọng ở bảng chi tiết chi phí: % so với DOANH THU sau VAT của TĐ đang chọn (Báo cáo), hiện ở mọi dòng
   const kDt = tdDangChon(), dtK = Number(costData.dt_td?.[kDt - 1]) || 0;
   const pctDt = (v) => (dtK ? ((v / dtK) * 100).toFixed(1).replace('.', ',') + '%' : '—');
+  // Rê chuột vào ô %: tỷ trọng so với doanh thu cả 3 thời điểm
+  const pctAll = (v) => esc([1, 2, 3].map((k) => { const d = Number(costData.dt_td?.[k - 1]) || 0; return `TĐ${k}: ${d ? ((v / d) * 100).toFixed(1).replace('.', ',') + '%' : '—'}`; }).join(' · ') + ' (so với doanh thu sau VAT)');
   $('#c-k-sau').textContent = dvT(tong.sau_vat);
   $('#c-k-sub').innerHTML = `Trước VAT ${dvT(tong.gia_tri)} · VAT ${dvT(tong.tien_vat)}${tong.tam_tinh ? ' · <span class="warn-text" title="Có HĐ đầu vào chưa quyết toán">có HĐ tạm tính</span>' : ''}` +
     (tong.ngoai_cp.so_dong ? `<br>Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}` : '') +
@@ -1797,7 +1799,7 @@ function renderCost() {
   const sumCells = (t, cls = '') => `
       <td class="num ${cls}">${dvm(t.gia_tri)}</td>
       <td class="num ${cls}">${dvm(t.sau_vat)}</td>
-      <td class="num ${cls === 'strong' ? '' : 'muted'}">${pctDt(t.sau_vat)}</td>`;
+      <td class="num ${cls === 'strong' ? '' : 'muted'}" title="${pctAll(t.sau_vat)}">${pctDt(t.sau_vat)}</td>`;
   const toggle = (key, n) => (n ? `<button class="grp-toggle" data-cgrp="${key}">${costOpen.has(key) ? '▾' : '▸'}</button>` : '<span class="grp-toggle-sp"></span>');
   const addBtn = (nhom, sub) => (edit ? `<button class="sm" data-cadd="${nhom}" data-csub="${sub || ''}" title="Thêm chi phí vào mục này">+</button>` : '');
   const ngoaiCp = (r) => Boolean(NHOM().find((n) => n.code === r.nhom)?.sub.find((sc) => sc.code === r.nhom_con)?.khong_tinh_cp);
@@ -1808,7 +1810,7 @@ function renderCost() {
       <td class="c-dt">${esc(r.doi_tac)}${r.so_ct ? `<div class="muted small">${esc(r.so_ct)}</div>` : ''}</td><td>${dmy(r.ngay)}</td>
       <td class="num">${dvm(r.gia_tri)}</td>
       <td class="num strong">${dvm(r.sau_vat)}<div class="c-vat">${r.vat ? `VAT ${r.vat}%` : r.khong_vat ? 'Không VAT' : vatBadge(0)}</div></td>
-      <td class="num muted">${ngoaiCp(r) ? '' : pctDt(r.sau_vat)}</td>
+      <td class="num muted" title="${ngoaiCp(r) ? '' : pctAll(r.sau_vat)}">${ngoaiCp(r) ? '' : pctDt(r.sau_vat)}</td>
       <td class="c-note" title="${esc(r.ghi_chu)}">${esc(r.ghi_chu)}</td>
       <td class="row-actions">${edit ? `<button class="sm" data-cedit="${r.id}">Sửa</button><button class="danger sm" data-cdel="${r.id}">Xóa</button>` : ''}</td>
     </tr>`;
@@ -1843,7 +1845,7 @@ function renderCost() {
             <td class="c-dt">${esc(c.doi_tac)}</td><td></td>
             <td class="num">${dvm(c.qt_gia_tri)}</td>
             <td class="num strong">${dvm(c.qt_sau_vat)}<div class="c-vat">HT/QT</div></td>
-            <td class="num muted">${pctDt(c.qt_sau_vat)}</td><td class="c-note" title="${esc([c.hang_muc, c.ghi_chu].filter(Boolean).join(' · '))}">${esc(c.hang_muc || c.ghi_chu)}</td>
+            <td class="num muted" title="${pctAll(c.qt_sau_vat)}">${pctDt(c.qt_sau_vat)}</td><td class="c-note" title="${esc([c.hang_muc, c.ghi_chu].filter(Boolean).join(' · '))}">${esc(c.hang_muc || c.ghi_chu)}</td>
             <td class="row-actions"><button class="sm" data-tpopen="${c.id}">Chi tiết</button></td>
           </tr>`;
         });
