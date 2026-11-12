@@ -155,7 +155,8 @@ function bDashRender(list, v, one) {
 // Chọn TĐ cho nhóm DT – CP – LN (và cột của bảng dự án)
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-dbtd]'); if (!b) return;
-  BST.i_td = Number(b.dataset.dbtd); bSave(); // V23.12: chung TĐ với mục I Báo cáo renderKeepPos('[data-dbtd="' + b.dataset.dbtd + '"]');
+  BST.i_td = Number(b.dataset.dbtd); bSave(); // V23.12: chung TĐ với mục I Báo cáo
+  renderKeepPos('[data-dbtd="' + b.dataset.dbtd + '"]');
 });
 // Bảng Danh mục dự án: bấm Mã DA -> dashboard riêng dự án đó; bấm dòng -> bản đồ bay tới dự án, mở thông tin
 document.addEventListener('click', (e) => {

@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V24.12.11.26 – Sửa lỗi: bấm nút TĐ trên Dashboard không đổi số
+- Lỗi do bản V23: lệnh vẽ lại bị dính vào dòng ghi chú. Đã tách lại; bấm TĐ1/TĐ2/TĐ3 trên Dashboard đổi số ngay. Kiểm tra bằng bấm chuột thật. 4518 ĐẠT, 0 LỖI.
+
 ## V23.12.11.26 – Dashboard chạy đúng theo Báo cáo, dùng chung nút TĐ
 - Nút TĐ1 / TĐ2 / TĐ3 trên Dashboard = nút TĐ mục I Báo cáo (bấm bên nào bên kia đổi theo; chọn 1 dự án tự nhảy TĐ mới nhất). Tên nút giống Báo cáo: Ký HĐ · Điều chỉnh · Quyết toán.
 - 3 thẻ DT – CP – LN và khối I = đúng số mục I Báo cáo (TĐ1 = số chốt TĐ1, TĐ2/3 = mục IV), so với TĐ liền trước như mục I. Khối II = mục II, khối III + bảng Kế hoạch – Thực – Còn lại = mục III (mới nhất), khối IV = mục IV. Bảng dự án và Dashboard PDF theo cùng TĐ.
