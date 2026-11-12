@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V28.12.11.26 – Dòng "Chi phí chung – không gắn HĐ" ở Báo cáo, rê chuột thấy tách khoản
+- Mục I, II: dòng con cuối dưới dự án đổi tên "Chi phí chung – không gắn HĐ" khi chỉ có chi phí (còn doanh thu / tiền về chưa gắn HĐ thì giữ "Chưa phân theo HĐ").
+- Rê chuột mục I: tách theo nguồn tại TĐ đang chọn – từng nhóm chi phí đã ghi (lương, tài chính, lãi vay…), gói / HĐ đầu vào chưa gắn HĐ CĐT, điều chỉnh – quyết toán cả nhóm, TĐ1: chênh lệch với số đã chốt. Máy chủ trả thêm `cp_chung` (chỉ đọc, không đổi số).
+- Kiểm tra DA-05 thật (web quanlytaichinh, tài khoản test, chỉ đọc): 300 = lương 200 + chi phí tài chính 100, dữ liệu đúng.
+- Đối chiếu: phần tách cộng đúng phần không gắn HĐ ở mọi dự án mẫu (TĐ2/3, trước & sau VAT). tester 4518 ĐẠT · kiem-tra-goi 47 ĐẠT, 0 LỖI.
+
 ## V27.12.11.26 – Mua lẻ gắn vào gói chi phí (chống tính trùng)
 - Dòng chi phí mua lẻ có ô **Gắn vào gói** (chỉ gói cùng nhóm, gói chưa đóng). Kho dữ liệu: thêm cột `chi_phi.goi_id` (chỉ THÊM).
 - Cách tính: TĐ1 = giá trị gói (mua lẻ gắn gói không cộng thêm) · TĐ2/TĐ3 = mua lẻ thực + phần gói chưa mua hết (gói − mua lẻ, không âm); gói đóng / đã gắn HĐ: chỉ mua lẻ thực. Áp dụng đồng bộ Báo cáo (tổng, theo HĐ CĐT), thẻ và bảng trang Chi phí.

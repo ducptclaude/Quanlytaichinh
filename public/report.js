@@ -822,7 +822,11 @@ function bTongHopHtml(list, v, P) {
   const gMo = (d) => !BST.iv_hd_dong?.includes(d.id);
   const gPrj = (x, i) => { const hs = x.d.hds || []; return prj(x, i).replace(`<td class="th-ma"><b>`, `<td class="th-ma">${hs.length ? `<button type="button" class="iv-tg no-print" data-ivhd="${x.d.id}" title="${gMo(x.d) ? 'Thu gọn các HĐ' : 'Xem các HĐ của dự án'}">${gMo(x.d) ? '▾' : '▸'}</button>` : ''}<b>`); };
   const gTen = (h, i, j) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="kind-tag kind-hd">HĐ</span> ${esc(h.so_ma || h.so_hieu)}${h.so_pl ? ` <span class="muted small">+${h.so_pl} PL</span>` : ''}</td><td>${h.da_qt ? '<span class="iv-qt" title="HĐ đã quyết toán">✓ QT</span>' : ''}</td>`;
-  const gKhac = (i, j, tip) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="iv-chung" title="${tip}">Chưa phân theo HĐ</span></td><td></td>`;
+  const gKhac = (i, j, tip, ten = 'Chưa phân theo HĐ') => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="iv-chung" title="${tip}">${ten}</span></td><td></td>`;
+  // V28.12: tách "chi phí chung – không gắn HĐ" tại TĐ k theo nguồn (lương, tài chính…, gói / HĐ chưa gắn HĐ CĐT, điều chỉnh – QT cả nhóm, chênh lệch số chốt TĐ1)
+  const chungTip = (d, k, cpCon) => { const P = (d.cp_chung || []).map((x) => [x.ten, x[v]?.[k - 1] || 0]).filter(([, x]) => Math.abs(x) >= 1e5);
+    const du = cpCon - P.reduce((a, [, x]) => a + x, 0); if (Math.abs(du) >= 1e5) P.push([k === 1 ? 'Chênh lệch với số đã chốt TĐ1' : 'Điều chỉnh / quyết toán cả nhóm', du]);
+    return P.length ? 'Gồm: ' + P.map(([t, x]) => `${t} ${bTy(x)} ${TY()}`).join(' · ') : ''; };
   const gDt = (h, n) => (n === 3 ? h.td3?.[v] : h['td' + n]?.[v]) || 0;
   const gCp = (h, n) => h.cp_td?.[v]?.[n - 1] || 0;
   const gQd = (sv, gt, svTong) => (v === 'sv' || !svTong ? sv : Math.round(sv * (gt / svTong))); // tiền thật quy về trước VAT theo tỷ lệ của HĐ
@@ -897,7 +901,8 @@ function bTongHopHtml(list, v, P) {
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
         <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}${k === 1 && !r.x.td1 ? '<sup class="th-tt" title="Chưa chốt TĐ1: lấy HĐ gốc và chi phí trên hệ thống">*</sup>' : ''}</b></td></tr>` +
         (hs.length && gMo(r.x.d) ? con.map((c, j) => dong(c, gTen(c.h, i, j))).join('') +
-          (Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? dong(khac, gKhac(i, hs.length, 'Phần không gắn được HĐ chủ đầu tư: chi phí chung (đã ghi, gián tiếp, tài chính, mua lẻ), HĐ / gói chưa gắn HĐ CĐT, điều chỉnh – quyết toán cả nhóm; TĐ1: chênh lệch với số đã chốt')) : '') : '');
+          (Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? dong(khac, gKhac(i, hs.length, (Math.abs(khac.dt) >= 1e6 ? `Doanh thu chưa phân theo HĐ ${bTy(khac.dt)} ${TY()} · ` : '') + (chungTip(r.x.d, k, khac.cp) || 'Phần không gắn được HĐ chủ đầu tư'),
+            Math.abs(khac.dt) < 1e6 ? 'Chi phí chung – không gắn HĐ' : 'Chưa phân theo HĐ')) : '') : '');
       }).join('')}</tbody>
       ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', bpct(TT.ln, TT.dt)])}
     </table></div>
@@ -920,7 +925,8 @@ function bTongHopHtml(list, v, P) {
         return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(x, i)}<td class="num">${tlk('thu', x.thu, x.d.id)}</td><td class="num">${tlk('chi', x.chi, x.d.id)}</td>
         <td class="num strong ${x.con < 0 ? 'neg' : 'pos'}">${tlk('con', x.con, x.d.id)}</td></tr>` +
         (hs.length && gMo(x.d) ? con.map((c, j) => dong(c, gTen(c.h, i, j))).join('') +
-          (Math.abs(kh.thu) + Math.abs(kh.chi) >= 1e6 ? dong(kh, gKhac(i, hs.length, 'Tiền về chưa gắn HĐ, chi phí đã chi (gián tiếp, tài chính, mua lẻ…) và đã trả HĐ đầu vào chưa gắn HĐ chủ đầu tư'), 'iv-chung-row') : '') : '');
+          (Math.abs(kh.thu) + Math.abs(kh.chi) >= 1e6 ? dong(kh, gKhac(i, hs.length, 'Tiền về chưa gắn HĐ, chi phí đã chi (gián tiếp, tài chính, mua lẻ…) và đã trả HĐ đầu vào chưa gắn HĐ chủ đầu tư',
+            Math.abs(kh.thu) < 1e6 ? 'Chi phí chung – không gắn HĐ' : 'Chưa phân theo HĐ'), 'iv-chung-row') : '') : '');
       }).join('')}</tbody>
       ${foot([tlk('thu', T.thu), tlk('chi', T.chi), tlk('con', T.con)])}
     </table></div>
