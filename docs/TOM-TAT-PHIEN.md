@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.12.11.26 – Lưu số liệu không còn làm trang nhảy lên đầu; HT/QT nhập đợt ngay trong bảng
+- Nguyên nhân nhảy: sau mỗi lần lưu, tín hiệu "số liệu vừa đổi" tải lại CẢ trang Doanh thu / Chi phí (ẩn phần thân trong chốc lát → trang ngắn lại → cuộn về đầu). Nay chỉ tải lại số liệu (loadRevenue / loadCost) và giữ vị trí cuộn (taiLaiGiuViTri) – áp dụng cả sau duyệt / hủy.
+- Bảng 2 HT/QT: "+ Đợt" ở dòng HĐ và "+ Đợt tiếp theo / + Quyết toán" dưới bảng mở 1 dòng nhập ngay dưới HĐ (tên đợt điền sẵn, VAT theo HĐ, tự tính tiền VAT / sau VAT; Enter = Lưu, Esc = Bỏ) thay vì cuộn lên form. Đã thử 3 lần liên tiếp mỗi loại: khung bảng đứng yên. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V12.12.11.26 – Báo cáo IV: Chi phí và Lợi nhuận cũng theo dự án (tổng) + từng HĐ CĐT (con)
 - Chi phí của 1 HĐ CĐT = HĐ đầu vào gắn HĐ CĐT đó (theo TĐ) + gói chi phí gắn HĐ CĐT đó (TĐ1 tạm tính; TĐ2/TĐ3 chỉ gói chưa có HĐ, chưa đóng, nhóm chưa QT); đã chi = đã trả HĐ đầu vào. Phần còn lại hiện 1 dòng "Chi phí chung – không gắn HĐ" (chi phí đã ghi, HĐ/gói chưa gắn, điều chỉnh / QT cả nhóm) = dự án − tổng các HĐ → luôn khớp. Lợi nhuận HĐ = DT HĐ − CP HĐ; dòng chung = − chi phí chung.
 - Máy chủ chỉ THÊM cp_td cho từng HĐ. Thử: HĐ 1012 = gói VT 300 + HĐTP 350 = 650; HĐ 1011 = gói KC 300 → 2 HĐ 350; chung = điều chỉnh nhóm 20; tổng 950 / 1.020 khớp. Tester 4.518 ĐẠT, 0 LỖI.

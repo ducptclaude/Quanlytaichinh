@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Giá trị trước VAT": "Value before VAT",
+"Nhập tên đợt / hồ sơ": "Enter the round / document name",
+"Nhập giá trị trước VAT của đợt": "Enter the round value before VAT",
 "Chi phí chung – không gắn HĐ": "General costs – not linked to a contract",
 "Thu gọn các HĐ": "Collapse contracts",
 "Xem các HĐ của dự án": "Show the project contracts",
@@ -1562,6 +1565,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Đã thêm \"{}\"",
+"Added \"{}\""
+],
 [
 "({} HĐ)",
 "({} contracts)"

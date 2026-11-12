@@ -460,6 +460,7 @@ function buildRevenueSections() {
         <label class="tv-hd-pick">Thêm cho HĐ <select id="qt-hd-pick"></select></label>
         <button type="button" data-qtq="dot" title="Thêm đợt kế tiếp, tên theo hồ sơ đã có (VD Hoàn thành đợt 2 -> Hoàn thành đợt 3)">+ Đợt tiếp theo</button>
         <button type="button" data-qtq="qt">+ Quyết toán</button>
+        <span id="qt-nhap-msg" class="msg" role="alert"></span>
         <span class="muted small">Đã có đợt thanh toán / quyết toán: Giá trị hoàn thành = tổng lũy kế các đợt; chưa có: tính theo chi phí (cost to cost)</span>
       </div>` : ''}
     </div>`).join('');
@@ -755,7 +756,10 @@ function renderRevenue() {
       renderDcForm(rows);
       { const th = $('thead .td-th-slot', card) || $('thead th.td-col-on', card); if (th) { $$('thead th.td-col', card).forEach((x) => x !== th && x.remove()); th.outerHTML = tdThHtml(); } }
       $('tbody', card).innerHTML = rows.length ? hdGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
-    } else $('tbody', card).innerHTML = rows.length ? qtGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
+    } else {
+      $('tbody', card).innerHTML = rows.length || qtDraft ? qtGroupsHtml(rows) : `<tr><td colspan="${cols}" class="empty">Chưa có dữ liệu</td></tr>`;
+      $$('tr.qt-draft input.money', card).forEach(attachMoneyInput); $$('tr.qt-draft input.date-dmy', card).forEach(attachDateInput);
+    }
     const t = tong[loai];
     if (loai === 'hd') {
       const gs = hdGroups(rows), t1 = gs.reduce((a, g) => a + grpTd(g).t1, 0), t2 = gs.reduce((a, g) => a + grpTd(g).t2, 0), t3 = gs.reduce((a, g) => a + grpTd(g).t3, 0);
@@ -796,6 +800,8 @@ function qtGroupList(rows) {
     if (!groups.has(k)) groups.set(k, { k, head: heads.find((h) => h.id === k) || null, rows: [] });
     groups.get(k).rows.push(r);
   }
+  // HĐ đang mở dòng nhập nhanh mà chưa có đợt nào: vẫn hiện nhóm để nhập
+  if (qtDraft && order.has(qtDraft.hd) && !groups.has(qtDraft.hd)) groups.set(qtDraft.hd, { k: qtDraft.hd, head: heads.find((h) => h.id === qtDraft.hd) || null, rows: [] });
   // Trong 1 HĐ: các đợt theo số thứ tự (đợt 2 trước đợt 10), Quyết toán luôn ở cuối, rồi theo ngày
   const coll = new Intl.Collator('vi', { numeric: true, sensitivity: 'base' });
   const isQt = (r) => normVn(r.so_hieu).includes('quyet toan');
@@ -804,6 +810,20 @@ function qtGroupList(rows) {
       String(a.ngay || '9999').localeCompare(String(b.ngay || '9999')) || a.id - b.id);
   }
   return [...groups.values()].sort((a, b) => (a.k ? order.get(a.k) : 1e6) - (b.k ? order.get(b.k) : 1e6));
+}
+let qtDraft = null; // dòng nhập nhanh đợt HT/QT ngay trong bảng: { hd, so_hieu }
+function qtDraftRow(g, n) {
+  const vat = revData.items.find((r) => r.id === g.k)?.vat ?? '';
+  return `<tr class="tv-child tv-draft qt-draft" data-qtdraft="${g.k}">
+    <td class="num muted">${n}.${g.rows.length + 1}</td>
+    <td class="indent"><span class="tree">└</span><input class="tv-in" data-f="so_hieu" maxlength="150" value="${esc(qtDraft.so_hieu)}" title="Tên đợt / hồ sơ (đổi thành &quot;Quyết toán&quot; nếu là hồ sơ quyết toán)"></td>
+    <td class="c-o"><input class="tv-in date-dmy" data-f="ngay" value="${esc(qtDraft.ngay || '')}"></td>
+    <td class="num"><input class="tv-in money num" data-f="gia_tri" placeholder="Giá trị trước VAT"></td>
+    <td class="num c-o"><input class="tv-in vat-in" data-f="vat" type="number" min="0" max="100" step="1" value="${esc(vat)}" style="width:58px"></td>
+    <td class="num muted" data-qtd="tien_vat"></td><td class="num strong" data-qtd="sau_vat"></td>
+    <td><input class="tv-in" data-f="ghi_chu" maxlength="500" placeholder="Ghi chú"></td><td class="c-o"></td>
+    <td class="row-actions"><button type="button" class="primary sm" data-qtdsave="${g.k}">Lưu</button><button type="button" class="sm" data-qtdbo="1">Bỏ</button></td>
+  </tr>`;
 }
 function qtGroupsHtml(rows) {
   const edit = canRv('hd');
@@ -852,7 +872,7 @@ function qtGroupsHtml(rows) {
         <td class="wrap">${esc(r.ghi_chu)}</td>
         <td class="muted c-o">${esc(r.nguoi_cap_nhat || '')}</td>
         ${edit ? `<td class="row-actions"><button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button></td>` : ''}
-      </tr>`).join('') : '');
+      </tr>`).join('') + (qtDraft && qtDraft.hd === g.k && edit ? qtDraftRow(g, n) : '') : '');
   }).join('');
 }
 function updateQtToggleAll() {
@@ -1020,7 +1040,9 @@ async function saveRevenue(f) {
 }
 
 async function onRevTableClick(e) {
-  const { redit, rdel, grp, qtgrp, qtadd, rdot, rqt, rqtsave, rmokhoa, rmochot } = e.target.dataset;
+  const { redit, rdel, grp, qtgrp, qtadd, rdot, rqt, rqtsave, rmokhoa, rmochot, qtdsave, qtdbo } = e.target.dataset;
+  if (qtdbo) { qtDraft = null; return renderRevenue(); }
+  if (qtdsave) return qtLuuNhap(e.target);
   if (rmochot) { // HĐ đã đóng quyết toán: mở chốt (Passcode) – số quyết toán từng văn bản giữ nguyên
     const h = revData.items.find((x) => x.id === Number(rmochot)); if (!h) return;
     const pc = await askPasscode(`Mở khoá quyết toán HĐ ${h.so_ma || ''}?`, 'Bỏ chốt quyết toán để sửa HĐ / PL / đợt điều chỉnh. Số quyết toán đã nhập vẫn giữ (có ghi nhật ký).', '🔓 Mở khoá');
@@ -1063,28 +1085,12 @@ async function onRevTableClick(e) {
   }
   if (e.target.dataset.qtq) {
     // Thanh "Thêm cho HĐ" mục 2: + Đợt thanh toán (đặt tên đợt kế tiếp) / + Quyết toán – điền sẵn form
-    const f = $('.rev-form[data-loai="qt"]'); const k = Number($('#qt-hd-pick')?.value);
-    if (!f || !k) return;
-    resetRevForm(f); f._hdAc?.set(k);
-    const qt = e.target.dataset.qtq === 'qt', ten = qt ? 'Quyết toán' : tenDotKeTiep(k);
-    f.elements.so_hieu.value = ten;
-    showMsg($('.msg', f), qt ? 'Nhập giá trị quyết toán (phần còn lại sau các đợt đã nghiệm thu / thanh toán)' : `Nhập giá trị "${ten}"`);
-    f.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => f.elements.gia_tri.focus(), 300);
-    return;
+    const k = Number($('#qt-hd-pick')?.value); if (!k) return;
+    return qtMoNhap(k, e.target.dataset.qtq === 'qt' ? 'Quyết toán' : tenDotKeTiep(k));
   }
   if (qtadd) {
-    // Thêm đợt cho HĐ: điền sẵn Số HĐ và tên đợt kế tiếp
-    const f = $('.rev-form[data-loai="qt"]');
-    if (!f) return;
-    resetRevForm(f);
-    const k = Number(qtadd);
-    f._hdAc?.set(k);
-    f.elements.so_hieu.value = tenDotKeTiep(k); // theo tên hồ sơ đã có: Hoàn thành đợt 2 -> Hoàn thành đợt 3
-    showMsg($('.msg', f), 'Nhập giá trị đợt mới (đổi tên thành "Quyết toán" nếu là hồ sơ quyết toán)');
-    f.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => f.elements.gia_tri.focus(), 300);
-    return;
+    // Thêm đợt cho HĐ: mở dòng nhập ngay dưới HĐ trong bảng (giữ nguyên chỗ đang xem), tên đợt kế tiếp điền sẵn
+    return qtMoNhap(Number(qtadd), tenDotKeTiep(Number(qtadd)));
   }
   if (grp !== undefined) {
     hdCollapsed.has(grp) ? hdCollapsed.delete(grp) : hdCollapsed.add(grp);
@@ -3342,7 +3348,7 @@ function dyKenhMo() {
       if (!$('#tab-duyet').hidden) loadDuyet(true);
       if (d.ghi || d.loai === 'ghi') { // số liệu vừa thay đổi (máy này hoặc máy khác, kể cả cùng tài khoản) -> tải lại trang đang mở
         const tab = ['revenue', 'cost'].find((x) => !$('#tab-' + x).hidden && !document.querySelector('#tab-' + x + ' [data-dirty]'));
-        if (tab && loaders[tab]) loaders[tab]();
+        if (tab) taiLaiGiuViTri(tab);
         if (!$('#tab-report').hidden && !document.querySelector('dialog[open]')) { // Báo cáo đang mở: tải lại số, giữ vị trí cuộn
           const y = scrollY; Promise.resolve(loadReport()).then(() => scrollTo(0, y)).catch(() => {});
         }
@@ -3440,7 +3446,14 @@ async function dyLamMoi() {
   if (!$('#tab-duyet').hidden) await loadDuyet();
   dyPoll(); dyPanel();
   const tab = ['revenue', 'cost'].find((t) => !$('#tab-' + t).hidden);
-  if (tab && loaders[tab]) loaders[tab]();
+  if (tab) taiLaiGiuViTri(tab);
+}
+// Số liệu vừa đổi (lưu / duyệt / máy khác): chỉ tải lại SỐ LIỆU của trang Doanh thu / Chi phí đang mở – không dựng lại cả trang,
+//  giữ nguyên chỗ đang xem (trước đây dựng lại cả trang -> trang ngắn lại trong chốc lát -> nhảy lên đầu)
+function taiLaiGiuViTri(tab) {
+  const y = scrollY;
+  const tai = tab === 'revenue' ? (revData ? loadRevenue : loadRevenueTab) : (costData ? loadCost : loadCostTab);
+  return Promise.resolve(tai()).then(() => { if (Math.abs(scrollY - y) > 1) scrollTo(0, y); }).catch(() => {});
 }
 // Mục "Chờ duyệt" trong Nhập liệu (Doanh thu / Chi phí): nội dung chờ của dự án đang chọn – CHƯA tính vào tổng
 const DY_NHOM = { revenue: ['doanh_thu', 'tien_ve', 'td', 'bh'], cost: ['chi_phi', 'thau_phu', 'tp_hd_pl', 'tp_thanh_toan'] };
@@ -3895,4 +3908,41 @@ document.addEventListener('click', (e) => {
   const el = document.getElementById(a.dataset.gd); if (!el) return;
   const top = el.getBoundingClientRect().top + scrollY - (document.querySelector('.topbar')?.offsetHeight || 0) - 12;
   scrollTo({ top, behavior: 'smooth' });
+});
+
+// ---------- Bảng HT/QT: nhập nhanh 1 đợt ngay trong bảng ----------
+function qtMoNhap(hd, ten) {
+  if (!hd) return;
+  qtOpen.add(hd); qtDraft = { hd, so_hieu: ten };
+  renderRevenue();
+  const tr = document.querySelector(`tr.qt-draft[data-qtdraft="${hd}"]`);
+  if (tr) { const r = tr.getBoundingClientRect(); if (r.top < 70 || r.bottom > innerHeight) tr.scrollIntoView({ block: 'nearest' }); tr.querySelector('[data-f="gia_tri"]')?.focus({ preventScroll: true }); }
+}
+async function qtLuuNhap(btn) {
+  const tr = btn.closest('tr.qt-draft'), f = $('.rev-form[data-loai="qt"]'), msg = f ? $('.msg', f) : null;
+  const v = (k) => tr.querySelector(`[data-f="${k}"]`)?.value ?? '';
+  const say = (t, ty) => { const m = $('#qt-nhap-msg') || msg; if (m) showMsg(m, t, ty); else if (ty === 'err') alert(t); };
+  tr.querySelector('[data-f="gia_tri"]').dispatchEvent(new Event('blur'));
+  const ngay = dmyToIso(v('ngay')), gia_tri = parseMoney(v('gia_tri'));
+  if (!v('so_hieu').trim()) return say('Nhập tên đợt / hồ sơ', 'err');
+  if (ngay === null) return say('Ngày không hợp lệ, nhập dd/mm/yyyy', 'err');
+  if (gia_tri === '' || gia_tri === '-') return say('Nhập giá trị trước VAT của đợt', 'err');
+  btn.disabled = true;
+  try {
+    await api(`/api/du-an/${revProjectId}/doanh-thu`, { method: 'POST', body: JSON.stringify({ loai: 'qt', hd_id: qtDraft.hd, so_hieu: v('so_hieu').trim(), ngay, gia_tri, vat: v('vat') || 0, ghi_chu: v('ghi_chu') }) });
+    const ten = v('so_hieu').trim(); qtDraft = null;
+    await tvReload(); // tải lại số liệu, vẽ lại tại chỗ (không cuộn trang)
+    say(`Đã thêm "${ten}"`);
+  } catch (err) { btn.disabled = false; say(err.message, 'err'); }
+}
+// Gõ trong dòng nhập nhanh: tính tiền VAT / sau VAT ngay; Enter = Lưu, Esc = Bỏ
+document.addEventListener('input', (e) => {
+  const tr = e.target.closest?.('tr.qt-draft'); if (!tr) return;
+  const g = Number(parseMoney(tr.querySelector('[data-f="gia_tri"]').value)) || 0, vat = Number(tr.querySelector('[data-f="vat"]').value) || 0, tv = calcVat(g, vat);
+  tr.querySelector('[data-qtd="tien_vat"]').textContent = g ? money(tv) : ''; tr.querySelector('[data-qtd="sau_vat"]').textContent = g ? money(g + tv) : '';
+});
+document.addEventListener('keydown', (e) => {
+  const tr = e.target.closest?.('tr.qt-draft'); if (!tr) return;
+  if (e.key === 'Enter') { e.preventDefault(); tr.querySelector('[data-qtdsave]')?.click(); }
+  if (e.key === 'Escape') { e.preventDefault(); qtDraft = null; renderRevenue(); }
 });
