@@ -930,7 +930,8 @@ function hdRowHtml(r, stt, { child = false, toggle = '', head = null, g = null }
       <td class="wrap">${esc(r.ghi_chu)}</td>
       <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
       ${canRv('hd') ? `<td class="row-actions">${khoa
-        ? (md === 3 && x.coQt ? `<button data-rmokhoa="${r.id}" title="Bỏ số quyết toán để sửa lại (cần Passcode)">🔓 Mở khoá</button>` : '<span class="muted small" title="Đã có số quyết toán – khoá văn bản (TĐ1, TĐ2, TĐ3)">🔒 Khoá</span>')
+        ? (x.coQt ? `<button class="sm" data-rmokhoa="${r.id}" title="Bỏ số quyết toán của văn bản này để sửa lại (cần Passcode). HĐ đang đóng quyết toán sẽ tự mở lại">🔓 Mở khoá</button>`
+          : hdKhoa(r) ? `<button class="sm" data-rmochot="${revData.items.find((h) => h.loai === 'hd' && h.ma_loai === 'HĐ' && h.qt_dong && hdKey(h) === hdKey(r))?.id}" title="HĐ đã đóng quyết toán – mở khoá để sửa (cần Passcode)">🔓 Mở khoá</button>` : '<span class="muted small">🔒 Khoá</span>')
         : md === 1 ? `<button data-redit="${r.id}">Sửa</button><button class="danger" data-rdel="${r.id}">Xóa</button>`
           : md === 2 ? ''
             : `<button class="primary" data-rqtsave="${r.id}" title="Lưu số quyết toán – văn bản sẽ bị khoá">Lưu QT</button>`}</td>` : ''}
@@ -1019,7 +1020,16 @@ async function saveRevenue(f) {
 }
 
 async function onRevTableClick(e) {
-  const { redit, rdel, grp, qtgrp, qtadd, rdot, rqt, rqtsave, rmokhoa } = e.target.dataset;
+  const { redit, rdel, grp, qtgrp, qtadd, rdot, rqt, rqtsave, rmokhoa, rmochot } = e.target.dataset;
+  if (rmochot) { // HĐ đã đóng quyết toán: mở chốt (Passcode) – số quyết toán từng văn bản giữ nguyên
+    const h = revData.items.find((x) => x.id === Number(rmochot)); if (!h) return;
+    const pc = await askPasscode(`Mở khoá quyết toán HĐ ${h.so_ma || ''}?`, 'Bỏ chốt quyết toán để sửa HĐ / PL / đợt điều chỉnh. Số quyết toán đã nhập vẫn giữ (có ghi nhật ký).', '🔓 Mở khoá');
+    if (pc === null) return;
+    const items = revData.items.filter((r) => r.loai === 'hd' && hdKey(r) === hdKey(h)).map((r) => ({ id: r.id, gt_qt: r.gt_qt ?? '' }));
+    try { await api(`/api/doanh-thu/${h.id}/quyet-toan`, { method: 'PUT', body: JSON.stringify({ ngay_qt: h.ngay_qt || null, dong: false, items, passcode: pc }) }); await loadRevenue(); showMsg($('#td-hd-msg'), `Đã mở khoá quyết toán HĐ ${h.so_ma}`); }
+    catch (err) { showMsg($('#td-hd-msg'), err.message, 'err'); }
+    return;
+  }
   const tdMsg = (t, ty) => showMsg($('#td-hd-msg'), t, ty);
   if (rqtsave) {
     const el = $(`.rev-card [data-qtin="${rqtsave}"]`); el?.dispatchEvent(new Event('blur'));

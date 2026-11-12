@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.12.11.26 – Doanh thu bảng HĐ / PL: nút Mở khoá (Passcode) ở mọi tab TĐ
+- Dòng HĐ / PL đang khoá (đã có số QT hoặc HĐ đã đóng QT) hiện nút "🔓 Mở khoá" ở cả TĐ1 / TĐ2 / TĐ3 (trước chỉ TĐ3, còn lại chỉ ghi "🔒 Khoá"). Văn bản có số QT: bỏ số QT của văn bản đó (HĐ đang đóng tự mở lại) – dùng API cũ, có nhật ký. HĐ đóng mà văn bản chưa có số: mở chốt HĐ (giữ số QT). Đều cần Passcode. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V06.12.11.26 – Thu gọn thì ẩn cột trống (HT/QT, Tiền về, chi tiết chi phí) + màu thanh tiến độ doanh thu
 - Bảng thu gọn hết nhóm: ẩn các cột chỉ có ở dòng chi tiết; mở 1 nhóm hiện lại đủ. HT/QT: Ngày, VAT, Người cập nhật · Tiền về: Ngày, Người cập nhật · Chi tiết chi phí (từng khối): Đối tác / Số HĐ-CT, Ngày, Ghi chú. Đã kiểm tra số ô mỗi dòng khớp tiêu đề (0 dòng lệch).
 - Thanh tiến độ HT/QT (doanh thu): đang làm = xanh ngọc "còn …" · đủ / vượt = xanh lá ("vượt … ▲") · vượt >110% thêm "⚠ kiểm tra PL" · ĐÃ quyết toán mà thấp hơn HĐ = cam "QT thiếu …". Số không đổi. Tester 4.518 ĐẠT, 0 LỖI.
