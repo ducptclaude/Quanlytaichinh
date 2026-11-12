@@ -789,8 +789,10 @@ function bMuc3Data(list, v, rows, k = [1, 2, 3].includes(Number(BST.i_td)) ? Num
 function bTongHopHtml(list, v, P) {
   const MOT = Boolean(bScope().one); // xem 1 dự án: ẩn bảng danh sách dự án ở mục III (mục I, II vẫn hiện)
   const { to, rows, T } = bTongHopData(list, v, P);
-  // Mục III: theo TĐ đang chọn ở mục I – Còn phải thu = DT TĐ − dòng thu · Còn phải chi = CP TĐ − dòng chi · Còn lại = phải thu − phải chi
-  const { k: k3, R: R3, T: T3 } = bMuc3Data(list, v, rows);
+  // Mục III: luôn lấy thời điểm MỚI NHẤT của từng dự án (= TĐ3: có quyết toán lấy quyết toán, chưa có = TĐ2, chưa điều chỉnh = TĐ1)
+  //  Còn phải thu = DT mới nhất − dòng thu · Còn phải chi = CP mới nhất − dòng chi · Còn lại = phải thu − phải chi
+  const { R: R3, T: T3 } = bMuc3Data(list, v, rows, 3);
+  const MN = 'mới nhất', MN_TIP = 'Thời điểm mới nhất của từng dự án: có quyết toán lấy quyết toán (TĐ3), chưa có lấy điều chỉnh (TĐ2), chưa điều chỉnh lấy giá trị ký (TĐ1)';
   // Mục III: sắp xếp theo Tên dự án / Tình trạng (bấm tiêu đề cột; bấm lần nữa đảo chiều)
   const S3 = BST.t3_sort || {}, TT_THU_TU = { 'Đang thi công': 1, 'Chuẩn bị': 2, 'Tạm dừng': 3, 'Hoàn thành': 4 };
   if (S3.k) {
@@ -925,26 +927,24 @@ function bTongHopHtml(list, v, P) {
     <p class="muted small f-note tt-hint no-print">Bấm vào số <b>Dòng thu</b> / <b>Dòng chi</b> / <b>Còn lại</b> (ô lớn hoặc từng dự án) để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.</p>
     ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án, làm tròn tới 0,1 tỷ.</p>' : ''}
 
-    ${thHead('III', 'Dòng tiền còn lại phải thu – chi', `Doanh thu, chi phí dự kiến TĐ${k3} (mục I) trừ dòng thu, dòng chi thực tế (mục II)`, [`Từ mục I (TĐ${k3}) và II`, vt[0].toUpperCase() + vt.slice(1)])}
-    <div class="i-tdbar"><div class="i-tdseg" role="group" aria-label="Chọn thời điểm">${[[1, 'Ký HĐ'], [2, 'Điều chỉnh'], [3, 'Quyết toán']].map(([n, t]) =>
-      `<button type="button" data-itd3="${n}" class="${n === k3 ? 'on' : ''}"><b>TĐ${n}</b> ${t}</button>`).join('')}</div><span class="muted small">Cùng thời điểm với mục I – đổi ở đây hoặc mục I đều được</span></div>
+    ${thHead('III', 'Dòng tiền còn lại phải thu – chi', 'Doanh thu, chi phí thời điểm mới nhất trừ dòng thu, dòng chi thực tế (mục II)', ['Thời điểm mới nhất', vt[0].toUpperCase() + vt.slice(1)])}
     <div class="f-grid th-grid3">
-      ${card('dt', 'Còn lại phải thu', T3.pt, [`Doanh thu TĐ${k3} <b>${bTy(T3.dt)}</b> − Dòng thu <b>${bTy(T3.thu)}</b>`, `Đã thu <b>${bpct(T3.thu, T3.dt)}</b> doanh thu TĐ${k3}`])}
-      ${card('cp', 'Còn lại phải chi', T3.pc, [`Chi phí TĐ${k3} <b>${bTy(T3.cp)}</b> − Dòng chi <b>${bTy(T3.chi)}</b>`, `Đã chi <b>${bpct(T3.chi, T3.cp)}</b> chi phí TĐ${k3}`])}
+      ${card('dt', 'Còn lại phải thu', T3.pt, [`Doanh thu ${MN} <b>${bTy(T3.dt)}</b> − Dòng thu <b>${bTy(T3.thu)}</b>`, `Đã thu <b>${bpct(T3.thu, T3.dt)}</b> doanh thu ${MN}`])}
+      ${card('cp', 'Còn lại phải chi', T3.pc, [`Chi phí ${MN} <b>${bTy(T3.cp)}</b> − Dòng chi <b>${bTy(T3.chi)}</b>`, `Đã chi <b>${bpct(T3.chi, T3.cp)}</b> chi phí ${MN}`])}
       ${card('ln', 'Còn lại (thu − chi)', T3.con, ['Còn phải thu − Còn phải chi', T3.con < 0 ? 'Phần còn phải chi lớn hơn phần còn phải thu' : 'Tiền dự án còn dư khi thu – chi hết'])}
     </div>
     <div class="table-wrap${MOT ? ' th-mot' : ''}"><table class="b-table th-table th-t3">
       <thead><tr class="t3-grp"><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">${s3h('ten', 'Tên dự án')}</th><th rowspan="2">${s3h('tt', 'Tình trạng')}</th>
         <th colspan="3" class="g-thu">Thu (tiền về)</th><th colspan="3" class="g-chi">Chi (tiền ra)</th><th rowspan="2" class="num g-con">Còn lại (thu − chi)</th></tr>
-        <tr class="t3-sub"><th class="num c-thu g1">Doanh thu TĐ${k3}</th><th class="num c-thu">Dòng thu</th><th class="num c-thu">Còn phải thu</th>
-        <th class="num c-chi g1">Chi phí TĐ${k3}</th><th class="num c-chi">Dòng chi</th><th class="num c-chi">Còn phải chi</th></tr></thead>
+        <tr class="t3-sub"><th class="num c-thu g1" title="${MN_TIP}">Doanh thu ${MN}</th><th class="num c-thu">Dòng thu</th><th class="num c-thu">Còn phải thu</th>
+        <th class="num c-chi g1" title="${MN_TIP}">Chi phí ${MN}</th><th class="num c-chi">Dòng chi</th><th class="num c-chi">Còn phải chi</th></tr></thead>
       <tbody>${R3.map((r, i) => `<tr>${prj(r.x, i)}<td class="num c-thu g1">${bTy(r.dt)}</td><td class="num c-thu">${bTy(r.thu)}</td><td class="num c-thu c-kq"><b>${ty(r.pt)}</b></td>
         <td class="num c-chi g1">${bTy(r.cp)}</td><td class="num c-chi">${bTy(r.chi)}</td><td class="num c-chi c-kq"><b>${ty(r.pc)}</b></td>
         <td class="num strong g-con ${r.con < 0 ? 'neg' : 'pos'}">${bTy(r.con)}</td></tr>`).join('')}</tbody>
       <tfoot><tr><td></td><td colspan="3">Tổng cộng (${R3.length} dự án)</td><td class="num c-thu g1">${bTy(T3.dt)}</td><td class="num c-thu">${bTy(T3.thu)}</td><td class="num c-thu">${ty(T3.pt)}</td>
         <td class="num c-chi g1">${bTy(T3.cp)}</td><td class="num c-chi">${bTy(T3.chi)}</td><td class="num c-chi">${ty(T3.pc)}</td><td class="num g-con">${ty(T3.con)}</td></tr></tfoot>
     </table></div>
-    <p class="muted small f-note">Còn phải thu = Doanh thu TĐ${k3} (mục I) − Dòng thu (mục II) · Còn phải chi = Chi phí TĐ${k3} (mục I) − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. Đổi thời điểm ở mục I (TĐ1 / TĐ2 / TĐ3) thì mục III tự lấy theo.</p>
+    <p class="muted small f-note">Còn phải thu = Doanh thu ${MN} − Dòng thu (mục II) · Còn phải chi = Chi phí ${MN} − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. ${MN_TIP}.</p>
     ${bMuc4Html(list, v)}`;
 }
 

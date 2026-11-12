@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V20.12.11.26 – Báo cáo mục III: luôn lấy thời điểm mới nhất (bỏ nút TĐ1/TĐ2/TĐ3 ở mục III)
+- Mới nhất = TĐ3 của từng dự án (có quyết toán lấy quyết toán, chưa có = TĐ2, chưa điều chỉnh = TĐ1). Đổi TĐ ở mục I không làm đổi mục III.
+- Chữ "TĐ3" ở mục III đổi thành "mới nhất". Dashboard (thanh TĐ riêng) chưa đổi.
+
 ## V19.12.11.26 – Báo cáo: cả khu "Báo cáo theo công trình" mặc định thu gọn, mở ra tự theo dự án
 - Bỏ nút ẩn ma trận (V18) – ma trận hiện như cũ. Cả khu "Báo cáo theo công trình" mặc định thu gọn (1 dòng, ghi dự án sẽ mở); ▸ mở / ▾ thu gọn, nhớ lựa chọn. Mở ra: hiện đúng dự án đang chọn ở Phạm vi, hoặc dự án đang làm ở Nhập liệu (Doanh thu / Chi phí) nếu Phạm vi = Tất cả; "← Về tổng quan" → lưới tất cả công trình. Mở từ trang Dự án vẫn mở thẳng khu này. Khi thu gọn, bản in không có khu này. Tester 4.518 ĐẠT, 0 LỖI.
 
