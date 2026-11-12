@@ -2380,7 +2380,7 @@ function renderTpCard() {
       <td class="c-dt tp-dt">${dt}</td>
       ${qtNhom ? `<td class="num muted c-prev">${mtr(goiSv(r, 2))}</td><td class="num muted" title="Nhóm đã quyết toán – TĐ3 theo số quyết toán của nhóm">theo QT nhóm</td><td class="num muted">—</td>` : so3(goiSv(r, kTd), kTd > 1 ? goiSv(r, kTd - 1) : 0)}
       ${hd.length ? tt2(sumOf(hd, 'da_tt'), sumOf(hd, 'con_lai')) : ttNone}
-      <td class="row-actions tp-act">${edit && kTd === 2 && !coQt && r.tinh_trang !== 'dong' ? `<button class="sm primary" data-goihd="${r.id}" title="Tạo HĐ thật cho gói này (HĐ thay giá trị tạm tính của gói)">+ HĐ</button>` : ''}${edit && kTd === 2 && !coQt && !hd.length ? `<button class="sm" data-goidong="${r.id}" data-tt="${r.tinh_trang === 'dong' ? '' : 'dong'}" title="${r.tinh_trang === 'dong' ? 'Tính lại gói vào TĐ2' : 'Gói không dùng nữa: TĐ2 = 0 (TĐ1 giữ nguyên)'}">${r.tinh_trang === 'dong' ? 'Mở lại' : 'Đóng gói'}</button>` : ''}</td></tr>` +
+      <td class="row-actions tp-act">${edit && kTd === 2 && !coQt && r.tinh_trang !== 'dong' && !hd.length ? `<button class="sm primary" data-goihd="${r.id}" title="Tạo HĐ thật cho gói này (HĐ thay giá trị tạm tính của gói)">+ HĐ</button>` : ''}${edit && kTd === 2 && !coQt && !hd.length ? `<button class="sm" data-goidong="${r.id}" data-tt="${r.tinh_trang === 'dong' ? '' : 'dong'}" title="${r.tinh_trang === 'dong' ? 'Tính lại gói vào TĐ2' : 'Gói không dùng nữa: TĐ2 = 0 (TĐ1 giữ nguyên)'}">${r.tinh_trang === 'dong' ? 'Mở lại' : 'Đóng gói'}</button>` : ''}</td></tr>` +
       (mo ? hd.map(hdGoiRow).join('') : '');
   };
   // Số liệu 1 loại (nhóm) trong 1 HĐ CĐT: gói + đợt điều chỉnh nhóm + HĐ ngoài gói

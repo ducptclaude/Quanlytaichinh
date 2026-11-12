@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V16.12.11.26 – Nút "+ HĐ" chỉ hiện ở gói chưa có HĐ
+- Gói đã có HĐ gắn thì ẩn nút "+ HĐ" (thêm HĐ khác cho gói vẫn làm ở form Thêm chi phí). Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V15.12.11.26 – Gói chi phí: nút "+ HĐ" tạo HĐ thật ngay từ bảng chi tiết
 - Bảng chi tiết HĐ đầu vào (nhấp đúp nhóm), tab TĐ2: mỗi gói chưa đóng có nút "+ HĐ" → đóng hộp, điền sẵn form Thêm chi phí (nhóm của gói, Hình thức = Hợp đồng, Gói = gói đó, HĐ CĐT của gói), con trỏ ở Số HĐ. Gói đã có HĐ vẫn thêm được HĐ khác. Thử: gói Vật tư KC → HĐ-VT-01 gắn đúng gói + HĐ CĐT. Tester 4.518 ĐẠT, 0 LỖI.
 
