@@ -61,7 +61,7 @@ function applyBranding(s) {
 // =====================================================================
 // Tab
 // =====================================================================
-const loaders = { duyet: () => loadDuyet(), projects: loadProjects, revenue: loadRevenueTab, cost: loadCostTab, users: () => (can('tai_khoan') ? loadUsers() : Promise.resolve()).then(() => loadLogs()), settings: loadSettings, profile: async () => {}, guide: async () => {}, contact: loadContact, report: () => { BST.chi_tiet = false; return loadReport(); } }; // mỗi lần vào tab Báo cáo: chi tiết ẩn
+const loaders = { duyet: () => loadDuyet(), projects: loadProjects, revenue: loadRevenueTab, cost: loadCostTab, users: () => (can('tai_khoan') ? loadUsers() : Promise.resolve()).then(() => loadLogs()), settings: loadSettings, profile: async () => {}, guide: async () => {}, contact: loadContact, report: () => { BST.chi_tiet = false; return loadReport().then(() => bTdVaoBaoCao()); } }; // mỗi lần vào tab Báo cáo: chi tiết ẩn
 
 const NHAP_LIEU = ['projects', 'revenue', 'cost'];
 // Menu Xuất: chọn xong một mục thì đóng menu

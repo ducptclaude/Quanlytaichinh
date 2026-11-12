@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.12.11.26 – Báo cáo: vào trang / chọn dự án tự nhảy TĐ mới nhất
+- Mỗi lần mở tab Báo cáo khi đang xem 1 dự án: mục I tự chuyển sang TĐ mới nhất của dự án (trước chỉ khi đổi dự án ở ô Phạm vi).
+- TĐ mới nhất: TĐ3 khi đã có số quyết toán ở bất kỳ HĐ CĐT / HĐ đầu vào hoặc quyết toán nhóm chi phí; TĐ2 khi có điều chỉnh doanh thu / HĐ đầu vào / gói; còn lại TĐ1; hoặc TĐ đã chốt lớn hơn. Chỉ đổi TĐ đang xem, số liệu không đổi. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V08.12.11.26 – Tab Hướng dẫn
 - Nút "Hướng dẫn" trên thanh menu (mọi vai trò). Trang tĩnh (views/index.html #tab-guide, CSS .gd-*): mục lục 5 phần + Bắt đầu nhanh 5 bước; 1. Quy tắc nhập liệu & số liệu (3 TĐ, quy tắc nhập số, cách tính chỉ tiêu, chú giải màu); 2. Nhập Doanh thu TĐ1/2/3 (+ ví dụ HĐ 1011, bảng HT/QT, tiền về); 3. Nhập Chi phí TĐ1/2/3 (gói, HĐ thật, điều chỉnh, quyết toán, thanh toán, bảng 3 lớp, ví dụ gói Kết cấu); 4. Xuất báo cáo; 5. Tính năng + bảng vai trò. Nút "Mở trang …" chuyển thẳng tới trang nhập. Chưa dịch English (ghi ở CLAUDE.md). Tester 4.518 ĐẠT, 0 LỖI.
 

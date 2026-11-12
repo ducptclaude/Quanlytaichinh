@@ -2228,11 +2228,19 @@ $('#b-report').addEventListener('click', async (e) => {
 // Sự kiện
 // ---------------------------------------------------------------------
 // TĐ mới nhất của 1 dự án: số chốt TĐ lớn nhất đã nhập, hoặc theo hệ thống (đã quyết toán -> TĐ3, có phụ lục / phát sinh -> TĐ2, còn lại TĐ1)
+//  V09.12: TĐ3 khi đã có số quyết toán ở BẤT KỲ HĐ (CĐT / đầu vào) hoặc quyết toán nhóm chi phí; TĐ2 khi có điều chỉnh doanh thu / HĐ đầu vào / gói chi phí
 function bTdMoiNhat(d) {
   const chot = Math.max(0, ...(d.thoi_diem || []).map((t) => Number(t.td) || 0));
-  const m = d.moc || {};
-  const he = m.da_qt ? 3 : (m.dt_ps || 0) !== (m.dt_goc || 0) || (m.tp_ps || 0) !== (m.tp_goc || 0) ? 2 : 1;
-  return Math.max(chot, he);
+  const m = d.moc || {}, dt = m.cp?.dtru?.gt || [0, 0, 0];
+  const coQt = m.da_qt || (d.hds || []).some((h) => h.da_qt) || (d.chi_tiet?.thau_phu || []).some((c) => c.da_qt) || dt[2] !== dt[1];
+  const coDc = (m.dt_ps || 0) !== (m.dt_goc || 0) || (m.tp_ps || 0) !== (m.tp_goc || 0) || dt[1] !== dt[0];
+  return Math.max(chot, coQt ? 3 : coDc ? 2 : 1);
+}
+// Vào trang Báo cáo đang xem 1 dự án -> mục I tự nhảy TĐ mới nhất của dự án đó
+function bTdVaoBaoCao() {
+  const d = BC?.du_an?.find((x) => x.id === Number(BST.project)); if (!d) return;
+  const k = bTdMoiNhat(d); if (BST.i_td === k) return;
+  BST.i_td = k; bSave(); renderReport();
 }
 // Đồng bộ dự án đang làm việc giữa Báo cáo và Nhập liệu (Doanh thu / Chi phí) – tránh nhập nhầm dự án
 function dongBoDuAn(id) {
