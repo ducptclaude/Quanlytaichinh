@@ -456,6 +456,7 @@
           <div class="gd-rule"><span class="gd-ico">⏳</span><b>Tạm tính</b><p>HĐ chưa quyết toán là <span class="st st-tam-tinh">Tạm tính</span>: lấy giá trị HĐ + PL mới nhất. Trả đủ tiền mà chưa QT vẫn là tạm tính.</p></div>
           <div class="gd-rule"><span class="gd-ico">🔒</span><b>Khoá &amp; mở khoá</b><p>Có số QT → khoá văn bản. HĐ đầu vào đã QT và còn lại = 0 → khoá. Mở bằng nút <b>🔓 Mở khoá</b> + Passcode (có ghi nhật ký).</p></div>
           <div class="gd-rule"><span class="gd-ico">✅</span><b>Phê duyệt</b><p>Thêm / sửa / xóa của người nhập liệu hiện ở tab <b>Duyệt</b>; Quản trị, Lãnh đạo nhập thì tự duyệt.</p></div>
+          <div class="gd-rule"><span class="gd-ico">📌</span><b>Lưu xong giữ nguyên chỗ</b><p>Lưu tiền về, đợt HT/QT, chi phí… trang chỉ cập nhật số, không nhảy lên đầu. Nhập dở trong bảng thì nhấn <b>Enter</b> để lưu.</p></div>
           <div class="gd-rule"><span class="gd-ico">🏦</span><b>Không phải doanh thu / chi phí</b><p><b>Nhận tiền vay</b> và <b>trả nợ gốc</b> được tách riêng, không cộng vào doanh thu, chi phí.</p></div>
         </div>
 
@@ -471,7 +472,7 @@
             <tr><td><b>Thực thu</b> (dòng thu)</td><td>Tiền về: tạm ứng + các đợt thanh toán + quyết toán</td></tr>
             <tr><td><b>Thực chi</b> (dòng chi)</td><td>Chi phí đã chi + đã trả HĐ đầu vào (gồm tạm ứng)</td></tr>
             <tr><td><b>Còn lại thực</b></td><td>Thực thu − Thực chi</td></tr>
-            <tr><td><b>Còn phải thu / phải chi</b></td><td>Doanh thu − Thực thu · Chi phí dự kiến − Thực chi</td></tr>
+            <tr><td><b>Còn phải thu / phải chi</b></td><td>Doanh thu − Thực thu · Chi phí − Thực chi (lấy TĐ mới nhất của từng dự án – mục III)</td></tr>
             <tr><td><b>% doanh thu</b></td><td>Giá trị sau VAT ÷ Doanh thu sau VAT cùng TĐ</td></tr>
           </tbody>
         </table></div>
@@ -532,7 +533,7 @@
           </table></div>
         </div>
         <div class="gd-grid gd-grid2">
-          <div class="gd-rule"><span class="gd-ico">🏁</span><b>Bảng 2 – Hoàn thành / Quyết toán</b><p>Ghi các đợt nghiệm thu: chọn <b>Số HĐ</b>, tên đợt (VD "Nghiệm thu đợt 1"), giá trị → <b>Thêm dòng</b>; hoặc nút <b>+ Đợt</b> ở dòng HĐ. Thanh tiến độ cho biết đã đạt bao nhiêu % giá trị HĐ, còn bao nhiêu.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🏁</span><b>Bảng 2 – Hoàn thành / Quyết toán</b><p>Bấm <b>+ Đợt</b> ở dòng HĐ (hoặc <b>+ Đợt tiếp theo / + Quyết toán</b> dưới bảng) → mở <b>dòng nhập ngay dưới HĐ</b>, tên đợt điền sẵn: gõ giá trị, ngày → <b>Enter</b> (Lưu) / <b>Esc</b> (Bỏ). Thanh tiến độ: % đã đạt so với giá trị HĐ, còn bao nhiêu; vượt HĐ = xanh (tốt), đã QT mà thiếu = cam.</p></div>
           <div class="gd-rule"><span class="gd-ico">💵</span><b>Bảng 3 – Tiền về</b><p>Ở dòng HĐ bấm <b>+ TƯ</b> (tạm ứng), <b>+ Đợt</b> (thanh toán), <b>+ QT</b> (quyết toán – mỗi HĐ 1 lần). Gõ số tiền, ngày → <b>Lưu</b>. Tiền về là cơ sở tính <b>Thực thu</b>.</p></div>
         </div>
       </div>
@@ -554,7 +555,8 @@
           <div class="gd-step td2">
             <div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>HĐ thật &amp; điều chỉnh</div>
             <ol>
-              <li>Tab <b>TĐ2</b> → Thêm chi phí, Hình thức <b>Hợp đồng</b>: chọn <b>Gói</b> mà HĐ thay thế, hoặc <b>Phát sinh ngoài TĐ1</b>.</li>
+              <li>Nhanh nhất: nhấp đúp nhóm → ở gói chưa có HĐ bấm <b>+ HĐ</b> → form Thêm chi phí điền sẵn nhóm, gói, HĐ CĐT → nhập Số HĐ, nhà cung cấp, giá trị ký. (Hoặc tự chọn Hình thức <b>Hợp đồng</b> + <b>Gói</b> / <b>Phát sinh ngoài TĐ1</b>.)</li>
+              <li>HĐ gắn gói / phát sinh được ký ở TĐ2 → <b>giá trị ký, ngày ký, VAT</b> sửa ngay ở tab <b>TĐ2</b> (cột "Giá trị ký").</li>
               <li>Tăng / giảm HĐ: khung <b>"TĐ2 – Điều chỉnh HĐ đầu vào"</b> (nhiều đợt, như Doanh thu).</li>
               <li>Điều chỉnh cả nhóm: nút <b>± Nhóm</b> trong bảng chi tiết. Gói không dùng nữa: <b>Đóng gói</b> (TĐ2 = 0).</li>
             </ol>
@@ -612,7 +614,10 @@
           </tbody>
         </table></div>
         <div class="gd-grid gd-grid2">
-          <div class="gd-rule"><span class="gd-ico">📑</span><b>Nội dung báo cáo</b><p><b>I.</b> Doanh thu – Chi phí – Lợi nhuận (theo TĐ) · <b>II.</b> Dòng tiền thực tế · <b>III.</b> Dòng tiền còn lại phải thu – chi · <b>IV.</b> Doanh thu hoàn thành – quyết toán. Bấm số để xem chi tiết.</p></div>
+          <div class="gd-rule"><span class="gd-ico">📑</span><b>Nội dung báo cáo</b><p><b>I.</b> Doanh thu – Chi phí – Lợi nhuận (chọn TĐ1 / TĐ2 / TĐ3) · <b>II.</b> Dòng tiền thực tế · <b>III.</b> Dòng tiền còn lại phải thu – chi (luôn lấy <b>TĐ mới nhất</b> của từng dự án) · <b>IV.</b> Doanh thu hoàn thành – quyết toán. Bấm số để xem chi tiết.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🧭</span><b>Tự nhảy TĐ mới nhất</b><p>Vào Báo cáo hoặc chọn 1 dự án: mục I tự chuyển TĐ mới nhất (đã có số QT → TĐ3, có điều chỉnh → TĐ2, còn lại TĐ1). Vẫn bấm chọn TĐ khác được.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🌳</span><b>Dự án → từng HĐ</b><p>Bảng mục I, II, IV: dòng dự án là tổng, nút <b>▾ / ▸</b> mở các HĐ chủ đầu tư bên dưới; phần không gắn được HĐ (chi phí chung, tiền về chưa gắn HĐ…) ở dòng <b>"Chưa phân theo HĐ"</b> → tổng con luôn bằng dự án.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🏗️</span><b>Báo cáo theo công trình</b><p>Mặc định thu gọn; bấm <b>▸</b> để mở – tự hiện dự án đang chọn ở Phạm vi (hoặc dự án đang nhập ở Doanh thu / Chi phí). "← Về tổng quan" xem lưới tất cả công trình.</p></div>
           <div class="gd-rule"><span class="gd-ico">🔐</span><b>Ai được xuất</b><p>Quản trị, Lãnh đạo, Ban Kiểm soát. Tài khoản <b>Chỉ xem</b> và <b>Khách</b> chỉ xem, không xuất.</p></div>
         </div>
       </div>

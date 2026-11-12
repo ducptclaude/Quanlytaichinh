@@ -1,6 +1,10 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Doanh thu, chi phí ở thời điểm mới nhất của từng dự án trừ dòng thu, dòng chi thực tế (mục II)": "Revenue and cost at each project's latest milestone minus actual collections and expenditure (section II)",
+"TĐ mới nhất từng dự án": "Latest milestone per project",
+"TĐ mới nhất": "Latest milestone",
+"Lấy theo TĐ mới nhất của dự án": "Taken at the project's latest milestone",
 "Mở báo cáo theo công trình": "Open project report",
 "Thu gọn báo cáo theo công trình": "Collapse project report",
 "đang ẩn – bấm ▸ để mở": "hidden – click ▸ to open",
@@ -1578,6 +1582,22 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Doanh thu mới nhất {} − Dòng thu {}",
+"Latest revenue {} − Collections {}"
+],
+[
+"Chi phí mới nhất {} − Dòng chi {}",
+"Latest cost {} − Expenditure {}"
+],
+[
+"Đã thu {} doanh thu",
+"Collected {} of revenue"
+],
+[
+"Đã chi {} chi phí",
+"Spent {} of cost"
+],
 [
 "{} – {} · đang ẩn – bấm ▸ để mở",
 "{} – {} · hidden – click ▸ to open"

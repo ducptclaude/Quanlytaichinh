@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V21.12.11.26 – Cập nhật trang Hướng dẫn theo các điều chỉnh cuối
+- Hướng dẫn: nhập đợt HT/QT ngay trong bảng (Enter / Esc), nút "+ HĐ" cho gói chưa có HĐ, sửa giá trị ký HĐ gắn gói ở TĐ2, lưu xong giữ nguyên chỗ, Báo cáo tự nhảy TĐ mới nhất, bảng dự án → từng HĐ (+ dòng Chưa phân theo HĐ), mục III luôn lấy thời điểm mới nhất, Báo cáo theo công trình thu gọn mặc định. Mục III dùng bản V20 của phiên song song. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V20.12.11.26 – Báo cáo mục III: luôn lấy thời điểm mới nhất (bỏ nút TĐ1/TĐ2/TĐ3 ở mục III)
 - Mới nhất = TĐ3 của từng dự án (có quyết toán lấy quyết toán, chưa có = TĐ2, chưa điều chỉnh = TĐ1). Đổi TĐ ở mục I không làm đổi mục III.
 - Chữ "TĐ3" ở mục III đổi thành "mới nhất". Dashboard (thanh TĐ riêng) chưa đổi.
