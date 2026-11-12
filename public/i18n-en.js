@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Gắn vào gói": "Link to package",
+"— Không gắn gói —": "— No package —",
 "TĐ2 – điều chỉnh": "M2 – adjustments",
 "TĐ3 – quyết toán": "M3 – final account",
 "Số mới nhất − dòng thu, dòng chi": "Latest figures − collections, expenditure",
@@ -1587,6 +1589,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Mua lẻ {}",
+"Ad-hoc purchases {}"
+],
 [
 "LN TĐ{} · lúc ký hợp đồng",
 "M{} profit · at contract signing"

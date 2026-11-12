@@ -1569,6 +1569,9 @@ function setCostMode() {
   $$('.c-tp', cForm).forEach((el) => (el.hidden = !tp));
   { const gw = $('#c-goi-wrap'); if (gw) { gw.hidden = !(tp && tdDangChon() === 2); if (!gw.hidden) { const sel = cForm.elements.goi, keep = sel.value; sel.innerHTML = goiOptions(cForm.elements.nhom.value); if ([...sel.options].some((o) => o.value === keep)) sel.value = keep; } } }
   $$('.c-gen', cForm).forEach((el) => (el.hidden = tp));
+  { const lw = $('#c-legoi-wrap'); if (lw) { const sel = cForm.elements.le_goi, keep = Number(sel.dataset.keep || sel.value) || null, nh = cForm.elements.nhom.value;
+    const co = !tp && !costGoiMode() && (costData?.du_tru || []).some((r) => r.loai === 'ky' && r.nhom === nh);
+    lw.hidden = !co; if (co) { sel.innerHTML = leGoiOptions(nh, keep); sel.value = [...sel.options].some((o) => Number(o.value) === keep) ? String(keep) : ''; } else sel.value = ''; delete sel.dataset.keep; } }
   if (tp) $('#c-sub-wrap').hidden = true;
   updateNoiDungHint();
   if (cForm.elements.sau_vat) updateCostPreview();
@@ -1787,6 +1790,7 @@ async function saveCost() {
   const body = {
     nhom: e.nhom.value, nhom_con: e.nhom_con.value, noi_dung: e.noi_dung.value, doi_tac: e.doi_tac.value,
     so_ct: e.so_ct.value, ngay, gia_tri: parseMoney(e.gia_tri.value), vat: e.vat.value, ghi_chu: e.ghi_chu.value,
+    goi_id: $('#c-legoi-wrap')?.hidden ? null : Number(e.le_goi?.value) || null, // V27.12: gắn mua lẻ vào gói
   };
   try {
     await api(id ? `/api/chi-phi/${id}` : `/api/du-an/${revProjectId}/chi-phi`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) });
@@ -1833,7 +1837,7 @@ function renderCost() {
   const detail = (r, no, indent, gc = '') => `
     <tr class="c-row ${gc}${ngoaiCp(r) ? ' ngoai-cp' : ''}" data-cid="${r.id}" title="${esc(r.nguoi_cap_nhat ? 'Cập nhật bởi ' + r.nguoi_cap_nhat : '')}">
       <td class="num muted">${no}</td>
-      <td class="indent-${indent}"><span class="tree">└</span>${daTag(r)}${esc(r.noi_dung)}</td>
+      <td class="indent-${indent}"><span class="tree">└</span>${daTag(r)}${esc(r.noi_dung)}${r.goi_id ? ` <span class="tp-ps le-goi-tag" title="Mua lẻ gắn gói: không cộng thêm ở TĐ1, trừ dần phần tạm tính của gói">Gói: ${esc((costData.du_tru || []).find((x) => x.id === r.goi_id)?.noi_dung || '#' + r.goi_id)}</span>` : ''}</td>
       <td class="c-dt">${esc(r.doi_tac)}${r.so_ct ? `<div class="muted small">${esc(r.so_ct)}</div>` : ''}</td><td>${dmy(r.ngay)}</td>
       <td class="num">${dvm(r.gia_tri)}</td>
       <td class="num strong">${dvm(r.sau_vat)}<div class="c-vat">${r.vat ? `VAT ${r.vat}%` : r.khong_vat ? 'Không VAT' : vatBadge(0)}</div></td>
@@ -1985,6 +1989,7 @@ $('#tab-cost').addEventListener('click', async (e) => {
     fillSubOptions(r.nhom, r.nhom_con);
     el.noi_dung.value = r.noi_dung; el.doi_tac.value = r.doi_tac || ''; el.so_ct.value = r.so_ct || '';
     el.ngay.value = isoToDmy(r.ngay); el.gia_tri.value = money(r.gia_tri); el.vat.value = r.vat; el.ghi_chu.value = r.ghi_chu || '';
+    if (el.le_goi) el.le_goi.dataset.keep = r.goi_id || '';
     $('#c-form-title').textContent = 'Sửa chi phí';
     setCostMode();
     showMsg($('#c-msg'), 'Đang sửa: ' + r.noi_dung);
@@ -2063,11 +2068,11 @@ function costKpiTd() {
   const tai = (kk) => {
     const o = { B1: 0, B2: 0, B3: 0, hd: 0, ghi: 0, goi: 0 };
     for (const c of costData.thau_phu || []) { const v = tpTdSv(c, kk); o[khoiOf(c.nhom || 'thau_phu')] += v; o.hd += v; }
-    for (const r of costData.items || []) if (!ngoai(r)) { const v = Number(r.sau_vat) || 0; o[khoiOf(r.nhom)] += v; o.ghi += v; }
+    for (const r of costData.items || []) if (!ngoai(r) && !(kk === 1 && r.goi_id)) { const v = Number(r.sau_vat) || 0; o[khoiOf(r.nhom)] += v; o.ghi += v; } // mua lẻ gắn gói: TĐ1 lấy giá trị gói
     const dt = costData.du_tru || [];
     for (const code of new Set(dt.map((r) => r.nhom))) {
       const rs = dt.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
-      const t2 = S('ky', (r) => !gan.has(r.id) && r.tinh_trang !== 'dong') + S('dc');
+      const t2 = rs.filter((r) => r.loai === 'ky' && !gan.has(r.id) && r.tinh_trang !== 'dong').reduce((t, r) => t + Math.max(0, svL(r) - leGoi(r.id)), 0) + S('dc'); // gói mở: phần chưa mua lẻ hết
       const v = kk === 1 ? S('ky') : kk === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2;
       o[khoiOf(code)] += v; o.goi += v;
     }
@@ -2139,6 +2144,12 @@ function goiChip(r) {
   if (r.tinh_trang === 'dong') return ' <span class="st st-tam-dung" title="Gói không dùng nữa: TĐ2, TĐ3 = 0 (TĐ1 giữ nguyên)">Đã đóng</span>';
   if (hd.length) return ` <span class="st st-hoan-thanh" title="TĐ2 / TĐ3 lấy theo HĐ: ${esc(hd.map((c) => c.so_ma).join(', '))}">Đã có HĐ${hd.length > 1 ? ` (${hd.length})` : ''}</span>`;
   return ' <span class="st st-tam-tinh" title="Chưa có HĐ – giá trị tạm tính">Tạm tính</span>';
+}
+// V27.12: mua lẻ gắn gói – tổng dòng chi phí đã gắn vào gói (f: 'sau_vat' | 'gia_tri')
+function leGoi(id, f = 'sau_vat') { return (costData?.items || []).reduce((a, r) => a + (r.goi_id === id ? Number(r[f]) || 0 : 0), 0); }
+function leGoiOptions(nhom, keep) {
+  const ds = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom && (r.tinh_trang !== 'dong' || r.id === keep));
+  return '<option value="">— Không gắn gói —</option>' + ds.map((r) => `<option value="${r.id}">${esc(r.noi_dung || 'Gói #' + r.id)} · gói ${money(r.so_tien)} đ${leGoi(r.id, 'gia_tri') ? ` · đã mua lẻ ${money(leGoi(r.id, 'gia_tri'))} đ` : ''}</option>`).join('');
 }
 function goiOptions(nhom) {
   const ds = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom && r.tinh_trang !== 'dong');
@@ -2284,7 +2295,7 @@ function renderTpCard() {
   const nhoms = HDV;
   const dem = (k) => (k ? tatCa.filter((c) => (c.nhom || 'thau_phu') === k).length : tatCa.length);
   // Chi phí mua lẻ (không HĐ) của vật tư / MMTB / nhân công – hiện kèm để bảng trên khớp cây chi phí bên dưới
-  const leOf = (k) => (costData.items || []).filter((r) => r.nhom === k);
+  const leOf = (k) => (costData.items || []).filter((r) => r.nhom === k && !r.goi_id); // mua lẻ gắn gói nằm trong gói
   const coLe = (k) => (k ? leOf(k).length : LE_NHOM.some((x) => leOf(x).length));
   $('#tp-nhom').innerHTML = ['', ...nhoms].map((k) => `<button type="button" data-v="${k}" class="${tpFilter.nhom === k ? 'on' : ''} ${dem(k) || coLe(k) ? '' : 'zero'}" title="${k ? esc(TPN()[k]) : 'Tất cả loại'}${k && leOf(k).length ? ` · ${dem(k)} HĐ + ${leOf(k).length} dòng mua lẻ` : ''}">${k ? TP_NGAN[k] : 'Tất cả'} <span class="cnt">${dem(k)}${k && leOf(k).length ? '<i>+lẻ</i>' : ''}</span></button>`).join('');
   const all = tpFilter.nhom ? tatCa.filter((c) => (c.nhom || 'thau_phu') === tpFilter.nhom) : tatCa;
@@ -2328,18 +2339,20 @@ function renderTpCard() {
   const dtrAll = q || tpFilter.loc ? [] : (costData.du_tru || []).filter((r) => !tpFilter.nhom || r.nhom === tpFilter.nhom);
   const nhomIdx = (x) => { const i = NHOM().findIndex((n) => n.code === x); return i < 0 ? 99 : i; };
   const gCodes = [...new Set(dtrAll.map((r) => r.nhom))].sort((x, y) => nhomIdx(x) - nhomIdx(y));
-  const goiSv = (r, k) => { const hd = hdCua(r); if (k === 1) return svL(r); if (hd.length) return hd.reduce((t, c) => t + tpTdSv(c, k), 0); return moG(r) ? svL(r) : 0; };
+  // V27.12: gói TĐ2/3 = HĐ gắn + mua lẻ gắn + phần gói chưa chi hết (gói còn mở)
+  const conG = (r) => (moG(r) ? Math.max(0, svL(r) - leGoi(r.id)) : 0);
+  const goiSv = (r, k) => { const hd = hdCua(r); if (k === 1) return svL(r); return hd.reduce((t, c) => t + tpTdSv(c, k), 0) + leGoi(r.id) + conG(r); };
   const nhomSv = (code, k) => { const rs = dtrAll.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
     if (k === 1) return S('ky');
-    const t2 = S('ky', moG) + S('dc'), hdK = rs.filter((r) => r.loai === 'ky').reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0), 0);
+    const kyR = rs.filter((r) => r.loai === 'ky'), t2 = kyR.reduce((t, r) => t + conG(r), 0) + S('dc'), hdK = kyR.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0) + leGoi(r.id), 0);
     return (k === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2) + hdK; };
   const nhomHd = (code) => dtrAll.filter((r) => r.nhom === code && r.loai === 'ky').flatMap(hdCua);
   // Theo HĐ CĐT (b): đợt điều chỉnh / quyết toán cả nhóm thuộc HĐ CĐT chung của các gói trong nhóm (khác nhau -> "chưa gắn")
   const chuNhom = (code) => { const ks = [...new Set(dtrAll.filter((r) => r.nhom === code && r.loai === 'ky').map(cdtOf))]; return ks.length === 1 ? ks[0] : 0; };
   const nhomSvB = (code, k, b) => { const rs = dtrAll.filter((r) => r.nhom === code), own = chuNhom(code) === b, kyB = rs.filter((r) => r.loai === 'ky' && cdtOf(r) === b);
-    const S = (arr) => arr.reduce((t, r) => t + svL(r), 0), hdK = kyB.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0), 0);
+    const S = (arr) => arr.reduce((t, r) => t + svL(r), 0), hdK = kyB.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0) + leGoi(r.id), 0);
     if (k === 1) return S(kyB);
-    const t2 = S(kyB.filter(moG)) + (own ? S(rs.filter((r) => r.loai === 'dc')) : 0);
+    const t2 = kyB.reduce((t, r) => t + conG(r), 0) + (own ? S(rs.filter((r) => r.loai === 'dc')) : 0);
     return (k === 3 && rs.some((r) => r.loai === 'qt') ? (own ? S(rs.filter((r) => r.loai === 'qt')) : 0) : t2) + hdK; };
   const bks = [...new Set([...groups.map((g) => g.k), ...kyHien.map(cdtOf), ...dtrAll.filter((r) => r.loai !== 'ky').map((r) => chuNhom(r.nhom))])]
     .sort((a, b) => (a ? cdtOrd.get(a) : 1e6) - (b ? cdtOrd.get(b) : 1e6));
@@ -2372,7 +2385,7 @@ function renderTpCard() {
   const goiRow = (r, stt, coQt) => {
     const hd = hdCua(r), qtNhom = kTd === 3 && coQt && !hd.length, coCon = kTd > 1 && hd.length > 0, mo = coCon && (autoOpen || (tpFullOpen ? !tpOpen.has('grc:' + r.id) : tpOpen.has('gr:' + r.id)));
     const tam = kTd === 1 || (!hd.length && r.tinh_trang !== 'dong'), dong = kTd > 1 && r.tinh_trang === 'dong';
-    const chip = tam ? '<span class="st st-tam-tinh">Tạm tính</span>' : dong ? '<span class="st st-tam-dung" title="Gói không dùng nữa: TĐ2, TĐ3 = 0 (TĐ1 giữ nguyên)">Đã đóng</span>' : '';
+    const chip = (leGoi(r.id) ? `<span class="tp-ps" title="Mua lẻ đã gắn gói (sau VAT)${kTd > 1 ? ' – TĐ' + kTd + ' = mua lẻ + phần gói chưa mua hết' : ''}">Mua lẻ ${mtr(leGoi(r.id))}</span> ` : '') + (tam ? '<span class="st st-tam-tinh">Tạm tính</span>' : dong ? '<span class="st st-tam-dung" title="Gói không dùng nữa: TĐ2, TĐ3 = 0 (TĐ1 giữ nguyên)">Đã đóng</span>' : '');
     const dt = coCon ? (hd.length === 1 ? esc(hd[0].doi_tac || hd[0].so_ma) : `<button type="button" class="link-btn" data-tpgr="${r.id}" title="${esc([...new Set(hd.map((c) => c.doi_tac || c.so_ma))].join(', '))}">${hd.length} HĐ ${mo ? '▾' : '▸'}</button>`)
       : `<span class="muted">${kTd === 1 ? '' : 'Chưa có HĐ'}</span>`;
     return `<tr class="tv-child tp-r-goi ${tam && kTd > 1 ? 'tp-r-tam' : ''}"><td class="num muted">${stt}</td>
@@ -3690,7 +3703,8 @@ function dtrTd(rows) {
   const gan = new Set((costData?.thau_phu || []).map((c) => c.goi_id).filter(Boolean));
   const conTinh = (r) => !gan.has(r.id) && r.tinh_trang !== 'dong';
   const S = (k, loc = () => true) => rows.filter((r) => r.loai === k && loc(r)).reduce((a, r) => a + (Number(r.so_tien) || 0), 0);
-  const t1 = S('ky'), t2 = S('ky', conTinh) + S('dc'), coQt = rows.some((r) => r.loai === 'qt');
+  const t1 = S('ky'), coQt = rows.some((r) => r.loai === 'qt');
+  const t2 = rows.filter((r) => r.loai === 'ky').reduce((a, r) => a + (conTinh(r) ? Math.max(0, (Number(r.so_tien) || 0) - leGoi(r.id, 'gia_tri')) : 0) + leGoi(r.id, 'gia_tri'), 0) + S('dc'); // V27.12: + mua lẻ gắn gói
   return { t1, t2, t3: coQt ? S('qt') : t2, coQt, ngoai: t1 === 0 && t2 !== 0 };
 }
 // Chi tiết đã có của nhóm (trước VAT): HĐ đầu vào theo TĐ2 + chi phí đã ghi (không gồm vay / trả gốc)

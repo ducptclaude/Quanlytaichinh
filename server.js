@@ -1162,6 +1162,14 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
   res.status(201).json(await store.createDuTru(id, data, req.user.id));
 }));
+// V27.12: dòng mua lẻ gắn gói – gói TĐ1 cùng dự án, CÙNG NHÓM; gắn mới thì gói chưa đóng (giữ gắn cũ thì cho qua)
+async function checkGoiLe(goiId, duAnId, nhom, giuCu = false) {
+  const g = await store.getDuTru(goiId);
+  if (!g || g.du_an_id !== duAnId || g.loai !== 'ky') return 'Gói chi phí không thuộc dự án này';
+  if (g.nhom !== nhom) return 'Gói chi phí khác nhóm với dòng mua lẻ';
+  if (g.tinh_trang === 'dong' && !giuCu) return 'Gói chi phí đã đóng – mở lại gói trước khi gắn';
+  return null;
+}
 // Gói chi phí phải là dòng dự trù TĐ1 của cùng dự án, chưa đóng
 async function checkGoi(goiId, duAnId) {
   const g = await store.getDuTru(goiId);
@@ -1433,6 +1441,7 @@ api.post('/du-an/:id/chi-phi', canTien, wrap(async (req, res) => {
   if (!(await store.getProject(id))) return bad(res, 'Không tìm thấy công trình', 404);
   const { data, errors } = validateCost({ ...(req.body || {}), _new: true });
   if (errors.length) return bad(res, errors);
+  if (data.goi_id) { const e = await checkGoiLe(data.goi_id, id, data.nhom); if (e) return bad(res, e); }
   res.status(201).json(await store.createCost(id, data, req.user.id));
 }));
 
@@ -1441,6 +1450,9 @@ api.put('/chi-phi/:id', canTien, wrap(async (req, res) => {
   if (!id) return bad(res, 'ID không hợp lệ');
   const { data, errors } = validateCost(req.body || {});
   if (errors.length) return bad(res, errors);
+  const cur = await store.getCostRef(id);
+  if (!cur) return bad(res, 'Không tìm thấy dòng chi phí', 404);
+  if (data.goi_id) { const e = await checkGoiLe(data.goi_id, cur.du_an_id, data.nhom, data.goi_id === cur.goi_id); if (e) return bad(res, e); }
   const ok = await store.updateCost(id, data, req.user.id);
   ok ? res.json({ id }) : bad(res, 'Không tìm thấy dòng chi phí', 404);
 }));

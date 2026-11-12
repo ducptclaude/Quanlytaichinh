@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V27.12.11.26 – Mua lẻ gắn vào gói chi phí (chống tính trùng)
+- Dòng chi phí mua lẻ có ô **Gắn vào gói** (chỉ gói cùng nhóm, gói chưa đóng). Kho dữ liệu: thêm cột `chi_phi.goi_id` (chỉ THÊM).
+- Cách tính: TĐ1 = giá trị gói (mua lẻ gắn gói không cộng thêm) · TĐ2/TĐ3 = mua lẻ thực + phần gói chưa mua hết (gói − mua lẻ, không âm); gói đóng / đã gắn HĐ: chỉ mua lẻ thực. Áp dụng đồng bộ Báo cáo (tổng, theo HĐ CĐT), thẻ và bảng trang Chi phí.
+- Mua lẻ CHƯA gắn gói tính như cũ → số DA-01..DA-04 và dữ liệu mẫu không đổi (tester 4518 ĐẠT, 0 LỖI).
+- `kiem-tra-goi.js` thêm tình huống mua lẻ 50 rồi 180 gắn gói vật tư 200: CP 760/740/730 → 760/770/760; chặn gắn khác nhóm, gắn gói đã đóng. 47 ĐẠT, 0 LỖI.
+
 ## V26.12.11.26 – Dashboard khối IV: số lớn chạy theo TĐ đang chọn
 - Số lớn khối IV = lợi nhuận TĐ đang chọn (TĐ1: lúc ký; TĐ2/TĐ3: tăng/giảm so với TĐ1), cột TĐ đang chọn được viền đậm. Báo cáo mục IV giữ nguyên. 4518 ĐẠT, 0 LỖI.
 

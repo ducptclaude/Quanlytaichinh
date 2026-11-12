@@ -178,6 +178,7 @@
             <label class="span-2" id="c-goiten-wrap" hidden>Tên gói *<input name="ten_goi" maxlength="300" placeholder="VD: Thầu phụ 1 – Kết cấu"></label>
             <label class="c-tp c-goi" id="c-goi-wrap" hidden title="TĐ2: HĐ thay giá trị tạm tính của gói dự trù TĐ1, hoặc là phát sinh ngoài TĐ1 (TĐ1 = 0)">Gói chi phí (TĐ2) *<select name="goi"></select></label>
             <label class="c-tp"><span id="c-so-label">Số HĐ thầu phụ *</span><input name="so_tp" maxlength="120" placeholder="Số mới: gõ · Số đã có: nhấp đúp" title="Số HĐ mới: gõ trực tiếp. Số đã có: nhấp đúp để mở bảng chi tiết"></label>
+            <label class="c-legoi" id="c-legoi-wrap" hidden title="Mua lẻ thuộc 1 gói đã dự trù: TĐ1 vẫn lấy giá trị gói (không cộng thêm); TĐ2/TĐ3 = mua lẻ thực + phần gói chưa mua hết">Gắn vào gói<select name="le_goi"></select></label>
             <label class="span-2 c-gen">Nội dung *<input name="noi_dung" maxlength="300"></label>
             <label><span id="c-dt-label">Đối tác / Nhà cung cấp</span><input name="doi_tac" maxlength="200"></label>
             <datalist id="bank-list"></datalist>
@@ -556,6 +557,7 @@
             <div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>HĐ thật &amp; điều chỉnh</div>
             <ol>
               <li>Nhanh nhất: nhấp đúp nhóm → ở gói chưa có HĐ bấm <b>+ HĐ</b> → form Thêm chi phí điền sẵn nhóm, gói, HĐ CĐT → nhập Số HĐ, nhà cung cấp, giá trị ký. (Hoặc tự chọn Hình thức <b>Hợp đồng</b> + <b>Gói</b> / <b>Phát sinh ngoài TĐ1</b>.)</li>
+              <li><b>Mua lẻ thuộc 1 gói</b> (VD gói vật tư 200, mua lẻ dần): thêm dòng chi phí, chọn ô <b>Gắn vào gói</b>. TĐ1 vẫn = giá trị gói (không cộng thêm); TĐ2 / TĐ3 = mua lẻ thực + phần gói chưa mua hết (gói đã đóng: chỉ còn mua lẻ thực).</li>
               <li>HĐ gắn gói / phát sinh được ký ở TĐ2 → <b>giá trị ký, ngày ký, VAT</b> sửa ngay ở tab <b>TĐ2</b> (cột "Giá trị ký").</li>
               <li>Tăng / giảm HĐ: khung <b>"TĐ2 – Điều chỉnh HĐ đầu vào"</b> (nhiều đợt, như Doanh thu).</li>
               <li>Điều chỉnh cả nhóm: nút <b>± Nhóm</b> trong bảng chi tiết. Gói không dùng nữa: <b>Đóng gói</b> (TĐ2 = 0).</li>
