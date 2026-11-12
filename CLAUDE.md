@@ -22,6 +22,7 @@ Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm so
 2. Tăng phiên bản: `node scripts/bump-version.js` (dạng `Vlần.dd.mm.yy`, giờ Việt Nam, lưu `version.json`).
 3. Chạy thử: `npm start` (không có DATABASE_URL = bộ nhớ tạm), Quản trị → Cài đặt → Tạo dữ liệu mẫu,
    rồi đối chiếu số liệu: `node scripts/tester.js <url> <tài khoản> <mật khẩu>` (~4.500 kiểm tra, phải 0 LỖI).
+   Thay đổi về gói / HĐ đầu vào / khóa: chạy thêm `node scripts/kiem-tra-goi.js <url localhost> <tài khoản> <mật khẩu>` (phải 0 LỖI).
    Chụp màn hình máy tính (1366px) + điện thoại (iPhone 13) các trang bị ảnh hưởng, kiểm tra không tràn ngang.
 4. Lưu lên GitHub nhánh `staging` (Railway tự cập nhật).
 5. Cập nhật `docs/TOM-TAT-PHIEN.md`.

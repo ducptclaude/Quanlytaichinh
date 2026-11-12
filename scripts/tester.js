@@ -103,8 +103,8 @@ function check(cond, what, detail = '') {
       const hdSv = lines.reduce((s, l) => s + sv(l.gia_tri, l.vat), 0);
       const hdVat = lines.reduce((s, l) => s + vatOf(l.gia_tri, l.vat), 0);
       const daTt = c.pays.reduce((s, x) => s + x.so_tien, 0);
-      const khoa = c.pays.some((x) => x.loai === 'quyet_toan');
       let qSv = lines.reduce((s, l) => s + sv(l.gia_tri_qt ?? l.gia_tri, l.vat), 0);
+      const khoa = c.pays.length > 0 && lines.length > 0 && qSv - daTt === 0; // trả đủ -> khóa (V03.12; khóa sổ = trả đủ + đã QT)
       let qGt = lines.reduce((s, l) => s + (l.gia_tri_qt ?? l.gia_tri), 0);
       if (khoa) { qSv = daTt; qGt = hdSv ? Math.round(daTt - (daTt * hdVat) / hdSv) : daTt; khoaN++; }
       const t = `${tag} / ${c.so_ma}`;
