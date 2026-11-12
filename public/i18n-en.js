@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"TĐ2 – điều chỉnh": "M2 – adjustments",
+"TĐ3 – quyết toán": "M3 – final account",
 "Số mới nhất − dòng thu, dòng chi": "Latest figures − collections, expenditure",
 "Doanh thu mới nhất − dòng thu · chi phí mới nhất − dòng chi": "Latest revenue − collections · latest cost − expenditure",
 "Kế hoạch – Thực – Còn lại · mới nhất": "Plan – Actual – Remaining · latest",
@@ -1585,6 +1587,18 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Lợi nhuận TĐ{} · {}",
+"M{} profit · {}"
+],
+[
+"{} so với TĐ{}",
+"{} vs M{}"
+],
+[
+"chi phí bằng {} doanh thu · cùng TĐ với mục I báo cáo",
+"cost is {} of revenue · same milestone as report section I"
+],
 [
 "Doanh thu mới nhất {} − Dòng thu {}",
 "Latest revenue {} − Collections {}"

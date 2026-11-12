@@ -7,7 +7,7 @@
 // Bảng màu dashboard: DT xanh dương · CP cam đất · LN xanh ngọc lục · Thu xanh than · Chi vàng nghệ
 const DBC = { dt: '#2f6bd8', cp: '#e07b39', ln: '#12a58b', thu: '#1f3b73', chi: '#e0a43a', pt: '#7c5cd6', td: ['#a9c1f0', '#5b8de6', '#12a58b'] };
 const DB_COST_COL = ['#2f6bd8', '#e07b39', '#12a58b', '#7c5cd6', '#e0a43a', '#e05780', '#4aa3df', '#94a3b8'];
-const DB_TD = [[1, 'TĐ1', 'Hợp đồng'], [2, 'TĐ2', 'Điều chỉnh'], [3, 'TĐ3', 'Mới nhất']];
+const DB_TD = [[1, 'TĐ1', 'Ký HĐ'], [2, 'TĐ2', 'Điều chỉnh'], [3, 'TĐ3', 'Quyết toán']]; // cùng tên nút mục I Báo cáo
 const DB_ST = [['Chuẩn bị', 'st-chuan-bi', '#d08a1e'], ['Đang thi công', 'st-dang-thi-cong', '#3462a3'], ['Tạm dừng', 'st-tam-dung', '#c0392b'], ['Hoàn thành', 'st-hoan-thanh', '#0f7a4f']];
 
 function bViewUI() {
@@ -27,17 +27,21 @@ function bDashRender(list, v, one) {
     return `<span class="${(d > 0) === good ? 'db-up' : 'db-dn'}">${d > 0 ? '▲' : '▼'} ${bTy(Math.abs(d))}</span>`; };
 
   // ---- Thanh chỉ số: nhóm DT – CP – LN theo TĐ đang chọn · nhóm dòng tiền thực tế ----
-  const k = [1, 2, 3].includes(Number(BST.db_td)) ? Number(BST.db_td) : 3;
-  const tk = MT['t' + k], ck = MT['c' + k], lk = MT['l' + k];
+  // V23.12: dùng CHUNG TĐ với mục I Báo cáo (BST.i_td – tự nhảy TĐ mới nhất khi chọn dự án) và cùng cách tính:
+  // TĐ1 = số chốt TĐ1 (bTongHopData), TĐ2/TĐ3 = mục IV; so sánh với TĐ liền trước như mục I
+  const k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1;
+  const tdV = (n) => (n === 1 ? { t: T.dt1, c: T.cp1, l: T.dt1 - T.cp1 } : { t: MT['t' + n], c: MT['c' + n], l: MT['l' + n] });
+  const cur = tdV(k), prv = k > 1 ? tdV(k - 1) : null;
+  const tk = cur.t, ck = cur.c, lk = cur.l;
   const { T: T3 } = bMuc3Data(list, v, rows, 3); // V22.12: Kế hoạch – Thực – Còn lại và mục III luôn lấy số MỚI NHẤT (như mục III Báo cáo), không theo nút TĐ
   const tdLab = { 1: 'TĐ1 · hợp đồng', 2: 'TĐ2 · điều chỉnh', 3: 'TĐ3 · mới nhất' }[k];
-  const vs = (a, b, good) => (k === 1 ? '<span class="db-eq">kế hoạch lúc ký hợp đồng</span>' : `${dlt(a, b, good)} so với TĐ1`);
+  const vs = (a, b, good) => (k === 1 ? '<span class="db-eq">kế hoạch lúc ký hợp đồng</span>' : `${dlt(a, b, good)} so với TĐ${k - 1}`);
   const kpi = (k, lab, val, sub, col) => `<div class="db-kpi" style="--db-c:${col}"><span class="db-kl">${lab}</span>
       <b class="db-kv ${val < 0 ? 'neg' : ''}">${bTy(val)} <small>${TY()}</small></b><span class="db-ks">${sub}</span></div>`;
   const kpis = [
-    kpi('dt', 'Doanh thu', tk, vs(tk, MT.t1, true), DBC.dt),
-    kpi('cp', 'Chi phí', ck, `Bằng <b>${pc(ck, tk)}</b> doanh thu · ${k === 1 ? 'lúc ký' : dlt(ck, MT.c1, false)}`, DBC.cp),
-    kpi('ln', 'Lợi nhuận', lk, `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · ${dlt(lk, MT.l1, true)}`}`, DBC.ln),
+    kpi('dt', 'Doanh thu', tk, vs(tk, prv?.t, true), DBC.dt),
+    kpi('cp', 'Chi phí', ck, `Bằng <b>${pc(ck, tk)}</b> doanh thu · ${k === 1 ? 'lúc ký' : vs(ck, prv.c, false)}`, DBC.cp),
+    kpi('ln', 'Lợi nhuận', lk, `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · ${vs(lk, prv.l, true)}`}`, DBC.ln),
   ].join('');
   // Bảng Kế hoạch (mục I, TĐ đang chọn) · Thực (mục II) · Còn lại (mục III = Kế hoạch − Thực) × Doanh thu / Chi phí / Lợi nhuận
   const mxRow = (lab, col, a, b2, c) => `<tr><th scope="row"><i style="background:${col}"></i>${lab}</th><td>${n(a)}</td><td>${n(b2)}</td><td class="db-mx-con">${n(c)}</td></tr>`;
@@ -52,7 +56,7 @@ function bDashRender(list, v, one) {
   // ---- Dòng chảy 4 khối ----
   const go = (no) => `<button type="button" class="db-go" data-dbgo="${no}">Xem mục ${no} ›</button>`;
   const line = (lab, x, max, col, extra = '') => `<li><span>${lab}</span>${bar(x, max, col)}<b>${n(x)}</b>${extra}</li>`;
-  const mx1 = Math.max(T.dt1, T.cp1, 1), mx2 = Math.max(T.thu, T.chi, 1), mx3 = Math.max(Math.abs(T3.pt), Math.abs(T3.pc), Math.abs(T3.con), 1);
+  const mx1 = Math.max(tk, ck, 1), mx2 = Math.max(T.thu, T.chi, 1), mx3 = Math.max(Math.abs(T3.pt), Math.abs(T3.pc), Math.abs(T3.con), 1);
   const lnPts = [MT.l1, MT.l2, MT.l3], lMax = Math.max(...lnPts.map(Math.abs), 1);
   const step = lnPts.map((x, i) => {
     const h = Math.max(4, (Math.abs(x) / lMax) * 54);
@@ -66,9 +70,9 @@ function bDashRender(list, v, one) {
   // Nối giữa các khối: đường nét đứt + mũi tên tròn (không chữ)
   const arrow = () => `<div class="db-arrow" aria-hidden="true"><i><svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i></div>`;
   const flow = [
-    blk('I', 'b1', 'Kế hoạch lúc ký', 'TĐ1 – ký hợp đồng', T.ln1, `Lợi nhuận dự kiến · ${pc(T.ln1, T.dt1)}`,
-      `<ul class="db-lines">${line('Doanh thu', T.dt1, mx1, DBC.dt)}${line('Chi phí', T.cp1, mx1, DBC.cp)}${line('Lợi nhuận', T.ln1, mx1, DBC.ln)}</ul>
-      <div class="db-note2">${rows.filter((x) => x.td1).length}/${rows.length} dự án đã chốt TĐ1 · chi phí bằng <b>${pc(T.cp1, T.dt1)}</b> doanh thu</div>`),
+    blk('I', 'b1', 'Doanh thu – Chi phí – Lợi nhuận', { 1: 'TĐ1 – ký hợp đồng', 2: 'TĐ2 – điều chỉnh', 3: 'TĐ3 – quyết toán' }[k], lk, `Lợi nhuận TĐ${k} · ${pc(lk, tk)}`,
+      `<ul class="db-lines">${line('Doanh thu', tk, mx1, DBC.dt)}${line('Chi phí', ck, mx1, DBC.cp)}${line('Lợi nhuận', lk, mx1, DBC.ln)}</ul>
+      <div class="db-note2">${k === 1 ? `${rows.filter((x) => x.td1).length}/${rows.length} dự án đã chốt TĐ1 · ` : ''}chi phí bằng <b>${pc(ck, tk)}</b> doanh thu · cùng TĐ với mục I báo cáo</div>`),
     arrow(),
     blk('II', 'b2', 'Dòng tiền thực tế', `Lũy kế đến hôm nay`, T.con, 'Còn lại (thu − chi)',
       `<ul class="db-lines">${line('Dòng thu', T.thu, mx2, DBC.thu)}${line('Dòng chi', T.chi, mx2, DBC.chi)}${line('Còn lại', T.con, mx2, DBC.ln)}</ul>
@@ -96,7 +100,7 @@ function bDashRender(list, v, one) {
   // ---- Bảng dự án ----
   const tRows = rows.map((x, i) => {
     const q = m4.get(x.d.id) || { t3: 0, l3: 0 };
-    const qt = q['t' + k] || 0, ql = q['l' + k] || 0;
+    const qt = k === 1 ? x.dt1 : q['t' + k] || 0, ql = k === 1 ? x.dt1 - x.cp1 : q['l' + k] || 0; // TĐ1 = số chốt như mục I
     const ts = qt ? ql / qt : 0, th = x.hd_sv ? x.thu / x.hd_sv : 0;
     return `<tr class="db-row" data-dbrow="${x.d.id}" title="Bấm để xem vị trí trên bản đồ"><td class="num db-stt">${i + 1}</td><td class="db-ma"><button type="button" class="db-lnk" data-dbprj="${x.d.id}" title="Xem dashboard riêng dự án ${esc(x.d.ma_du_an)}">${esc(x.d.ma_du_an)} ›</button></td><td class="db-ten" title="${esc(x.d.ten_du_an)}">${esc(x.d.ten_du_an)}</td>
       <td><span class="st st-${slug(x.d.trang_thai)}">${esc(x.d.trang_thai)}</span></td>
@@ -151,7 +155,7 @@ function bDashRender(list, v, one) {
 // Chọn TĐ cho nhóm DT – CP – LN (và cột của bảng dự án)
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-dbtd]'); if (!b) return;
-  BST.db_td = Number(b.dataset.dbtd); bSave(); renderKeepPos('[data-dbtd="' + b.dataset.dbtd + '"]');
+  BST.i_td = Number(b.dataset.dbtd); bSave(); // V23.12: chung TĐ với mục I Báo cáo renderKeepPos('[data-dbtd="' + b.dataset.dbtd + '"]');
 });
 // Bảng Danh mục dự án: bấm Mã DA -> dashboard riêng dự án đó; bấm dòng -> bản đồ bay tới dự án, mở thông tin
 document.addEventListener('click', (e) => {

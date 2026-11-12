@@ -15,15 +15,15 @@ function dpHtml(list, v) {
   const ngay = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const one = list.length === 1 ? list[0] : null;
   // Đầu trang như Dashboard: 3 chỉ số DT – CP – LN theo TĐ đang chọn trên Dashboard + bảng Kế hoạch (mục I) – Thực (mục II) – Còn lại (mục III)
-  const k = [1, 2, 3].includes(Number(BST.db_td)) ? Number(BST.db_td) : 3;
-  const tk = T['t' + k], ck = T['c' + k], lk = T['l' + k];
+  const k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1; // chung TĐ với mục I Báo cáo
+  const tk = k === 1 ? TC.dt1 : T['t' + k], ck = k === 1 ? TC.cp1 : T['c' + k], lk = tk - ck; // TĐ1 = số chốt như mục I
   const M3 = bMuc3Data(list, v, C.rows, 3).T; // Kế hoạch – Thực – Còn lại: luôn số mới nhất
   const vs = (cur, base, good) => (k === 1 ? '<span class="dp-eq">Kế hoạch lúc ký hợp đồng</span>' : d(cur, base, good));
   const kpi = (lab, val, unit, sub, col) => `<div class="dp-k" style="--c:${col}"><div class="dp-kl">${lab}</div><div class="dp-kv">${val}<small>${unit}</small></div><div class="dp-ks">${sub}</div></div>`;
   const kpis = [
-    kpi(`Doanh thu · TĐ${k}`, ty(tk), 'tỷ', vs(tk, T.t1, true), DP.dt),
+    kpi(`Doanh thu · TĐ${k}`, ty(tk), 'tỷ', vs(tk, TC.dt1, true), DP.dt),
     kpi(`Chi phí · TĐ${k}`, ty(ck), 'tỷ', `Bằng <b>${pc(ck, tk)}</b> doanh thu`, DP.cp),
-    kpi(`Lợi nhuận · TĐ${k}`, ty(lk), 'tỷ', `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · lúc ký ${pc(T.l1, T.t1)}`}`, DP.ln),
+    kpi(`Lợi nhuận · TĐ${k}`, ty(lk), 'tỷ', `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · lúc ký ${pc(TC.dt1 - TC.cp1, TC.dt1)}`}`, DP.ln),
   ].join('');
   const mxR = (lab, col, a, b2, c) => `<tr><th><i style="background:${col}"></i>${lab}</th><td>${ty(a)}</td><td>${ty(b2)}</td><td class="dp-mxc">${ty(c)}</td></tr>`;
   const mxT = `<table class="dp-mx"><thead><tr><th>Tỷ đồng</th><th>Kế hoạch <small>Mới nhất</small></th><th>Thực <small>Mục II · lũy kế</small></th><th class="dp-mxc">Còn lại <small>Mục III</small></th></tr></thead>
