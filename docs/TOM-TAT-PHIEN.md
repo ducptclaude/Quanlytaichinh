@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.12.11.26 – HĐ đầu vào gắn gói / phát sinh: sửa giá trị ký ở tab TĐ2
+- HĐ gắn gói hoặc phát sinh ngoài TĐ1 (ký ở TĐ2): trong bảng nhập chi tiết HĐ, tab TĐ2 cho sửa giá trị ký, ngày ký, VAT, ghi chú và thêm PL (cột đổi tên "Giá trị ký"). HĐ ký từ TĐ1 giữ như cũ (chỉ sửa ở TĐ1). TĐ1 của phần việc vẫn là giá trị gói. Đã kiểm tra: ký 350 → 330 + đợt +20 = TĐ2 350; Báo cáo TĐ1/TĐ2 400 / 450 đúng. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V09.12.11.26 – Báo cáo: vào trang / chọn dự án tự nhảy TĐ mới nhất
 - Mỗi lần mở tab Báo cáo khi đang xem 1 dự án: mục I tự chuyển sang TĐ mới nhất của dự án (trước chỉ khi đổi dự án ở ô Phạm vi).
 - TĐ mới nhất: TĐ3 khi đã có số quyết toán ở bất kỳ HĐ CĐT / HĐ đầu vào hoặc quyết toán nhóm chi phí; TĐ2 khi có điều chỉnh doanh thu / HĐ đầu vào / gói; còn lại TĐ1; hoặc TĐ đã chốt lớn hơn. Chỉ đổi TĐ đang xem, số liệu không đổi. Tester 4.518 ĐẠT, 0 LỖI.

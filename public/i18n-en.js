@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Giá trị ký": "Signed value",
+"HĐ gắn gói / phát sinh: ký ở TĐ2 – TĐ1 của phần việc này là giá trị gói": "Package-linked / additional contract: signed at M2 – M1 of this work is the package value",
 "Hướng dẫn": "Guide",
 "Hướng dẫn sử dụng hệ thống": "System user guide",
 "⚠ kiểm tra PL": "⚠ check addenda",

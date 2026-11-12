@@ -2599,6 +2599,7 @@ function renderTpDlg() {
     const t1 = Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2 = Number(l.gia_tri) || 0, q = nnV(l.gia_tri_qt);
     return [a[0] + t1, a[1] + t2, a[2] + (q ?? t2)];
   }, [0, 0, 0]);
+  const tdKy = c.goi_id || c.phat_sinh ? 2 : 1; // HĐ gắn gói / phát sinh ngoài TĐ1 được ký ở TĐ2
   const lineRow = (l, draft) => {
     const qtStr = l.gia_tri_qt === null || l.gia_tri_qt === undefined ? '' : money(l.gia_tri_qt);
     const gtStr = draft ? '' : money(l.gia_tri_ky ?? l.gia_tri); // giá trị KÝ (TĐ1)
@@ -2606,7 +2607,7 @@ function renderTpDlg() {
     const qtSau = draft ? 0 : l.qt_sau_vat;
     const t1 = Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2 = Number(l.gia_tri) || 0;
     const md = tdDangChon(), lk = !draft && nnV(l.gia_tri_qt) !== null; // có số quyết toán = khoá dòng
-    const ok1 = editL && md === 1 && !lk, ok3 = editL && md === 3 && !lk;
+    const ok1 = editL && md === tdKy && !lk, ok3 = editL && md === 3 && !lk; // tdKy: TĐ ký HĐ (gắn gói / phát sinh = TĐ2)
     const q3 = draft ? null : nnV(l.gia_tri_qt);
     return `<tr data-k="${draft ? 'dl' + l.key : 'l' + l.id}" data-dc="${draft || md === 1 ? 0 : t2 - t1}" class="${draft ? 'tv-draft' : l.ma_loai === 'HĐ' ? 'tp-hd-row' : 'tp-pl-row'}">
       <td>${l.ma_loai === 'HĐ' ? '' : '<span class="tree">└</span>'}<span class="kind-tag ${l.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${l.ma_loai}</span> <b>${esc(c.so_ma)}</b>${draft ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</td>
@@ -2619,7 +2620,7 @@ function renderTpDlg() {
       <td class="num strong c3s" data-calc="qt">${dvm(qtSau) + (q3 !== null ? tdDelta(q3, t2) : '') + (!draft && !l.da_qt ? '<div class="muted small">chưa QT</div>' : '')}</td>
       <td>${inp('ghi_chu', draft ? '' : l.ghi_chu, 'maxlength="500"', ok1 || draft)}</td>
       <td class="row-actions">${!editL ? '' : lk ? (md === 3 ? '<button class="sm" data-tpmoqt>🔓 Mở khoá</button>' : '<span class="muted small">🔒 Khoá</span>')
-        : draft || md === 1 ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button>${l.ma_loai === 'HĐ' ? '' : `<button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>`}`
+        : draft || md === tdKy ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button>${l.ma_loai === 'HĐ' ? '' : `<button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>`}`
           : md === 3 ? '<button class="primary sm" data-save hidden>Lưu QT</button>' : ''}</td>
     </tr>`;
   };
@@ -2664,14 +2665,14 @@ function renderTpDlg() {
     <h4>Giá trị HĐ / PL</h4>
     <div data-td-mode class="td-mode"></div>
     <div class="table-wrap"><table class="tp-dtl tp-hdpl td-m${tdDangChon()}">
-      <thead><tr><th>Số HĐ/PL</th><th>Ngày ký</th><th class="num c1v" title="Ký – giá trị lúc ký">TĐ1<br><span class="muted small">trước VAT</span></th><th class="num c2v" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm">TĐ2<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num c2s">${tdDangChon() === 1 ? 'TĐ1' : 'TĐ2'}<br><span class="muted small">sau VAT</span></th>
+      <thead><tr><th>Số HĐ/PL</th><th>Ngày ký</th><th class="num c1v" title="${tdKy === 2 ? 'HĐ gắn gói / phát sinh: ký ở TĐ2 – TĐ1 của phần việc này là giá trị gói' : 'Ký – giá trị lúc ký'}">${tdKy === 2 ? 'Giá trị ký' : 'TĐ1'}<br><span class="muted small">trước VAT</span></th><th class="num c2v" title="Điều chỉnh – TĐ1 + các đợt tăng / giảm">TĐ2<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num c2s">${tdDangChon() === 1 ? 'TĐ1' : 'TĐ2'}<br><span class="muted small">sau VAT</span></th>
         <th class="num c3v" title="Quyết toán – giá trị HT/QT. Trống = TĐ2">TĐ3<br><span class="muted small">trước VAT</span></th><th class="num c3s">HT/QT<br><span class="muted small">sau VAT</span></th><th>Ghi chú</th><th></th></tr></thead>
       <tbody>${c.lines.map((l) => lineRow(l, false)).join('')}${tpDrafts.lines.map((d) => lineRow(d, true)).join('')}</tbody>
       <tfoot><tr><td colspan="2">TỔNG</td>${(() => { const [a, b] = tpTdTong(c.lines); return `<td class="num tp-sum-mo c1v" title="Tổng TĐ1 – giá trị ký, trước VAT">${dvm(a)}</td><td class="num tp-sum-mo c2v" title="Tổng TĐ2 – sau điều chỉnh, trước VAT">${dvm(b)}${tdDangChon() === 2 ? tdDelta(b, a) : ''}</td>`; })()}<td></td>
         <td class="num c2s">${dvm(tdDangChon() === 1 ? c.lines.reduce((a, l) => a + tpCalc(String(Number(l.gia_tri_ky ?? l.gia_tri) || 0), l.vat), 0) : c.hd_sau_vat)}</td><td class="num tp-sum-mo c3v" title="Tổng giá trị HT/QT trước VAT">${dvm(c.qt_gia_tri)}</td>
         <td class="num c3s">${dvm(c.qt_sau_vat)}${tdDelta(c.qt_gia_tri, tpTdTong(c.lines)[1])}</td><td colspan="2"></td></tr></tfoot>
     </table></div>
-    ${editL && tdDangChon() === 1 && !(c.lines.length && c.lines.every((l) => nnV(l.gia_tri_qt) !== null)) ? `<div class="tv-tools"><button class="sm" data-addpl="${nextPl}">+ Thêm ${nextPl}</button>
+    ${editL && tdDangChon() === tdKy && !(c.lines.length && c.lines.every((l) => nnV(l.gia_tri_qt) !== null)) ? `<div class="tv-tools"><button class="sm" data-addpl="${nextPl}">+ Thêm ${nextPl}</button>
       <span class="muted small">TĐ1 = giá trị ký · tăng / giảm sau ký: bấm <b>± Đợt</b> · ô HT/QT (TĐ3) để trống = chưa quyết toán (lấy bằng TĐ2)</span></div>` : ''}
 
     ${tdDangChon() > 1 ? (() => { // Danh sách các đợt điều chỉnh TĐ2 (theo dõi) – từ TĐ2 trở đi
