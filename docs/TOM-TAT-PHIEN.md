@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V26.12.11.26 – Dashboard khối IV: số lớn chạy theo TĐ đang chọn
+- Số lớn khối IV = lợi nhuận TĐ đang chọn (TĐ1: lúc ký; TĐ2/TĐ3: tăng/giảm so với TĐ1), cột TĐ đang chọn được viền đậm. Báo cáo mục IV giữ nguyên. 4518 ĐẠT, 0 LỖI.
+
 ## V25.12.11.26 – Bộ tự kiểm tra gói chi phí – HĐ đầu vào – khóa thanh toán
 - Mới: `scripts/kiem-tra-goi.js` (chỉ chạy máy thử, có ghi dữ liệu): tạo 1 dự án thử, nhập 2 HĐ CĐT (điều chỉnh, quyết toán), 3 gói (1 gói đóng), 3 HĐ đầu vào (gắn gói / phát sinh / có QT), điều chỉnh nhóm, chi phí lương, thanh toán; đối chiếu CP TĐ1/2/3 = 760/740/730, DT = 1500/1600/1580, chi phí theo từng HĐ CĐT, phần không gắn HĐ, khóa / khóa sổ (thanh toán thêm bị chặn khi đã trả đủ + đã QT). 19 ĐẠT, 0 LỖI.
 - Sửa bộ đối chiếu `tester.js`: quy tắc khóa theo đúng hệ thống (trả đủ = khóa), trước đây dùng quy tắc cũ "có đợt thanh toán quyết toán". Dữ liệu mẫu: 4518 ĐẠT, 0 LỖI; thêm dự án thử: 4565 ĐẠT, 0 LỖI.

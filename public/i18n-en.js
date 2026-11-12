@@ -1588,6 +1588,14 @@ window.BKS_EN = {
 },
 "patterns": [
 [
+"LN TĐ{} · lúc ký hợp đồng",
+"M{} profit · at contract signing"
+],
+[
+"LN TĐ{} · {} so với TĐ1",
+"M{} profit · {} vs M1"
+],
+[
 "Lợi nhuận TĐ{} · {}",
 "M{} profit · {}"
 ],

@@ -3679,3 +3679,4 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .pc-sec-dong .f-head { margin-bottom: 0; }
 .pc-sec-dong .pc-sec-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 @media print { .pc-sec-dong { display: none !important; } }
+.db-step.on i { outline: 2px solid var(--db-navy); outline-offset: 2px; } .db-step.on b { text-decoration: underline; text-underline-offset: 3px; }

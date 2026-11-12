@@ -60,7 +60,7 @@ function bDashRender(list, v, one) {
   const lnPts = [MT.l1, MT.l2, MT.l3], lMax = Math.max(...lnPts.map(Math.abs), 1);
   const step = lnPts.map((x, i) => {
     const h = Math.max(4, (Math.abs(x) / lMax) * 54);
-    return `<div class="db-step"><span class="db-sv ${x < 0 ? 'neg' : ''}">${bTy(x)}</span><i style="height:${h}px;background:${DBC.td[i]}"></i>
+    return `<div class="db-step${i + 1 === k ? ' on' : ''}"><span class="db-sv ${x < 0 ? 'neg' : ''}">${bTy(x)}</span><i style="height:${h}px;background:${DBC.td[i]}"></i>
       <b>TĐ${i + 1}</b><small>${pc(x, [MT.t1, MT.t2, MT.t3][i])}</small></div>`;
   }).join('');
   const blk = (no, cls, title, sub, big, bigLab, body) => `<section class="db-blk ${cls}">
@@ -82,7 +82,7 @@ function bDashRender(list, v, one) {
       `<ul class="db-lines">${line('Còn phải thu', T3.pt, mx3, DBC.dt)}${line('Còn phải chi', T3.pc, mx3, DBC.cp)}${line('Còn lại', T3.con, mx3, DBC.ln)}</ul>
       <div class="db-note2">Doanh thu mới nhất − dòng thu · chi phí mới nhất − dòng chi</div>`),
     arrow(),
-    blk('IV', 'b4', 'Lợi nhuận TĐ1 → TĐ3', 'Hợp đồng → điều chỉnh → quyết toán', MT.l3, `LN mới nhất · ${dlt(MT.l3, MT.l1)}`,
+    blk('IV', 'b4', 'Lợi nhuận TĐ1 → TĐ3', 'Hợp đồng → điều chỉnh → quyết toán', MT['l' + k], `LN TĐ${k} · ${k === 1 ? 'lúc ký hợp đồng' : `${dlt(MT['l' + k], MT.l1)} so với TĐ1`}`, // V26.12: số lớn theo TĐ đang chọn (Báo cáo mục IV giữ nguyên)
       `<div class="db-steps">${step}</div>`),
   ].join('');
 
