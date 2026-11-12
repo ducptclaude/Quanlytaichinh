@@ -8,7 +8,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 |---|---|---|---|---|
 | **chot-07.11.26** | V03.07.11.26 | (mới nhất) | 07/11/2026 | Mục II bấm xem chi tiết theo VAT; Dashboard tối nền trong suốt, khối neon |
 | phien-07.11.26-08h01 | V30.06.11.26 | `f012cd5` | 07/11/2026 | Trước khi sửa ngày 07/11 |
-| **chot-12.11.26** | V28.12.11.26 | (mới nhất) | 12/11/2026 | Bảng HĐ đầu vào chỉ nhóm chính, nhấp đúp mở bảng chi tiết; % doanh thu ở bảng chi phí · mục III Báo cáo lấy thời điểm mới nhất · Dashboard dùng chung TĐ và số với Báo cáo |
+| **chot-12.11.26** | V29.12.11.26 | (mới nhất) | 12/11/2026 | Bảng HĐ đầu vào chỉ nhóm chính, nhấp đúp mở bảng chi tiết; % doanh thu ở bảng chi phí · mục III Báo cáo lấy thời điểm mới nhất · Dashboard dùng chung TĐ và số với Báo cáo |
 | phien-12.11.26-11h36 | V15.11.11.26 | `1fb6782` | 12/11/2026 | (phiên song song) Trước khi sửa mục III Báo cáo |
 | phien-12.11.26-10h11 | V08.12.11.26 | `7280fed` | 12/11/2026 | Trước khi sửa TĐ mới nhất ở Báo cáo |
 | phien-12.11.26-08h15 | V32.11.11.26 | `71cd34c` | 12/11/2026 | Trước khi sửa ngày 12/11 |

@@ -1590,6 +1590,14 @@ window.BKS_EN = {
 },
 "patterns": [
 [
+"Tham khảo – phân bổ chi phí chung theo tỷ lệ doanh thu TĐ{} ({}): {} → Lợi nhuận sau phân bổ {} ({})",
+"For reference – common costs allocated by M{} revenue share ({}): {} → Profit after allocation {} ({})"
+],
+[
+"Tham khảo – phân bổ chi phí chung theo tỷ lệ dòng thu ({}): {} → Còn lại sau phân bổ {} ({})",
+"For reference – common costs allocated by collections share ({}): {} → Remaining after allocation {} ({})"
+],
+[
 "Mua lẻ {}",
 "Ad-hoc purchases {}"
 ],

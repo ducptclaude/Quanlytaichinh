@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V29.12.11.26 – Mục II tách dòng chi phí chung · phân bổ chi phí chung cho từng HĐ (tham khảo)
+- Mục II: rê chuột dòng "Chi phí chung – không gắn HĐ" thấy tách tiền thật sau VAT: chi phí đã ghi theo nhóm (lương, tài chính, lãi vay…), đã trả HĐ đầu vào chưa gắn HĐ CĐT, tiền về chưa gắn HĐ. Máy chủ trả thêm `tien_chung` (chỉ đọc).
+- Mục I, II: rê chuột tên từng HĐ thấy phần chi phí chung chia cho HĐ đó (mục I theo tỷ lệ doanh thu TĐ đang chọn, mục II theo tỷ lệ dòng thu) và lợi nhuận / còn lại sau phân bổ. Chỉ tham khảo, không đổi số trên bảng.
+- Đối chiếu 12 dự án mẫu: tổng các khoản tách = dòng chi phí chung mục II. tester 4518 ĐẠT · kiem-tra-goi 47 ĐẠT, 0 LỖI.
+
 ## V28.12.11.26 – Dòng "Chi phí chung – không gắn HĐ" ở Báo cáo, rê chuột thấy tách khoản
 - Mục I, II: dòng con cuối dưới dự án đổi tên "Chi phí chung – không gắn HĐ" khi chỉ có chi phí (còn doanh thu / tiền về chưa gắn HĐ thì giữ "Chưa phân theo HĐ").
 - Rê chuột mục I: tách theo nguồn tại TĐ đang chọn – từng nhóm chi phí đã ghi (lương, tài chính, lãi vay…), gói / HĐ đầu vào chưa gắn HĐ CĐT, điều chỉnh – quyết toán cả nhóm, TĐ1: chênh lệch với số đã chốt. Máy chủ trả thêm `cp_chung` (chỉ đọc, không đổi số).
