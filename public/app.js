@@ -822,8 +822,11 @@ function qtGroupsHtml(rows) {
     // Ghi chú trực quan: thanh tiến độ % đạt so với giá trị HĐ (sau VAT) + phần còn lại
     const daSv = sum('sau_vat'), pHd = base ? (daSv / base) * 100 : null, conSv = base ? base - daSv : 0;
     const pctHd = pHd === null ? `<span class="muted small">${g.rows.length} đợt</span>` : `<div class="ht-prog" title="Đã hoàn thành / quyết toán ${dvT(daSv)} / giá trị HĐ + PL ${dvT(base)} (sau VAT)">
-        <span class="ht-bar"><i class="${pHd > 100.05 ? 'vuot' : pHd >= 99.95 ? 'du' : ''}" style="width:${Math.min(100, Math.max(0, pHd)).toFixed(1)}%"></i></span>
-        <b>${pHd.toFixed(1).replace('.', ',')}%</b><span class="muted small">${conSv > 0 ? `còn ${dvm(conSv)}` : conSv < 0 ? `vượt ${dvm(-conSv)}` : 'đủ giá trị HĐ'}</span></div>`;
+        <span class="ht-bar"><i class="${pHd >= 99.95 ? 'du' : daQt ? 'thieu' : ''}" style="width:${Math.min(100, Math.max(0, pHd)).toFixed(1)}%"></i></span>
+        <b class="${pHd >= 99.95 ? 'ht-tot' : daQt ? 'ht-thieu' : ''}">${pHd.toFixed(1).replace('.', ',')}%</b>${conSv > 0
+          ? (daQt ? `<span class="ht-thieu small" title="Đã quyết toán nhưng thấp hơn giá trị HĐ + PL – doanh thu giảm">QT thiếu ${dvm(conSv)}</span>` : `<span class="muted small">còn ${dvm(conSv)}</span>`)
+          : conSv < 0 ? `<span class="ht-tot small">vượt ${dvm(-conSv)} ▲</span>${pHd > 110.05 ? '<span class="ht-kt" title="Vượt trên 110% giá trị HĐ + PL – kiểm tra phát sinh đã ký phụ lục chưa">⚠ kiểm tra PL</span>' : ''}`
+          : '<span class="ht-tot small">đủ giá trị HĐ</span>'}</div>`;
     const head = `<tr class="tv-head-row ${g.k ? '' : 'tv-sub-warn'}">
       <td class="num">${n}</td>
       <td>${g.k ? `<button class="grp-toggle" data-qtgrp="${g.k}" title="${open ? 'Thu gọn' : 'Mở chi tiết'}">${open ? '▾' : '▸'}</button>
@@ -1153,8 +1156,8 @@ function tienVeCardHtml() {
       <div class="table-wrap">
         <table class="tv-table">
           <thead><tr>
-            <th class="num">#</th><th>Nội dung</th><th class="num">Giá trị tiền về</th><th>Ngày (dd/mm/yyyy)</th>
-            <th>Ghi chú</th><th>Người cập nhật</th>${can('tien') ? '<th></th>' : ''}
+            <th class="num">#</th><th>Nội dung</th><th class="num">Giá trị tiền về</th><th class="c-o">Ngày (dd/mm/yyyy)</th>
+            <th>Ghi chú</th><th class="c-o">Người cập nhật</th>${can('tien') ? '<th></th>' : ''}
           </tr></thead>
           <tbody id="tv-body"></tbody>
           <tfoot id="tv-foot"></tfoot>
@@ -1242,16 +1245,16 @@ function renderTienVe() {
     if (!edit) {
       return `<tr class="tv-child"><td class="num muted">${stt}</td>
         <td class="indent"><span class="tree">└</span><b>${label}</b></td><td class="num">${dvm(r.so_tien)}</td>
-        <td>${isoToDmy(r.ngay)}</td><td class="wrap">${esc(r.ghi_chu)}</td><td class="muted">${esc(r.nguoi_cap_nhat || '')}</td></tr>`;
+        <td class="c-o">${isoToDmy(r.ngay)}</td><td class="wrap">${esc(r.ghi_chu)}</td><td class="muted c-o">${esc(r.nguoi_cap_nhat || '')}</td></tr>`;
     }
     const cls = !r.id ? 'tv-draft' : tvEdits[r.key] ? 'tv-dirty' : '';
     return `<tr class="tv-child ${cls}" data-key="${r.key}">
       <td class="num muted">${stt}</td>
       <td class="indent"><span class="tree">└</span>${hdSel}<b>${label}</b>${!r.id ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</td>
       <td class="num"><input class="tv-in money num" data-f="so_tien" value="${esc(v.so_tien)}" placeholder="Nhập giá trị"></td>
-      <td><input class="tv-in date-dmy" data-f="ngay" value="${esc(v.ngay)}"></td>
+      <td class="c-o"><input class="tv-in date-dmy" data-f="ngay" value="${esc(v.ngay)}"></td>
       <td><input class="tv-in" data-f="ghi_chu" maxlength="500" value="${esc(v.ghi_chu)}"></td>
-      <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
+      <td class="muted c-o">${esc(r.nguoi_cap_nhat || '')}</td>
       <td class="row-actions">
         <button class="primary sm" data-tvsave="${r.key}" ${tvDirty(r) ? '' : 'hidden'}>Lưu</button>
         <button class="danger sm" data-tvdel="${r.key}">${r.id ? 'Xóa' : 'Bỏ'}</button>
@@ -1276,17 +1279,19 @@ function renderTienVe() {
         ${orphan ? '<span class="st st-tam-tinh">Chưa chọn HĐ</span>' : `<span class="kind-tag kind-hd">HĐ</span> <b>${esc(hdName(g.k).replace(/^HĐ\s+/, ''))}</b>`}
         <span class="muted small">(${g.rows.length} dòng)</span></td>
       <td class="num tv-head-sum">${dvm(sum(() => true))}</td>
-      <td colspan="2" class="muted small">${parts}</td>
-      <td colspan="${cols - 5}" class="row-actions">${edit && !orphan ? `
+      <td class="c-o"></td><td class="muted small">${parts}</td><td class="c-o"></td>
+      ${cols > 6 ? `<td class="row-actions">${edit && !orphan ? `
         <button class="sm" data-tvadd="tam_ung" data-hd="${g.k}" title="Thêm Tạm ứng">+ TƯ</button>
         <button class="sm" data-tvadd="dot" data-hd="${g.k}" title="Chèn đợt thanh toán">+ Đợt</button>
-        <button class="sm" data-tvadd="quyet_toan" data-hd="${g.k}" ${hasQt ? 'disabled title="HĐ đã có Quyết toán"' : 'title="Thêm Quyết toán"'}>+ QT</button>` : ''}</td>
+        <button class="sm" data-tvadd="quyet_toan" data-hd="${g.k}" ${hasQt ? 'disabled title="HĐ đã có Quyết toán"' : 'title="Thêm Quyết toán"'}>+ QT</button>` : ''}</td>` : ''}
     </tr>`;
     return head + (open ? g.rows.map((r, i) => childHtml(r, `${n}.${i + 1}`, orphan)).join('') : '');
   }).join('') : `<tr><td colspan="${cols}" class="empty">${heads.length ? 'Chưa có dữ liệu' : 'Chưa có HĐ ở mục 1 – hãy nhập HĐ trước'}</td></tr>`;
 
   const t = revData.tong_tien_ve;
-  $('#tv-foot').innerHTML = `<tr><td></td><td>TỔNG TIỀN VỀ</td><td class="num">${dvm(t.tong)}</td><td colspan="${cols - 3}"></td></tr>`;
+  $('#tv-foot').innerHTML = `<tr><td></td><td>TỔNG TIỀN VỀ</td><td class="num">${dvm(t.tong)}</td><td class="c-o"></td><td></td><td class="c-o"></td>${cols > 6 ? '<td></td>' : ''}</tr>`;
+  // Thu gọn hết các HĐ -> ẩn cột chỉ có ở dòng chi tiết (Ngày, Người cập nhật); mở 1 HĐ -> hiện lại
+  $('#tv-body').closest('table').classList.toggle('tv-gon', !groups.some((g) => g.k === 0 || tvOpen.has(g.k) || g.rows.some((r) => !r.id || tvEdits[r.key])));
   const anyClosed = groups.some((g) => g.k && !tvOpen.has(g.k));
   $('#tv-toggle-all').textContent = anyClosed ? 'Mở tất cả' : 'Thu gọn tất cả';
   $('#tv-toggle-all').hidden = !groups.some((g) => g.k);
@@ -1824,6 +1829,7 @@ function renderCost() {
   // Bảng cây cho 1 khối: Nhóm -> Hạng mục -> Chi tiết
   const blockRows = (k) => {
     let html = '';
+    const gon = !nhomOf(k.code).some((n) => costOpen.has(n.code)); // chưa mở nhóm nào: chỉ hiện cột có số
     nhomOf(k.code).forEach((n, i) => {
       const no = stt(k, i);
       const g = tong.theo_nhom[n.code];
@@ -1831,8 +1837,8 @@ function renderCost() {
       const tps = HDV.includes(n.code) ? costData.thau_phu.filter((c) => (c.nhom || 'thau_phu') === n.code) : [];
       const open = costOpen.has(n.code), gc = `c-gc${i % 6}`; // màu nền riêng cho từng nhóm (nhóm, hạng mục, chi tiết cùng tông)
       html += `<tr class="c-g1 ${gc}${open ? ' c-open' : ''}${(g.so_dong || tps.length) ? '' : ' c-empty'}"><td class="num">${no}</td>
-        <td colspan="3">${toggle(n.code, rows.length || n.sub.length || tps.length)}<b>${esc(n.ten)}</b> <span class="muted small">(${tps.length ? `${new Set(tps.map((c) => c.hd_cdt_id || 0)).size} HĐ CĐT · ${tps.length} HĐ` + (rows.length ? ' + ' + rows.length + ' dòng lẻ' : '') : g.so_dong + ' dòng'})</span>${g.tam_tinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>
-        ${sumCells(g, 'strong')}<td></td><td class="row-actions">${addBtn(n.code, n.sub[0]?.code)}</td></tr>`;
+        <td ${gon ? '' : 'colspan="3"'}>${toggle(n.code, rows.length || n.sub.length || tps.length)}<b>${esc(n.ten)}</b> <span class="muted small">(${tps.length ? `${new Set(tps.map((c) => c.hd_cdt_id || 0)).size} HĐ CĐT · ${tps.length} HĐ` + (rows.length ? ' + ' + rows.length + ' dòng lẻ' : '') : g.so_dong + ' dòng'})</span>${g.tam_tinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>
+        ${sumCells(g, 'strong')}${gon ? '' : '<td></td>'}<td class="row-actions">${addBtn(n.code, n.sub[0]?.code)}</td></tr>`;
       if (!open) return;
       // Hợp đồng đầu vào (thầu phụ, vật tư, MMTB, nhân công): gộp theo HĐ chủ đầu tư (cấp 2), từng HĐ là cấp 3
       const tpGs = tps.length ? tpGroups(tps) : [];
@@ -1895,8 +1901,8 @@ function renderCost() {
         <div class="table-wrap">
           <table class="cost-table">
             <thead><tr>
-              <th class="num">#</th><th>Nội dung</th><th>Đối tác / Số HĐ-CT</th><th>Ngày</th>
-              <th class="num">Trước VAT</th><th class="num">Sau VAT</th><th class="num c-pdt">% DT</th><th>Ghi chú</th><th></th>
+              <th class="num">#</th><th>Nội dung</th><th class="c-o">Đối tác / Số HĐ-CT</th><th class="c-o">Ngày</th>
+              <th class="num">Trước VAT</th><th class="num">Sau VAT</th><th class="num c-pdt">% DT</th><th class="c-o">Ghi chú</th><th></th>
             </tr></thead>
             <tbody></tbody><tfoot></tfoot>
           </table>
@@ -1912,7 +1918,9 @@ function renderCost() {
     const t = tong.theo_khoi[k.code];
     $('[data-ktotal]', card).textContent = dvT(t.sau_vat);
     $('tbody', card).innerHTML = blockRows(k);
-    $('tfoot', card).innerHTML = `<tr><td></td><td colspan="3">TỔNG ${esc(k.ten)}${t.tam_tinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>${sumCells(t)}<td colspan="2"></td></tr>`;
+    const gon = !nhomOf(k.code).some((n) => costOpen.has(n.code));
+    $('table', card).classList.toggle('c-gon', gon);
+    $('tfoot', card).innerHTML = `<tr><td></td><td ${gon ? '' : 'colspan="3"'}>TỔNG ${esc(k.ten)}${t.tam_tinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>${sumCells(t)}<td colspan="${gon ? 1 : 2}"></td></tr>`;
     $('[data-ctoggle]', card).textContent = blockKeys(k.code).every((x) => costOpen.has(x)) ? 'Thu gọn tất cả' : 'Mở tất cả';
   }
   renderTpCard();

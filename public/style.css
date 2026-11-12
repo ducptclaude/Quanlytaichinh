@@ -3574,3 +3574,14 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 
 .rev-table:not(.qt-gon) .ht-bar { width: 64px; }
 .rev-table:not(.qt-gon) .ht-prog { gap: 6px; }
+
+/* V06: doanh thu vượt = tốt (xanh), đã QT mà thiếu = cam, vượt >110% nhắc kiểm tra PL */
+.ht-bar i.thieu { background: #f59e0b; }
+.ht-prog .ht-tot { color: #16a34a; font-weight: 700; }
+.ht-prog .ht-thieu { color: #d97706; font-weight: 700; }
+.ht-prog .ht-kt { font-size: 11px; font-weight: 700; color: #b45309; background: #fff4d6; border-radius: 6px; padding: 1px 6px; }
+:root[data-theme="dark"] .ht-prog .ht-kt { background: rgba(247,199,104,.14); color: #f7d38a; }
+
+/* Thu gọn hết nhóm -> ẩn các cột chỉ có ở dòng chi tiết; mở ra hiện lại */
+.tv-table.tv-gon .c-o { display: none; }
+.cost-table.c-gon th.c-o { display: none; }
