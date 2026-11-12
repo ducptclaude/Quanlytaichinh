@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Chi phí chung – không gắn HĐ": "General costs – not linked to a contract",
 "Thu gọn các HĐ": "Collapse contracts",
 "Xem các HĐ của dự án": "Show the project contracts",
 "HĐ đã quyết toán": "Contract final account settled",

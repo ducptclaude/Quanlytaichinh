@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.12.11.26 – Báo cáo IV: Chi phí và Lợi nhuận cũng theo dự án (tổng) + từng HĐ CĐT (con)
+- Chi phí của 1 HĐ CĐT = HĐ đầu vào gắn HĐ CĐT đó (theo TĐ) + gói chi phí gắn HĐ CĐT đó (TĐ1 tạm tính; TĐ2/TĐ3 chỉ gói chưa có HĐ, chưa đóng, nhóm chưa QT); đã chi = đã trả HĐ đầu vào. Phần còn lại hiện 1 dòng "Chi phí chung – không gắn HĐ" (chi phí đã ghi, HĐ/gói chưa gắn, điều chỉnh / QT cả nhóm) = dự án − tổng các HĐ → luôn khớp. Lợi nhuận HĐ = DT HĐ − CP HĐ; dòng chung = − chi phí chung.
+- Máy chủ chỉ THÊM cp_td cho từng HĐ. Thử: HĐ 1012 = gói VT 300 + HĐTP 350 = 650; HĐ 1011 = gói KC 300 → 2 HĐ 350; chung = điều chỉnh nhóm 20; tổng 950 / 1.020 khớp. Tester 4.518 ĐẠT, 0 LỖI.
+
 ## V11.12.11.26 – Báo cáo IV: chi tiết doanh thu = dự án (dòng tổng) + các HĐ CĐT (dòng con)
 - Bảng "Chi tiết doanh thu với chủ đầu tư": mỗi dự án là dòng tổng (nền đậm, nút ▾ / ▸ thu gọn), dưới là từng HĐ: TĐ1, điều chỉnh theo văn bản, TĐ2, TĐ3 (mờ nếu HĐ chưa QT, "✓ QT" nếu đã QT), đã nhận, còn lại.
 - Máy chủ chỉ THÊM td1 / td2 / pl cho từng HĐ (lib/report.js), không đổi số cũ. Đối chiếu: tổng các HĐ con = dòng dự án ở TĐ1/TĐ2/TĐ3, trước & sau VAT, 13 dự án – khớp hết. Tester 4.518 ĐẠT, 0 LỖI.

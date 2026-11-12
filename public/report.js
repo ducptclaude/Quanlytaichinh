@@ -1007,6 +1007,15 @@ function bMuc4Html(list, v) {
     return ` title="${label}\nThực – đã quyết toán (${q.length} dự án): ${bTy(sq)} ${TY()}\nTạm tính theo TĐ2 – chưa QT (${t.length} dự án): ${bTy(st)} ${TY()}\nTổng: ${bn(sq + st)} đồng"`;
   };
   const tipCell = (k, label, val) => `<td class="num iv-tip"${splitTip(k, label)}>${val}</td>`;
+  // Dòng con theo HĐ chủ đầu tư (dùng cho cả 3 bảng chi tiết) + dòng "Chi phí chung – không gắn HĐ" để tổng khớp dòng dự án
+  const hdOpen = (x) => !BST.iv_hd_dong?.includes(x.d.id);
+  const tgBtn = (x) => ((x.d.hds || []).length ? `<button type="button" class="iv-tg no-print" data-ivhd="${x.d.id}" title="${hdOpen(x) ? 'Thu gọn các HĐ' : 'Xem các HĐ của dự án'}">${hdOpen(x) ? '▾' : '▸'}</button>` : '');
+  const prjP = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma">${tgBtn(x)}<b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}"><b>${esc(x.d.ten_du_an)}</b>${(x.d.hds || []).length ? ` <span class="muted small">(${x.d.hds.length} HĐ)</span>` : ''}</td>`;
+  const hdName = (h, i, j) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="kind-tag kind-hd">HĐ</span> ${esc(h.so_ma || h.so_hieu)}${h.so_pl ? ` <span class="muted small">+${h.so_pl} PL</span>` : ''}${h.da_qt ? ' <span class="iv-qt" title="HĐ đã quyết toán">✓ QT</span>' : ''}</td>`;
+  const chungName = (i, j) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="iv-chung" title="Chi phí không gắn được HĐ chủ đầu tư: chi phí đã ghi (gián tiếp, tài chính, mua lẻ…), HĐ đầu vào / gói chưa gắn HĐ CĐT, điều chỉnh – quyết toán cả nhóm">Chi phí chung – không gắn HĐ</span></td>`;
+  const hCp = (h) => { const c = h.cp_td || { gt: [0, 0, 0], sv: [0, 0, 0], da_chi: 0 }; const sv3 = c.sv[2], gt3 = c.gt[2];
+    return { c1: c[v][0], c2: c[v][1], c3: c[v][2], chi: v === 'sv' || !sv3 ? c.da_chi : Math.round(c.da_chi * (gt3 / sv3)), qt: c.qt }; };
+  const hDt = (h) => { const t2 = h.td2?.[v] ?? 0, t3 = h.td3?.[v] ?? t2, nh = v === 'sv' || !h.td3?.sv ? h.tien_ve : Math.round(h.tien_ve * (h.td3.gt / h.td3.sv)); return { t1: h.td1?.[v] ?? 0, t2, t3, nh }; };
   let det = '';
   if (ct === 'dt') {
     det = wrap('Chi tiết doanh thu với chủ đầu tư',
@@ -1033,8 +1042,13 @@ function bMuc4Html(list, v) {
     det = wrap('Chi tiết chi phí',
       `<tr><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">Tên dự án</th><th rowspan="2" class="num">TĐ1</th>
         <th colspan="${cpls.length + 1}" class="grp iv-g2">TĐ2</th><th rowspan="2" class="num">TĐ3</th><th rowspan="2" class="num">Đã chi</th><th rowspan="2" class="num">Còn phải chi</th></tr>${plHead(cpls)}`,
-      rows.map((x, i) => `<tr>${prj(x, i)}<td class="num">${m(x.c1)}</td>${plCols(cpls, x.cpl, x.c2)}
-        <td class="num strong">${m(x.c3, !x.qt)}</td><td class="num">${m(x.chi)}</td><td class="num strong">${m(x.con_chi, !x.qt)}</td></tr>`).join(''),
+      rows.map((x, i) => { const hs = x.d.hds || [], cs = hs.map(hCp), S = (k) => cs.reduce((a, c) => a + c[k], 0), r = { c1: x.c1 - S('c1'), c2: x.c2 - S('c2'), c3: x.c3 - S('c3'), chi: x.chi - S('chi') };
+        const dash = cpls.map(() => '<td class="num muted">–</td>').join('');
+        return `<tr class="iv-prj-row">${prjP(x, i)}<td class="num strong">${m(x.c1)}</td>${plCols(cpls, x.cpl, x.c2)}
+        <td class="num strong">${m(x.c3, !x.qt)}</td><td class="num strong">${m(x.chi)}</td><td class="num strong">${m(x.con_chi, !x.qt)}</td></tr>` +
+        (hdOpen(x) && hs.length ? hs.map((h, j) => { const c = cs[j]; return `<tr class="iv-hd-row">${hdName(h, i, j)}<td class="num">${m(c.c1)}</td>${dash}<td class="num">${m(c.c2)}</td><td class="num">${m(c.c3, !c.qt)}</td><td class="num">${m(c.chi)}</td><td class="num">${m(c.c3 - c.chi, !c.qt)}</td></tr>`; }).join('') +
+          (Math.abs(r.c1) + Math.abs(r.c2) + Math.abs(r.c3) + Math.abs(r.chi) > 0.5 ? `<tr class="iv-hd-row iv-chung-row">${chungName(i, hs.length)}<td class="num">${m(r.c1)}</td>${dash}<td class="num">${m(r.c2)}</td><td class="num">${m(r.c3, !x.qt)}</td><td class="num">${m(r.chi)}</td><td class="num">${m(r.c3 - r.chi, !x.qt)}</td></tr>` : '') : '');
+      }).join(''),
       `<tfoot><tr><td></td><td colspan="2">Tổng cộng (${rows.length} dự án)</td><td class="num">${bTy(T.c1)}</td>${cpls.map(() => '<td></td>').join('')}<td class="num">${bTy(T.c2)}</td>
         ${tipCell('c3', 'TĐ3 – Quyết toán', bTy(T.c3))}<td class="num">${bTy(T.chi)}</td>${tipCell('con_chi', 'Còn phải chi = TĐ3 − Đã chi', bTy(T.con_chi))}</tr></tfoot>`,
       'Chi phí = HĐ đầu vào – thầu phụ, vật tư, MMTB, nhân công (TĐ1 giá trị ký HĐ + PL · TĐ2 + các đợt điều chỉnh · TĐ3 quyết toán) + toàn bộ chi phí khác đã ghi nhận + dự trù theo nhóm (cộng dồn) · TĐ2 cột 1, 2, 3… = điều chỉnh theo văn bản HĐ, PL01, PL02… · Đã chi = trả HĐ đầu vào + chi phí khác đã chi · Còn phải chi = TĐ3 − Đã chi');
@@ -1044,8 +1058,14 @@ function bMuc4Html(list, v) {
       `<tr><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">Tên dự án</th><th colspan="2" class="grp">TĐ1 – Hợp đồng</th><th colspan="2" class="grp iv-g2">TĐ2 – Điều chỉnh</th>
         <th colspan="2" class="grp">TĐ3 – Quyết toán</th><th rowspan="2" class="num">Chênh lệch<br>TĐ3 − TĐ1</th><th rowspan="2" class="num">Thực tế<br>(thu − chi)</th></tr>
        <tr><th class="num">LN</th><th class="num">Tỷ suất</th><th class="num iv-g2">LN</th><th class="num iv-g2">Tỷ suất</th><th class="num">LN</th><th class="num">Tỷ suất</th></tr>`,
-      rows.map((x, i) => `<tr>${prj(x, i)}${lc(x.l1, tsF(x.l1, x.t1))}${lc(x.l2, tsF(x.l2, x.t2))}${lc(x.l3, tsF(x.l3, x.t3), !x.qt)}
-        <td class="num">${bTdDelta(x.l3, x.l1, true, false, '').replace(/ <small>.*?<\/small>/, '') || m(0)}</td><td class="num strong">${m(x.thuc)}</td></tr>`).join(''),
+      rows.map((x, i) => { const hs = x.d.hds || [], L = hs.map((h) => { const d = hDt(h), c = hCp(h); return { l1: d.t1 - c.c1, l2: d.t2 - c.c2, l3: d.t3 - c.c3, t1: d.t1, t2: d.t2, t3: d.t3, thuc: d.nh - c.chi, qt: h.da_qt && c.qt }; });
+        const S = (k) => L.reduce((a, y) => a + y[k], 0), r = { l1: x.l1 - S('l1'), l2: x.l2 - S('l2'), l3: x.l3 - S('l3'), thuc: x.thuc - S('thuc') };
+        const cl = (a, b) => `<td class="num">${bTdDelta(a, b, true, false, '').replace(/ <small>.*?<\/small>/, '') || m(0)}</td>`;
+        return `<tr class="iv-prj-row">${prjP(x, i)}${lc(x.l1, tsF(x.l1, x.t1))}${lc(x.l2, tsF(x.l2, x.t2))}${lc(x.l3, tsF(x.l3, x.t3), !x.qt)}
+        ${cl(x.l3, x.l1)}<td class="num strong">${m(x.thuc)}</td></tr>` +
+        (hdOpen(x) && hs.length ? hs.map((h, j) => { const y = L[j]; return `<tr class="iv-hd-row">${hdName(h, i, j)}${lc(y.l1, tsF(y.l1, y.t1))}${lc(y.l2, tsF(y.l2, y.t2))}${lc(y.l3, tsF(y.l3, y.t3), !y.qt)}${cl(y.l3, y.l1)}<td class="num">${m(y.thuc)}</td></tr>`; }).join('') +
+          (Math.abs(r.l1) + Math.abs(r.l2) + Math.abs(r.l3) + Math.abs(r.thuc) > 0.5 ? `<tr class="iv-hd-row iv-chung-row">${chungName(i, hs.length)}${lc(r.l1, null)}${lc(r.l2, null)}${lc(r.l3, null, !x.qt)}${cl(r.l3, r.l1)}<td class="num">${m(r.thuc)}</td></tr>` : '') : '');
+      }).join(''),
       foot([bTy(T.l1), pctT(tsF(T.l1, T.t1)), bTy(T.l2), pctT(tsF(T.l2, T.t2)), '__L3__', pctT(tsF(T.l3, T.t3)), `${T.l3 - T.l1 >= 0 ? '+' : '−'}${bTy(Math.abs(T.l3 - T.l1))}`, bTy(T.thuc)]).replace('<td class="num">__L3__</td>', tipCell('l3', 'Lợi nhuận TĐ3 – Quyết toán', bTy(T.l3))),
       'Lợi nhuận = Doanh thu − Chi phí tại từng thời điểm · Số mờ = chưa quyết toán, lấy theo TĐ2 · Thực tế = tiền đã nhận − tiền đã chi (không gồm vay, trả gốc)');
   }
