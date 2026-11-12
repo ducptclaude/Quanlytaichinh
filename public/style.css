@@ -3561,3 +3561,4 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
   .tp-c-in { width: 6px; } .tp-c-in2 { width: 12px; }
   #tp-card .tp-table td, #tp-card .tp-table th { padding-left: 6px; padding-right: 6px; }
 }
+.kpi .sub .kpi-pdt { border-bottom: 1px dotted currentColor; cursor: help; }

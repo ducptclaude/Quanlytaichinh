@@ -1976,14 +1976,14 @@ $('#tab-cost').addEventListener('click', async (e) => {
 const tpFilter = { q: '', loc: '', nhom: '' };
 // Tình trạng quyết toán HĐ đầu vào: chua = chưa QT (đang thực hiện) · con = đã QT, còn phải trả (giữ bảo hành, chưa trả hết)
 // · du = đã QT/đã trả đủ (còn lại = 0, khóa số) · vuot = trả vượt giá trị HT/QT
-const tpTT = (c) => (c.con_lai < 0 ? 'vuot' : !(c.khoa || c.da_qt) ? 'chua' : c.con_lai === 0 ? 'du' : 'con');
+const tpTT = (c) => (c.con_lai < 0 ? 'vuot' : !c.da_qt ? 'chua' : c.con_lai === 0 ? 'du' : 'con');
 const TP_TT = {
   chua: ['tp-st-chua', 'Chưa QT', 'Chưa quyết toán – đang thực hiện'],
   con: ['tp-st-con', 'Đã QT · còn phải trả', 'Đã quyết toán, còn tiền chưa trả (giữ bảo hành / chưa thanh toán hết)'],
   du: ['tp-st-lock', '🔒 Đã QT · trả đủ', 'Đã quyết toán và trả đủ (còn lại = 0) – khóa số'],
   vuot: ['tp-st-vuot', 'Trả vượt', 'Đã trả nhiều hơn giá trị HT/QT – cần kiểm tra'],
 };
-const tpDaQt = (c) => c.khoa || c.da_qt;
+const tpDaQt = (c) => Boolean(c.da_qt);
 // Nhóm theo HĐ chủ đầu tư (0 = chưa gắn); mặc định thu gọn, đang lọc/tìm thì tự mở
 const tpOpen = new Set();
 const hdCdtName = (id) => costData?.hd_cdt?.find((h) => h.id === id)?.so_hieu || '';
@@ -2046,19 +2046,22 @@ function costKpiTd() {
   const ss = (x, y) => { if (!b) return ''; const d = Math.round(x - y);
     return d ? `<span class="${d > 0 ? 'neg' : 'pos'} kpi-ss" title="So với TĐ${k - 1}: ${dvT(y)}">${d > 0 ? '▲ +' : '▼ −'}${dvT(Math.abs(d))}</span> so TĐ${k - 1}` : `<span class="muted">= TĐ${k - 1}</span>`; };
   const pc = (x) => (a.tong ? ((x / a.tong) * 100).toFixed(1).replace('.', ',') + '%' : '—');
+  // % so với DOANH THU sau VAT cùng TĐ (Báo cáo); rê chuột: % tổng chi phí
+  const dtK = Number(costData.dt_td?.[k - 1]) || 0, pdt = (x) => (dtK ? ((x / dtK) * 100).toFixed(1).replace('.', ',') + '%' : '—');
+  const pDt = (x) => `<span class="kpi-pdt" title="${pc(x)} tổng chi phí TĐ${k}${dtK ? ` · doanh thu TĐ${k}: ${dvT(dtK)}` : ''}">${pdt(x)} doanh thu</span>`;
   for (const kh of KHOI()) {
     const el = $(`#c-k-${kh.code}`); if (!el) continue;
     const lab = el.closest('.kpi').querySelector('.label'); lab.dataset.goc ||= lab.textContent;
     lab.textContent = `${lab.dataset.goc} · TĐ${k}`;
     el.textContent = dvT(a[kh.code]);
-    $(`#c-k-${kh.code}-sub`).innerHTML = `${pc(a[kh.code])} tổng${b ? ' · ' + ss(a[kh.code], b[kh.code]) : ''}`;
+    $(`#c-k-${kh.code}-sub`).innerHTML = `${pDt(a[kh.code])}${b ? ' · ' + ss(a[kh.code], b[kh.code]) : ''}`;
   }
   const t = $('#c-k-sau'); if (!t) return;
   const lab = t.closest('.kpi').querySelector('.label'); lab.dataset.goc ||= lab.textContent;
   lab.textContent = `Tổng chi phí TĐ${k} · sau VAT`;
   t.textContent = dvT(a.tong);
   const tong = costData.tong;
-  $('#c-k-sub').innerHTML = `${b ? ss(a.tong, b.tong) + '<br>' : ''}HĐ đầu vào ${dvT(a.hd)} · chi phí đã ghi ${dvT(a.ghi)}${a.goi ? ` · dự trù ${dvT(a.goi)}` : ''}` +
+  $('#c-k-sub').innerHTML = `${pDt(a.tong)}${b ? ' · ' + ss(a.tong, b.tong) : ''}<br>HĐ đầu vào ${dvT(a.hd)} · chi phí đã ghi ${dvT(a.ghi)}${a.goi ? ` · dự trù ${dvT(a.goi)}` : ''}` +
     (tong.ngoai_cp?.so_dong ? `<br>Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}` : '') +
     (tong.vay?.so_dong ? `<br>Không gồm tiền vay nhận về (tiền vào): ${dvT(tong.vay.sau_vat)}` : '');
 }
@@ -2079,7 +2082,7 @@ function costKpiByTp(list, leSv) {
   const S = (f) => list.reduce((a, c) => a + c[f], 0);
   const ten = tpFilter.nhom ? TP_NGAN[tpFilter.nhom] : 'HĐ đầu vào';
   const loc = { chua: 'chưa QT', con: 'đã QT · còn phải trả', du: 'đã QT · trả đủ' }[tpFilter.loc];
-  const nQt = list.filter((c) => c.khoa || c.da_qt).length, nPl = list.reduce((a, c) => a + (c.so_pl || 0), 0);
+  const nQt = list.filter((c) => c.da_qt).length, nPl = list.reduce((a, c) => a + (c.so_pl || 0), 0);
   const data = [
     [`Giá trị HĐ · ${ten}`, S('hd_sau_vat') + leSv, `${list.length} HĐ · ${nPl} PL${leSv ? ` + mua lẻ ${dvT(leSv)}` : ''} · sau VAT`],
     ['Giá trị HT/QT', S('qt_sau_vat') + leSv, `${nQt}/${list.length} HĐ đã quyết toán${leSv ? ' · gồm mua lẻ' : ''}`],

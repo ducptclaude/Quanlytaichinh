@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Chưa QT (đã trả đủ)": "Not settled (fully paid)",
 "% DT": "% Rev.",
 "Nhấp đúp vào ": "Double-click a ",
 "nhóm": "group",
@@ -1550,6 +1551,22 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"{} doanh thu",
+"{} of revenue"
+],
+[
+"{} tổng chi phí TĐ{} · doanh thu TĐ{}: {}",
+"{} of total M{} cost · M{} revenue: {}"
+],
+[
+"{} tổng chi phí TĐ{}",
+"{} of total M{} cost"
+],
+[
+"{} doanh thu · {} so TĐ{}",
+"{} of revenue · {} vs M{}"
+],
 [
 "% DT TĐ{}",
 "% Rev. M{}"
