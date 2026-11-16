@@ -1619,6 +1619,10 @@ window.BKS_EN = {
 },
 "patterns": [
 [
+"💰 Tiền về {} khoản {}",
+"💰 Collections: {} receipts {}"
+],
+[
 "Hoàn thành: {}",
 "Completed: {}"
 ],

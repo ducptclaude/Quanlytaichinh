@@ -1989,8 +1989,8 @@ function bPcTongQuan(d) {
   if (d.tien_chung?.thu) VC.push({ muc: 'tb', noi_dung: `Tiền về chưa gắn HĐ: ${bTy(d.tien_chung.thu)} ${TY()}`, link: { tab: 'revenue' } });
   for (const h of d.hds || []) if ((h.phai_thu || 0) >= 1e6) VC.push({ muc: 'thap', noi_dung: `HĐ ${h.so_ma}: đã nghiệm thu chưa thu tiền ${bTy(h.phai_thu)} ${TY()}`, link: { tab: 'revenue' } });
   const vc = [...VC, ...(d.canh_bao || [])].sort((a, b) => ({ cao: 0, tb: 1, thap: 2 }[a.muc] - { cao: 0, tb: 1, thap: 2 }[b.muc]));
-  const viec = `<div class="pc-sub-h">2. Việc cần xử lý <small class="muted">${vc.length ? `${vc.length} việc · bấm để mở đúng chỗ` : ''}</small></div>
-    ${vc.length ? `<ul class="pc-todo">${vc.slice(0, 12).map((w) => `<li ${w.link ? bWarnAttr(w, d.id) : ''}><span class="b-muc m-${w.muc}">${MUC[w.muc]}</span> ${esc(w.noi_dung)}${w.link ? ` <small class="muted">${bWarnPlace(w.link)} →</small>` : ''}</li>`).join('')}${vc.length > 12 ? `<li class="muted">… và ${vc.length - 12} việc khác (xem Cảnh báo)</li>` : ''}</ul>` : '<p class="muted small">✓ Không có việc tồn đọng</p>'}`;
+  const viec = `<details class="pc-fold"><summary class="pc-sub-h">2. Việc cần xử lý <small class="muted">${vc.length ? `${vc.length} việc · bấm để xem` : 'không có'}</small></summary>
+    ${vc.length ? `<ul class="pc-todo">${vc.slice(0, 12).map((w) => `<li ${w.link ? bWarnAttr(w, d.id) : ''}><span class="b-muc m-${w.muc}">${MUC[w.muc]}</span> ${esc(w.noi_dung)}${w.link ? ` <small class="muted">${bWarnPlace(w.link)} →</small>` : ''}</li>`).join('')}${vc.length > 12 ? `<li class="muted">… và ${vc.length - 12} việc khác (xem Cảnh báo)</li>` : ''}</ul>` : '<p class="muted small">✓ Không có việc tồn đọng</p>'}</details>`;
   // 3. Dòng tiền lũy kế theo tháng
   const th = d.tien_thuc?.thang || {}, ks = Object.keys(th).sort();
   let lk = { thu: 0, chi: 0 };
@@ -2018,15 +2018,15 @@ function bPcTongQuan(d) {
   if (d.ngay_qt) mo(d.ngay_qt).qt = true;
   const sgn = (x) => `<b class="${x < 0 ? 'neg' : ''}">${x > 0 ? '+' : ''}${bTy(x)}</b>`;
   const keys = Object.keys(MT).sort((a, b) => (a === '~') - (b === '~') || a.localeCompare(b));
-  const moc = `<div class="pc-sub-h">4. Mốc thời gian dự án <small class="muted">mỗi tháng 1 dòng · giá trị trước VAT, tiền về sau VAT · ${TY()}</small></div>
+  const moc = `<details class="pc-fold"><summary class="pc-sub-h">4. Mốc thời gian dự án <small class="muted">${keys.length} tháng · bấm để xem · giá trị trước VAT, tiền về sau VAT · ${TY()}</small></summary>
     ${keys.length ? `<ol class="pc-timeline">${keys.map((k) => { const x = MT[k], it = [];
       if (x.ky.length) it.push(`<span class="tl-ky" title="${esc(x.ky.join(', '))}">📝 Ký ${x.ky.length > 2 ? `${x.ky.length} văn bản` : esc(x.ky.join(', '))}</span>`);
-      if (x.dcd[0]) it.push(`<span>± ĐC doanh thu ${x.dcd[0]} lần ${sgn(x.dcd[1])}</span>`);
-      if (x.dcc[0]) it.push(`<span>± ĐC chi phí ${x.dcc[0]} lần ${sgn(x.dcc[1])}</span>`);
+      if (x.dcd[0]) it.push(`<span>± ĐC doanh thu ${x.dcd[0]} đợt ${sgn(x.dcd[1])}</span>`);
+      if (x.dcc[0]) it.push(`<span>± ĐC chi phí ${x.dcc[0]} đợt ${sgn(x.dcc[1])}</span>`);
       if (x.nt[0]) it.push(`<span>✔ Nghiệm thu ${x.nt[0]} đợt <b>${bTy(x.nt[1])}</b></span>`);
-      if (x.tv[0]) it.push(`<span>💰 Tiền về ${x.tv[0]} lần <b>${bTy(x.tv[1])}</b></span>`);
+      if (x.tv[0]) it.push(`<span title="Số khoản tiền về trong tháng (đếm số lần nhận tiền, không phải số thứ tự đợt)">💰 Tiền về ${x.tv[0]} khoản <b>${bTy(x.tv[1])}</b></span>`);
       if (x.qt) it.push('<span>🏁 Quyết toán</span>');
-      return `<li><b class="tl-m">${k === '~' ? 'Chưa ghi ngày' : `T${k.slice(5)}/${k.slice(0, 4)}`}</b><div class="tl-row">${it.join('')}</div></li>`; }).join('')}</ol>` : '<p class="muted small">Chưa có mốc</p>'}`;
+      return `<li><b class="tl-m">${k === '~' ? 'Chưa ghi ngày' : `T${k.slice(5)}/${k.slice(0, 4)}`}</b><div class="tl-row">${it.join('')}</div></li>`; }).join('')}</ol>` : '<p class="muted small">Chưa có mốc</p>'}</details>`;
   return `<div class="pc-tq">${suc}${viec}${dong}${moc}</div>`;
 }
 function bPcBody(d, tab) {

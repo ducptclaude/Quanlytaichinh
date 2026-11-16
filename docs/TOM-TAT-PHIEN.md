@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.16.11.26 – Tổng quan công trình: thu gọn Việc cần xử lý, Mốc thời gian · "Tiền về x khoản"
+- 2 phần mặc định thu gọn, bấm tiêu đề để mở. Mốc thời gian: "Tiền về 2 lần" → "Tiền về 2 khoản" (đếm số lần nhận tiền trong tháng, không phải đợt số 2); điều chỉnh ghi "x đợt".
+
 ## V06.16.11.26 – Báo cáo theo công trình › Tổng quan làm lại (không lặp mục I–IV)
 - Bỏ: bảng Chi phí TĐ1, biểu đồ DT–CP–LN (sai, thiếu cột CP), vòng tròn cơ cấu chi phí (1.440 không khớp số nào), khung công nợ theo kỳ.
 - Mới: (1) Sức khỏe dự án – % thời gian đã qua · % giá trị hoàn thành · tiền về / GTHT · đã chi / CP TĐ3 + câu kết luận tự động (chậm tiến độ / chậm thu / chi nhanh / ứng vốn / cân đối);
