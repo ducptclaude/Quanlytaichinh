@@ -901,7 +901,7 @@ function bTongHopHtml(list, v, P) {
     <div class="i-tdbar">${seg}<label class="i-doi ${k > 1 ? '' : 'off'}" title="${k > 1 ? '' : 'TĐ1 là mốc đầu – không có thay đổi để lọc'}"><input type="checkbox" data-idoi ${chiDoi ? 'checked' : ''} ${k > 1 ? '' : 'disabled'}> Chỉ dự án có thay đổi <b>${k > 1 ? nDoi : 0}</b>/${R.length}</label><span class="muted small">Mũi tên ▲▼ = tăng / giảm so với TĐ liền trước</span></div>
     <div class="f-grid th-grid3">
       ${card('dt', `Doanh thu ${TEN[2]}`, TT.dt, k === 1 ? [`${rows.length} dự án · giá trị HĐ + PL khi ký`, Math.abs(cDt.hd + cDt.pl - TT.dt) < 1e6 ? tachDt : ''] : [sub('dt', true), tachDt, luuY(qtThieu, 'HĐ CĐT')])}
-      ${card('cp', `Chi phí ${TEN[2]}`, TT.cp, k === 1 ? ['Dự toán chi phí khi ký HĐ (gồm gián tiếp, tài chính)', dtruLine] : [sub('cp', false), [cTp.hd || cTp.pl ? tachCp : '', dtruLine].filter(Boolean).join(' · '), luuY(tpThieu, 'HĐ đầu vào')], 'tỷ', '', [bpct(TT.cp, TT.dt), 'Chi phí so với doanh thu'])}
+      ${card('cp', `Chi phí ${TEN[2]}`, TT.cp, k === 1 ? ['Dự toán chi phí khi ký HĐ (gồm gián tiếp, tài chính)'] : [sub('cp', false), luuY(tpThieu, 'HĐ đầu vào')] /* V05.16: bỏ dòng "HĐ đầu vào · Dự trù" (người dùng yêu cầu) */, 'tỷ', '', [bpct(TT.cp, TT.dt), 'Chi phí so với doanh thu'])}
       ${card('ln', `Lợi nhuận ${TEN[2]}`, TT.ln, [k > 1 ? `${sub('ln', true)} · TĐ${k - 1} ${bpct(P0.ln, P0.dt)}` : `Bình quân <b>${rows.length ? bTy(TT.ln / rows.length) : '0'}</b> ${TY()} / dự án`], 'tỷ', '', [bpct(TT.ln, TT.dt), 'Tỷ suất lợi nhuận'])}
     </div>
     <div class="table-wrap"><table class="b-table th-table th-t1">

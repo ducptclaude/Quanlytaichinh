@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.16.11.26 – Thẻ Chi phí mục I: bỏ dòng "HĐ đầu vào · Dự trù"
+- Dòng này chỉ tách 1 phần chi phí (thiếu gián tiếp, tài chính) nên cộng không ra số lớn → bỏ hẳn (người dùng chọn). Giữ: % / so với TĐ trước / cảnh báo văn bản chưa có số QT. Thẻ Doanh thu giữ dòng "HĐ · PL".
+- tester 4518 ĐẠT, 0 LỖI; điện thoại không tràn.
+
 ## V04.16.11.26 – Bỏ chốt TĐ: TĐ1 = số hệ thống tự tính, không làm tròn
 - Lý do dòng "Chênh lệch với số chốt TĐ1" (DA-05: 50): KHÔNG phải số chốt (DA-01..05 đều chưa chốt TĐ nào – đã kiểm tra trên web), mà do dự án chưa chốt bị làm tròn chi phí TĐ1 sau VAT tới 0,1 tỷ (1.450 → 1.500).
 - Mục I / III / Dashboard / bảng chi tiết dòng tiền: TĐ1 lấy `bTd1He` = cùng công thức mục IV (doanh thu HĐ + PL ký; chi phí = HĐ đầu vào ký + gói + chi phí gián tiếp, tài chính), trước & sau VAT, không làm tròn. Bỏ chữ "đã chốt TĐ1", dấu (*), dòng chênh lệch số chốt.
