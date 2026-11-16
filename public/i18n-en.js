@@ -1,6 +1,12 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Trực tiếp chưa gắn HĐ": "Direct – not linked to a contract",
+"Chi phí thời điểm 1": "M1 costs",
+"Chi phí so với doanh thu": "Cost as % of revenue",
+"Dự toán chi phí khi ký HĐ (gồm gián tiếp, tài chính)": "Cost estimate at contract signing (incl. indirect, financial)",
+"Số chốt thời điểm": "Locked milestone figures",
+"(mục I · TĐ1 dùng số chốt nếu có)": "(section I · M1 uses locked figures if any)",
 "Gắn vào gói": "Link to package",
 "— Không gắn gói —": "— No package —",
 "TĐ2 – điều chỉnh": "M2 – adjustments",
@@ -1589,6 +1595,18 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"gồm dự trù gián tiếp + tài chính · {}",
+"incl. indirect + financial estimates · {}"
+],
+[
+"HĐ đầu vào {} (PL {})",
+"Procurement contracts {} (Addendum {})"
+],
+[
+"✓ TĐ{} đã chốt {}",
+"✓ M{} locked {}"
+],
 [
 "Tham khảo – phân bổ chi phí chung theo tỷ lệ doanh thu TĐ{} ({}): {} → Lợi nhuận sau phân bổ {} ({})",
 "For reference – common costs allocated by M{} revenue share ({}): {} → Profit after allocation {} ({})"

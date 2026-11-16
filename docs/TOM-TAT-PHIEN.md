@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.16.11.26 – Bỏ ma trận kế hoạch · Chi phí TĐ1 gồm gián tiếp + tài chính · Mục IV tách khối · % trên thẻ mục I
+- Báo cáo theo công trình › Tổng quan: bỏ ma trận TĐ1–TĐ3 (số cũ không khớp mục I); chỉ giữ dòng gọn "Số chốt thời điểm" với nút + Chốt / Sửa (mục I TĐ1 vẫn dùng số chốt).
+- Bảng "Chi phí kế hoạch" → "Chi phí thời điểm 1 – gồm dự trù gián tiếp + tài chính": theo khối / nhóm tại TĐ1, cùng số mục I TĐ1. Máy chủ thêm `cp_td_nhom` (chi phí từng nhóm × TĐ1–3, đã chi) – tổng nhóm = chi phí dự án ở mọi dự án, 3 TĐ, trước & sau VAT.
+- Mục IV › Chi tiết chi phí: dưới dự án tách Chi phí trực tiếp (→ từng HĐ CĐT + "Trực tiếp chưa gắn HĐ") · Chi phí gián tiếp · Chi phí tài chính; rê chuột khối xem từng nhóm.
+- Đã chi theo HĐ CĐT (mục II, IV) tính cả mua lẻ gắn gói của HĐ đó; dòng chi phí chung mục II không còn đếm phần này.
+- Mục I: % hiện cạnh số lớn (chi phí / doanh thu, tỷ suất LN), gọn ghi chú (HĐ đầu vào · Dự trù 1 dòng).
+- Điểm khôi phục đầu phiên: `phien-16.11.26-08h18`. tester 4518 ĐẠT · kiem-tra-goi 47 ĐẠT, 0 LỖI; điện thoại không tràn ngang.
+
 ## V29.12.11.26 – Mục II tách dòng chi phí chung · phân bổ chi phí chung cho từng HĐ (tham khảo)
 - Mục II: rê chuột dòng "Chi phí chung – không gắn HĐ" thấy tách tiền thật sau VAT: chi phí đã ghi theo nhóm (lương, tài chính, lãi vay…), đã trả HĐ đầu vào chưa gắn HĐ CĐT, tiền về chưa gắn HĐ. Máy chủ trả thêm `tien_chung` (chỉ đọc).
 - Mục I, II: rê chuột tên từng HĐ thấy phần chi phí chung chia cho HĐ đó (mục I theo tỷ lệ doanh thu TĐ đang chọn, mục II theo tỷ lệ dòng thu) và lợi nhuận / còn lại sau phân bổ. Chỉ tham khảo, không đổi số trên bảng.
