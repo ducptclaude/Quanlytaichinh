@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.16.11.26 – Chi phí gián tiếp, tài chính: TĐ1, TĐ2 theo % doanh thu (nhập tay); TĐ3 = thực chi
+- Trang Chi phí (tab TĐ1 / TĐ2): ô "Dự trù theo % doanh thu" – gián tiếp %, tài chính % → = % × doanh thu cùng TĐ (trước VAT). TĐ2 trống = theo % TĐ1. Trống TĐ1 = tính như cũ (DA-01..04 không đổi tới khi nhập).
+- TĐ3 (quyết toán): gián tiếp, tài chính = thực chi (chi phí đã ghi). Tiền chi thật luôn vào thực chi mục II (không đổi).
+- Kho dữ liệu: du_an thêm pt_gt1, pt_gt2, pt_tc1, pt_tc2 (chỉ THÊM). API PUT /du-an/:id/ty-le (qua luồng Duyệt, quyền HĐ). Máy chủ: chi phí theo nhóm / khối (`cp_td_nhom`, `dtru`) đã gồm dự trù % → mục I–IV, Dashboard, trang Chi phí cùng số.
+- kiem-tra-goi: 10% / 5% → CP 945 / 970 / 760, TĐ2 12% → 1.002, xóa % → 760 / 770 / 760, thực chi không đổi, chặn > 100%: 85 ĐẠT, 0 LỖI. tester 4612 ĐẠT. Các bảng con vẫn cộng khớp dòng dự án.
+
 ## V09.16.11.26 – Chi tiết lợi nhuận gọn chữ
 - Cột "Chênh lệch TĐ3 − TĐ1" → "LN TĐ3 − TĐ1" (rê chuột giải thích); không đổi để trống (bỏ "● Không đổi"); có đổi ghi ▲ +x (+y%) / ▼ −x (−y%). Bỏ "—" ở cột tỷ suất các dòng trừ. Ghi chú cuối bảng rút còn 1 dòng ngắn.
 

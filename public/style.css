@@ -3706,3 +3706,6 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
   .pc-timeline > li { grid-template-columns: 1fr; } }
 .pc-fold > summary { cursor: pointer; list-style: none; } .pc-fold > summary::-webkit-details-marker { display: none; }
 .pc-fold > summary::before { content: '▸'; display: inline-block; width: 16px; color: var(--muted); } .pc-fold[open] > summary::before { content: '▾'; }
+.c-pt { background: var(--card, #fff); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 13px; }
+.pt-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; } .c-pt .pt-form label { display: inline-flex !important; flex-direction: row !important; align-items: center; gap: 6px; margin: 0; font-weight: 600; white-space: nowrap; }
+.pt-form .pt-in { width: 86px; text-align: right; } .pt-form small { flex-basis: 100%; }

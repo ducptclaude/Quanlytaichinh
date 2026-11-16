@@ -292,6 +292,7 @@ const DUYET_TRUOC = [
   ['PUT', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
   ['DELETE', /^\/du-an\/(\d+)\/thoi-diem\/([123])$/, 'Thời điểm (TĐ)', 'td', 'p', QUYEN.td],
   ['PUT', /^\/du-an\/(\d+)\/bh$/, 'DT-CP dự kiến · BH/Khác', 'bh', 'p', Q_ANY],
+  ['PUT', /^\/du-an\/(\d+)\/ty-le$/, 'Dự trù % gián tiếp / tài chính', 'ty_le', 'p', QUYEN.hd], // V10.16
   ['PUT', /^\/so-du-dau-ky$/, 'Số dư đầu kỳ', 'sddk', '', ['admin', 'ke_toan']],
 ];
 const KIEM = { // kiểm tra dữ liệu ngay lúc gửi (lỗi báo ngay cho người nhập, không phải chờ tới lúc duyệt)
@@ -443,13 +444,15 @@ api.use(wrap(async (req, res, next) => {
   else if ((kind === 'qt_vb' || kind === 'qt_tp') && method === 'PUT') noi_dung = `${audit.describe(kind, before)} | Nhập số quyết toán ${audit.money(data.gt_qt)} -> khoá văn bản`;
   else if (kind === 'qt_vb' || kind === 'qt_tp') noi_dung = `${audit.describe(kind, before)} | Mở khoá: bỏ số quyết toán`;
   else if (kind === 'qt_dt') noi_dung = `${audit.describe('qt_dt', before)} | ${data.dong ? 'Đóng' : 'Mở'} quyết toán${data.ngay_qt ? ' ngày ' + String(data.ngay_qt).split('-').reverse().join('/') : ''} · ${data.items.filter((x) => x.gt_qt !== null).length}/${data.items.length} văn bản có số QT`;
+  else if (kind === 'ty_le') { const f = (x) => (x === undefined || x === null || String(x).trim() === '' ? '—' : String(x).replace('.', ',') + '%');
+    noi_dung = `Dự trù % doanh thu – gián tiếp TĐ1 ${f(body.pt_gt1)} · TĐ2 ${f(body.pt_gt2)} · tài chính TĐ1 ${f(body.pt_tc1)} · TĐ2 ${f(body.pt_tc2)}`; }
   else if (kind === 'sddk') noi_dung = `${du_an_id ? 'Số dư đầu kỳ dự án' : 'Số dư đầu kỳ chung (công ty)'}: ${audit.money(soTien(body.so_tien))}`;
   else if (method === 'POST') noi_dung = audit.describe(kind, { ...data, tp: data?.so_ma || '', hd: '', so_hieu: [data?.ma_loai, data?.so_ma || data?.so_hieu].filter(Boolean).join(' ') }) || doi_tuong;
   else if (method === 'PUT') { const d = audit.diff(kind, before, { ...before, ...data }); noi_dung = audit.describe(kind, before) + (d ? ` | ${d}` : ''); }
   else noi_dung = audit.describe(kind, before);
   if (kind === 'thau_phu' && method === 'POST' && data?.gia_tri !== undefined) noi_dung += ` · HĐ gốc ${audit.money(data.gia_tri)}`;
   const tien = (kind === 'qt_vb' || kind === 'qt_tp') ? (method === 'PUT' ? data.gt_qt : before?.gt_qt ?? null) : kind === 'qt_dt' ? data.items.reduce((a, x) => a + (x.gt_qt || 0), 0) : method === 'DELETE' ? (before?.gia_tri ?? before?.so_tien ?? null)
-    : kind === 'td' ? soTien(body.cp) : kind === 'sddk' ? soTien(body.so_tien) : kind === 'bh' ? soTien(body.bh_khac)
+    : kind === 'td' ? soTien(body.cp) : kind === 'sddk' ? soTien(body.so_tien) : kind === 'bh' ? soTien(body.bh_khac) : kind === 'ty_le' ? null
       : (data?.gia_tri ?? data?.so_tien ?? null);
   const du_an = du_an_id ? (await store.listProjects()).find((p) => p.id === du_an_id)?.ma_du_an || '' : before?.ma_du_an || '';
   const hs = await store.addDuyet({ hanh_dong, doi_tuong, loai: kind, ban_ghi_id, du_an, du_an_id, noi_dung: noi_dung.slice(0, 1000), so_tien: tien === null ? null : Math.round(tien),
@@ -822,6 +825,25 @@ api.put('/du-an/:id/ngay', canHd, wrap(async (req, res) => {
 }));
 
 // Số liệu nhập tay của công trình: DT-CP dự kiến (mục I) · BH/Khác + ghi chú (mục IV)
+// V10.16: % dự trù chi phí gián tiếp / tài chính (× doanh thu) tại TĐ1, TĐ2 – trống = không dùng (TĐ2 trống = theo TĐ1)
+api.put('/du-an/:id/ty-le', canHd, wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const cur = id && (await store.listProjects()).find((p) => p.id === id);
+  if (!cur) return bad(res, 'Không tìm thấy dự án', 404);
+  const d = {}, errs = [];
+  for (const k of ['pt_gt1', 'pt_gt2', 'pt_tc1', 'pt_tc2']) {
+    const raw = req.body?.[k] === undefined ? cur[k] : req.body[k];
+    const v = raw === null || raw === undefined || String(raw).trim() === '' ? null : Number(String(raw).replace(',', '.'));
+    if (v !== null && (!Number.isFinite(v) || v < 0 || v > 100)) errs.push('Tỷ lệ phải từ 0 đến 100 (%)');
+    d[k] = v === null ? null : Math.round(v * 1000) / 1000;
+  }
+  if (errs.length) return bad(res, errs[0]);
+  await store.setProjectPt(id, d, req.user.id);
+  const f = (x) => (x === null || x === undefined ? '—' : String(x).replace('.', ',') + '%');
+  audit.log(req, 'Sửa', 'Dự án', `Dự trù % doanh thu – gián tiếp TĐ1 ${f(d.pt_gt1)} · TĐ2 ${f(d.pt_gt2)} · tài chính TĐ1 ${f(d.pt_tc1)} · TĐ2 ${f(d.pt_tc2)}`, { du_an: cur.ma_du_an });
+  res.json({ id, ...d });
+}));
+
 api.put('/du-an/:id/bh', canAny, wrap(async (req, res) => {
   const id = parseId(req.params.id);
   const cur = id && (await store.listProjects()).find((p) => p.id === id);
@@ -1416,7 +1438,10 @@ api.get('/du-an/:id/chi-phi', wrap(async (req, res) => {
   // Doanh thu sau VAT tại TĐ1 / TĐ2 / TĐ3 (cùng cách tính Báo cáo) – để tính tỷ trọng chi phí so với doanh thu
   const bc = projectReport(du_an, { rev: sortRevenue(revAll).map(calcLine), tienVe: sortTienVe(tienVe), cost: items, tp: thau_phu, duTru: du_tru });
   const dt_td = [bc.moc?.dt?.goc?.sv || 0, bc.moc?.dt?.ps?.sv || 0, bc.moc?.dt?.qt?.sv || 0];
-  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]), du_tru, dt_td });
+  const dt_td_gt = [bc.moc?.dt?.goc?.gt || 0, bc.moc?.dt?.ps?.gt || 0, bc.moc?.dt?.qt?.gt || 0];
+  // V10.16: chi phí theo khối × TĐ (sau VAT, cùng số Báo cáo) + dự trù % gián tiếp / tài chính
+  const cp_khoi = ['B1', 'B2', 'B3'].reduce((o, kh) => { o[kh] = [0, 1, 2].map((j) => (bc.cp_td_nhom || []).filter((n) => n.khoi === kh).reduce((a, n) => a + n.sv[j], 0)); return o; }, {});
+  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]), du_tru, dt_td, dt_td_gt, cp_khoi, pt_td: bc.moc?.cp?.pt_td || {} });
 }));
 
 // Chi phí tổng hợp TẤT CẢ dự án (chỉ xem): ghép dữ liệu từng dự án, tính tổng bằng cùng hàm như từng dự án

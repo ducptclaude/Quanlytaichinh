@@ -2076,10 +2076,13 @@ function costKpiTd() {
       const v = kk === 1 ? S('ky') : kk === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2;
       o[khoiOf(code)] += v; o.goi += v;
     }
+    // V10.16: gián tiếp / tài chính theo % doanh thu (TĐ1, TĐ2) hoặc thực chi (TĐ3) – lấy đúng số máy chủ (như Báo cáo)
+    for (const kh of ['B2', 'B3']) if (costData.pt_td?.[kh] && costData.cp_khoi?.[kh]) o[kh] = costData.cp_khoi[kh][kk - 1];
     o.tong = o.B1 + o.B2 + o.B3;
     return o;
   };
   const a = tai(k), b = k > 1 ? tai(k - 1) : null;
+  ptHtml(k);
   const ss = (x, y) => { if (!b) return ''; const d = Math.round(x - y);
     return d ? `<span class="${d > 0 ? 'neg' : 'pos'} kpi-ss" title="So với TĐ${k - 1}: ${dvT(y)}">${d > 0 ? '▲ +' : '▼ −'}${dvT(Math.abs(d))}</span> so TĐ${k - 1}` : `<span class="muted">= TĐ${k - 1}</span>`; };
   const pc = (x) => (a.tong ? ((x / a.tong) * 100).toFixed(1).replace('.', ',') + '%' : '—');
@@ -2098,10 +2101,43 @@ function costKpiTd() {
   lab.textContent = `Tổng chi phí TĐ${k} · sau VAT`;
   t.textContent = dvT(a.tong);
   const tong = costData.tong;
-  $('#c-k-sub').innerHTML = `${pDt(a.tong)}${b ? ' · ' + ss(a.tong, b.tong) : ''}<br>HĐ đầu vào ${dvT(a.hd)} · chi phí đã ghi ${dvT(a.ghi)}${a.goi ? ` · dự trù ${dvT(a.goi)}` : ''}` +
+  const coPt = k < 3 && ['B2', 'B3'].some((kh) => costData.pt_td?.[kh]); // V10.16: đang dự trù % -> bỏ dòng tách (không cộng ra tổng)
+  $('#c-k-sub').innerHTML = `${pDt(a.tong)}${b ? ' · ' + ss(a.tong, b.tong) : ''}${coPt ? '' : `<br>HĐ đầu vào ${dvT(a.hd)} · chi phí đã ghi ${dvT(a.ghi)}${a.goi ? ` · dự trù ${dvT(a.goi)}` : ''}`}` +
     (tong.ngoai_cp?.so_dong ? `<br>Không gồm trả nợ gốc vay: ${dvT(tong.ngoai_cp.sau_vat)}` : '') +
     (tong.vay?.so_dong ? `<br>Không gồm tiền vay nhận về (tiền vào): ${dvT(tong.vay.sau_vat)}` : '');
 }
+// V10.16: ô nhập % dự trù chi phí gián tiếp / tài chính (× doanh thu cùng TĐ) – TĐ1, TĐ2 nhập tay; TĐ3 = thực chi
+function ptHtml(k) {
+  const el = $('#c-pt'); if (!el) return;
+  const d = costData?.du_an; if (!d || costAll) { el.hidden = true; return; }
+  el.hidden = false;
+  const num = (x) => (x === null || x === undefined ? '' : String(x).replace('.', ','));
+  const dt = Number(costData.dt_td_gt?.[k - 1]) || 0, pt = costData.pt_td || {};
+  const thuc = (kh) => (costData.items || []).filter((r) => NHOM().find((n) => n.code === r.nhom)?.khoi === kh && !NHOM().find((n) => n.code === r.nhom)?.sub.find((sc) => sc.code === r.nhom_con)?.khong_tinh_cp).reduce((a, r) => a + (Number(r.gia_tri) || 0), 0);
+  if (k === 3) {
+    el.innerHTML = `<b>TĐ3 – Quyết toán:</b> chi phí gián tiếp, tài chính = <b>thực chi</b> (gián tiếp ${dvT(thuc('B2'))} · tài chính ${dvT(thuc('B3'))}, trước VAT). Dự trù % chỉ dùng ở TĐ1, TĐ2.`;
+    return;
+  }
+  const f = (key) => d[key] ?? null, edit = can('hd');
+  const o1 = (key, ph) => `<input class="pt-in" name="${key}" inputmode="decimal" value="${num(f(key))}" placeholder="${ph}" ${edit ? '' : 'disabled'} aria-label="${key}">`;
+  const gt = k === 1 ? 'pt_gt1' : 'pt_gt2', tc = k === 1 ? 'pt_tc1' : 'pt_tc2';
+  const ph = (k1) => (k === 2 && f(k1) !== null ? `theo TĐ1: ${num(f(k1))}` : '%');
+  const val = (kh) => (pt[kh] ? pt[kh].gt[k - 1] : null);
+  el.innerHTML = `<form id="pt-form" class="pt-form"><span><b>Dự trù theo % doanh thu TĐ${k}</b> <small class="muted">(doanh thu TĐ${k} trước VAT ${dvT(dt)})</small></span>
+    <label>Gián tiếp ${o1(gt, ph('pt_gt1'))}%${val('B2') !== null ? ` = <b>${dvT(val('B2'))}</b>` : ''}</label>
+    <label>Tài chính ${o1(tc, ph('pt_tc1'))}%${val('B3') !== null ? ` = <b>${dvT(val('B3'))}</b>` : ''}</label>
+    ${edit ? '<button type="submit" class="sm primary">Lưu</button>' : ''}
+    <small class="muted">Tiền chi thực tế (lương, lãi vay…) ghi ở bảng chi phí → vào thực chi; TĐ3 lấy thực chi.${k === 2 ? ' TĐ2 để trống = theo % TĐ1.' : ''} Để trống TĐ1 = tính như cũ (chi phí đã ghi).</small><span class="msg" id="pt-msg"></span></form>`;
+}
+document.addEventListener('submit', async (e) => {
+  if (e.target.id !== 'pt-form') return;
+  e.preventDefault();
+  const body = {}; for (const i of e.target.querySelectorAll('.pt-in')) body[i.name] = i.value.trim();
+  try {
+    await api(`/api/du-an/${revProjectId}/ty-le`, { method: 'PUT', body: JSON.stringify(body) });
+    await loadCost(); showMsg($('#pt-msg'), 'Đã lưu');
+  } catch (err) { showMsg($('#pt-msg'), err.message, 'err'); }
+});
 function costKpiByTp(list, leSv) {
   const box = $('#c-k-sau')?.closest('.kpis'); if (!box) return;
   const cards = [...box.querySelectorAll('.kpi')];

@@ -165,6 +165,7 @@
           <div class="kpi"><div class="label">Chi phí tài chính</div><div class="value" id="c-k-B3">0</div><div class="sub" id="c-k-B3-sub"></div></div>
           <div class="kpi"><div class="label">Tổng chi phí sau VAT</div><div class="value" id="c-k-sau">0</div><div class="sub" id="c-k-sub"></div></div>
         </div>
+        <div id="c-pt" class="c-pt" hidden></div>
 
         <div class="card" data-role="admin editor qs ke_toan">
           <h2 id="c-form-title">Thêm chi phí</h2>
@@ -557,6 +558,7 @@
             <div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>HĐ thật &amp; điều chỉnh</div>
             <ol>
               <li>Nhanh nhất: nhấp đúp nhóm → ở gói chưa có HĐ bấm <b>+ HĐ</b> → form Thêm chi phí điền sẵn nhóm, gói, HĐ CĐT → nhập Số HĐ, nhà cung cấp, giá trị ký. (Hoặc tự chọn Hình thức <b>Hợp đồng</b> + <b>Gói</b> / <b>Phát sinh ngoài TĐ1</b>.)</li>
+              <li><b>Chi phí gián tiếp, tài chính theo %</b>: ở trang Chi phí, tab <b>TĐ1</b> (và <b>TĐ2</b> nếu khác) nhập % dự trù × doanh thu cùng TĐ → <b>Lưu</b>. TĐ1, TĐ2 lấy số dự trù; <b>TĐ3 (quyết toán) = thực chi</b>. Tiền lương, lãi vay… chi thật vẫn ghi ở bảng chi phí → vào <b>thực chi</b> (mục II). Để trống % = tính như cũ.</li>
               <li><b>Mua lẻ thuộc 1 gói</b> (VD gói vật tư 200, mua lẻ dần): thêm dòng chi phí, chọn ô <b>Gắn vào gói</b>. TĐ1 vẫn = giá trị gói (không cộng thêm); TĐ2 / TĐ3 = mua lẻ thực + phần gói chưa mua hết (gói đã đóng: chỉ còn mua lẻ thực).</li>
               <li>HĐ gắn gói / phát sinh được ký ở TĐ2 → <b>giá trị ký, ngày ký, VAT</b> sửa ngay ở tab <b>TĐ2</b> (cột "Giá trị ký").</li>
               <li>Tăng / giảm HĐ: khung <b>"TĐ2 – Điều chỉnh HĐ đầu vào"</b> (nhiều đợt, như Doanh thu).</li>

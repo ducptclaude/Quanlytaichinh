@@ -93,6 +93,18 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
   check(r2.status === 201, 'TP2 vẫn nhập thanh toán được', `mã ${r2.status}`);
   const r3 = await api('POST', `/thau-phu/${TP3}/thanh-toan`, { loai: 'dot', dot: 2, so_tien: 1 * U, ngay: NGAY }, true);
   check(r3.status === 423, 'TP3 đã khóa -> chặn thanh toán thêm', `mã ${r3.status}`);
+  // ---- V10.16: dự trù % gián tiếp / tài chính (× doanh thu TĐ1, TĐ2); TĐ3 = thực chi ----
+  const thucChi = async () => (await api('GET', '/bao-cao')).du_an.find((x) => x.id === id).tien_thuc;
+  const tc0 = JSON.stringify(await thucChi());
+  await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '10', pt_gt2: '', pt_tc1: '5', pt_tc2: '' });
+  await doiChieu('5) Gián tiếp 10%, tài chính 5% DT (TĐ2 theo TĐ1): TĐ1 = 760 − lương 40 + 150 + 75 · TĐ2 = 770 − 40 + 160 + 80 · TĐ3 = thực chi', [945, 970, 760], [400, 360, 360], [320, 350, 340], [225, 260, 60]);
+  check(JSON.stringify(await thucChi()) === tc0, 'Thực chi (mục II) không đổi khi nhập %');
+  await api('PUT', `/du-an/${id}/ty-le`, { pt_gt2: '12' });
+  await doiChieu('6) TĐ2 gián tiếp 12% → 192', [945, 1002, 760], [400, 360, 360], [320, 350, 340], [225, 292, 60]);
+  const sai2 = await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '120' }, true);
+  check(sai2.status === 400, 'Chặn tỷ lệ > 100%', `mã ${sai2.status}`);
+  await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '', pt_gt2: '', pt_tc1: '', pt_tc2: '' });
+  await doiChieu('7) Xóa % → về cách tính cũ', [760, 770, 760], [400, 360, 360], [320, 350, 340], [40, 60, 60]);
   console.log(`\nKẾT QUẢ: ${pass} kiểm tra ĐẠT, ${fail} LỖI`);
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.log('Dừng vì lỗi:', e.message); process.exit(1); });
