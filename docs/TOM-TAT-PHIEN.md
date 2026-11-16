@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.16.11.26 – Mục IV › Chi tiết lợi nhuận: bỏ dòng "Chi phí chung", trừ dần theo khối
+- Dưới các HĐ (lãi gộp HĐ = DT HĐ − chi phí trực tiếp HĐ): (−) Trực tiếp chưa gắn HĐ · (−) Chi phí gián tiếp · (−) Chi phí tài chính = lợi nhuận dự án. Cột Thực tế chia theo tiền thật từng khối. Cùng tên, cùng số mục I, II, IV chi phí. Phân bổ theo tỷ lệ chỉ ở phần rê chuột (tham khảo), không đưa vào số chính.
+- Kiểm tra: dòng con = dòng dự án (LN TĐ1/2/3 + Thực tế), trước & sau VAT, mọi dự án mẫu. tester 4565 · kiem-tra-goi 47 ĐẠT, 0 LỖI.
+
 ## V07.16.11.26 – Tổng quan công trình: thu gọn Việc cần xử lý, Mốc thời gian · "Tiền về x khoản"
 - 2 phần mặc định thu gọn, bấm tiêu đề để mở. Mốc thời gian: "Tiền về 2 lần" → "Tiền về 2 khoản" (đếm số lần nhận tiền trong tháng, không phải đợt số 2); điều chỉnh ghi "x đợt".
 
