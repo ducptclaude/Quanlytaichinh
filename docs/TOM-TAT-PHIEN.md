@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.16.11.26 – Mục I, II: tách dòng "Chi phí chung – không gắn HĐ" thành các dòng rõ tên
+- Dưới mỗi dự án (sau các HĐ CĐT): Trực tiếp chưa gắn HĐ (cần gắn HĐ) · Chi phí gián tiếp · Chi phí tài chính · Điều chỉnh / quyết toán cả nhóm (TĐ2, TĐ3) hoặc Chênh lệch với số chốt TĐ1 (TĐ1) · Doanh thu / Tiền về chưa gắn HĐ (nếu có). Rê chuột: giải thích + từng nhóm.
+- Máy chủ: `cp_chung`, `tien_chung` thêm khối (B1/B2/B3). Mục II chia theo tỷ lệ tiền thật để cộng đúng dòng dự án.
+- Kiểm tra: dòng con = dòng dự án ở mục I (TĐ1, 2, 3) và mục II cho mọi dự án mẫu. tester 4518 · kiem-tra-goi 47 ĐẠT, 0 LỖI; điện thoại không tràn.
+
 ## V02.16.11.26 – Mục IV: TĐ2 gộp 1 cột, bấm xem các lần tăng / giảm (doanh thu + chi phí)
 - Chi tiết doanh thu và Chi tiết chi phí chỉ còn 3 cột TĐ1 · TĐ2 · TĐ3 (bỏ cột con theo văn bản ở TĐ2).
 - Bấm số TĐ2 (dự án, HĐ CĐT, khối chi phí) → hộp: TĐ1 → TĐ2, số lần tăng / giảm, từng đợt (văn bản, nội dung, ngày, ±), dòng còn lại = thay gói bằng HĐ ký thật / phát sinh / đóng gói (chi phí) hoặc PL ký thêm ở TĐ2 (doanh thu). Máy chủ thêm `dt_dc`, `cp_dc` (chỉ đọc).

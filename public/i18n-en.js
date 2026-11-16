@@ -1,6 +1,11 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Chênh lệch với số chốt TĐ1": "Difference vs locked M1",
+"Điều chỉnh / quyết toán cả nhóm": "Group-level adjustments / final account",
+"Tiền về chưa gắn HĐ": "Collections not linked to a contract",
+"Doanh thu chưa phân theo HĐ": "Revenue not allocated to a contract",
+"Chi chưa gắn HĐ": "Expenditure not linked to a contract",
 "Phụ lục ký thêm ở TĐ2 / khác": "Addenda signed at M2 / other",
 "Bấm để xem các lần tăng / giảm so với TĐ1": "Click to see increases / decreases vs M1",
 "Thay gói tạm tính bằng HĐ ký thật / HĐ phát sinh / đóng gói": "Package estimates replaced by signed contracts / new contracts / closed packages",
