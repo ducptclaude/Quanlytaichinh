@@ -30,6 +30,7 @@ window.BKS_EN = {
 "Tăng / giảm": "Increase / decrease",
 "Trực tiếp chưa gắn HĐ": "Direct – not linked to a contract",
 "Trực tiếp": "Direct",
+"Chi phí từng HĐ đã gồm chi phí gián tiếp, tài chính chia theo tỷ lệ doanh thu HĐ – cộng các HĐ = dự án.": "Each contract's cost includes indirect and financial costs allocated by contract revenue share – contracts add up to the project.",
 "· Gián tiếp": "· Indirect",
 "· Tài chính": "· Financial",
 "Chi phí thời điểm 1": "M1 costs",
@@ -1625,6 +1626,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Gồm chi phí gián tiếp, tài chính chia theo tỷ lệ doanh thu: {} {}",
+"Incl. indirect and financial costs allocated by revenue share: {} {}"
+],
 [
 "Gồm chi phí gián tiếp {} · tài chính {} {}",
 "Incl. indirect cost {} · financial {} {}"

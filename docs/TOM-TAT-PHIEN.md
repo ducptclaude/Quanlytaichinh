@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.16.11.26 – Mục I TĐ1, TĐ2: chia chi phí gián tiếp + tài chính vào từng HĐ theo tỷ lệ doanh thu HĐ
+- Cộng chi phí các HĐ = chi phí dự án (trước đây thiếu phần gián tiếp / tài chính). Rê chuột ô chi phí HĐ xem phần được chia. TĐ3 giữ dòng riêng (thực chi), mũi tên TĐ3 so với TĐ2 chưa chia.
+- Ví dụ DA-05 (7% + 3% = 190): HĐ 1012 nhận 50 → 300; HĐ 1011 nhận 140 → 1.040; cộng 1.340. tester 4612 ĐẠT, 0 LỖI.
+
 ## V12.16.11.26 – Mục I: TĐ1, TĐ2 gộp gián tiếp / tài chính vào chi phí, tách trên thẻ
 - Thẻ "Chi phí" mục I (TĐ1, TĐ2): thêm dòng Trực tiếp · Gián tiếp · Tài chính (cộng = tổng thẻ).
 - Bảng mục I: TĐ1, TĐ2 không hiện dòng con "Chi phí gián tiếp / tài chính" (đã gộp trong chi phí dự án, rê chuột ô chi phí dự án để xem); TĐ3 hiện riêng như cũ.
