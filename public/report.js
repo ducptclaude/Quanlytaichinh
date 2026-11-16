@@ -1127,21 +1127,23 @@ function bMuc4Html(list, v) {
       if (G.B2.some((z) => Math.abs(z) >= 1e5)) rows.push(['(−) Chi phí gián tiếp', 'Chi phí chung cả dự án (lương, thưởng, tiện ích, ngoại giao…) – không thuộc riêng HĐ nào', G.B2, -chiR * sh('B2')]);
       if (G.B3.some((z) => Math.abs(z) >= 1e5)) rows.push(['(−) Chi phí tài chính', 'Chi phí tài chính cả dự án (lãi vay, phí ngân hàng, phạt…) – không thuộc riêng HĐ nào', G.B3, -chiR * sh('B3')]);
       return rows.map(([ten, tip, l, th], n) => `<tr class="iv-hd-row iv-chung-row"><td class="num th-stt muted">${i + 1}.${j0 + n + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="iv-chung" title="${esc(tip)}">${ten}</span></td>${lc(l[0], null)}${lc(l[1], null)}${lc(l[2], null, !x.qt)}${cl(l[2], l[0])}<td class="num">${m(th)}</td></tr>`).join(''); };
-    const lc = (l, t, ghost) => `<td class="num strong">${m(l, ghost)}</td><td class="num iv-ts">${t === null ? '—' : `<span class="${ghost ? 'td-ghost-t' : ''} ${l < 0 ? 'neg' : ''}">${pctT(t)}</span>`}</td>`;
+    const lc = (l, t, ghost) => `<td class="num strong">${m(l, ghost)}</td><td class="num iv-ts">${t === null ? '' : `<span class="${ghost ? 'td-ghost-t' : ''} ${l < 0 ? 'neg' : ''}">${pctT(t)}</span>`}</td>`;
     det = wrap('Chi tiết lợi nhuận',
       `<tr><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">Tên dự án</th><th colspan="2" class="grp">TĐ1 – Hợp đồng</th><th colspan="2" class="grp iv-g2">TĐ2 – Điều chỉnh</th>
-        <th colspan="2" class="grp">TĐ3 – Quyết toán</th><th rowspan="2" class="num">Chênh lệch<br>TĐ3 − TĐ1</th><th rowspan="2" class="num">Thực tế<br>(thu − chi)</th></tr>
+        <th colspan="2" class="grp">TĐ3 – Quyết toán</th><th rowspan="2" class="num" title="Lợi nhuận TĐ3 (quyết toán) − lợi nhuận TĐ1 (ký HĐ); để trống = không đổi">LN TĐ3 − TĐ1</th><th rowspan="2" class="num">Thực tế<br>(thu − chi)</th></tr>
        <tr><th class="num">LN</th><th class="num">Tỷ suất</th><th class="num iv-g2">LN</th><th class="num iv-g2">Tỷ suất</th><th class="num">LN</th><th class="num">Tỷ suất</th></tr>`,
       rows.map((x, i) => { const hs = x.d.hds || [], L = hs.map((h) => { const d = hDt(h), c = hCp(h); return { l1: d.t1 - c.c1, l2: d.t2 - c.c2, l3: d.t3 - c.c3, t1: d.t1, t2: d.t2, t3: d.t3, thuc: d.nh - c.chi, qt: h.da_qt && c.qt }; });
         const S = (k) => L.reduce((a, y) => a + y[k], 0), r = { l1: x.l1 - S('l1'), l2: x.l2 - S('l2'), l3: x.l3 - S('l3'), thuc: x.thuc - S('thuc') };
-        const cl = (a, b) => `<td class="num">${bTdDelta(a, b, true, false, '').replace(/ <small>.*?<\/small>/, '') || m(0)}</td>`;
+        // V09.16: chỉ hiện khi có thay đổi: ▲ +x (+y%) / ▼ −x (−y%); không đổi để trống
+        const cl = (a, b) => { const d0 = a - b; if (Math.abs(d0) < 1e6) return '<td class="num"></td>';
+          return `<td class="num"><span class="i-dl ${d0 > 0 ? 'up' : 'dn'}" title="LN TĐ3 ${bTy(a)} − LN TĐ1 ${bTy(b)} ${TY()}">${d0 > 0 ? '▲ +' : '▼ −'}${bTy(Math.abs(d0))}${b ? ` (${d0 > 0 ? '+' : '−'}${Math.abs((d0 / Math.abs(b)) * 100).toFixed(1).replace('.', ',')}%)` : ''}</span></td>`; };
         return `<tr class="iv-prj-row">${prjP(x, i)}${lc(x.l1, tsF(x.l1, x.t1))}${lc(x.l2, tsF(x.l2, x.t2))}${lc(x.l3, tsF(x.l3, x.t3), !x.qt)}
         ${cl(x.l3, x.l1)}<td class="num strong">${m(x.thuc)}</td></tr>` +
         (hdOpen(x) && hs.length ? hs.map((h, j) => { const y = L[j]; return `<tr class="iv-hd-row">${hdName(h, i, j).replace('<td class="th-name">', `<td class="th-name" title="Lợi nhuận của HĐ = doanh thu HĐ − chi phí trực tiếp của HĐ (lãi gộp HĐ)">`)}${lc(y.l1, tsF(y.l1, y.t1))}${lc(y.l2, tsF(y.l2, y.t2))}${lc(y.l3, tsF(y.l3, y.t3), !y.qt)}${cl(y.l3, y.l1)}<td class="num">${m(y.thuc)}</td></tr>`; }).join('') +
           lnTach(x, i, hs.length, r, L, lc, cl) : '');
       }).join(''),
-      foot([bTy(T.l1), pctT(tsF(T.l1, T.t1)), bTy(T.l2), pctT(tsF(T.l2, T.t2)), '__L3__', pctT(tsF(T.l3, T.t3)), `${T.l3 - T.l1 >= 0 ? '+' : '−'}${bTy(Math.abs(T.l3 - T.l1))}`, bTy(T.thuc)]).replace('<td class="num">__L3__</td>', tipCell('l3', 'Lợi nhuận TĐ3 – Quyết toán', bTy(T.l3))),
-      'Lợi nhuận = Doanh thu − Chi phí tại từng thời điểm · Số mờ = chưa quyết toán, lấy theo TĐ2 · Thực tế = tiền đã nhận − tiền đã chi (không gồm vay, trả gốc)');
+      foot([bTy(T.l1), pctT(tsF(T.l1, T.t1)), bTy(T.l2), pctT(tsF(T.l2, T.t2)), '__L3__', pctT(tsF(T.l3, T.t3)), Math.abs(T.l3 - T.l1) < 1e6 ? '' : `${T.l3 - T.l1 > 0 ? '▲ +' : '▼ −'}${bTy(Math.abs(T.l3 - T.l1))}`, bTy(T.thuc)]).replace('<td class="num">__L3__</td>', tipCell('l3', 'Lợi nhuận TĐ3 – Quyết toán', bTy(T.l3))),
+      'Số mờ = chưa quyết toán (lấy theo TĐ2) · Thực tế = đã thu − đã chi');
   }
   return `${thHead('IV', 'Doanh thu hoàn thành – quyết toán', 'Hợp đồng (TĐ1) – Điều chỉnh (TĐ2) – Quyết toán (TĐ3) · tự tính theo dữ liệu hệ thống', ['Theo dữ liệu hệ thống', vt])}
     ${sum}${!gop ? '' : `<p class="muted small f-note">LN gộp = Doanh thu − Giá vốn (HĐ đầu vào + chi phí trực tiếp: vật tư, nhân công, máy, tổ chức thi công, khác); Lợi nhuận = LN gộp − chi phí gián tiếp (lương, tiện ích, ngoại giao) − chi phí tài chính (lãi vay, phí, phạt).</p>`}${det}`;

@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"LN TĐ3 − TĐ1": "Profit M3 − M1",
+"Số mờ = chưa quyết toán (lấy theo TĐ2) · Thực tế = đã thu − đã chi": "Faded = not finalised (uses M2) · Actual = collections − expenditure",
 "1. Sức khỏe dự án": "1. Project health",
 "Thời gian đã qua": "Time elapsed",
 "Tiền về / giá trị hoàn thành": "Collections / completed value",

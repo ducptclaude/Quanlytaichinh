@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.16.11.26 – Chi tiết lợi nhuận gọn chữ
+- Cột "Chênh lệch TĐ3 − TĐ1" → "LN TĐ3 − TĐ1" (rê chuột giải thích); không đổi để trống (bỏ "● Không đổi"); có đổi ghi ▲ +x (+y%) / ▼ −x (−y%). Bỏ "—" ở cột tỷ suất các dòng trừ. Ghi chú cuối bảng rút còn 1 dòng ngắn.
+
 ## V08.16.11.26 – Mục IV › Chi tiết lợi nhuận: bỏ dòng "Chi phí chung", trừ dần theo khối
 - Dưới các HĐ (lãi gộp HĐ = DT HĐ − chi phí trực tiếp HĐ): (−) Trực tiếp chưa gắn HĐ · (−) Chi phí gián tiếp · (−) Chi phí tài chính = lợi nhuận dự án. Cột Thực tế chia theo tiền thật từng khối. Cùng tên, cùng số mục I, II, IV chi phí. Phân bổ theo tỷ lệ chỉ ở phần rê chuột (tham khảo), không đưa vào số chính.
 - Kiểm tra: dòng con = dòng dự án (LN TĐ1/2/3 + Thực tế), trước & sau VAT, mọi dự án mẫu. tester 4565 · kiem-tra-goi 47 ĐẠT, 0 LỖI.
