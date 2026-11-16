@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.16.11.26 – Báo cáo theo công trình › Tổng quan làm lại (không lặp mục I–IV)
+- Bỏ: bảng Chi phí TĐ1, biểu đồ DT–CP–LN (sai, thiếu cột CP), vòng tròn cơ cấu chi phí (1.440 không khớp số nào), khung công nợ theo kỳ.
+- Mới: (1) Sức khỏe dự án – % thời gian đã qua · % giá trị hoàn thành · tiền về / GTHT · đã chi / CP TĐ3 + câu kết luận tự động (chậm tiến độ / chậm thu / chi nhanh / ứng vốn / cân đối);
+  (2) Việc cần xử lý – HĐ đầu vào chưa nhập số QT, chi phí trực tiếp chưa gắn HĐ CĐT, tiền về chưa gắn HĐ, HĐ đã nghiệm thu chưa thu tiền + cảnh báo hệ thống; bấm mở đúng chỗ;
+  (3) Dòng tiền lũy kế theo tháng (tiền về, đã chi, còn lại); (4) Mốc thời gian – mỗi tháng 1 dòng (ký HĐ/PL, điều chỉnh, nghiệm thu, tiền về, quyết toán).
+- Đầu thẻ: "Tiến độ x%" (nhập tay, DA-05 đang 0%) → "Hoàn thành" = GTHT ÷ DT TĐ3 tự tính.
+- tester 4565 ĐẠT (có dự án thử), 0 LỖI; bấm việc cần xử lý mở đúng tab; điện thoại không tràn.
+
 ## V05.16.11.26 – Thẻ Chi phí mục I: bỏ dòng "HĐ đầu vào · Dự trù"
 - Dòng này chỉ tách 1 phần chi phí (thiếu gián tiếp, tài chính) nên cộng không ra số lớn → bỏ hẳn (người dùng chọn). Giữ: % / so với TĐ trước / cảnh báo văn bản chưa có số QT. Thẻ Doanh thu giữ dòng "HĐ · PL".
 - tester 4518 ĐẠT, 0 LỖI; điện thoại không tràn.

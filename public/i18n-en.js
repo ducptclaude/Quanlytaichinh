@@ -1,6 +1,18 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"1. Sức khỏe dự án": "1. Project health",
+"Thời gian đã qua": "Time elapsed",
+"Tiền về / giá trị hoàn thành": "Collections / completed value",
+"Đã chi / chi phí TĐ3": "Expenditure / M3 cost",
+"2. Việc cần xử lý": "2. Action items",
+"3. Dòng tiền lũy kế theo tháng": "3. Cumulative cash flow by month",
+"4. Mốc thời gian dự án": "4. Project timeline",
+"Tiền về lũy kế": "Cumulative collections",
+"Đã chi lũy kế": "Cumulative expenditure",
+"Tiến độ, thu tiền và chi tiêu đang cân đối": "Progress, collections and spending are in balance",
+"✓ Không có việc tồn đọng": "✓ No pending items",
+"Chưa ghi ngày": "No date",
 "Chênh lệch với số chốt TĐ1": "Difference vs locked M1",
 "Điều chỉnh / quyết toán cả nhóm": "Group-level adjustments / final account",
 "Tiền về chưa gắn HĐ": "Collections not linked to a contract",
@@ -1606,6 +1618,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"Hoàn thành: {}",
+"Completed: {}"
+],
 [
 "{} lần tăng ({}) · {} lần giảm ({})",
 "{} increases ({}) · {} decreases ({})"

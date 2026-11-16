@@ -3686,3 +3686,21 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .iv-khoi-row .th-name b { font-weight: 700; } .iv-tree2 { margin-left: 16px; }
 .iv-td2 { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; } .iv-td2.strong { font-weight: 700; }
 .td2-dlg { max-width: 760px !important; width: min(760px, calc(100vw - 32px)) !important; } .td2-dlg p { margin: 4px 0; }
+/* V06.16: Tổng quan công trình */
+.pc-tq .pc-sub-h { margin-top: 14px; } .pc-tq .pc-sub-h small { font-weight: 400; margin-left: 6px; }
+.pc-tq .pc-list.pc-health > li { display: grid !important; grid-template-columns: minmax(150px, 210px) 1fr 64px minmax(120px, 220px); gap: 10px; align-items: center; padding: 4px 0; }
+.pc-tq .pc-health > li > span:first-child { font-size: 13px; } .pc-tq .pc-health > li > b { text-align: right; }
+.pc-health li small { color: var(--muted); font-size: 11.5px; }
+.pc-kl { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; } .pc-kl li { font-size: 13px; padding: 6px 10px; border-radius: 8px; }
+.pc-kl .kl-bad { background: #fde8e8; color: #9b1c1c; } .pc-kl .kl-warn { background: #fff4e0; color: #8a5300; } .pc-kl .kl-ok { background: #e7f6ef; color: #0f7a4f; }
+.pc-todo { list-style: none; padding: 0; margin: 4px 0; display: grid; gap: 4px; } .pc-todo li { font-size: 13px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.pc-todo li:hover { background: var(--hover, #f3f6fb); }
+.pc-cash { width: 100%; height: auto; max-height: 230px; } .pc-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); }
+.pc-legend i { display: inline-block; width: 12px; height: 4px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+.pc-timeline { list-style: none; padding: 0; margin: 4px 0; } .pc-timeline > li { display: grid; grid-template-columns: 96px 1fr; gap: 8px; padding: 6px 0; border-top: 1px dashed var(--border); }
+.pc-timeline .tl-row { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; } .pc-timeline .tl-row span { white-space: nowrap; }
+.pc-timeline .tl-ky { max-width: 100%; overflow: hidden; text-overflow: ellipsis; } .pc-timeline .tl-m { font-size: 12.5px; color: var(--muted); }
+.pc-timeline .tl-i { display: inline-block; width: 22px; text-align: center; }
+@media (max-width: 640px) { .pc-tq .pc-list.pc-health > li { grid-template-columns: 1fr 56px; } .pc-tq .pc-health > li .pc-bar { grid-column: 1 / -1; grid-row: 2; } .pc-tq .pc-health > li small { grid-column: 1 / -1; }
+  .pc-timeline .tl-row span { white-space: normal; }
+  .pc-timeline > li { grid-template-columns: 1fr; } }
