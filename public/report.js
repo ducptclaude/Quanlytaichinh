@@ -280,17 +280,11 @@ function bThucDrill(key, pid = 0, sec2 = false) {
       x.thu = bQ01(x.thu, rT); x.chi = bQ01(x.chi, rC); x.cp = Math.round(x.cp * rC); x.tp = x.chi - x.cp; x.con = x.thu - x.chi;
     }
     if (key === 'thu') { // Doanh thu dự kiến ban đầu = doanh thu TĐ1 (như mục I): đã chốt lấy số chốt, chưa chốt hệ thống tự tính theo HĐ gốc
-      const td1 = (d.thoi_diem || []).find((t) => t.td === 1);
-      const d1 = td1 ? Number(td1.dt) || 0 : bSysMoc(d, 1).dt; // trước VAT
-      const goc = d.moc?.dt?.goc;
-      x.dt1 = gt ? Math.round(d1) : Math.round((d1 * (goc?.gt ? goc.sv / goc.gt : 1.1)) / 1e8) * 1e8; // sau VAT: quy đổi theo VAT HĐ gốc, làm tròn 0,1 tỷ
+      x.dt1 = bTd1He(d, gt ? 'gt' : 'sv').dt1; // V04.16: số hệ thống, không chốt, không làm tròn
       x.con_thu = x.dt1 - x.thu;
     }
     if (key === 'chi') { // Chi phí dự kiến ban đầu = chi phí TĐ1 (như mục I): đã chốt lấy số chốt, chưa chốt hệ thống tự tính theo HĐ gốc
-      const td1 = (d.thoi_diem || []).find((t) => t.td === 1);
-      const c1 = td1 ? Number(td1.cp) || 0 : bSysMoc(d, 1).cp; // trước VAT
-      const cpGt = d.du_kien.chi_phi.gt, cpSv = d.du_kien.chi_phi.sv;
-      x.cp1 = gt ? Math.round(c1) : Math.round((c1 * (cpGt ? cpSv / cpGt : 1.1)) / 1e8) * 1e8; // sau VAT: quy đổi, làm tròn 0,1 tỷ như mục I
+      x.cp1 = bTd1He(d, gt ? 'gt' : 'sv').cp1; // V04.16: số hệ thống, không chốt, không làm tròn
       x.con_chi = x.cp1 - x.chi;
     }
     return { d, ...x, kh_con: x.kh_thu - x.kh_chi };
@@ -616,15 +610,10 @@ function bTongHopData(list, v, P) {
     const rT = v === 'sv' ? 1 : (dtSv ? d.du_kien.doanh_thu.gt / dtSv : 1 / 1.1), rC = v === 'sv' || !cpSv ? 1 : cpGt / cpSv;
     const q01 = (x, r) => (r === 1 ? x : Math.round((x * r) / 1e8) * 1e8); // quy đổi trước VAT: làm tròn 0,1 tỷ
     const thu = q01(c.thu, rT), chi = q01(c.chi, rC);
-    // TĐ1 – ký hợp đồng (dự kiến): số đã chốt TĐ1 (nhập tay, trước VAT); chưa chốt thì lấy HĐ gốc + thầu phụ HĐ gốc + chi phí khác trên hệ thống
-    const m = d.moc || {}, td1 = (d.thoi_diem || []).find((t) => t.td === 1);
-    const g1 = td1 ? { dt: Number(td1.dt) || 0, cp: Number(td1.cp) || 0 } : bSysMoc(d, 1);
-    const rD = v === 'sv' && m.dt?.goc?.gt ? m.dt.goc.sv / m.dt.goc.gt : v === 'sv' ? 1.1 : 1;
-    const rCp = v === 'sv' ? (cpGt ? cpSv / cpGt : 1.1) : 1;
-    // Số TĐ1 nhập tay là trước VAT; xem sau VAT thì quy đổi và làm tròn tới 0,1 tỷ (số ước tính, tránh số lẻ)
-    const r01 = (x) => (v === 'sv' ? Math.round(x / 1e8) * 1e8 : Math.round(x));
-    const dt1 = r01(g1.dt * rD), cp1 = r01(g1.cp * rCp);
-    return { d, dt1, cp1, ln1: dt1 - cp1, td1: Boolean(td1), dt, cp, ns: Boolean(nsGt), ns_v: nsV, cp_ghi: d.du_kien.chi_phi[v], vuot, ln: dt - cp, tp, hd_sv: dt, thu, chi, con: thu - chi, vay: c.vay, goc: c.goc, phai_thu: dt - thu };
+    // V04.16: TĐ1 – ký hợp đồng = số HỆ THỐNG tự tính (HĐ + PL ký · gói / HĐ đầu vào ký · chi phí gián tiếp, tài chính), cùng nguồn mục IV;
+    //  bỏ số chốt TĐ nhập tay và bỏ làm tròn 0,1 tỷ khi xem sau VAT (người dùng yêu cầu)
+    const { dt1, cp1 } = bTd1He(d, v);
+    return { d, dt1, cp1, ln1: dt1 - cp1, td1: false, dt, cp, ns: Boolean(nsGt), ns_v: nsV, cp_ghi: d.du_kien.chi_phi[v], vuot, ln: dt - cp, tp, hd_sv: dt, thu, chi, con: thu - chi, vay: c.vay, goc: c.goc, phai_thu: dt - thu };
   });
   const T = rows.reduce((a, x) => { for (const k of ['dt1', 'cp1', 'ln1', 'dt', 'cp', 'ln', 'tp', 'hd_sv', 'thu', 'chi', 'con', 'vay', 'goc', 'phai_thu']) a[k] += x[k]; return a; },
     { dt1: 0, cp1: 0, ln1: 0, dt: 0, cp: 0, ln: 0, tp: 0, hd_sv: 0, thu: 0, chi: 0, con: 0, vay: 0, goc: 0, phai_thu: 0 });
@@ -835,8 +824,7 @@ function bTongHopHtml(list, v, P) {
     for (const g of ['B1', 'B2', 'B3']) if (Math.abs(cur.G[g]) >= 1e5 || (prv && Math.abs(prv.G[g]) >= 1e5))
       out.push([{ dt: 0, cp: cur.G[g], b: prv ? { dt: 0, cp: prv.G[g] } : null }, KH_TEN[g][0], KH_TEN[g][1] + (cur.T[g].length ? '\nGồm: ' + cur.T[g].join(' · ') : '')]);
     const du = khac.cp - cur.G.B1 - cur.G.B2 - cur.G.B3, duP = k > 1 ? khac.b.cp - prv.G.B1 - prv.G.B2 - prv.G.B3 : 0;
-    if (Math.abs(du) >= 1e5) out.push([{ dt: 0, cp: du, b: k === 3 ? { dt: 0, cp: duP } : null }, k === 1 ? 'Chênh lệch với số chốt TĐ1' : 'Điều chỉnh / quyết toán cả nhóm',
-      k === 1 ? 'TĐ1 lấy theo số đã chốt khi ký HĐ; phần này = số chốt − chi phí TĐ1 đang có trên hệ thống' : 'Đợt điều chỉnh / quyết toán cho cả nhóm chi phí (không gắn riêng HĐ)']);
+    if (Math.abs(du) >= 1e5) out.push([{ dt: 0, cp: du, b: k === 3 ? { dt: 0, cp: duP } : null }, 'Điều chỉnh / quyết toán cả nhóm', 'Đợt điều chỉnh / quyết toán cho cả nhóm chi phí (không gắn riêng HĐ)']);
     return out.map(([c, ten, tip], n) => dong(c, gKhac(i, j0 + n, esc(tip), ten))).join(''); };
   const tachII = (d, kh, i, j0, dong) => { const out = [], t = d.tien_chung || { thu: 0, chi: [] };
     if (Math.abs(kh.thu) >= 1e6) out.push([{ thu: kh.thu, chi: 0 }, 'Tiền về chưa gắn HĐ', 'Tiền về chưa chọn HĐ chủ đầu tư – nên gắn HĐ']);
@@ -855,7 +843,7 @@ function bTongHopHtml(list, v, P) {
     return P.length ? 'Gồm (tiền thật, sau VAT): ' + P.map(([a, x]) => `${a} ${bTy(x)} ${TY()}`).join(' · ') : ''; };
   // V28.12: tách "chi phí chung – không gắn HĐ" tại TĐ k theo nguồn (lương, tài chính…, gói / HĐ chưa gắn HĐ CĐT, điều chỉnh – QT cả nhóm, chênh lệch số chốt TĐ1)
   const chungTip = (d, k, cpCon) => { const P = (d.cp_chung || []).map((x) => [x.ten, x[v]?.[k - 1] || 0]).filter(([, x]) => Math.abs(x) >= 1e5);
-    const du = cpCon - P.reduce((a, [, x]) => a + x, 0); if (Math.abs(du) >= 1e5) P.push([k === 1 ? 'Chênh lệch với số đã chốt TĐ1' : 'Điều chỉnh / quyết toán cả nhóm', du]);
+    const du = cpCon - P.reduce((a, [, x]) => a + x, 0); if (Math.abs(du) >= 1e5) P.push(['Điều chỉnh / quyết toán cả nhóm', du]);
     return P.length ? 'Gồm: ' + P.map(([t, x]) => `${t} ${bTy(x)} ${TY()}`).join(' · ') : ''; };
   const gDt = (h, n) => (n === 3 ? h.td3?.[v] : h['td' + n]?.[v]) || 0;
   const gCp = (h, n) => h.cp_td?.[v]?.[n - 1] || 0;
@@ -864,7 +852,7 @@ function bTongHopHtml(list, v, P) {
     ${(() => { // Mục I: DT – CP – LN theo TĐ chọn (TĐ1 ký HĐ · TĐ2 điều chỉnh · TĐ3 quyết toán / mới nhất), mũi tên so với TĐ liền trước
       const k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1;
       const M = bMuc4Data(list, v), m4 = new Map(M.rows.map((x) => [x.d.id, x]));
-      // TĐ1 giữ đúng số chốt TĐ1 (như trước); TĐ2, TĐ3 lấy cùng nguồn mục IV
+      // V04.16: TĐ1 = số hệ thống (không chốt); TĐ2, TĐ3 lấy cùng nguồn mục IV
       const val = (x, n) => (n === 1 ? { dt: x.dt1, cp: x.cp1 } : (() => { const q = m4.get(x.d.id); return q ? { dt: q['t' + n], cp: q['c' + n] } : { dt: 0, cp: 0 }; })());
       const R = rows.map((x) => { const a = val(x, k), b = k > 1 ? val(x, k - 1) : null; return { x, dt: a.dt, cp: a.cp, ln: a.dt - a.cp, b }; });
       const S = (f) => R.reduce((a2, r) => a2 + r[f], 0);
@@ -912,7 +900,7 @@ function bTongHopHtml(list, v, P) {
       return `${thHead('I', 'Doanh thu – Chi phí – Lợi nhuận', TEN[1], [TEN[0], vt[0].toUpperCase() + vt.slice(1)])}
     <div class="i-tdbar">${seg}<label class="i-doi ${k > 1 ? '' : 'off'}" title="${k > 1 ? '' : 'TĐ1 là mốc đầu – không có thay đổi để lọc'}"><input type="checkbox" data-idoi ${chiDoi ? 'checked' : ''} ${k > 1 ? '' : 'disabled'}> Chỉ dự án có thay đổi <b>${k > 1 ? nDoi : 0}</b>/${R.length}</label><span class="muted small">Mũi tên ▲▼ = tăng / giảm so với TĐ liền trước</span></div>
     <div class="f-grid th-grid3">
-      ${card('dt', `Doanh thu ${TEN[2]}`, TT.dt, k === 1 ? [`${rows.length} dự án · giá trị HĐ + PL khi ký`, Math.abs(cDt.hd + cDt.pl - TT.dt) < 1e6 ? tachDt : '', `${rows.filter((x) => x.td1).length}/${rows.length} dự án đã chốt TĐ1`] : [sub('dt', true), tachDt, luuY(qtThieu, 'HĐ CĐT')])}
+      ${card('dt', `Doanh thu ${TEN[2]}`, TT.dt, k === 1 ? [`${rows.length} dự án · giá trị HĐ + PL khi ký`, Math.abs(cDt.hd + cDt.pl - TT.dt) < 1e6 ? tachDt : ''] : [sub('dt', true), tachDt, luuY(qtThieu, 'HĐ CĐT')])}
       ${card('cp', `Chi phí ${TEN[2]}`, TT.cp, k === 1 ? ['Dự toán chi phí khi ký HĐ (gồm gián tiếp, tài chính)', dtruLine] : [sub('cp', false), [cTp.hd || cTp.pl ? tachCp : '', dtruLine].filter(Boolean).join(' · '), luuY(tpThieu, 'HĐ đầu vào')], 'tỷ', '', [bpct(TT.cp, TT.dt), 'Chi phí so với doanh thu'])}
       ${card('ln', `Lợi nhuận ${TEN[2]}`, TT.ln, [k > 1 ? `${sub('ln', true)} · TĐ${k - 1} ${bpct(P0.ln, P0.dt)}` : `Bình quân <b>${rows.length ? bTy(TT.ln / rows.length) : '0'}</b> ${TY()} / dự án`], 'tỷ', '', [bpct(TT.ln, TT.dt), 'Tỷ suất lợi nhuận'])}
     </div>
@@ -929,13 +917,13 @@ function bTongHopHtml(list, v, P) {
           <td class="num">${c.dt ? bpct(c.dt - c.cp, c.dt) : '—'}</td></tr>`;
         return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
-        <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}${k === 1 && !r.x.td1 ? '<sup class="th-tt" title="Chưa chốt TĐ1: lấy HĐ gốc và chi phí trên hệ thống">*</sup>' : ''}</b></td></tr>` +
+        <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}</b></td></tr>` +
         (hs.length && gMo(r.x.d) ? con.map((c, j) => dong(c, pbTen(gTen(c.h, i, j), khac.cp, c.dt, sum('dt'), c.dt - c.cp, `doanh thu TĐ${k}`, 'Lợi nhuận', c.dt))).join('') +
           (Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? tachI(r.x.d, k, khac, i, hs.length, dong) : '') : ''); void chungTip;
       }).join('')}</tbody>
       ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', bpct(TT.ln, TT.dt)])}
     </table></div>
-    ${k === 1 ? `<p class="muted small f-note">Số dự kiến theo TĐ1 đã chốt (Doanh thu, Chi phí khi ký HĐ – nhập ở bảng TĐ của từng dự án). <b>(*)</b> Dự án chưa chốt TĐ1: lấy HĐ gốc với CĐT, thầu phụ theo HĐ gốc và chi phí khác đã ghi nhận trên hệ thống. Xem sau VAT: doanh thu quy đổi theo VAT của HĐ gốc, chi phí theo tỷ lệ VAT của chi phí dự án, làm tròn tới 0,1 tỷ. Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = giá trị ký (TĐ1) của từng HĐ / PL + các đợt điều chỉnh tăng / giảm; chi phí = HĐ đầu vào theo TĐ2 và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán từng HĐ / PL; văn bản chưa có số quyết toán tạm lấy theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>`}`;
+    ${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính lúc ký HĐ: doanh thu HĐ + PL ký với CĐT · chi phí = gói / HĐ đầu vào ký + chi phí gián tiếp, tài chính. Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = giá trị ký (TĐ1) của từng HĐ / PL + các đợt điều chỉnh tăng / giảm; chi phí = HĐ đầu vào theo TĐ2 và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán từng HĐ / PL; văn bản chưa có số quyết toán tạm lấy theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>`}`;
     })()}
 
     ${thHead('II', 'Dòng tiền thực tế', 'Tiền thật đã thu về và đã chi ra của dự án', [`Lũy kế đến ${dTo}`, vt[0].toUpperCase() + vt.slice(1)])}
@@ -2056,6 +2044,11 @@ const TD_TEN = { 1: 'Ký hợp đồng', 2: 'Có phát sinh', 3: 'Quyết toán'
 const TD_HT = { 1: 'HĐ gốc', 2: 'HĐ + phụ lục', 3: 'quyết toán' };
 // Số hệ thống theo mốc (KẾ HOẠCH theo hợp đồng): TĐ1 = HĐ gốc · TĐ2 = HĐ + PL · TĐ3 = quyết toán (DT);
 // CP = thầu phụ cùng mốc + chi phí khác đã ghi nhận đến ngày chốt (ngày chứng từ ≤ ngày chốt)
+// V04.16: TĐ1 hệ thống của 1 dự án (trước / sau VAT) – cùng công thức mục IV (bMuc4Data: t1, c1)
+function bTd1He(d, v) {
+  const dt = d.moc?.dt, cp = d.moc?.cp; if (!dt || !cp) return { dt1: 0, cp1: 0 };
+  return { dt1: dt.goc[v], cp1: cp.tp_goc[v] + cp.khac[v] + (cp.dtru?.[v]?.[0] || 0) };
+}
 function bSysMoc(d, td, ngay) {
   const m = d.moc || {};
   const dt = td === 1 ? m.dt_goc : td === 2 ? m.dt_ps : m.dt_qt;
@@ -2149,11 +2142,10 @@ function bTdBlock(d) {
   })();
   // V30.12: bỏ ma trận kế hoạch TĐ1–TĐ3 (người dùng yêu cầu) – chỉ giữ dòng gọn để chốt / sửa số chốt TĐ (mục I TĐ1 dùng số chốt)
   void ROWS; void cell; void head;
-  const chot = [1, 2, 3].map((n) => { const t = tds[n];
+  const chot = [].map((n) => { const t = tds[n]; // V04.16: bỏ chốt TĐ (người dùng yêu cầu) – giữ hàm để đọc dữ liệu cũ
     if (t) return `<span class="pc-chot ok" title="Số chốt TĐ${n}: doanh thu ${bTy(t.dt)} · chi phí ${bTy(t.cp)} ${TY()}">✓ TĐ${n} đã chốt ${dmy(t.ngay)}${edit ? ` <button type="button" class="td-btn" data-tdedit="${n}">Sửa</button>` : ''}</span>`;
     return edit && (n === 1 || tds[n - 1]) ? `<button type="button" class="td-btn td-add" data-tdedit="${n}">+ Chốt TĐ${n}</button>` : ''; }).filter(Boolean).join(' ');
   return `<div class="pc-tds">
-    ${chot ? `<div class="pc-td-bar no-print"><span>Số chốt thời điểm <small class="muted">(mục I · TĐ1 dùng số chốt nếu có)</small></span> ${chot}</div>` : ''}
     ${thucRows}${bPcCpKhoi(d)}
   </div>`;
 }

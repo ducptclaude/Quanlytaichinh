@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.16.11.26 – Bỏ chốt TĐ: TĐ1 = số hệ thống tự tính, không làm tròn
+- Lý do dòng "Chênh lệch với số chốt TĐ1" (DA-05: 50): KHÔNG phải số chốt (DA-01..05 đều chưa chốt TĐ nào – đã kiểm tra trên web), mà do dự án chưa chốt bị làm tròn chi phí TĐ1 sau VAT tới 0,1 tỷ (1.450 → 1.500).
+- Mục I / III / Dashboard / bảng chi tiết dòng tiền: TĐ1 lấy `bTd1He` = cùng công thức mục IV (doanh thu HĐ + PL ký; chi phí = HĐ đầu vào ký + gói + chi phí gián tiếp, tài chính), trước & sau VAT, không làm tròn. Bỏ chữ "đã chốt TĐ1", dấu (*), dòng chênh lệch số chốt.
+- Báo cáo theo công trình: bỏ nút + Chốt / Sửa TĐ. Dữ liệu chốt cũ (bảng thoi_diem) không xóa, chỉ không dùng.
+- Kiểm tra: TĐ1 mục I = mục IV ở mọi dự án (trước & sau VAT); dòng con = dòng dự án mục I, II ở TĐ1–3. tester 4518 · kiem-tra-goi 47 ĐẠT, 0 LỖI.
+
 ## V03.16.11.26 – Mục I, II: tách dòng "Chi phí chung – không gắn HĐ" thành các dòng rõ tên
 - Dưới mỗi dự án (sau các HĐ CĐT): Trực tiếp chưa gắn HĐ (cần gắn HĐ) · Chi phí gián tiếp · Chi phí tài chính · Điều chỉnh / quyết toán cả nhóm (TĐ2, TĐ3) hoặc Chênh lệch với số chốt TĐ1 (TĐ1) · Doanh thu / Tiền về chưa gắn HĐ (nếu có). Rê chuột: giải thích + từng nhóm.
 - Máy chủ: `cp_chung`, `tien_chung` thêm khối (B1/B2/B3). Mục II chia theo tỷ lệ tiền thật để cộng đúng dòng dự án.

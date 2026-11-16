@@ -28,7 +28,7 @@ function bDashRender(list, v, one) {
 
   // ---- Thanh chỉ số: nhóm DT – CP – LN theo TĐ đang chọn · nhóm dòng tiền thực tế ----
   // V23.12: dùng CHUNG TĐ với mục I Báo cáo (BST.i_td – tự nhảy TĐ mới nhất khi chọn dự án) và cùng cách tính:
-  // TĐ1 = số chốt TĐ1 (bTongHopData), TĐ2/TĐ3 = mục IV; so sánh với TĐ liền trước như mục I
+  // TĐ1 = số hệ thống (bTongHopData, không chốt), TĐ2/TĐ3 = mục IV; so sánh với TĐ liền trước như mục I
   const k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1;
   const tdV = (n) => (n === 1 ? { t: T.dt1, c: T.cp1, l: T.dt1 - T.cp1 } : { t: MT['t' + n], c: MT['c' + n], l: MT['l' + n] });
   const cur = tdV(k), prv = k > 1 ? tdV(k - 1) : null;
@@ -72,7 +72,7 @@ function bDashRender(list, v, one) {
   const flow = [
     blk('I', 'b1', 'Doanh thu – Chi phí – Lợi nhuận', { 1: 'TĐ1 – ký hợp đồng', 2: 'TĐ2 – điều chỉnh', 3: 'TĐ3 – quyết toán' }[k], lk, `Lợi nhuận TĐ${k} · ${pc(lk, tk)}`,
       `<ul class="db-lines">${line('Doanh thu', tk, mx1, DBC.dt)}${line('Chi phí', ck, mx1, DBC.cp)}${line('Lợi nhuận', lk, mx1, DBC.ln)}</ul>
-      <div class="db-note2">${k === 1 ? `${rows.filter((x) => x.td1).length}/${rows.length} dự án đã chốt TĐ1 · ` : ''}chi phí bằng <b>${pc(ck, tk)}</b> doanh thu · cùng TĐ với mục I báo cáo</div>`),
+      <div class="db-note2">chi phí bằng <b>${pc(ck, tk)}</b> doanh thu · cùng TĐ với mục I báo cáo</div>`),
     arrow(),
     blk('II', 'b2', 'Dòng tiền thực tế', `Lũy kế đến hôm nay`, T.con, 'Còn lại (thu − chi)',
       `<ul class="db-lines">${line('Dòng thu', T.thu, mx2, DBC.thu)}${line('Dòng chi', T.chi, mx2, DBC.chi)}${line('Còn lại', T.con, mx2, DBC.ln)}</ul>
