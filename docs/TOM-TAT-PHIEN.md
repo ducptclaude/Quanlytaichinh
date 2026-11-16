@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.16.11.26 – Mục I: TĐ1, TĐ2 gộp gián tiếp / tài chính vào chi phí, tách trên thẻ
+- Thẻ "Chi phí" mục I (TĐ1, TĐ2): thêm dòng Trực tiếp · Gián tiếp · Tài chính (cộng = tổng thẻ).
+- Bảng mục I: TĐ1, TĐ2 không hiện dòng con "Chi phí gián tiếp / tài chính" (đã gộp trong chi phí dự án, rê chuột ô chi phí dự án để xem); TĐ3 hiện riêng như cũ.
+- Mục IV (3 TĐ chung 1 bảng) giữ nguyên. tester 4612 ĐẠT, 0 LỖI; máy tính + điện thoại không tràn.
+
 ## V11.16.11.26 – Khung "Dự trù theo % doanh thu" làm lại cho đẹp
 - 2 ô Chi phí gián tiếp / Chi phí tài chính có vạch màu trùng thẻ phía trên (xanh ngọc / tím), ô % gọn (không lặp "%"), số tiền tương ứng cùng màu, ghi chú 1 dòng. Điện thoại: mỗi ô 1 hàng, không tràn.
 
