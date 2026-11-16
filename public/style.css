@@ -3684,3 +3684,5 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .f-val .f-pct { font-size: .55em; font-weight: 700; color: var(--muted); margin-left: 10px; letter-spacing: 0; }
 .pc-chot { font-size: 12px; margin-left: 8px; } .pc-chot.ok { color: var(--ok, #0f7a4f); }
 .iv-khoi-row .th-name b { font-weight: 700; } .iv-tree2 { margin-left: 16px; }
+.iv-td2 { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; } .iv-td2.strong { font-weight: 700; }
+.td2-dlg { max-width: 760px !important; width: min(760px, calc(100vw - 32px)) !important; } .td2-dlg p { margin: 4px 0; }

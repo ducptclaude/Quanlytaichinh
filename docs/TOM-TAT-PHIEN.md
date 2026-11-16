@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.16.11.26 – Mục IV: TĐ2 gộp 1 cột, bấm xem các lần tăng / giảm (doanh thu + chi phí)
+- Chi tiết doanh thu và Chi tiết chi phí chỉ còn 3 cột TĐ1 · TĐ2 · TĐ3 (bỏ cột con theo văn bản ở TĐ2).
+- Bấm số TĐ2 (dự án, HĐ CĐT, khối chi phí) → hộp: TĐ1 → TĐ2, số lần tăng / giảm, từng đợt (văn bản, nội dung, ngày, ±), dòng còn lại = thay gói bằng HĐ ký thật / phát sinh / đóng gói (chi phí) hoặc PL ký thêm ở TĐ2 (doanh thu). Máy chủ thêm `dt_dc`, `cp_dc` (chỉ đọc).
+- Kiểm tra dự án thử: chi phí HĐ H1 0,40 → 0,36 = +0,03 (TP1) −0,07 (thay gói); doanh thu H1 1,00 → 1,10 = 1 lần tăng +0,10. tester 4518 · kiem-tra-goi 47 ĐẠT, 0 LỖI.
+
 ## V01.16.11.26 – Bỏ ma trận kế hoạch · Chi phí TĐ1 gồm gián tiếp + tài chính · Mục IV tách khối · % trên thẻ mục I
 - Báo cáo theo công trình › Tổng quan: bỏ ma trận TĐ1–TĐ3 (số cũ không khớp mục I); chỉ giữ dòng gọn "Số chốt thời điểm" với nút + Chốt / Sửa (mục I TĐ1 vẫn dùng số chốt).
 - Bảng "Chi phí kế hoạch" → "Chi phí thời điểm 1 – gồm dự trù gián tiếp + tài chính": theo khối / nhóm tại TĐ1, cùng số mục I TĐ1. Máy chủ thêm `cp_td_nhom` (chi phí từng nhóm × TĐ1–3, đã chi) – tổng nhóm = chi phí dự án ở mọi dự án, 3 TĐ, trước & sau VAT.

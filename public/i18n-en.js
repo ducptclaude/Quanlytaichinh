@@ -1,6 +1,12 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Phụ lục ký thêm ở TĐ2 / khác": "Addenda signed at M2 / other",
+"Bấm để xem các lần tăng / giảm so với TĐ1": "Click to see increases / decreases vs M1",
+"Thay gói tạm tính bằng HĐ ký thật / HĐ phát sinh / đóng gói": "Package estimates replaced by signed contracts / new contracts / closed packages",
+"Không có đợt điều chỉnh": "No adjustments",
+"Toàn dự án": "Whole project",
+"Tăng / giảm": "Increase / decrease",
 "Trực tiếp chưa gắn HĐ": "Direct – not linked to a contract",
 "Chi phí thời điểm 1": "M1 costs",
 "Chi phí so với doanh thu": "Cost as % of revenue",
@@ -1595,6 +1601,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"{} lần tăng ({}) · {} lần giảm ({})",
+"{} increases ({}) · {} decreases ({})"
+],
 [
 "gồm dự trù gián tiếp + tài chính · {}",
 "incl. indirect + financial estimates · {}"
