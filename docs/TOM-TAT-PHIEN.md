@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.16.11.26 – Khung "Dự trù theo % doanh thu" làm lại cho đẹp
+- 2 ô Chi phí gián tiếp / Chi phí tài chính có vạch màu trùng thẻ phía trên (xanh ngọc / tím), ô % gọn (không lặp "%"), số tiền tương ứng cùng màu, ghi chú 1 dòng. Điện thoại: mỗi ô 1 hàng, không tràn.
+
 ## V10.16.11.26 – Chi phí gián tiếp, tài chính: TĐ1, TĐ2 theo % doanh thu (nhập tay); TĐ3 = thực chi
 - Trang Chi phí (tab TĐ1 / TĐ2): ô "Dự trù theo % doanh thu" – gián tiếp %, tài chính % → = % × doanh thu cùng TĐ (trước VAT). TĐ2 trống = theo % TĐ1. Trống TĐ1 = tính như cũ (DA-01..04 không đổi tới khi nhập).
 - TĐ3 (quyết toán): gián tiếp, tài chính = thực chi (chi phí đã ghi). Tiền chi thật luôn vào thực chi mục II (không đổi).

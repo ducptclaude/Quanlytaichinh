@@ -2119,15 +2119,16 @@ function ptHtml(k) {
     return;
   }
   const f = (key) => d[key] ?? null, edit = can('hd');
-  const o1 = (key, ph) => `<input class="pt-in" name="${key}" inputmode="decimal" value="${num(f(key))}" placeholder="${ph}" ${edit ? '' : 'disabled'} aria-label="${key}">`;
+  const o1 = (key, ph) => `<input class="pt-in" name="${key}" inputmode="decimal" value="${num(f(key))}" placeholder="${ph}" ${edit ? '' : 'disabled'} aria-label="${key}"><em>%</em>`;
   const gt = k === 1 ? 'pt_gt1' : 'pt_gt2', tc = k === 1 ? 'pt_tc1' : 'pt_tc2';
-  const ph = (k1) => (k === 2 && f(k1) !== null ? `theo TĐ1: ${num(f(k1))}` : '%');
+  const ph = (k1) => (k === 2 && f(k1) !== null ? num(f(k1)) : '0');
   const val = (kh) => (pt[kh] ? pt[kh].gt[k - 1] : null);
-  el.innerHTML = `<form id="pt-form" class="pt-form"><span><b>Dự trù theo % doanh thu TĐ${k}</b> <small class="muted">(doanh thu TĐ${k} trước VAT ${dvT(dt)})</small></span>
-    <label>Gián tiếp ${o1(gt, ph('pt_gt1'))}%${val('B2') !== null ? ` = <b>${dvT(val('B2'))}</b>` : ''}</label>
-    <label>Tài chính ${o1(tc, ph('pt_tc1'))}%${val('B3') !== null ? ` = <b>${dvT(val('B3'))}</b>` : ''}</label>
-    ${edit ? '<button type="submit" class="sm primary">Lưu</button>' : ''}
-    <small class="muted">Tiền chi thực tế (lương, lãi vay…) ghi ở bảng chi phí → vào thực chi; TĐ3 lấy thực chi.${k === 2 ? ' TĐ2 để trống = theo % TĐ1.' : ''} Để trống TĐ1 = tính như cũ (chi phí đã ghi).</small><span class="msg" id="pt-msg"></span></form>`;
+  const box = (cls, ten, key, k1, kh) => `<label class="pt-box ${cls}"><span class="pt-ten">${ten}</span><span class="pt-ip">${o1(key, ph(k1))}</span><span class="pt-val">${val(kh) !== null ? `= <b>${dvT(val(kh))}</b>` : '<i class="muted">chưa nhập</i>'}</span></label>`;
+  el.innerHTML = `<form id="pt-form" class="pt-form">
+    <div class="pt-head"><b>Dự trù theo % doanh thu · TĐ${k}</b><small>Doanh thu TĐ${k} (trước VAT): <b>${dvT(dt)}</b></small></div>
+    ${box('pt-b2', 'Chi phí gián tiếp', gt, 'pt_gt1', 'B2')}${box('pt-b3', 'Chi phí tài chính', tc, 'pt_tc1', 'B3')}
+    ${edit ? '<button type="submit" class="primary pt-save">Lưu</button>' : ''}<span class="msg" id="pt-msg"></span>
+    <small class="pt-note">Tiền chi thật (lương, lãi vay…) ghi ở bảng chi phí → thực chi · TĐ3 = thực chi${k === 2 ? ' · trống = theo % TĐ1' : ' · trống = tính theo chi phí đã ghi'}</small></form>`;
 }
 document.addEventListener('submit', async (e) => {
   if (e.target.id !== 'pt-form') return;
