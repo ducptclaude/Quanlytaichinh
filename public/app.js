@@ -1937,14 +1937,32 @@ function renderCost() {
     if ($('#c-blocks-sum')) $('#c-blocks-sum').textContent = `Trực tiếp · Gián tiếp · Tài chính – ${tong.so_dong} dòng chi phí`;
     const t = tong.theo_khoi[k.code];
     $('[data-ktotal]', card).textContent = dvT(t.sau_vat);
-    $('tbody', card).innerHTML = blockRows(k);
+    $('tbody', card).innerHTML = blockRows(k) + khoanRows(k.code);
+    // V15.17: gián tiếp / tài chính – "Tổng" = chi phí của khối tại TĐ đang chọn (cùng thẻ trên, báo cáo); chi phí đã ghi ghi kèm
+    const kk = tdDangChon(), cpK = costData.cp_khoi?.[k.code]?.[kk - 1];
+    if (['B2', 'B3'].includes(k.code) && cpK !== undefined && !costAll) { const tt = $('[data-ktotal]', card); tt.textContent = dvT(cpK); tt.title = `Chi phí ${k.ten.toLowerCase()} TĐ${kk} (sau VAT, cùng thẻ trên và Báo cáo) · chi phí đã ghi: ${dvT(t.sau_vat)}`; }
     const gon = !nhomOf(k.code).some((n) => costOpen.has(n.code));
     $('table', card).classList.toggle('c-gon', gon);
-    $('tfoot', card).innerHTML = `<tr><td></td><td ${gon ? '' : 'colspan="3"'}>TỔNG ${esc(k.ten)}${t.tam_tinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>${sumCells(t)}<td colspan="${gon ? 1 : 2}"></td></tr>`;
+    $('tfoot', card).innerHTML = `<tr><td></td><td ${gon ? '' : 'colspan="3"'}>${['B2', 'B3'].includes(k.code) && !costAll ? `CHI PHÍ ĐÃ GHI (THỰC CHI) – ${esc(k.ten)}` : `TỔNG ${esc(k.ten)}`}${t.tam_tinh ? ' <span class="st st-tam-tinh">Có tạm tính</span>' : ''}</td>${sumCells(t)}<td colspan="${gon ? 1 : 2}"></td></tr>`;
     $('[data-ctoggle]', card).textContent = blockKeys(k.code).every((x) => costOpen.has(x)) ? 'Thu gọn tất cả' : 'Mở tất cả';
   }
   renderTpCard();
   if (tpDlgId) renderTpDlg();
+}
+// V15.17: dưới bảng gián tiếp / tài chính: các khoản dự trù (giá trị tại TĐ đang chọn, đã chi) + dự trù theo % / số nhập – để bảng nối với thẻ và báo cáo
+function khoanRows(kh) {
+  if (!['B2', 'B3'].includes(kh) || costAll || !costData?.du_tru) return '';
+  const k = tdDangChon(), KS = ptKhoan().filter((x) => x.khoi === kh), pt = costData.pt_td?.[kh];
+  const cpK = costData.cp_khoi?.[kh]?.[k - 1];
+  if (!KS.length && !(pt?.gt && k < 3)) return '';
+  const svOf = (x, r) => x + Math.round((x * (Number(r?.vat) || 0)) / 100);
+  const co = nhomOf(kh).some((n) => costOpen.has(n.code)) ? '<td class="c-o"></td><td class="c-o"></td>' : '', co1 = co ? '<td class="c-o"></td>' : ''; // bảng gọn: không có cột đối tác / ngày / ghi chú
+  const row = (ten, sub, gt, sv, cls = '') => `<tr class="c-khoan ${cls}"><td></td><td>${ten}${sub ? `<div class="muted small">${sub}</div>` : ''}</td>${co}<td class="num">${dvT(gt)}</td><td class="num">${dvT(sv)}</td><td class="num c-pdt"></td>${co1}<td></td></tr>`;
+  let h = `<tr class="c-khoan-h"><td></td><td colspan="1"><b>Dự trù theo khoản · TĐ${k}</b> <span class="muted small">(nhập ở khung "Khoản chi phí gián tiếp, tài chính" phía trên)</span></td>${co}<td class="num"></td><td class="num"></td><td class="num c-pdt"></td>${co1}<td></td></tr>`;
+  h += KS.map((x) => row(`└ <b>${esc(x.r.noi_dung || 'Khoản')}</b>`, `${esc(NHOM().find((n) => n.code === x.r.nhom)?.ten || '')} · đã chi ${dvT(x.le)}${x.dong ? ' · đã đóng' : x.chot !== null ? ' · đã chốt' : ''}`, x.t[k - 1], svOf(x.t[k - 1], x.r))).join('');
+  if (pt?.gt && k < 3) h += row('<b>Dự trù đang dùng (% / số nhập)</b>', `TĐ${k} của khối lấy số này thay cho cộng các khoản`, pt.gt[k - 1], pt.gt[k - 1], 'c-khoan-pt');
+  if (cpK !== undefined) h += row(`<b>Chi phí khối TĐ${k} (= thẻ phía trên, báo cáo)</b>`, k === 3 ? 'TĐ3 = thực chi (khoản đã chốt lấy số chốt)' : 'dự trù chưa chi hết + chi phí đã ghi', cpK, cpK, 'c-khoan-tong');
+  return h;
 }
 const blockKeys = (khoi) => nhomOf(khoi).flatMap((n) => [n.code, ...n.sub.map((sc) => `${n.code}:${sc.code}`),
   ...(HDV.includes(n.code) && costData ? [...new Set(costData.thau_phu.filter((c) => (c.nhom || 'thau_phu') === n.code).map((c) => c.hd_cdt_id || 0))].map((k) => `${n.code}:hd${k}`) : [])]);
@@ -2108,7 +2126,8 @@ function costKpiTd() {
 }
 // V10.16 + V04.17: chi phí gián tiếp / tài chính – (1) khoản chi tiết nhập như thầu phụ: TĐ1 dự trù · TĐ2 điều chỉnh theo khoản · TĐ3 = thực chi / số chốt;
 //  (2) khối chưa có khoản nào thì dùng % × doanh thu cùng TĐ (TĐ1, TĐ2). Số tiền ở đây là trước VAT.
-let ptEdit = null; // { id, kind: 'dc' | 'chot' } – dòng đang mở ô nhập
+let ptEdit = null;
+document.addEventListener('change', (e) => { const sel = e.target.closest('#pt-form .pt-dv'); if (!sel) return; const ip = sel.form.elements[sel.name.replace(/_dv$/, '')]; if (ip) { ip.value = ''; ip.focus(); } }); // đổi % <-> đ: xoá ô để nhập lại // { id, kind: 'dc' | 'chot' } – dòng đang mở ô nhập
 const PK_GOI_Y = { gt_luong: ['Lương ban chỉ huy', 'Thưởng', 'BHXH, BHYT'], gt_tien_ich: ['Lán trại, tiện ích', 'Điện nước thi công', 'Văn phòng phẩm'], gt_ngoai_giao: ['Tiếp khách', 'Ngoại giao'],
   tc_chi_phi: ['Phí bảo lãnh', 'Phí ngân hàng'], tc_tra_no: ['Lãi vay'], tc_phat: ['Phạt chậm tiến độ'] };
 function ptKhoan() {
@@ -2136,19 +2155,18 @@ function ptHtml(k) {
   if (k === 3) phan1 = `<div class="pt-head"><b>TĐ3 – Quyết toán</b><small>Gián tiếp, tài chính = <b>thực chi</b> (khoản đã chốt số lấy số chốt) · thực chi gián tiếp ${dvT(thuc('B2'))} · tài chính ${dvT(thuc('B3'))}</small></div>`;
   else {
     const f = (key) => d[key] ?? null;
-    const o1 = (key, ph) => `<input class="pt-in" name="${key}" inputmode="decimal" value="${num(f(key))}" placeholder="${ph}" ${edit ? '' : 'disabled'} aria-label="${key}"><em>%</em>`;
+    // V15.17: mỗi ô nhập % (× doanh thu) HOẶC số tiền net (chọn đơn vị) – không khoá khi đã có khoản chi tiết
+    const tk = (key) => 'tien_' + key.slice(3), laTien = (key) => f(tk(key)) !== null;
+    const o1 = (key, ph) => `<input class="pt-in" name="${key}" inputmode="decimal" value="${laTien(key) ? money(f(tk(key))) : num(f(key))}" placeholder="${ph}" ${edit ? '' : 'disabled'} aria-label="${key}"><select class="pt-dv" name="${key}_dv" ${edit ? '' : 'disabled'} aria-label="Đơn vị"><option value="pt">%</option><option value="tien" ${laTien(key) ? 'selected' : ''}>đ</option></select>`;
     const gt = k === 1 ? 'pt_gt1' : 'pt_gt2', tc = k === 1 ? 'pt_tc1' : 'pt_tc2';
-    const ph = (k1) => (k === 2 && f(k1) !== null ? num(f(k1)) : '0');
+    const ph = (k1) => (k === 2 && f(tk(k1)) !== null ? money(f(tk(k1))) : k === 2 && f(k1) !== null ? num(f(k1)) + ' %' : '0');
     const val = (kh) => (pt[kh]?.gt ? pt[kh].gt[k - 1] : null);
-    const box = (cls, ten, key, k1, kh) => coKhoan(kh)
-      ? `<div class="pt-box ${cls}"><span class="pt-ten">${ten}</span><span class="pt-val"><i>theo khoản bên dưới</i></span></div>`
-      : `<label class="pt-box ${cls}"><span class="pt-ten">${ten}</span><span class="pt-ip">${o1(key, ph(k1))}</span><span class="pt-val">${val(kh) !== null ? `= <b>${dvT(val(kh))}</b>` : '<i class="muted">chưa nhập</i>'}</span></label>`;
-    const coO = !coKhoan('B2') || !coKhoan('B3');
-    phan1 = !coO ? '' : `<form id="pt-form" class="pt-form">
-    <div class="pt-head"><b>Dự trù theo % doanh thu · TĐ${k}</b><small>Doanh thu TĐ${k} (trước VAT): <b>${dvT(dt)}</b></small></div>
+    const box = (cls, ten, key, k1, kh) => `<label class="pt-box ${cls}"><span class="pt-ten">${ten}</span><span class="pt-ip">${o1(key, ph(k1))}</span><span class="pt-val">${val(kh) !== null ? `= <b>${dvT(val(kh))}</b>` : '<i class="muted">chưa nhập</i>'}</span></label>`;
+    phan1 = `<form id="pt-form" class="pt-form">
+    <div class="pt-head"><b>Dự trù gián tiếp, tài chính · TĐ${k}</b><small>Doanh thu TĐ${k} (trước VAT): <b>${dvT(dt)}</b></small></div>
     ${box('pt-b2', 'Chi phí gián tiếp', gt, 'pt_gt1', 'B2')}${box('pt-b3', 'Chi phí tài chính', tc, 'pt_tc1', 'B3')}
-    ${edit && coO ? '<button type="submit" class="primary pt-save">Lưu</button>' : ''}<span class="msg" id="pt-msg"></span>
-    <small class="pt-note">Khối đã có khoản chi tiết thì không dùng % · TĐ3 = thực chi${k === 2 ? ' · trống = theo % TĐ1' : ''}</small></form>`;
+    ${edit ? '<button type="submit" class="primary pt-save">Lưu</button>' : ''}<span class="msg" id="pt-msg"></span>
+    <small class="pt-note">Nhập % (× doanh thu) hoặc số tiền dự trù → TĐ${k} lấy số này (khoản chi tiết bên dưới để theo dõi) · để trống = cộng theo khoản / chi phí đã ghi${k === 2 ? ' · TĐ2 trống = theo TĐ1' : ''} · TĐ3 = thực chi</small></form>`;
   }
   // ---- (1) khoản chi tiết ----
   const nhB = NHOM().filter((n) => ['B2', 'B3'].includes(n.khoi));
@@ -2174,11 +2192,15 @@ function ptHtml(k) {
   // chi đã ghi của khối nhưng không gắn khoản nào -> tính ở cả 3 TĐ (để cộng khối = thẻ phía trên)
   const kyIds = new Set(KS.map((x) => x.r.id));
   const ngoai = (kh) => (costData.items || []).filter((r) => { const n = NHOM().find((x) => x.code === r.nhom); return n?.khoi === kh && !n.sub.find((sc) => sc.code === r.nhom_con)?.khong_tinh_cp && !kyIds.has(r.goi_id); }).reduce((a, r) => a + (Number(r.gia_tri) || 0), 0);
+  // V15.17: khối có nhập % / số tiền dự trù -> TĐ1, TĐ2 của khối lấy số này (thẻ, báo cáo); dòng này cho thấy chênh với cộng các khoản
+  const ptRow = (kh, s) => { const g = pt[kh]?.gt; if (!g) return '';
+    const ch = (i) => (i < 2 ? g[i] - s(i) : 0), o = (i) => `<td class="${c(i)}">${i < 2 ? dvT(g[i]) : '<span class="muted">= thực chi</span>'}</td>`;
+    return `<tr class="pk-dung"><td><b>Dự trù đang dùng (% / số nhập)</b><div class="muted small">TĐ1, TĐ2 của khối lấy dòng này · chênh so với cộng khoản: TĐ1 ${dvT(ch(0))} · TĐ2 ${dvT(ch(1))}</div></td>${o(0)}${o(1)}${o(2)}<td></td><td></td><td></td></tr>`; };
   const tong = (kh) => { const ks = KS.filter((x) => x.khoi === kh); if (!ks.length) return '';
     const ng = ngoai(kh), s = (i) => ks.reduce((a, x) => a + x.t[i], 0) + ng, le = ks.reduce((a, x) => a + x.le, 0) + ng;
     const ngR = Math.abs(ng) >= 1 ? `<tr class="pk-ngoai"><td><i>Chi chưa gắn khoản</i><div class="muted small">chi phí đã ghi của khối, không chọn khoản – tính ở cả 3 TĐ</div></td><td class="${c(0)}">${dvT(ng)}</td><td class="${c(1)}">${dvT(ng)}</td><td class="${c(2)}">${dvT(ng)}</td><td class="num">${dvT(ng)}</td><td class="num">–</td><td></td></tr>` : '';
     return `<tr class="pk-khoi pk-${kh}"><td colspan="7"><b>${TEN_K[kh]}</b></td></tr>${ks.map(row).join('')}${ngR}
-      <tr class="pk-tong"><td>Cộng ${TEN_K[kh].toLowerCase()}</td><td class="${c(0)}">${dvT(s(0))}</td><td class="${c(1)}">${dvT(s(1))}</td><td class="${c(2)}">${dvT(s(2))}</td><td class="num">${dvT(le)}</td><td class="num">${dvT(s(k - 1) - le)}</td><td></td></tr>`; };
+      <tr class="pk-tong"><td>Cộng ${TEN_K[kh].toLowerCase()}</td><td class="${c(0)}">${dvT(s(0))}</td><td class="${c(1)}">${dvT(s(1))}</td><td class="${c(2)}">${dvT(s(2))}</td><td class="num">${dvT(le)}</td><td class="num">${dvT(s(k - 1) - le)}</td><td></td></tr>${ptRow(kh, s)}`; };
   const them = edit && k === 1 ? `<form class="pk-add" id="pk-add"><b>+ Thêm khoản</b>
       <select name="nhom" aria-label="Nhóm">${nhB.map((n) => `<option value="${n.code}">${n.khoi === 'B2' ? 'Gián tiếp' : 'Tài chính'} · ${esc(n.ten)}</option>`).join('')}</select>
       <input name="noi_dung" list="pk-goi-y" maxlength="300" placeholder="Tên khoản (VD: Lương BCH)" required><datalist id="pk-goi-y"></datalist>
@@ -2190,7 +2212,7 @@ function ptHtml(k) {
   // V05.17: nút mở / thu gọn bảng khoản (mặc định gọn, nhớ theo máy); đang nhập điều chỉnh / chốt thì luôn mở
   let mo = false; try { mo = localStorage.getItem('pk_mo') === '1'; } catch {}
   mo = mo || Boolean(ptEdit);
-  const tomTat = KS.length ? ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `${kh === 'B2' ? 'Gián tiếp' : 'Tài chính'} <b>${dvT(ks.reduce((a, x) => a + x.t[k - 1], 0) + ngoai(kh))}</b> (${ks.length} khoản)` : ''; }).filter(Boolean).join(' · ') : '<span class="muted">chưa có khoản</span>';
+  const tomTat = KS.length ? ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `${kh === 'B2' ? 'Gián tiếp' : 'Tài chính'} <b>${dvT(k < 3 && pt[kh]?.gt ? pt[kh].gt[k - 1] : ks.reduce((a, x) => a + x.t[k - 1], 0) + ngoai(kh))}</b> (${ks.length} khoản${k < 3 && pt[kh]?.gt ? ', đang theo % / số nhập' : ''})` : ''; }).filter(Boolean).join(' · ') : '<span class="muted">chưa có khoản</span>';
   el.innerHTML = `${phan1}<div class="pk-wrap"><button type="button" class="pk-tog" data-pktog aria-expanded="${mo}"><span class="pk-tg">${mo ? '▾' : '▸'}</span> <b>Khoản chi phí gián tiếp, tài chính · TĐ${k}</b> <small>${tomTat}</small><span class="pk-tg-txt">${mo ? 'Thu gọn' : 'Mở ra'}</span></button>
     ${mo ? `${bang}${them}${KS.length || them ? huongDan : '<small class="muted">Chưa có khoản – thêm ở tab TĐ1.</small>'}` : ''}</div>`;
   $$('input.money', el).forEach(attachMoneyInput);
@@ -2215,7 +2237,8 @@ document.addEventListener('submit', async (e) => {
   const f = e.target;
   if (f.id === 'pt-form') {
     e.preventDefault();
-    const body = {}; for (const i of f.querySelectorAll('.pt-in')) body[i.name] = i.value.trim();
+    const body = {}; for (const i of f.querySelectorAll('.pt-in')) { const dv = f.elements[i.name + '_dv']?.value, v = i.value.trim(), t = 'tien_' + i.name.slice(3);
+      if (dv === 'tien') { body[t] = v === '' ? '' : String(parseMoney(v)); body[i.name] = ''; } else { body[i.name] = v; body[t] = ''; } }
     try { await api(`/api/du-an/${revProjectId}/ty-le`, { method: 'PUT', body: JSON.stringify(body) }); await loadCost(); showMsg($('#pt-msg'), 'Đã lưu'); }
     catch (err) { showMsg($('#pt-msg'), err.message, 'err'); }
     return;

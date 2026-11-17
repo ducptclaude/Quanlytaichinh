@@ -3783,3 +3783,11 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 }
 /* V14.17: bảng danh mục + bản đồ: luôn xếp dọc (nội dung tối đa 1320px – xếp ngang làm bảng bị cắt) */
 @media (min-width: 1601px) { .db-row3 { grid-template-columns: minmax(0, 1fr); } .db-mapc { height: 400px; min-height: 400px; } .db-table .db-ten { max-width: 320px; } main .db-mapc.leaflet-container { height: calc(400px * var(--uiz)); } }
+.c-pt .pt-dv { border: 0; background: transparent; font-weight: 700; color: var(--muted); padding: 4px 2px; width: auto; min-width: 0; box-shadow: none; }
+.c-pt .pt-ip input.pt-in { width: 110px; }
+.c-pt .pk-dung td { background: #f1fbf9; border-bottom: 2px solid var(--teal); }
+/* V15.17: dòng khoản dự trù trong bảng chi tiết gián tiếp / tài chính */
+.cost-table .c-khoan-h td { background: #eef6f5; color: var(--navy); border-top: 2px solid var(--teal); }
+.cost-table .c-khoan td { background: #fbfdfd; }
+.cost-table .c-khoan-pt td { background: #f1fbf9; }
+.cost-table .c-khoan-tong td { font-weight: 700; background: #e6f4f2; }

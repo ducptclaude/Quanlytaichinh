@@ -120,8 +120,12 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
   await doiChieu('12) Chốt 150 (đã chi 130, còn phải trả 20): TĐ3 = 150', [860, 900, 910], [400, 360, 360], [320, 350, 340], [140, 190, 210]);
   check((await api('PUT', `/du-tru/${G2}`, { gt_chot: 1 * U }, true)).status === 400, 'Chặn chốt số cho gói chi phí trực tiếp');
   await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '10', pt_tc1: '5' });
-  await doiChieu('13) Có khoản gián tiếp → bỏ qua % gián tiếp; tài chính chưa có khoản → dùng 5%', [935, 980, 910], [400, 360, 360], [320, 350, 340], [215, 270, 210]);
-  await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '', pt_tc1: '' });
+  await doiChieu('13) V15.17: % vẫn dùng khi đã có khoản (khoản để theo dõi): gián tiếp 10% → 150 / 160, tài chính 5% → 75 / 80; TĐ3 giữ thực chi + chốt', [945, 970, 910], [400, 360, 360], [320, 350, 340], [225, 260, 210]);
+  await api('PUT', `/du-an/${id}/ty-le`, { tien_gt1: String(200 * U) });
+  await doiChieu('13b) Gián tiếp nhập số tiền 200 (TĐ2 trống = theo TĐ1)', [995, 1010, 910], [400, 360, 360], [320, 350, 340], [275, 300, 210]);
+  const sai4 = await api('PUT', `/du-an/${id}/ty-le`, { tien_tc1: '-5' }, true);
+  check(sai4.status === 400, 'Chặn số tiền dự trù âm', `mã ${sai4.status}`);
+  await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '', pt_tc1: '', tien_gt1: '', tien_tc1: '' });
   await api('PUT', `/du-tru/${K1}`, { gt_chot: '' });
   await doiChieu('14) Bỏ % và bỏ chốt → TĐ3 về thực chi', [860, 900, 890], [400, 360, 360], [320, 350, 340], [140, 190, 190]);
   console.log(`\nKẾT QUẢ: ${pass} kiểm tra ĐẠT, ${fail} LỖI`);

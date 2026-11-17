@@ -837,10 +837,18 @@ api.put('/du-an/:id/ty-le', canHd, wrap(async (req, res) => {
     if (v !== null && (!Number.isFinite(v) || v < 0 || v > 100)) errs.push('Tỷ lệ phải từ 0 đến 100 (%)');
     d[k] = v === null ? null : Math.round(v * 1000) / 1000;
   }
+  // V15.17: hoặc nhập SỐ TIỀN dự trù (net, trước VAT) – có số thì dùng số, bỏ %
+  for (const k of ['tien_gt1', 'tien_gt2', 'tien_tc1', 'tien_tc2']) {
+    const raw = req.body?.[k] === undefined ? cur[k] : req.body[k];
+    const v = raw === null || raw === undefined || String(raw).trim() === '' ? null : Number(String(raw).replace(/[.\s]/g, '').replace(',', '.'));
+    if (v !== null && (!Number.isFinite(v) || v < 0 || v > 1e15)) errs.push('Số tiền dự trù không hợp lệ (số ≥ 0)');
+    d[k] = v === null ? null : Math.round(v);
+    if (d[k] !== null) d['pt_' + k.slice(5)] = null;
+  }
   if (errs.length) return bad(res, errs[0]);
   await store.setProjectPt(id, d, req.user.id);
-  const f = (x) => (x === null || x === undefined ? '—' : String(x).replace('.', ',') + '%');
-  audit.log(req, 'Sửa', 'Dự án', `Dự trù % doanh thu – gián tiếp TĐ1 ${f(d.pt_gt1)} · TĐ2 ${f(d.pt_gt2)} · tài chính TĐ1 ${f(d.pt_tc1)} · TĐ2 ${f(d.pt_tc2)}`, { du_an: cur.ma_du_an });
+  const f = (k) => (d['tien_' + k] !== null && d['tien_' + k] !== undefined ? new Intl.NumberFormat('vi-VN').format(d['tien_' + k]) + ' đ' : d['pt_' + k] === null || d['pt_' + k] === undefined ? '—' : String(d['pt_' + k]).replace('.', ',') + '%');
+  audit.log(req, 'Sửa', 'Dự án', `Dự trù gián tiếp TĐ1 ${f('gt1')} · TĐ2 ${f('gt2')} · tài chính TĐ1 ${f('tc1')} · TĐ2 ${f('tc2')}`, { du_an: cur.ma_du_an });
   res.json({ id, ...d });
 }));
 

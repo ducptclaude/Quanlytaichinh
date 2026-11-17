@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V15.17.11.26 – Dự trù gián tiếp / tài chính: nhập % HOẶC số tiền, không khoá khi có khoản; bảng chi tiết nối số
+- Ô dự trù mỗi khối: chọn đơn vị % (× doanh thu) hoặc đ (số net). Có nhập → TĐ1, TĐ2 khối lấy số này (cả khi đã có khoản; khoản để theo dõi, có dòng "Dự trù đang dùng" + chênh). TĐ2 trống = theo TĐ1. TĐ3 = thực chi (khoản chốt = số chốt), không còn bị % đè.
+- Kho dữ liệu: du_an thêm tien_gt1/2, tien_tc1/2 (chỉ THÊM). API ty-le nhận tien_* (≥ 0; có số thì bỏ %).
+- Bảng chi tiết chi phí (trang Chi phí) gián tiếp / tài chính: "Tổng" = chi phí khối tại TĐ (= thẻ, báo cáo); dưới bảng có dòng các khoản dự trù, dự trù đang dùng, chi phí khối; dòng cuối đổi tên "Chi phí đã ghi (thực chi)".
+- kiem-tra-goi 187 ĐẠT (sửa bước 13: % vẫn dùng khi có khoản; thêm 13b số tiền 200), tester 4565 ĐẠT; không tràn.
+
 ## V14.17.11.26 – Giao diện tự phóng to theo màn hình máy tính rộng (Mac, Win)
 - style.css: --uiz theo độ rộng (≥1420: 1,05 · 1500: 1,09 · 1600: 1,14 · 1700: 1,2 · 1900: 1,28 · 2200: 1,4); phóng thanh tiêu đề + nội dung + chân trang (zoom), hộp thoại / gợi ý ngoài vùng phóng giữ nguyên; bản đồ trả về tỷ lệ gốc (bấm / kéo đúng). Dashboard: bảng danh mục + bản đồ luôn xếp dọc.
 - Đo 1280×800, 1366×768, 1440×900, 1512×982 (Mac 14"), 1728×1117 (Mac 16"), 1920×1080, 2560×1440: không tràn ngang, bản đồ mở đúng điểm, hộp chọn kỳ trong màn hình. Dưới 1420px giữ nguyên. tester ĐẠT.
