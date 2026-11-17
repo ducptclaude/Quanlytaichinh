@@ -896,6 +896,9 @@ function bTongHopHtml(list, v, P) {
       const GH = bGthtMap(list, v);
       const htCell = (d) => { const g = GH.get(d.id) || { gtht: 0, dt3: 0, ht: 0, nguon: 'c2c' }; const p = g.ht || 0;
         return `<td class="th-ht" title="Giá trị hoàn thành ${bTy(g.gtht)} ÷ Doanh thu TĐ3 ${bTy(g.dt3)} ${TY()} – ${GT_NGUON(g)}"><span class="ht-wrap">${meter(Math.min(p, 1), 1, p > 1 ? '#d92d35' : BCOL.dk)}<b class="ht-pct ${p > 1 ? 'neg' : ''}">${bpct(g.gtht, g.dt3)}</b></span></td>`; };
+      // V11.17: ngay dưới số DT / CP ghi mức thay đổi so với TĐ trước (vd PL quyết toán lệch dương) – nhìn tổng quan thấy được ở dự án, khối, từng HĐ
+      const dd = (a, b0, good) => { if (k < 2 || b0 === null || b0 === undefined) return ''; const d0 = a - b0; if (Math.abs(d0) < 1e6) return '';
+        return `<small class="i-dd ${(d0 > 0) === good ? 'up' : 'dn'}" title="So với TĐ${k - 1}: ${bTy(b0)} → ${bTy(a)} ${TY()}">${d0 > 0 ? '▲ +' : '▼ −'}${bTy(Math.abs(d0))}</small>`; };
       const dCell = (r) => { if (!doi(r)) return '<td class="num i-dc"><span class="i-dl eq">—</span></td>';
         const d = (r.dt - r.cp) - (r.b.dt - r.b.cp);
         const tip = `So với TĐ${k - 1}: DT ${r.dt - r.b.dt >= 0 ? '+' : '−'}${bTy(Math.abs(r.dt - r.b.dt))} · CP ${r.cp - r.b.cp >= 0 ? '+' : '−'}${bTy(Math.abs(r.cp - r.b.cp))} · LN ${d >= 0 ? '+' : '−'}${bTy(Math.abs(d))} ${TY()}`;
@@ -916,9 +919,9 @@ function bTongHopHtml(list, v, P) {
         const khac = { dt: r.dt - sum('dt'), cp: r.cp - sum('cp'), b: k > 1 ? { dt: r.b.dt - sum('dt', 1), cp: r.b.cp - sum('cp', 1) } : null };
         const dong = (c, ten) => `<tr class="iv-hd-row${ten ? '' : ' iv-chung-row'}">${ten || ''}<td class="th-ht">${c.h ? (() => { const p = c.h.da_qt ? 1 : c.h.so_dot && c.h.td3?.[v] ? (c.h.nt?.[v] || 0) / c.h.td3[v] : null;
             return p === null ? '<span class="muted">—</span>' : `<span class="ht-wrap">${meter(Math.min(p, 1), 1, BCOL.dk)}<b class="ht-pct">${(p * 100).toFixed(1).replace('.', ',')}%</b></span>`; })() : ''}</td>
-          <td class="num">${bTy(c.dt)}</td><td class="num">${bTy(c.cp)}</td><td class="num ${c.dt - c.cp < 0 ? 'neg' : ''}">${bTy(c.dt - c.cp)}</td>
+          <td class="num">${bTy(c.dt)}${dd(c.dt, c.b?.dt, true)}</td><td class="num">${bTy(c.cp)}${dd(c.cp, c.b?.cp, false)}</td><td class="num ${c.dt - c.cp < 0 ? 'neg' : ''}">${bTy(c.dt - c.cp)}</td>
           <td class="num">${c.dt ? bpct(c.dt - c.cp, c.dt) : '—'}</td></tr>`;
-        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
+        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}${dd(r.dt, r.b?.dt, true)}</td><td class="num">${bTy(r.cp)}${dd(r.cp, r.b?.cp, false)}</td>
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>
         <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}</b></td></tr>` +
         (hs.length && gMo(r.x.d) ? (() => {
@@ -927,14 +930,14 @@ function bTongHopHtml(list, v, P) {
           const ex = Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? tachI(r.x.d, k, khac) : [];
           const tt = ex.filter((e) => e[3] === 'TT'), coNhom = true;
           const ng = ['B2', 'B3'].map((g) => ex.find((e) => e[3] === g) || [{ dt: 0, cp: 0 }, KH_TEN[g][0], KH_TEN[g][1], g]);
-          const dongK = (c, ten) => `<tr class="iv-hd-row iv-grp-row">${ten}<td class="th-ht"></td><td class="num"></td><td class="num">${bTy(c.cp)}</td><td class="num"></td><td class="num"></td></tr>`;
+          const dongK = (c, ten) => `<tr class="iv-hd-row iv-grp-row">${ten.replace('<span class="iv-tree">└</span>', '<span class="iv-tree">└</span><span class="iv-tg-sp"></span>')}<td class="th-ht"></td><td class="num"></td><td class="num">${bTy(c.cp)}${dd(c.cp, c.b?.cp, false)}</td><td class="num"></td><td class="num"></td></tr>`;
           let j = 0; const l2 = (h, jj) => (coNhom ? h.replace('<td class="th-name">', '<td class="th-name iv-l2">').replace(`>${i + 1}.${jj + 1}</td>`, `>${i + 1}.1.${jj + 1}</td>`) : h);
           const hdR = con.map((c) => { const jj = j++; return dong(c, l2(gTen(c.h, i, jj), jj)); }).join('') + tt.map(([c, ten, tip]) => { const jj = j++; return dong(c, l2(gKhac(i, jj, esc(tip), ten), jj)); }).join('');
           let head = '';
           if (coNhom) { const G = [...con, ...tt.map((e) => e[0])], sm = (f, b) => G.reduce((a, c) => a + (b ? (c.b ? c.b[f] : 0) : c[f]), 0);
             // V03.17: dòng khối chỉ ghi chi phí; bấm ▸ / ▾ để sổ / gọn chi tiết từng HĐ (mặc định gọn)
             const mo = (BST.iv_tt_mo || []).includes(r.x.d.id);
-            head = `<tr class="iv-hd-row iv-grp-row"><td class="num th-stt muted">${i + 1}.1</td><td></td><td class="th-name"><span class="iv-tree">└</span><button type="button" class="iv-tg no-print" data-ivtt="${r.x.d.id}" title="${mo ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ (doanh thu, chi phí trực tiếp, lợi nhuận)'}">${mo ? '▾' : '▸'}</button> <b class="iv-grp" title="Chi phí trực tiếp: HĐ đầu vào, gói, mua lẻ – chi tiết theo từng HĐ chủ đầu tư">Chi phí trực tiếp</b></td><td></td><td class="th-ht"></td><td class="num"></td><td class="num">${bTy(sm('cp'))}</td><td class="num"></td><td class="num"></td></tr>`;
+            head = `<tr class="iv-hd-row iv-grp-row"><td class="num th-stt muted">${i + 1}.1</td><td></td><td class="th-name"><span class="iv-tree">└</span><button type="button" class="iv-tg no-print" data-ivtt="${r.x.d.id}" title="${mo ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ (doanh thu, chi phí trực tiếp, lợi nhuận)'}">${mo ? '▾' : '▸'}</button><b class="iv-grp" title="Chi phí trực tiếp: HĐ đầu vào, gói, mua lẻ – chi tiết theo từng HĐ chủ đầu tư">Chi phí trực tiếp</b></td><td></td><td class="th-ht"></td><td class="num"></td><td class="num">${bTy(sm('cp'))}${k > 1 ? dd(sm('cp'), sm('cp', 1), false) : ''}</td><td class="num"></td><td class="num"></td></tr>`;
             if (!mo) return head + ng.map(([c, ten, tip], n) => dongK(c, gKhac(i, n + 1, esc(tip), ten))).join(''); }
           return head + hdR + ng.map(([c, ten, tip], n) => dongK(c, gKhac(i, n + 1, esc(tip), ten))).join(''); })() : ''); void chungTip; void pbTen;
       }).join('')}</tbody>

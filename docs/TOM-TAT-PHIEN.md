@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.17.11.26 – Mục I: mức thay đổi so TĐ trước ngay dưới số DT / CP; thẳng hàng tên khối
+- TĐ2 / TĐ3: dưới số doanh thu, chi phí của dự án, khối (trực tiếp / gián tiếp / tài chính) và từng HĐ ghi ▲ +x / ▼ −x so TĐ trước (DT tăng xanh, CP tăng đỏ) → PL quyết toán lệch nhìn thấy ngay. Tên 3 khối thẳng hàng. tester 4612 ĐẠT, không tràn.
+
 ## V10.17.11.26 – Chi tiết lợi nhuận = bảng tổng LN dự án TĐ1 / TĐ2 / TĐ3
 - Bỏ dòng Lãi gộp / (−) gián tiếp / (−) tài chính (số âm gây hiểu nhầm) và nút mở; mỗi dự án 1 dòng: LN TĐ1 · TĐ2 · TĐ3 · Tỷ suất TĐ1 → TĐ3 · Tăng / giảm · Thực tế. tester 4612 ĐẠT.
 
