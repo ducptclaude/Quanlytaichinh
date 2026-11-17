@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.17.11.26 – Mục I dòng khối chỉ ghi chi phí + sổ / gọn HĐ; bỏ bảng mục II; bỏ tab Tổng quan
+- Mục I: dòng "Chi phí trực tiếp" chỉ ghi chi phí (doanh thu ở dòng dự án và từng HĐ); nút ▸ / ▾ để sổ / gọn chi tiết các HĐ (mặc định gọn).
+- Mục II: bỏ bảng từng dự án, giữ 3 ô Dòng thu / Dòng chi / Còn lại (bấm số xem chi tiết).
+- Báo cáo theo công trình: bỏ tab Tổng quan (mở mặc định tab Doanh thu); nút "Tiền thực tế" hiện bảng tiền trên đầu tab đang mở.
+- tester 4565 ĐẠT, 0 LỖI; máy tính + điện thoại không tràn.
+
 ## V02.17.11.26 – Mục I: dự án nào cũng đủ 3 khối; bỏ cột "± LN so TĐ trước"
 - Mọi dự án (kể cả DA-01..04) hiện Chi phí trực tiếp / Chi phí gián tiếp / Chi phí tài chính; chưa có = 0.
 - Dòng gián tiếp, tài chính chỉ ghi chi phí (bỏ doanh thu 0, lợi nhuận âm, tỷ lệ). Bỏ cột "± LN so TĐ trước" (thay đổi xem ở thẻ phía trên).

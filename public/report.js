@@ -932,8 +932,10 @@ function bTongHopHtml(list, v, P) {
           const hdR = con.map((c) => dong(c, l2(gTen(c.h, i, j++)))).join('') + tt.map(([c, ten, tip]) => dong(c, l2(gKhac(i, j++, esc(tip), ten)))).join('');
           let head = '';
           if (coNhom) { const G = [...con, ...tt.map((e) => e[0])], sm = (f, b) => G.reduce((a, c) => a + (b ? (c.b ? c.b[f] : 0) : c[f]), 0);
-            const c0 = { dt: sm('dt'), cp: sm('cp'), b: k > 1 ? { dt: sm('dt', 1), cp: sm('cp', 1) } : null };
-            head = dong(c0, `<td class="num th-stt muted"></td><td></td><td class="th-name"><span class="iv-tree">└</span><b class="iv-grp" title="Các HĐ chủ đầu tư: doanh thu – chi phí trực tiếp (HĐ đầu vào, gói, mua lẻ) = lãi gộp">Chi phí trực tiếp</b></td><td></td>`).replace('class="iv-hd-row', 'class="iv-hd-row iv-grp-row'); }
+            // V03.17: dòng khối chỉ ghi chi phí; bấm ▸ / ▾ để sổ / gọn chi tiết từng HĐ (mặc định gọn)
+            const mo = (BST.iv_tt_mo || []).includes(r.x.d.id);
+            head = `<tr class="iv-hd-row iv-grp-row"><td class="num th-stt muted"></td><td></td><td class="th-name"><span class="iv-tree">└</span><button type="button" class="iv-tg no-print" data-ivtt="${r.x.d.id}" title="${mo ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ (doanh thu, chi phí trực tiếp, lợi nhuận)'}">${mo ? '▾' : '▸'}</button> <b class="iv-grp" title="Chi phí trực tiếp: HĐ đầu vào, gói, mua lẻ – chi tiết theo từng HĐ chủ đầu tư">Chi phí trực tiếp</b></td><td></td><td class="th-ht"></td><td class="num"></td><td class="num">${bTy(sm('cp'))}</td><td class="num"></td><td class="num"></td></tr>`;
+            if (!mo) return head + ng.map(([c, ten, tip]) => dongK(c, gKhac(i, (j++, con.length + tt.length + ng.findIndex((e) => e[1] === ten)), esc(tip), ten))).join(''); }
           return head + hdR + ng.map(([c, ten, tip]) => dongK(c, gKhac(i, j++, esc(tip), ten))).join(''); })() : ''); void chungTip; void pbTen;
       }).join('')}</tbody>
       ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), bpct(TT.ln, TT.dt)])}
@@ -947,21 +949,8 @@ ${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính l
       ${card('cp', 'Dòng chi', T.chi, ['Chi phí đã chi + đã trả HĐ đầu vào', `Bằng <b>${bpct(T.chi, T.thu)}</b> dòng thu`], 'tỷ', 'chi')}
       ${card('ln', 'Còn lại (thu − chi)', T.con, [T.con < 0 ? 'Đang chi nhiều hơn thu' : 'Tiền dự án đang có', 'Không gồm tiền vay, trả nợ gốc'], 'tỷ', 'con')}
     </div>
-    <div class="table-wrap"><table class="b-table th-table">
-      ${hd(['Dòng thu', 'Dòng chi', 'Còn lại (Thu − Chi)'])}
-      <tbody>${rows.map((x, i) => {
-        const hs = x.d.hds || [];
-        const con = hs.map((h) => { const thu = gQd(h.tien_ve || 0, h.td3?.gt || 0, h.td3?.sv || 0), chi = gQd(h.cp_td?.da_chi || 0, h.cp_td?.gt?.[2] || 0, h.cp_td?.sv?.[2] || 0); return { h, thu, chi }; });
-        const kh = { thu: x.thu - con.reduce((a, c) => a + c.thu, 0), chi: x.chi - con.reduce((a, c) => a + c.chi, 0) };
-        const dong = (c, ten, cls = '') => `<tr class="iv-hd-row ${cls}">${ten}<td class="num">${bTy(c.thu)}</td><td class="num">${bTy(c.chi)}</td><td class="num ${c.thu - c.chi < 0 ? 'neg' : ''}">${bTy(c.thu - c.chi)}</td></tr>`;
-        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(x, i)}<td class="num">${tlk('thu', x.thu, x.d.id)}</td><td class="num">${tlk('chi', x.chi, x.d.id)}</td>
-        <td class="num strong ${x.con < 0 ? 'neg' : 'pos'}">${tlk('con', x.con, x.d.id)}</td></tr>` +
-        (hs.length && gMo(x.d) ? con.map((c, j) => dong(c, pbTen(gTen(c.h, i, j), kh.chi, c.thu, con.reduce((a, q) => a + q.thu, 0), c.thu - c.chi, 'dòng thu', 'Còn lại', c.thu))).join('') +
-          (Math.abs(kh.thu) + Math.abs(kh.chi) >= 1e6 ? tachII(x.d, kh, i, hs.length, dong) : '') : ''); void tienTip;
-      }).join('')}</tbody>
-      ${foot([tlk('thu', T.thu), tlk('chi', T.chi), tlk('con', T.con)])}
-    </table></div>
-    <p class="muted small f-note tt-hint no-print">Bấm vào số <b>Dòng thu</b> / <b>Dòng chi</b> / <b>Còn lại</b> (ô lớn hoặc từng dự án) để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.</p>
+    ${/* V03.17: bỏ bảng từng dự án (người dùng yêu cầu) – xem chi tiết bằng cách bấm số trên 3 ô */ ''}
+    <p class="muted small f-note tt-hint no-print">Bấm vào số <b>Dòng thu</b> / <b>Dòng chi</b> / <b>Còn lại</b> để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.</p>
     ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án, làm tròn tới 0,1 tỷ.</p>' : ''}
 
     ${thHead('III', 'Dòng tiền còn lại phải thu – chi', 'Doanh thu, chi phí thời điểm mới nhất trừ dòng thu, dòng chi thực tế (mục II)', ['Thời điểm mới nhất', vt[0].toUpperCase() + vt.slice(1)])}
@@ -1769,6 +1758,8 @@ async function bGoWarn(daId, l) {
 }
 $('#b-report').addEventListener('click', (e) => {
   const ivh = e.target.closest('[data-ivhd]');
+  const ivt = e.target.closest('[data-ivtt]'); // V03.17: sổ / gọn chi tiết HĐ trong khối Chi phí trực tiếp (mục I)
+  if (ivt) { const id = Number(ivt.dataset.ivtt), s = new Set(BST.iv_tt_mo || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_tt_mo = [...s]; bSave(); return renderKeepPos(`[data-ivtt="${id}"]`); }
   if (ivh) { const id = Number(ivh.dataset.ivhd), s = new Set(BST.iv_hd_dong || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_hd_dong = [...s]; bSave(); return renderKeepPos(`[data-ivhd="${id}"]`); }
   const w = e.target.closest('[data-wlink]');
   if (w) bGoWarn(Number(w.dataset.wda), JSON.parse(w.dataset.wlink)).catch((err) => alert(err.message));
@@ -1805,7 +1796,7 @@ function bDrawCharts(list, v, one) {
 // =====================================================================
 // THẺ BÁO CÁO TỪNG CÔNG TRÌNH (ảnh, 6 tab: Tổng quan · Doanh thu · Chi phí · Lợi nhuận · Dòng tiền · Công nợ)
 // =====================================================================
-const PC_TABS = [['tong', 'Tổng quan'], ['dt', 'Doanh thu'], ['cp', 'Chi phí'], ['ln', 'Lợi nhuận'], ['dong', 'Dòng tiền'], ['cn', 'Công nợ']];
+const PC_TABS = [['dt', 'Doanh thu'], ['cp', 'Chi phí'], ['ln', 'Lợi nhuận'], ['dong', 'Dòng tiền'], ['cn', 'Công nợ']];
 const pcTab = {};            // id dự án -> tab đang mở
 const NHOM_NGAN = { thau_phu: 'Thầu phụ', vat_tu: 'Vật tư', nhan_cong: 'Nhân công', may_moc: 'Máy móc', to_chuc: 'Tổ chức TC', khac: 'Khác',
   gt_tien_ich: 'Tiện ích/phục vụ', gt_luong: 'Lương, thưởng', gt_ngoai_giao: 'Ngoại giao', tc_chi_phi: 'CP tài chính', tc_tra_no: 'Lãi vay', tc_phat: 'Phạt CĐT' };
@@ -1938,7 +1929,7 @@ function bNgayDialog(d) {
 }
 function bPcCard(d, idx) {
   const color = PROJ_COLORS[idx % PROJ_COLORS.length];
-  const tab = PC_TABS.some(([k]) => k === pcTab[d.id]) ? pcTab[d.id] : 'tong';
+  const tab = PC_TABS.some(([k]) => k === pcTab[d.id]) ? pcTab[d.id] : 'dt';
   const sub = [d.loai_cong_trinh, d.dia_diem].filter(Boolean).join(' – ') || d.chu_dau_tu || '';
   const img = d.co_anh
     ? `<img src="/api/du-an/${d.id}/anh?v=${d.anh_v}" alt="Ảnh ${esc(d.ten_du_an)}" loading="lazy">`
@@ -2059,7 +2050,9 @@ function bPcTongQuan(d) {
       return `<li><b class="tl-m">${k === '~' ? 'Chưa ghi ngày' : `T${k.slice(5)}/${k.slice(0, 4)}`}</b><div class="tl-row">${it.join('')}</div></li>`; }).join('')}</ol>` : '<p class="muted small">Chưa có mốc</p>'}</details>`;
   return `<div class="pc-tq">${suc}${viec}${dong}${moc}</div>`;
 }
-function bPcBody(d, tab) {
+// V03.17: bỏ tab Tổng quan – bảng "Tiền thực tế" (nút đầu thẻ) hiện trên đầu tab đang mở
+function bPcBody(d, tab) { return (BST.td_tt === true ? bTdBlock(d) : '') + bPcBody0(d, tab); }
+function bPcBody0(d, tab) {
   const v = BST.vat;
   const P = bPeriod(bScope().list);
   const cur = bSumRange([d], v, P.from, P.to);
@@ -2127,7 +2120,7 @@ function bPcBody(d, tab) {
     }
     default: // tổng quan – V06.16: sức khỏe dự án · việc cần xử lý · dòng tiền lũy kế · mốc thời gian (không lặp mục I–IV)
       void row; void kyNote; void cur; void prv; void H;
-      return `${bTdBlock(d)}${bPcTongQuan(d)}`;
+      return bPcBody0(d, 'dt'); // tab cũ 'tong' -> Doanh thu
   }
 }
 
@@ -2408,16 +2401,15 @@ $('#b-report').addEventListener('click', async (e) => {
   }
   if (e.target.closest('[data-tdchi]')) { // mở / thu gọn chi tiết Thực chi (trả HĐ đầu vào, chi phí khác)
     BST.td_chi = !BST.td_chi;
-    $('.pc-body', card).innerHTML = bPcBody(BC.du_an.find((x) => x.id === id), 'tong');
+    $('.pc-body', card).innerHTML = bPcBody(BC.du_an.find((x) => x.id === id), pcTab[id] || 'dt');
     return bPcDraw(card);
   }
   if (e.target.closest('[data-tdtt]')) { // đóng / mở bảng tiền thực tế (nút ở đầu thẻ) – chuyển về tab Tổng quan
     BST.td_tt = BST.td_tt !== true;
-    pcTab[id] = 'tong';
-    card.querySelectorAll('.pc-tabs button').forEach((b) => b.classList.toggle('on', b.dataset.pt === 'tong'));
+    const tb = PC_TABS.some(([k]) => k === pcTab[id]) ? pcTab[id] : 'dt';
     const b = card.querySelector('.pc-tt-tog');
     if (b) { b.classList.toggle('on', BST.td_tt); b.setAttribute('aria-pressed', String(BST.td_tt)); b.textContent = `💵 Tiền thực tế ${BST.td_tt ? '▴' : '▾'}`; }
-    card.querySelector('.pc-body').innerHTML = bPcBody(BC.du_an.find((x) => x.id === id), 'tong');
+    card.querySelector('.pc-body').innerHTML = bPcBody(BC.du_an.find((x) => x.id === id), tb);
     return bPcDraw(card);
   }
   if (e.target.closest('[data-pcngay]')) return bNgayDialog(BC.du_an.find((x) => x.id === id));
