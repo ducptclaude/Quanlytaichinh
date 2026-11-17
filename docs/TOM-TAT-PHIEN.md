@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.17.11.26 – Mục I: dự án nào cũng đủ 3 khối; bỏ cột "± LN so TĐ trước"
+- Mọi dự án (kể cả DA-01..04) hiện Chi phí trực tiếp / Chi phí gián tiếp / Chi phí tài chính; chưa có = 0.
+- Dòng gián tiếp, tài chính chỉ ghi chi phí (bỏ doanh thu 0, lợi nhuận âm, tỷ lệ). Bỏ cột "± LN so TĐ trước" (thay đổi xem ở thẻ phía trên).
+- tester 4565 ĐẠT, 0 LỖI; máy tính + điện thoại không tràn.
+
 ## V01.17.11.26 – Mục I: chia theo cơ cấu Chi phí trực tiếp / Gián tiếp / Tài chính (cả 3 TĐ)
 - Dưới mỗi dự án: dòng **Chi phí trực tiếp** (cộng các HĐ: DT | CP trực tiếp | lãi gộp) → các HĐ (thụt vào) + Trực tiếp chưa gắn HĐ / ĐC cả nhóm → **Chi phí gián tiếp** → **Chi phí tài chính**. Lãi gộp − gián tiếp − tài chính = LN dự án.
 - Bỏ cách chia gián tiếp / tài chính vào HĐ (V13.16). Dòng Chi phí trực tiếp = số "Trực tiếp" trên thẻ. Dự án không có gián tiếp / tài chính: giữ như cũ (chỉ các HĐ).
