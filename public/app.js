@@ -2270,13 +2270,13 @@ function ptHtml(k) {
       ${lab('Khoản *', `<select name="khoan">${khOpt(true)}</select>`)}
       ${lab('Việc *', '<select name="viec"><option value="dc">± Điều chỉnh số</option><option value="dong">Đóng khoản (không dùng nữa: TĐ2 = đã chi)</option><option value="mo">Mở lại khoản đã đóng</option></select>', 'pk-cu')}
       ${lab('Nhóm chi phí *', `<select name="nhom">${nhOpt}</select>`, 'pk-moi')}${lab('Tên khoản *', '<input name="ten" list="pk-goi-y" maxlength="300" placeholder="VD: Lương tháng 11"><datalist id="pk-goi-y"></datalist>', 'pk-moi')}
-      ${lab('Số tiền (trước VAT) *', '<input name="so_tien" class="money num" placeholder="+ tăng · − giảm">', 'pk-so')}${lab('Nội dung', '<input name="noi_dung" maxlength="300" placeholder="VD: Theo bảng lương thật">', 'pk-nd')}
+      ${lab('Số tiền TĐ2 (trước VAT) *', '<input name="so_tien" class="money num" placeholder="nhập số cuối">', 'pk-so')}<span class="pk-lech muted small" data-pklech></span>${lab('Nội dung', '<input name="noi_dung" maxlength="300" placeholder="VD: Theo bảng lương thật">', 'pk-nd')}
       <div class="actions"><button type="submit" class="primary">Lưu</button><span class="msg" id="pk-f-msg"></span></div></form>`;
   else panel2 = `<form id="pk-f" class="grid-form pk-f" data-k="3">
       ${lab('Khoản *', `<select name="khoan">${khOpt(false)}</select>`)}${lab('Số chốt TĐ3 (trước VAT)', '<input name="so_tien" class="money num" placeholder="để trống = theo đã chi">')}
       <div class="actions"><button type="submit" class="primary">Lưu chốt số</button><span class="msg" id="pk-f-msg"></span></div></form>`;
   const HINT = { 1: 'Ghi tiền đã chi thật (trả thầu phụ, mua vật tư, trả lương, lãi…). Chọn "Thuộc gói / khoản" để trừ vào dự trù.',
-    2: k === 1 ? 'Thêm khoản dự trù gián tiếp / tài chính (VD: Lương tháng 10). Gói thầu phụ, vật tư… dự trù ở ① với Cách nhập = Gói.' : k === 2 ? 'Chọn khoản để điều chỉnh / đóng, hoặc "Khoản mới" cho chi phí phát sinh ở TĐ2 (VD: lương các tháng tiếp theo).' : 'Chọn khoản để chốt số cuối. Để trống = TĐ3 lấy theo số đã chi.',
+    2: k === 1 ? 'Thêm khoản dự trù gián tiếp / tài chính (VD: Lương tháng 10). Gói thầu phụ, vật tư… dự trù ở ① với Cách nhập = Gói.' : k === 2 ? 'Chọn khoản rồi nhập SỐ CUỐI tại TĐ2 (hệ thống tự tính phần tăng / giảm), hoặc "Khoản mới" cho chi phí phát sinh ở TĐ2.' : 'Chọn khoản để chốt số cuối. Để trống = TĐ3 lấy theo số đã chi.',
     3: 'Nhập nhanh tổng gián tiếp / tài chính: số (150tr), % (7% × doanh thu) hoặc công thức. Để trống = cộng theo các khoản.' };
   const seg = edit ? `<div class="cf-seg" role="tablist">${[['1', '① Chi thật'], ['2', '② Dự trù / khoản'], ['3', '③ Dự trù nhanh']].map(([m, t]) => `<button type="button" role="tab" data-cfmode="${m}" class="${cfMode === m ? 'on' : ''}" aria-selected="${cfMode === m}">${t}</button>`).join('')}<span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
   const card = cForm?.closest('.card');
@@ -2289,7 +2289,12 @@ function ptHtml(k) {
     const goiY = () => { const dl = $('#pk-goi-y', pf); if (dl) dl.innerHTML = (PK_GOI_Y[pf.elements.nhom?.value] || []).map((t) => `<option value="${esc(t)}">`).join(''); };
     const hien = () => { if (pf.dataset.k !== '2') return; const moi = pf.elements.khoan.value === 'moi', cu = /^\d+$/.test(pf.elements.khoan.value), viec = pf.elements.viec.value;
       $$('.pk-moi', pf).forEach((x) => (x.hidden = !moi)); $$('.pk-cu', pf).forEach((x) => (x.hidden = !cu)); $$('.pk-so', pf).forEach((x) => (x.hidden = !(moi || (cu && viec === 'dc')))); $$('.pk-nd', pf).forEach((x) => (x.hidden = !(cu && viec === 'dc'))); };
-    pf.addEventListener('change', () => { goiY(); hien(); }); goiY(); hien();
+    const lech = () => { const o = $('[data-pklech]', pf); if (!o) return; const id = Number(pf.elements.khoan?.value) || 0, r = (costData.du_tru || []).find((y) => y.id === id);
+      if (!r) { o.textContent = ''; return; }
+      const ht = (Number(r.so_tien) || 0) + (costData.du_tru || []).filter((y) => y.loai === 'dc' && y.goi_ref === id).reduce((a, y) => a + (Number(y.so_tien) || 0), 0), v = pf.elements.so_tien.value.trim(), d0 = v === '' ? null : parseMoney(v) - ht;
+      if (!pf.elements.so_tien.value && document.activeElement !== pf.elements.so_tien) pf.elements.so_tien.placeholder = `hiện tại ${money(ht)}`;
+      o.textContent = `Hiện tại ${money(ht)}${d0 ? ` → chênh ${d0 > 0 ? '+' : '−'}${money(Math.abs(d0))}` : ''}`; };
+    pf.addEventListener('change', () => { goiY(); hien(); lech(); }); pf.addEventListener('input', lech); goiY(); hien(); lech();
   }
 }
 let cfMode = (() => { try { return localStorage.getItem('cf_mode') || '1'; } catch { return '1'; } })(), pk2Sel = null;
@@ -2375,8 +2380,11 @@ document.addEventListener('submit', async (e) => {
       if (k === 2) {
         const viec = E.viec.value;
         if (viec === 'dong' || viec === 'mo') await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ tinh_trang: viec === 'dong' ? 'dong' : '' }) });
-        else { if (!so) return msg('Nhập số tăng (+) hoặc giảm (−)', 1);
-          await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: r.nhom, loai: 'dc', so_tien: so, vat: r.vat || 0, noi_dung: E.noi_dung.value.trim() || `Điều chỉnh ${r.noi_dung}`, ngay, goi_ref: id }) }); }
+        else { // V21.17: nhập SỐ CUỐI của khoản tại TĐ2 – hệ thống tự tính phần chênh so với số hiện tại (không cộng dồn)
+          if (E.so_tien.value.trim() === '' || so < 0) return msg('Nhập số TĐ2 mới của khoản (số cuối, ≥ 0)', 1);
+          const hienTai = (Number(r.so_tien) || 0) + (costData.du_tru || []).filter((y) => y.loai === 'dc' && y.goi_ref === id).reduce((a, y) => a + (Number(y.so_tien) || 0), 0), lech = so - hienTai;
+          if (!lech) return msg('Số không đổi so với hiện tại', 1);
+          await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: r.nhom, loai: 'dc', so_tien: lech, vat: r.vat || 0, noi_dung: E.noi_dung.value.trim() || `Điều chỉnh thành ${money(so)} (${lech > 0 ? '+' : '−'}${money(Math.abs(lech))})`, ngay, goi_ref: id }) }); }
         await loadCost(); return msg('Đã lưu');
       }
       await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ gt_chot: E.so_tien.value.trim() === '' ? '' : so }) });

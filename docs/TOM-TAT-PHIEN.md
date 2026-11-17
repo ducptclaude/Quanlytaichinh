@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V21.17.11.26 – Điều chỉnh khoản TĐ2: nhập SỐ CUỐI, hệ thống tự tính phần tăng / giảm
+- ② Dự trù / khoản · TĐ2 · ± Điều chỉnh: ô "Số tiền TĐ2" = số cuối của khoản; hiện "Hiện tại x → chênh ±y" khi gõ; lưu 1 đợt = chênh lệch (nội dung tự ghi "Điều chỉnh thành …"); bằng số hiện tại thì báo không đổi.
+- Thử: 150 → 200 → 295 → 180 → 200, TĐ2 khoản đúng từng lần. tester, kiem-tra-goi ĐẠT.
+
 ## V20.17.11.26 – Trang Chi phí: "Bảng để xem – Form để nhập" (người dùng duyệt)
 - Khung "Nhập chi phí" 1 chỗ, 3 lựa chọn: ① Chi thật (form gốc, ô "Thuộc gói / khoản") · ② Dự trù / khoản (TĐ1 thêm khoản · TĐ2 chọn khoản ± điều chỉnh / đóng / mở hoặc "Khoản mới (phát sinh TĐ2)" · TĐ3 chốt số) · ③ Dự trù nhanh (% / số / công thức). Mỗi lựa chọn 1 dòng hướng dẫn; ghi "Đang nhập cho TĐk".
 - Bảng "Nhóm chi phí" chỉ để xem, mặc định gọn 3 khối I / II / III; ▸ khối → nhóm → khoản (1 dòng, nhãn nhỏ: phát sinh TĐ2 / còn dự trù / đã chốt (TĐ3) / đã đóng). Bấm tên khoản → hộp chi tiết (dự trù, đợt điều chỉnh, lần chi, số chốt) + nút "Điều chỉnh / chốt khoản này", "Ghi chi cho khoản này" (đưa lên form, điền sẵn).
