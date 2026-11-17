@@ -2187,13 +2187,19 @@ function ptHtml(k) {
   const bang = KS.length ? `<div class="table-wrap"><table class="pk-table"><thead><tr><th>Khoản</th><th class="${c(0)}">TĐ1 dự trù</th><th class="${c(1)}">TĐ2 điều chỉnh</th><th class="${c(2)}">TĐ3 quyết toán</th><th class="num">Đã chi</th><th class="num">Còn</th><th class="no-print"></th></tr></thead>
     <tbody>${tong('B2')}${tong('B3')}</tbody></table></div>` : '';
   const huongDan = `<small class="pt-note">Ghi tiền chi thật (trả lương, lãi…) ở form chi phí, chọn <b>Gắn vào gói</b> = khoản → vào cột Đã chi. TĐ2 khoản chưa có số giữ dự trù; TĐ3 = đã chi (hoặc số chốt).</small>`;
-  el.innerHTML = `${phan1}<div class="pk-wrap"><div class="pt-head"><b>Khoản chi phí gián tiếp, tài chính · nhập như HĐ thầu phụ</b></div>${bang}${them}${KS.length || them ? huongDan : '<small class="muted">Chưa có khoản – thêm ở tab TĐ1.</small>'}</div>`;
+  // V05.17: nút mở / thu gọn bảng khoản (mặc định gọn, nhớ theo máy); đang nhập điều chỉnh / chốt thì luôn mở
+  let mo = false; try { mo = localStorage.getItem('pk_mo') === '1'; } catch {}
+  mo = mo || Boolean(ptEdit);
+  const tomTat = KS.length ? ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `${kh === 'B2' ? 'Gián tiếp' : 'Tài chính'} <b>${dvT(ks.reduce((a, x) => a + x.t[k - 1], 0) + ngoai(kh))}</b> (${ks.length} khoản)` : ''; }).filter(Boolean).join(' · ') : '<span class="muted">chưa có khoản</span>';
+  el.innerHTML = `${phan1}<div class="pk-wrap"><button type="button" class="pk-tog" data-pktog aria-expanded="${mo}"><span class="pk-tg">${mo ? '▾' : '▸'}</span> <b>Khoản chi phí gián tiếp, tài chính · TĐ${k}</b> <small>${tomTat}</small><span class="pk-tg-txt">${mo ? 'Thu gọn' : 'Mở ra'}</span></button>
+    ${mo ? `${bang}${them}${KS.length || them ? huongDan : '<small class="muted">Chưa có khoản – thêm ở tab TĐ1.</small>'}` : ''}</div>`;
   $$('input.money', el).forEach(attachMoneyInput);
   const sel = $('#pk-add [name=nhom]', el);
   if (sel) { const goiY = () => { $('#pk-goi-y', el).innerHTML = (PK_GOI_Y[sel.value] || []).map((t) => `<option value="${esc(t)}">`).join(''); }; sel.addEventListener('change', goiY); goiY(); }
   if (ptEdit) setTimeout(() => $('.pk-form [name=so_tien]', el)?.focus(), 30);
 }
 document.addEventListener('click', async (e) => {
+  if (e.target.closest('#c-pt [data-pktog]')) { let mo = false; try { mo = localStorage.getItem('pk_mo') === '1'; localStorage.setItem('pk_mo', mo ? '0' : '1'); } catch {} if (mo) ptEdit = null; return costKpiTd(); }
   const b = e.target.closest('#c-pt [data-pk]'); if (!b) return;
   const id = Number(b.dataset.id), r = (costData.du_tru || []).find((x) => x.id === id), act = b.dataset.pk;
   try {

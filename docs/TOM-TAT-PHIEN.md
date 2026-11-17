@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.17.11.26 – Bảng khoản gián tiếp / tài chính có nút mở / thu gọn
+- Mặc định gọn: 1 dòng tóm tắt (Gián tiếp x (n khoản) · Tài chính y) + nút "Mở ra"; nhớ theo máy; đang nhập điều chỉnh / chốt thì luôn mở. tester 4612 ĐẠT, không tràn.
+
 ## V04.17.11.26 – Chi phí gián tiếp, tài chính nhập theo KHOẢN (như HĐ thầu phụ)
 - Trang Chi phí: bảng "Khoản chi phí gián tiếp, tài chính": TĐ1 thêm khoản (nhóm + tên + dự trù) · TĐ2 "± Điều chỉnh" theo khoản / "Đóng khoản" · TĐ3 "Chốt số" (trống = thực chi). Cột Đã chi = chi phí ghi có "Gắn vào gói" = khoản. Dòng "Chi chưa gắn khoản" để cộng khối = thẻ.
 - Công thức (lib/report.js `duTruNhom`): TĐ2 khoản = max(đã chi, dự trù + điều chỉnh của khoản) (đóng = đã chi) · TĐ3 khối B2/B3 = thực chi, khoản có chốt = số chốt · khối đã có khoản → bỏ % (V10). Gói / khoản B2, B3 không tính vào HĐ CĐT, không hiện ở bảng HĐ đầu vào.

@@ -30,6 +30,9 @@ window.BKS_EN = {
 "Tăng / giảm": "Increase / decrease",
 "Trực tiếp chưa gắn HĐ": "Direct – not linked to a contract",
 "Trực tiếp": "Direct",
+"Mở ra": "Expand",
+"Thu gọn": "Collapse",
+"chưa có khoản": "no items yet",
 "Khoản chi phí gián tiếp, tài chính · nhập như HĐ thầu phụ": "Indirect & financial cost items · entered like subcontracts",
 "Khoản": "Item",
 "TĐ1 dự trù": "M1 estimate",
@@ -1652,6 +1655,14 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+[
+"({} khoản)",
+"({} items)"
+],
+[
+"Khoản chi phí gián tiếp, tài chính · TĐ{}",
+"Indirect & financial cost items · M{}"
+],
 [
 "Gồm chi phí gián tiếp, tài chính chia theo tỷ lệ doanh thu: {} {}",
 "Incl. indirect and financial costs allocated by revenue share: {} {}"

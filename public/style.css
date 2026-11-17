@@ -3738,3 +3738,7 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .c-pt .pk-add input[name=noi_dung] { min-width: 200px; flex: 1 1 200px; } .c-pt .pk-add input.money { width: 170px; }
 .c-pt .pk-edit td { background: #fffbea; }
 @media (max-width: 640px) { .c-pt .pk-add select, .c-pt .pk-add input, .c-pt .pk-add input.money { width: 100%; flex: 1 1 100%; } .c-pt .pk-form label { flex-wrap: wrap; } }
+.c-pt .pk-tog { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; width: 100%; text-align: left; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--navy); font-size: 13.5px; box-shadow: none; }
+.c-pt .pk-tog small { color: var(--muted); font-weight: 500; } .c-pt .pk-tog small b { color: var(--text); }
+.c-pt .pk-tg { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; }
+.c-pt .pk-tg-txt { margin-left: auto; font-size: 12px; color: var(--teal); font-weight: 700; }
