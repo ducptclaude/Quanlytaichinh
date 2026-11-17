@@ -3742,3 +3742,16 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .c-pt .pk-tog small { color: var(--muted); font-weight: 500; } .c-pt .pk-tog small b { color: var(--text); }
 .c-pt .pk-tg { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; }
 .c-pt .pk-tg-txt { margin-left: auto; font-size: 12px; color: var(--teal); font-weight: 700; }
+/* V08.17: ô tiêu đề Báo cáo – nền gradient navy → teal như thanh tiêu đề (chỉ trên màn hình; in giữ nền trắng) */
+@media screen {
+  #b-report .b-head, :root[data-theme="dark"] #b-report .b-head { background: var(--grad-brand) !important; border: 0 !important; color: #fff; box-shadow: 0 8px 26px rgba(19,38,74,.22); }
+  #b-report .b-head::before { display: none; }
+  #b-report .b-head h1 { color: #fff !important; }
+  #b-report .b-head h1 .b-h1-acc { color: #9ff3e6 !important; }
+  #b-report .b-head .b-tag { color: rgba(255,255,255,.85) !important; }
+  #b-report .b-head .b-company { background: rgba(255,255,255,.16) !important; color: #fff !important; }
+  #b-report .b-head .b-mi { background: rgba(255,255,255,.12) !important; border: 1px solid rgba(255,255,255,.25) !important; color: #fff !important; }
+  #b-report .b-head .b-mi em { color: #9ff3e6 !important; }
+  #b-report .b-head .b-mi b { color: #fff !important; }
+  #b-report .b-head .b-brand img { box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+}

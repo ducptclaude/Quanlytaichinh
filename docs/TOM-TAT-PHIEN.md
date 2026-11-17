@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.17.11.26 – Chi tiết lợi nhuận gọn lại · ô tiêu đề Báo cáo nền gradient navy → teal
+- Chi tiết lợi nhuận: 1 hàng tiêu đề; mỗi TĐ 1 cột LN; tỷ suất gom 1 cột "TĐ1 → TĐ3"; Tăng / giảm TĐ3 so TĐ1 chỉ ghi số (bỏ %); dòng trừ = 0 ghi "–"; ghi chú cách đọc 1 dòng.
+- Ô tiêu đề Báo cáo: nền gradient như thanh tiêu đề, chữ trắng (in vẫn nền trắng). tester 4612 ĐẠT, không tràn.
+
 ## V07.17.11.26 – Mục IV › Chi tiết lợi nhuận: cùng cơ cấu mục I / IV chi phí
 - Rà số DA-01..05 trên web (ảnh người dùng): cộng HĐ − gián tiếp − tài chính = LN dự án ở cả 3 TĐ, cột LN TĐ3 − TĐ1, Thực tế, tổng cộng đều khớp.
 - Dưới mỗi dự án: Lãi gộp (sau chi phí trực tiếp) [▸ / ▾ sổ các HĐ + (−) trực tiếp chưa gắn HĐ] → (−) Chi phí gián tiếp → (−) Chi phí tài chính; dự án nào cũng đủ 3 dòng. tester 4612 ĐẠT, không tràn.
