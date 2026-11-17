@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V18.17.11.26 – Bảng "Nhóm chi phí" chia 3 khối I / II / III; ô dự trù + thêm khoản chuyển vào "Thêm chi phí"
+- Bảng HĐ đầu vào (Nhóm chi phí): I. CHI PHÍ TRỰC TIẾP (= thẻ; HĐ CĐT → loại, mua lẻ, dòng "Chi phí trực tiếp khác" để cộng khớp) · II. GIÁN TIẾP · III. TÀI CHÍNH (từng khoản: TĐ, ± so TĐ trước, còn lại, nút Sửa / ± Điều chỉnh / Đóng / Chốt số ngay trên dòng; chi chưa gắn khoản; dự trù số nhập). Tổng cuối = I + II + III = thẻ tổng.
+- Khung ô dự trù + "+ Thêm khoản" nằm cuối khung "Thêm chi phí". Khi lọc / tìm HĐ: chỉ hiện phần HĐ như cũ.
+- tester 4565, kiem-tra-goi 211 ĐẠT; không tràn.
+
 ## V17.17.11.26 – Ô dự trù: bỏ nút Theo khoản / Số nhập, bỏ chữ ví dụ; khung cân đối cố định
 - Ô có số → dùng số nhập; để trống (TĐ1) + Lưu → về cộng theo khoản (xoá số cũ). Đang theo khoản thì ô hiện trống, bên cạnh ghi "= x theo khoản".
 - Khung 1 hàng cố định: tiêu đề | gián tiếp | tài chính | Lưu (ô nhập 150px, không nhảy dòng); điện thoại xếp dọc. kiem-tra-goi 211, tester 4565 ĐẠT; không tràn.

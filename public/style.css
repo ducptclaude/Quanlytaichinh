@@ -3810,3 +3810,14 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .c-pt .pt-in::placeholder { color: #b8c0cc; opacity: 1; font-weight: 500; }
 @media (max-width: 900px) { .c-pt .pt-box { grid-template-columns: 1fr 140px; } .c-pt .pt-val { grid-column: 1 / -1; } .c-pt .pt-ip { width: 140px; } }
 .c-pt .pt-val { overflow: visible !important; white-space: normal; line-height: 1.25; } .c-pt .pt-val small { display: block; font-size: 11px; color: var(--muted); }
+/* V18.17: bảng Nhóm chi phí chia 3 khối I / II / III */
+.tp-c-khoi td { background: #e9eef8 !important; color: var(--navy); }
+.tp-c-khoi.tp-k-B2 td:first-child { box-shadow: inset 4px 0 0 var(--teal); } .tp-c-khoi.tp-k-B3 td:first-child { box-shadow: inset 4px 0 0 #6d5bd0; } .tp-c-khoi.tp-k-B1 td:first-child { box-shadow: inset 4px 0 0 var(--navy); }
+.tp-khoi-no { display: inline-block; min-width: 26px; font-weight: 800; color: var(--navy); }
+.tp-c-khoan .tp-c-ten { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tp-khoan-ten { display: inline-flex; flex-direction: column; gap: 1px; } .tp-khoan-ten small { font-size: 11.5px; }
+.tp-pk-act { margin-left: auto; display: inline-flex; gap: 4px; }
+.tp-c-pt td { background: #f1fbf9; }
+#tp-tbody .pk-edit td { background: #fffbea; } #tp-tbody .pk-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+#tp-tbody .pk-form label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; }
+.card > .c-pt { margin-top: 14px; border-top: 1px dashed var(--border); border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0; padding: 14px 0 0; background: transparent; }
