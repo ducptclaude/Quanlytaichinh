@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V17.17.11.26 – Ô dự trù: bỏ nút Theo khoản / Số nhập, bỏ chữ ví dụ; khung cân đối cố định
+- Ô có số → dùng số nhập; để trống (TĐ1) + Lưu → về cộng theo khoản (xoá số cũ). Đang theo khoản thì ô hiện trống, bên cạnh ghi "= x theo khoản".
+- Khung 1 hàng cố định: tiêu đề | gián tiếp | tài chính | Lưu (ô nhập 150px, không nhảy dòng); điện thoại xếp dọc. kiem-tra-goi 211, tester 4565 ĐẠT; không tràn.
+
 ## V16.17.11.26 – Ô dự trù thông minh (số / % / công thức) + chọn Theo khoản / Số nhập (hết xung đột)
 - Ô gián tiếp / tài chính: gõ 150tr, 1,2 tỷ, 150.000.000, 7% (× doanh thu), 150tr+155tr, 1900tr*7%… (tự tính, xem trước khi gõ, báo lỗi nếu sai; không dùng eval). Lưu kèm công thức để hiện lại (ct_*).
 - Khối có khoản: mặc định THEO KHOẢN (cộng khoản); nút "Theo khoản / Số nhập" chọn rõ (cach_gt / cach_tc); gõ số mới rồi Lưu → tự chuyển Số nhập. Khối chưa có khoản: dùng số nhập như trước.

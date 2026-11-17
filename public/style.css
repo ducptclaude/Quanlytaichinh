@@ -3798,3 +3798,15 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .c-pt .pt-seg button.on { background: var(--navy); color: #fff; }
 .c-pt .pt-off .pt-ip { opacity: .45; }
 .c-pt .pt-box { flex-wrap: wrap; white-space: normal !important; }
+/* V17.17: khung dự trù cân đối, cố định – 1 hàng: tiêu đề | gián tiếp | tài chính | Lưu; ô nhập không có chữ ví dụ */
+@media (min-width: 901px) {
+  .c-pt .pt-form { display: grid !important; grid-template-columns: minmax(170px, auto) minmax(0, 1fr) minmax(0, 1fr) auto; align-items: center; gap: 10px 14px; }
+  .c-pt .pt-form .pt-note, .c-pt .pt-form #pt-msg { grid-column: 1 / -1; }
+}
+.c-pt .pt-box { display: grid !important; grid-template-columns: auto 150px minmax(130px, 1fr); align-items: center; gap: 10px; white-space: nowrap !important; }
+.c-pt .pt-ip input.pt-in { width: 100% !important; }
+.c-pt .pt-ip { width: 150px; }
+.c-pt .pt-val { overflow: hidden; text-overflow: ellipsis; }
+.c-pt .pt-in::placeholder { color: #b8c0cc; opacity: 1; font-weight: 500; }
+@media (max-width: 900px) { .c-pt .pt-box { grid-template-columns: 1fr 140px; } .c-pt .pt-val { grid-column: 1 / -1; } .c-pt .pt-ip { width: 140px; } }
+.c-pt .pt-val { overflow: visible !important; white-space: normal; line-height: 1.25; } .c-pt .pt-val small { display: block; font-size: 11px; color: var(--muted); }

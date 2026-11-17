@@ -2129,6 +2129,7 @@ function costKpiTd() {
 let ptEdit = null;
 // V16.17: đọc ô dự trù "thông minh": số (150tr, 1,2 tỷ, 150.000.000), % (7%) hoặc công thức (150tr+155tr, 1900tr*7%, (100+50)*2)
 //  -> { pt } (phần trăm × doanh thu) · { tien } (số tiền) · { trong } · { loi }. Không dùng eval (an toàn).
+const k1Of = (name) => /1$/.test(name); // ô TĐ1
 function magicSo(raw) {
   let t = String(raw ?? '').trim().replace(/^=/, '').toLowerCase().replace(/\s+/g, '');
   if (!t) return { trong: true };
@@ -2150,7 +2151,7 @@ function magicSo(raw) {
 document.addEventListener('input', (e) => { // xem trước kết quả khi đang gõ
   const ip = e.target.closest('#pt-form .pt-in'); if (!ip) return;
   const r = magicSo(ip.value), dt = Number(ip.form.dataset.dt) || 0, out = ip.form.querySelector(`[data-pv="${ip.name}"]`); if (!out) return;
-  out.innerHTML = r.trong ? '<i class="muted">trống</i>' : r.loi ? `<span class="neg">${esc(r.loi)}</span>` : r.pt !== undefined ? `= <b>${dvT(Math.round((r.pt / 100) * dt))}</b> <small>${String(r.pt).replace('.', ',')}% doanh thu</small>` : `= <b>${dvT(r.tien)}</b>`;
+  out.innerHTML = r.trong ? '<i class="muted">trống → theo khoản / chi phí đã ghi</i>' : r.loi ? `<span class="neg">${esc(r.loi)}</span>` : r.pt !== undefined ? `= <b>${dvT(Math.round((r.pt / 100) * dt))}</b> <small>${String(r.pt).replace('.', ',')}% doanh thu</small>` : `= <b>${dvT(r.tien)}</b>`;
 });
 document.addEventListener('click', async (e) => { // chọn cách tính khối: theo khoản / số nhập
   const b = e.target.closest('#c-pt [data-ptcach]'); if (!b) return;
@@ -2187,20 +2188,20 @@ function ptHtml(k) {
     const f = (key) => d[key] ?? null;
     // V16.17: ô thông minh – gõ số (150tr, 1,2 tỷ, 150.000.000), % (7%) hoặc công thức (150tr+155tr, 1900tr*7%); khối có khoản: chọn Theo khoản / Số nhập
     const tk = (key) => 'tien_' + key.slice(3), ck = (key) => 'ct_' + key.slice(3);
-    const hien = (key) => f(ck(key)) ?? (f(tk(key)) !== null ? money(f(tk(key))) : f(key) !== null ? num(f(key)) + '%' : '');
+    const hien0 = (key) => f(ck(key)) ?? (f(tk(key)) !== null ? money(f(tk(key))) : f(key) !== null ? num(f(key)) + '%' : '');
+    const hien = (key) => (theoKhoan(key.includes('gt') ? 'B2' : 'B3') ? '' : hien0(key)); // đang theo khoản: ô để trống
     const gt = k === 1 ? 'pt_gt1' : 'pt_gt2', tc = k === 1 ? 'pt_tc1' : 'pt_tc2';
-    const ph = (k1) => (k === 2 && hien(k1) ? `trống = theo TĐ1 (${hien(k1)})` : 'VD: 7% · 150tr · 150tr+155tr');
+    const ph = (k1) => (k === 2 && hien(k1) ? `theo TĐ1: ${hien(k1)}` : '');
     const theoKhoan = (kh) => coKhoan(kh) && d[kh === 'B2' ? 'cach_gt' : 'cach_tc'] !== 'nhap';
     const box = (cls, ten, key, k1, kh) => {
       const tkh = theoKhoan(kh), cpK = costData.cp_khoi?.[kh]?.[k - 1], nv = pt[kh]?.nhap?.[k - 1];
-      const seg = coKhoan(kh) ? `<span class="pt-seg" role="group" aria-label="Cách tính"><button type="button" data-ptcach="${kh}" data-v="khoan" class="${tkh ? 'on' : ''}" ${edit ? '' : 'disabled'}>Theo khoản</button><button type="button" data-ptcach="${kh}" data-v="nhap" class="${tkh ? '' : 'on'}" ${edit ? '' : 'disabled'}>Số nhập</button></span>` : '';
-      return `<div class="pt-box ${cls} ${tkh ? 'pt-off' : ''}"><span class="pt-ten">${ten}</span>${seg}<span class="pt-ip"><input class="pt-in" name="${key}" data-kh="${kh}" data-goc="${esc(hien(key))}" value="${esc(hien(key))}" placeholder="${esc(ph(k1))}" ${edit ? '' : 'disabled'} aria-label="${ten}" autocomplete="off"></span>
+      return `<div class="pt-box ${cls}"><span class="pt-ten">${ten}</span><span class="pt-ip"><input class="pt-in" name="${key}" data-kh="${kh}" data-goc="${esc(hien(key))}" value="${esc(hien(key))}" placeholder="${esc(ph(k1))}" ${edit ? '' : 'disabled'} aria-label="${ten}" autocomplete="off"></span>
         <span class="pt-val" data-pv="${key}">${tkh ? `= <b>${dvT(cpK ?? 0)}</b> <small>theo khoản</small>` : nv !== null && nv !== undefined ? `= <b>${dvT(nv)}</b>` : '<i class="muted">chưa nhập</i>'}</span></div>`; };
     phan1 = `<form id="pt-form" class="pt-form" data-dt="${dt}">
     <div class="pt-head"><b>Dự trù gián tiếp, tài chính · TĐ${k}</b><small>Doanh thu TĐ${k} (trước VAT): <b>${dvT(dt)}</b></small></div>
     ${box('pt-b2', 'Chi phí gián tiếp', gt, 'pt_gt1', 'B2')}${box('pt-b3', 'Chi phí tài chính', tc, 'pt_tc1', 'B3')}
     ${edit ? '<button type="submit" class="primary pt-save">Lưu</button>' : ''}<span class="msg" id="pt-msg"></span>
-    <small class="pt-note">Gõ số (150tr, 1,2 tỷ), % (7% = × doanh thu) hoặc công thức (150tr+155tr, 1900tr*7%) · khối đã có khoản: chọn <b>Theo khoản</b> (cộng các khoản) hoặc <b>Số nhập</b>${k === 2 ? ' · TĐ2 trống = theo TĐ1' : ''} · TĐ3 = thực chi</small></form>`;
+    <small class="pt-note">Gõ số (150tr, 1,2 tỷ), % (7% = × doanh thu) hoặc công thức (150tr+155tr) · ô có số → dùng số này; để trống → cộng theo khoản bên dưới${k === 2 ? ' (TĐ2 trống = theo TĐ1)' : ''} · TĐ3 = thực chi</small></form>`;
   }
   // ---- (1) khoản chi tiết ----
   const nhB = NHOM().filter((n) => ['B2', 'B3'].includes(n.khoi));
@@ -2276,7 +2277,8 @@ document.addEventListener('submit', async (e) => {
       const v = i.value.trim(), r = magicSo(v), t = 'tien_' + i.name.slice(3), c = 'ct_' + i.name.slice(3);
       if (r.loi) { i.focus(); return showMsg($('#pt-msg'), `${i.getAttribute('aria-label')}: ${r.loi}`, 'err'); }
       body[i.name] = r.pt !== undefined ? String(r.pt) : ''; body[t] = r.tien !== undefined ? String(r.tien) : ''; body[c] = r.trong ? '' : v;
-      if (v !== (i.dataset.goc || '') && !r.trong) body[i.dataset.kh === 'B2' ? 'cach_gt' : 'cach_tc'] = 'nhap'; // vừa gõ số mới -> khối dùng số nhập
+      const cachK = i.dataset.kh === 'B2' ? 'cach_gt' : 'cach_tc';
+      if (r.trong) { if (k1Of(i.name)) body[cachK] = ''; } else if (v !== (i.dataset.goc || '')) body[cachK] = 'nhap'; // có số mới -> dùng số nhập; ô TĐ1 trống -> theo khoản
     }
     try { await api(`/api/du-an/${revProjectId}/ty-le`, { method: 'PUT', body: JSON.stringify(body) }); await loadCost(); showMsg($('#pt-msg'), 'Đã lưu'); }
     catch (err) { showMsg($('#pt-msg'), err.message, 'err'); }
