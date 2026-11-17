@@ -3721,3 +3721,20 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .c-pt .pt-val { font-weight: 500; color: var(--muted); } .c-pt .pt-val b { font-weight: 800; }
 .c-pt .pt-save { padding: 7px 18px; } .c-pt .pt-note { flex-basis: 100%; color: var(--muted); font-size: 11.5px; }
 @media (max-width: 640px) { .c-pt .pt-box { width: 100%; justify-content: space-between; } }
+/* V04.17: khoản chi phí gián tiếp / tài chính (nhập như thầu phụ) */
+.c-pt .pk-wrap { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; gap: 8px; }
+.c-pt .pk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.c-pt .pk-table th { text-align: left; font-size: 11.5px; color: var(--muted); font-weight: 700; padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.c-pt .pk-table th.num, .c-pt .pk-table td.num { text-align: right; }
+.c-pt .pk-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.c-pt .pk-table .td-col-on { background: rgba(37, 99, 235, 0.06); font-weight: 700; }
+.c-pt .pk-khoi td { background: var(--bg-soft, #f7f9fc); color: var(--navy); padding-top: 8px; }
+.c-pt .pk-B2 td { box-shadow: inset 4px 0 0 var(--teal); } .c-pt .pk-B3 td { box-shadow: inset 4px 0 0 #6d5bd0; }
+.c-pt .pk-tong td { font-weight: 700; border-bottom: 2px solid var(--border); }
+.c-pt .pk-table .row-actions { white-space: nowrap; text-align: right; } .c-pt .pk-table .row-actions .sm + .sm { margin-left: 4px; }
+.c-pt .pk-form, .c-pt .pk-add { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.c-pt .pk-form label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; }
+.c-pt .pk-form input, .c-pt .pk-add input, .c-pt .pk-add select { max-width: 100%; }
+.c-pt .pk-add input[name=noi_dung] { min-width: 200px; flex: 1 1 200px; } .c-pt .pk-add input.money { width: 170px; }
+.c-pt .pk-edit td { background: #fffbea; }
+@media (max-width: 640px) { .c-pt .pk-add select, .c-pt .pk-add input, .c-pt .pk-add input.money { width: 100%; flex: 1 1 100%; } .c-pt .pk-form label { flex-wrap: wrap; } }

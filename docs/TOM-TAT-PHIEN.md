@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.17.11.26 – Chi phí gián tiếp, tài chính nhập theo KHOẢN (như HĐ thầu phụ)
+- Trang Chi phí: bảng "Khoản chi phí gián tiếp, tài chính": TĐ1 thêm khoản (nhóm + tên + dự trù) · TĐ2 "± Điều chỉnh" theo khoản / "Đóng khoản" · TĐ3 "Chốt số" (trống = thực chi). Cột Đã chi = chi phí ghi có "Gắn vào gói" = khoản. Dòng "Chi chưa gắn khoản" để cộng khối = thẻ.
+- Công thức (lib/report.js `duTruNhom`): TĐ2 khoản = max(đã chi, dự trù + điều chỉnh của khoản) (đóng = đã chi) · TĐ3 khối B2/B3 = thực chi, khoản có chốt = số chốt · khối đã có khoản → bỏ % (V10). Gói / khoản B2, B3 không tính vào HĐ CĐT, không hiện ở bảng HĐ đầu vào.
+- Kho dữ liệu: du_tru thêm goi_ref (điều chỉnh của khoản), gt_chot (số chốt TĐ3) – chỉ THÊM. API: POST du-tru nhận goi_ref; PUT /du-tru/:id nhận gt_chot.
+- DA-01..05 thật chưa có gói gián tiếp / tài chính → số không đổi. kiem-tra-goi 174 ĐẠT (thêm 7 tình huống khoản), tester 4612 ĐẠT, 0 LỖI; máy tính + điện thoại không tràn.
+
 ## V03.17.11.26 – Mục I dòng khối chỉ ghi chi phí + sổ / gọn HĐ; bỏ bảng mục II; bỏ tab Tổng quan
 - Mục I: dòng "Chi phí trực tiếp" chỉ ghi chi phí (doanh thu ở dòng dự án và từng HĐ); nút ▸ / ▾ để sổ / gọn chi tiết các HĐ (mặc định gọn).
 - Mục II: bỏ bảng từng dự án, giữ 3 ô Dòng thu / Dòng chi / Còn lại (bấm số xem chi tiết).

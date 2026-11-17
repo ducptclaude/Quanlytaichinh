@@ -1182,6 +1182,16 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   if (errors.length) return bad(res, errors);
   if (data.loai !== 'ky') data.hd_cdt_id = null; // chỉ gói (dòng TĐ1) mới gắn HĐ CĐT
   if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
+  // V04.17: đợt điều chỉnh TĐ2 của riêng 1 khoản (gián tiếp / tài chính): khoản TĐ1 cùng dự án, cùng nhóm, chưa đóng
+  const gr = req.body?.goi_ref === '' || req.body?.goi_ref == null ? null : Number(req.body.goi_ref);
+  if (gr !== null) {
+    if (data.loai !== 'dc') return bad(res, 'Chỉ đợt điều chỉnh (TĐ2) mới gắn vào 1 khoản');
+    const g = Number.isInteger(gr) && gr > 0 ? await store.getDuTru(gr) : null;
+    if (!g || g.du_an_id !== id || g.loai !== 'ky') return bad(res, 'Khoản dự trù không thuộc dự án này');
+    if (g.nhom !== data.nhom) return bad(res, 'Khoản dự trù khác nhóm với đợt điều chỉnh');
+    if (g.tinh_trang === 'dong') return bad(res, 'Khoản đã đóng – mở lại trước khi điều chỉnh');
+    data.goi_ref = gr;
+  }
   res.status(201).json(await store.createDuTru(id, data, req.user.id));
 }));
 // V27.12: dòng mua lẻ gắn gói – gói TĐ1 cùng dự án, CÙNG NHÓM; gắn mới thì gói chưa đóng (giữ gắn cũ thì cho qua)
@@ -1209,6 +1219,15 @@ api.put('/du-tru/:id', canHd, wrap(async (req, res) => {
     const hd = req.body.hd_cdt_id === '' || req.body.hd_cdt_id === null ? null : Number(req.body.hd_cdt_id);
     if (hd !== null) { if (!Number.isInteger(hd) || hd <= 0) return bad(res, 'HĐ chủ đầu tư không hợp lệ'); const e = await checkHeadRef(hd, cur.du_an_id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
     await store.setDuTruCdt(id, hd);
+    return res.json({ ok: true });
+  }
+  // V04.17: chốt số TĐ3 của 1 khoản gián tiếp / tài chính (trống = bỏ chốt -> TĐ3 = thực chi)
+  if (req.body && 'gt_chot' in req.body && !('so_tien' in req.body)) {
+    const kh = NHOM_CHI_PHI.find((n) => n.code === cur.nhom)?.khoi;
+    if (cur.loai !== 'ky' || !['B2', 'B3'].includes(kh)) return bad(res, 'Chỉ khoản chi phí gián tiếp / tài chính (dòng TĐ1) mới chốt số');
+    const raw = req.body.gt_chot, v = raw === '' || raw === null ? null : Number(String(raw).replace(/\./g, '').replace(',', '.'));
+    if (v !== null && (!Number.isFinite(v) || v < 0 || v > 1e15)) return bad(res, 'Số chốt không hợp lệ (số ≥ 0)');
+    await store.setDuTruChot(id, v === null ? null : Math.round(v));
     return res.json({ ok: true });
   }
   // Chỉ đổi tình trạng gói (tạm tính / đã xác định / đóng) – không gửi số tiền
