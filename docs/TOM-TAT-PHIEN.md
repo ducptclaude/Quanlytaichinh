@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.17.11.26 – Mục I: bỏ mũi tên dưới số; sổ được từng văn bản HĐ gốc / PL dưới mỗi HĐ
+- Bỏ ▲▼ dưới số (V11.17). Nút ▸ ở từng HĐ: sổ HĐ gốc, PL01, PL02… với doanh thu tại TĐ đang chọn (TĐ3 văn bản chưa có số QT = TĐ2); HĐ quyết toán theo hồ sơ cũ có thêm dòng "Chênh lệch quyết toán theo hồ sơ" để cộng khớp.
+- Máy chủ: hds[].vb (gt / sv × 3 TĐ từng văn bản). Thụt lề nhích trái (cấp 2: 16px, cấp 3: 32px). tester 4518–4612 ĐẠT, không tràn.
+
 ## V11.17.11.26 – Mục I: mức thay đổi so TĐ trước ngay dưới số DT / CP; thẳng hàng tên khối
 - TĐ2 / TĐ3: dưới số doanh thu, chi phí của dự án, khối (trực tiếp / gián tiếp / tài chính) và từng HĐ ghi ▲ +x / ▼ −x so TĐ trước (DT tăng xanh, CP tăng đỏ) → PL quyết toán lệch nhìn thấy ngay. Tên 3 khối thẳng hàng. tester 4612 ĐẠT, không tràn.
 

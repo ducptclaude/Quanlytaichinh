@@ -3759,3 +3759,10 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .th-table .i-dd { display: block; font-size: 10.5px; font-weight: 700; line-height: 1.2; margin-top: 1px; white-space: nowrap; }
 .th-table .i-dd.up { color: #12805c; } .th-table .i-dd.dn { color: #d92d35; }
 .th-table .iv-tg-sp { display: inline-block; width: 28px; }
+/* V12.17: thụt lề gọn hơn (nhích trái) để sổ được HĐ -> PL */
+.th-table .iv-tree { margin: 0 4px 0 2px !important; }
+.th-table .iv-l2 { padding-left: 16px !important; }
+.th-table .iv-l3 { padding-left: 32px !important; }
+.th-table .iv-tg-sp { width: 26px; }
+.th-table .iv-pl-row td { background: #fbfcfe; font-size: 12.5px; }
+.th-table .kind-tag.kind-pl { background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; }

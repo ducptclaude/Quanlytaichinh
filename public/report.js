@@ -897,7 +897,7 @@ function bTongHopHtml(list, v, P) {
       const htCell = (d) => { const g = GH.get(d.id) || { gtht: 0, dt3: 0, ht: 0, nguon: 'c2c' }; const p = g.ht || 0;
         return `<td class="th-ht" title="Giá trị hoàn thành ${bTy(g.gtht)} ÷ Doanh thu TĐ3 ${bTy(g.dt3)} ${TY()} – ${GT_NGUON(g)}"><span class="ht-wrap">${meter(Math.min(p, 1), 1, p > 1 ? '#d92d35' : BCOL.dk)}<b class="ht-pct ${p > 1 ? 'neg' : ''}">${bpct(g.gtht, g.dt3)}</b></span></td>`; };
       // V11.17: ngay dưới số DT / CP ghi mức thay đổi so với TĐ trước (vd PL quyết toán lệch dương) – nhìn tổng quan thấy được ở dự án, khối, từng HĐ
-      const dd = (a, b0, good) => { if (k < 2 || b0 === null || b0 === undefined) return ''; const d0 = a - b0; if (Math.abs(d0) < 1e6) return '';
+      void 0; const dd = (a, b0, good) => { if (k < 2 || b0 === null || b0 === undefined) return ''; const d0 = a - b0; if (Math.abs(d0) < 1e6) return '';
         return `<small class="i-dd ${(d0 > 0) === good ? 'up' : 'dn'}" title="So với TĐ${k - 1}: ${bTy(b0)} → ${bTy(a)} ${TY()}">${d0 > 0 ? '▲ +' : '▼ −'}${bTy(Math.abs(d0))}</small>`; };
       const dCell = (r) => { if (!doi(r)) return '<td class="num i-dc"><span class="i-dl eq">—</span></td>';
         const d = (r.dt - r.cp) - (r.b.dt - r.b.cp);
@@ -919,9 +919,9 @@ function bTongHopHtml(list, v, P) {
         const khac = { dt: r.dt - sum('dt'), cp: r.cp - sum('cp'), b: k > 1 ? { dt: r.b.dt - sum('dt', 1), cp: r.b.cp - sum('cp', 1) } : null };
         const dong = (c, ten) => `<tr class="iv-hd-row${ten ? '' : ' iv-chung-row'}">${ten || ''}<td class="th-ht">${c.h ? (() => { const p = c.h.da_qt ? 1 : c.h.so_dot && c.h.td3?.[v] ? (c.h.nt?.[v] || 0) / c.h.td3[v] : null;
             return p === null ? '<span class="muted">—</span>' : `<span class="ht-wrap">${meter(Math.min(p, 1), 1, BCOL.dk)}<b class="ht-pct">${(p * 100).toFixed(1).replace('.', ',')}%</b></span>`; })() : ''}</td>
-          <td class="num">${bTy(c.dt)}${dd(c.dt, c.b?.dt, true)}</td><td class="num">${bTy(c.cp)}${dd(c.cp, c.b?.cp, false)}</td><td class="num ${c.dt - c.cp < 0 ? 'neg' : ''}">${bTy(c.dt - c.cp)}</td>
+          <td class="num">${bTy(c.dt)}</td><td class="num">${bTy(c.cp)}</td><td class="num ${c.dt - c.cp < 0 ? 'neg' : ''}">${bTy(c.dt - c.cp)}</td>
           <td class="num">${c.dt ? bpct(c.dt - c.cp, c.dt) : '—'}</td></tr>`;
-        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}${dd(r.dt, r.b?.dt, true)}</td><td class="num">${bTy(r.cp)}${dd(r.cp, r.b?.cp, false)}</td>
+        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>
         <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}</b></td></tr>` +
         (hs.length && gMo(r.x.d) ? (() => {
@@ -930,14 +930,21 @@ function bTongHopHtml(list, v, P) {
           const ex = Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? tachI(r.x.d, k, khac) : [];
           const tt = ex.filter((e) => e[3] === 'TT'), coNhom = true;
           const ng = ['B2', 'B3'].map((g) => ex.find((e) => e[3] === g) || [{ dt: 0, cp: 0 }, KH_TEN[g][0], KH_TEN[g][1], g]);
-          const dongK = (c, ten) => `<tr class="iv-hd-row iv-grp-row">${ten.replace('<span class="iv-tree">└</span>', '<span class="iv-tree">└</span><span class="iv-tg-sp"></span>')}<td class="th-ht"></td><td class="num"></td><td class="num">${bTy(c.cp)}${dd(c.cp, c.b?.cp, false)}</td><td class="num"></td><td class="num"></td></tr>`;
+          const dongK = (c, ten) => `<tr class="iv-hd-row iv-grp-row">${ten.replace('<span class="iv-tree">└</span>', '<span class="iv-tree">└</span><span class="iv-tg-sp"></span>')}<td class="th-ht"></td><td class="num"></td><td class="num">${bTy(c.cp)}</td><td class="num"></td><td class="num"></td></tr>`;
           let j = 0; const l2 = (h, jj) => (coNhom ? h.replace('<td class="th-name">', '<td class="th-name iv-l2">').replace(`>${i + 1}.${jj + 1}</td>`, `>${i + 1}.1.${jj + 1}</td>`) : h);
-          const hdR = con.map((c) => { const jj = j++; return dong(c, l2(gTen(c.h, i, jj), jj)); }).join('') + tt.map(([c, ten, tip]) => { const jj = j++; return dong(c, l2(gKhac(i, jj, esc(tip), ten), jj)); }).join('');
+          // V12.17: bấm ▸ ở HĐ sổ từng văn bản (HĐ gốc, PL01…) – doanh thu tại TĐ đang chọn, cộng = doanh thu HĐ
+          const vbOk = (h) => (h.vb || []).length > 1, vbLech = (h) => gDt(h, k) - (h.vb || []).reduce((a, x) => a + (x[v]?.[k - 1] || 0), 0);
+          const plMo = (h) => (BST.iv_pl_mo || []).includes(h.id);
+          const plBtn = (h) => (vbOk(h) ? `<button type="button" class="iv-tg no-print" data-ivpl="${h.id}" title="${plMo(h) ? 'Thu gọn HĐ / PL' : 'Xem từng văn bản HĐ, PL'}">${plMo(h) ? '▾' : '▸'}</button>` : '<span class="iv-tg-sp"></span>');
+          const plRows = (h, jj) => (vbOk(h) && plMo(h) ? h.vb.map((x, n) => { const t = x[v]?.[k - 1] || 0;
+            return `<tr class="iv-hd-row iv-pl-row"><td class="num th-stt muted">${i + 1}.1.${jj + 1}.${n + 1}</td><td></td><td class="th-name iv-l3"><span class="iv-tree">└</span><span class="kind-tag ${x.ma === 'HĐ' ? 'kind-hd' : 'kind-pl'}" title="${esc(x.so_hieu)}">${esc(x.ma === 'HĐ' ? 'HĐ gốc' : x.ma)}</span>${x.qt ? ' <span class="iv-qt" title="Văn bản đã có số quyết toán">✓ QT</span>' : ''}</td><td></td><td class="th-ht"></td>
+              <td class="num">${bTy(t)}</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>`; }).join('') + (Math.abs(vbLech(h)) >= 1e5 ? `<tr class="iv-hd-row iv-pl-row"><td class="num th-stt muted">${i + 1}.1.${jj + 1}.${h.vb.length + 1}</td><td></td><td class="th-name iv-l3"><span class="iv-tree">└</span><span class="iv-chung" title="HĐ quyết toán theo hồ sơ HT/QT (chưa nhập số quyết toán từng văn bản) – phần chênh so với cộng các văn bản">Chênh lệch quyết toán theo hồ sơ</span></td><td></td><td class="th-ht"></td><td class="num">${bTy(vbLech(h))}</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>` : '') : '');
+          const hdR = con.map((c) => { const jj = j++; return dong(c, l2(gTen(c.h, i, jj), jj).replace('<span class="iv-tree">└</span>', `<span class="iv-tree">└</span>${plBtn(c.h)}`)) + plRows(c.h, jj); }).join('') + tt.map(([c, ten, tip]) => { const jj = j++; return dong(c, l2(gKhac(i, jj, esc(tip), ten), jj)); }).join('');
           let head = '';
           if (coNhom) { const G = [...con, ...tt.map((e) => e[0])], sm = (f, b) => G.reduce((a, c) => a + (b ? (c.b ? c.b[f] : 0) : c[f]), 0);
             // V03.17: dòng khối chỉ ghi chi phí; bấm ▸ / ▾ để sổ / gọn chi tiết từng HĐ (mặc định gọn)
             const mo = (BST.iv_tt_mo || []).includes(r.x.d.id);
-            head = `<tr class="iv-hd-row iv-grp-row"><td class="num th-stt muted">${i + 1}.1</td><td></td><td class="th-name"><span class="iv-tree">└</span><button type="button" class="iv-tg no-print" data-ivtt="${r.x.d.id}" title="${mo ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ (doanh thu, chi phí trực tiếp, lợi nhuận)'}">${mo ? '▾' : '▸'}</button><b class="iv-grp" title="Chi phí trực tiếp: HĐ đầu vào, gói, mua lẻ – chi tiết theo từng HĐ chủ đầu tư">Chi phí trực tiếp</b></td><td></td><td class="th-ht"></td><td class="num"></td><td class="num">${bTy(sm('cp'))}${k > 1 ? dd(sm('cp'), sm('cp', 1), false) : ''}</td><td class="num"></td><td class="num"></td></tr>`;
+            head = `<tr class="iv-hd-row iv-grp-row"><td class="num th-stt muted">${i + 1}.1</td><td></td><td class="th-name"><span class="iv-tree">└</span><button type="button" class="iv-tg no-print" data-ivtt="${r.x.d.id}" title="${mo ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ (doanh thu, chi phí trực tiếp, lợi nhuận)'}">${mo ? '▾' : '▸'}</button><b class="iv-grp" title="Chi phí trực tiếp: HĐ đầu vào, gói, mua lẻ – chi tiết theo từng HĐ chủ đầu tư">Chi phí trực tiếp</b></td><td></td><td class="th-ht"></td><td class="num"></td><td class="num">${bTy(sm('cp'))}</td><td class="num"></td><td class="num"></td></tr>`;
             if (!mo) return head + ng.map(([c, ten, tip], n) => dongK(c, gKhac(i, n + 1, esc(tip), ten))).join(''); }
           return head + hdR + ng.map(([c, ten, tip], n) => dongK(c, gKhac(i, n + 1, esc(tip), ten))).join(''); })() : ''); void chungTip; void pbTen;
       }).join('')}</tbody>
@@ -1772,6 +1779,8 @@ async function bGoWarn(daId, l) {
 }
 $('#b-report').addEventListener('click', (e) => {
   const ivh = e.target.closest('[data-ivhd]');
+  const ivp = e.target.closest('[data-ivpl]'); // V12.17: sổ / gọn văn bản HĐ, PL của 1 HĐ (mục I)
+  if (ivp) { const id = Number(ivp.dataset.ivpl), s = new Set(BST.iv_pl_mo || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_pl_mo = [...s]; bSave(); return renderKeepPos(`[data-ivpl="${id}"]`); }
   const ivt = e.target.closest('[data-ivtt]'); // V03.17: sổ / gọn chi tiết HĐ trong khối Chi phí trực tiếp (mục I)
   if (ivt) { const id = Number(ivt.dataset.ivtt), s = new Set(BST.iv_tt_mo || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_tt_mo = [...s]; bSave(); return renderKeepPos(`[data-ivtt="${id}"]`); }
   if (ivh) { const id = Number(ivh.dataset.ivhd), s = new Set(BST.iv_hd_mo || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_hd_mo = [...s]; bSave(); return renderKeepPos(`[data-ivhd="${id}"]`); }
