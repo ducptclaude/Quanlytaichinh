@@ -3669,6 +3669,7 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .th-table tr.iv-prj-row td { background: var(--bg-f3f7fd); border-top: 2px solid var(--bd-dbe6f5); }
 .th-table tr.iv-hd-row td { font-size: 12.5px; }
 .th-table .iv-tree { color: var(--muted); margin: 0 6px 0 8px; }
+.th-table .iv-l2 { padding-left: 30px !important; } .th-table .iv-grp-row td { font-weight: 700; background: var(--bg-soft, #f7f9fc); } .th-table .iv-grp, .th-table .iv-grp-row .iv-chung { color: var(--navy); font-style: normal; font-weight: 700; }
 .th-table .iv-tg { border: 1px solid var(--border); background: var(--bg-ffffff); border-radius: 6px; width: 22px; height: 22px; padding: 0; margin-right: 6px; cursor: pointer; font-size: 11px; line-height: 1; }
 .th-table .iv-qt { font-size: 11px; font-weight: 700; color: #16a34a; }
 .th-table .iv-chung { font-style: italic; color: var(--fg-475569); }

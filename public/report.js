@@ -818,15 +818,15 @@ function bTongHopHtml(list, v, P) {
   const khGom = (ds, val) => { const G = { B1: 0, B2: 0, B3: 0 }, T = { B1: [], B2: [], B3: [] };
     for (const x of ds) { const g = x.khoi === 'B2' || x.khoi === 'B3' ? x.khoi : 'B1', y = val(x); G[g] += y; if (Math.abs(y) >= 1e5) T[g].push(`${x.ten} ${bTy(y)} ${TY()}`); } return { G, T }; };
   const chungI = (d, kk) => khGom(d.cp_chung || [], (x) => x[v]?.[kk - 1] || 0);
-  const tachI = (d, k, khac, i, j0, dong, pbOk) => { const out = [];
-    if (Math.abs(khac.dt) >= 1e6) out.push([{ dt: khac.dt, cp: 0, b: k > 1 ? { dt: khac.b.dt, cp: 0 } : null }, 'Doanh thu chưa phân theo HĐ', 'Doanh thu không gắn được HĐ chủ đầu tư']);
+  // V01.17: trả danh sách dòng [số, tên, gợi ý, nhóm] – nhóm 'TT' thuộc khối Chi phí trực tiếp (cùng các HĐ), còn lại là dòng riêng
+  const tachI = (d, k, khac) => { const out = [];
+    if (Math.abs(khac.dt) >= 1e6) out.push([{ dt: khac.dt, cp: 0, b: k > 1 ? { dt: khac.b.dt, cp: 0 } : null }, 'Doanh thu chưa phân theo HĐ', 'Doanh thu không gắn được HĐ chủ đầu tư', 'TT']);
     const cur = chungI(d, k), prv = k > 1 ? chungI(d, k - 1) : null;
-    // V12.16: TĐ1, TĐ2 gián tiếp / tài chính gộp vào chi phí dự án (tách ở thẻ phía trên); TĐ3 hiện dòng riêng
-    for (const g of pbOk ? ['B1'] : ['B1', 'B2', 'B3']) if (Math.abs(cur.G[g]) >= 1e5 || (prv && Math.abs(prv.G[g]) >= 1e5))
-      out.push([{ dt: 0, cp: cur.G[g], b: prv ? { dt: 0, cp: prv.G[g] } : null }, KH_TEN[g][0], KH_TEN[g][1] + (cur.T[g].length ? '\nGồm: ' + cur.T[g].join(' · ') : '')]);
-    const du = khac.cp - cur.G.B1 - (pbOk ? 0 : cur.G.B2 + cur.G.B3), duP = k > 1 ? khac.b.cp - prv.G.B1 - prv.G.B2 - prv.G.B3 : 0;
-    if (Math.abs(du) >= 1e5) out.push([{ dt: 0, cp: du, b: k === 3 ? { dt: 0, cp: duP } : null }, 'Điều chỉnh / quyết toán cả nhóm', 'Đợt điều chỉnh / quyết toán cho cả nhóm chi phí (không gắn riêng HĐ)']);
-    return out.map(([c, ten, tip], n) => dong(c, gKhac(i, j0 + n, esc(tip), ten))).join(''); };
+    for (const g of ['B1', 'B2', 'B3']) if (Math.abs(cur.G[g]) >= 1e5 || (prv && Math.abs(prv.G[g]) >= 1e5))
+      out.push([{ dt: 0, cp: cur.G[g], b: prv ? { dt: 0, cp: prv.G[g] } : null }, KH_TEN[g][0], KH_TEN[g][1] + (cur.T[g].length ? '\nGồm: ' + cur.T[g].join(' · ') : ''), g === 'B1' ? 'TT' : g]);
+    const du = khac.cp - cur.G.B1 - cur.G.B2 - cur.G.B3, duP = k > 1 ? khac.b.cp - prv.G.B1 - prv.G.B2 - prv.G.B3 : 0;
+    if (Math.abs(du) >= 1e5) out.push([{ dt: 0, cp: du, b: k === 3 ? { dt: 0, cp: duP } : null }, 'Điều chỉnh / quyết toán cả nhóm', 'Đợt điều chỉnh / quyết toán cho cả nhóm chi phí (không gắn riêng HĐ)', 'TT']);
+    return out; };
   const tachII = (d, kh, i, j0, dong) => { const out = [], t = d.tien_chung || { thu: 0, chi: [] };
     if (Math.abs(kh.thu) >= 1e6) out.push([{ thu: kh.thu, chi: 0 }, 'Tiền về chưa gắn HĐ', 'Tiền về chưa chọn HĐ chủ đầu tư – nên gắn HĐ']);
     const ds = (t.chi || []).map(([ten, x, khoi]) => ({ ten, x, khoi: khoi || 'B1' })), tong = ds.reduce((a, x) => a + x.x, 0), he = tong ? kh.chi / tong : 0;
@@ -912,26 +912,30 @@ function bTongHopHtml(list, v, P) {
       <tbody>${RR.map((r, i) => {
         const hs = r.x.d.hds || [];
         const con = hs.map((h) => ({ h, dt: gDt(h, k), cp: gCp(h, k), b: k > 1 ? { dt: gDt(h, k - 1), cp: gCp(h, k - 1) } : null }));
-        // V13.16: TĐ1, TĐ2 chia chi phí gián tiếp + tài chính vào từng HĐ theo tỷ lệ doanh thu HĐ (cộng các HĐ = dự án); TĐ3 hiện dòng riêng (thực chi)
-        const pbK = (kk) => { const g = chungI(r.x.d, kk).G, T = g.B2 + g.B3, get = (c) => (kk === k ? c : c.b), td = con.reduce((a, c) => a + get(c).dt, 0);
-          if (!(td > 0) || Math.abs(T) < 1e5) return false; let con0 = T;
-          con.forEach((c, j) => { const x = j === con.length - 1 ? con0 : Math.round((T * get(c).dt) / td); con0 -= x; get(c).cp += x; get(c).pb = x; }); return true; };
-        const pbOk = k < 3 && pbK(k); if (k === 2) pbK(1);
         const sum = (f, b) => con.reduce((a, c) => a + (b ? (c.b ? c.b[f] : 0) : c[f]), 0);
         const khac = { dt: r.dt - sum('dt'), cp: r.cp - sum('cp'), b: k > 1 ? { dt: r.b.dt - sum('dt', 1), cp: r.b.cp - sum('cp', 1) } : null };
         const dong = (c, ten) => `<tr class="iv-hd-row${ten ? '' : ' iv-chung-row'}">${ten || ''}<td class="th-ht">${c.h ? (() => { const p = c.h.da_qt ? 1 : c.h.so_dot && c.h.td3?.[v] ? (c.h.nt?.[v] || 0) / c.h.td3[v] : null;
             return p === null ? '<span class="muted">—</span>' : `<span class="ht-wrap">${meter(Math.min(p, 1), 1, BCOL.dk)}<b class="ht-pct">${(p * 100).toFixed(1).replace('.', ',')}%</b></span>`; })() : ''}</td>
-          <td class="num">${bTy(c.dt)}</td><td class="num"${c.pb ? ` title="Gồm chi phí gián tiếp, tài chính chia theo tỷ lệ doanh thu: ${bTy(c.pb)} ${TY()}"` : ''}>${bTy(c.cp)}</td><td class="num ${c.dt - c.cp < 0 ? 'neg' : ''}">${bTy(c.dt - c.cp)}</td>${k > 1 ? dCell(c) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
+          <td class="num">${bTy(c.dt)}</td><td class="num">${bTy(c.cp)}</td><td class="num ${c.dt - c.cp < 0 ? 'neg' : ''}">${bTy(c.dt - c.cp)}</td>${k > 1 ? dCell(c) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
           <td class="num">${c.dt ? bpct(c.dt - c.cp, c.dt) : '—'}</td></tr>`;
-        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num"${k < 3 ? (() => { const g = chungI(r.x.d, k).G; return Math.abs(g.B2) + Math.abs(g.B3) >= 1e5 ? ` title="Gồm chi phí gián tiếp ${bTy(g.B2)} · tài chính ${bTy(g.B3)} ${TY()}"` : ''; })() : ''}>${bTy(r.cp)}</td>
+        return `<tr class="${hs.length ? 'iv-prj-row' : ''}">${gPrj(r.x, i)}${htCell(r.x.d)}<td class="num">${bTy(r.dt)}</td><td class="num">${bTy(r.cp)}</td>
         <td class="num strong ${r.ln < 0 ? 'neg' : 'pos'}">${bTy(r.ln)}</td>${k > 1 ? dCell(r) : '<td class="num i-dc"><span class="i-dl eq">—</span></td>'}
         <td class="num"><b class="${r.ln < 0 ? 'neg' : ''}">${bpct(r.ln, r.dt)}</b></td></tr>` +
-        (hs.length && gMo(r.x.d) ? con.map((c, j) => dong(c, pbTen(gTen(c.h, i, j), khac.cp, c.dt, sum('dt'), c.dt - c.cp, `doanh thu TĐ${k}`, 'Lợi nhuận', c.dt))).join('') +
-          (Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? tachI(r.x.d, k, khac, i, hs.length, dong, pbOk) : '') : ''); void chungTip;
+        (hs.length && gMo(r.x.d) ? (() => {
+          // V01.17: cơ cấu – Chi phí trực tiếp (các HĐ: DT | CP trực tiếp | lãi gộp) → Chi phí gián tiếp → Chi phí tài chính; cộng = dòng dự án
+          const ex = Math.abs(khac.dt) + Math.abs(khac.cp) >= 1e6 ? tachI(r.x.d, k, khac) : [];
+          const tt = ex.filter((e) => e[3] === 'TT'), ng = ex.filter((e) => e[3] !== 'TT'), coNhom = ng.length > 0;
+          let j = 0; const l2 = (h) => (coNhom ? h.replace('<td class="th-name">', '<td class="th-name iv-l2">') : h);
+          const hdR = con.map((c) => dong(c, l2(gTen(c.h, i, j++)))).join('') + tt.map(([c, ten, tip]) => dong(c, l2(gKhac(i, j++, esc(tip), ten)))).join('');
+          let head = '';
+          if (coNhom) { const G = [...con, ...tt.map((e) => e[0])], sm = (f, b) => G.reduce((a, c) => a + (b ? (c.b ? c.b[f] : 0) : c[f]), 0);
+            const c0 = { dt: sm('dt'), cp: sm('cp'), b: k > 1 ? { dt: sm('dt', 1), cp: sm('cp', 1) } : null };
+            head = dong(c0, `<td class="num th-stt muted"></td><td></td><td class="th-name"><span class="iv-tree">└</span><b class="iv-grp" title="Các HĐ chủ đầu tư: doanh thu – chi phí trực tiếp (HĐ đầu vào, gói, mua lẻ) = lãi gộp">Chi phí trực tiếp</b></td><td></td>`).replace('class="iv-hd-row', 'class="iv-hd-row iv-grp-row'); }
+          return head + hdR + ng.map(([c, ten, tip]) => dong(c, gKhac(i, j++, esc(tip), ten)).replace('class="iv-hd-row', 'class="iv-hd-row iv-grp-row')).join(''); })() : ''); void chungTip; void pbTen;
       }).join('')}</tbody>
       ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), k > 1 ? dl(TT.ln, P0.ln, true) : '<span class="i-dl eq">—</span>', bpct(TT.ln, TT.dt)])}
     </table></div>
-    ${k < 3 ? '<p class="muted small f-note">Chi phí từng HĐ đã gồm chi phí gián tiếp, tài chính chia theo tỷ lệ doanh thu HĐ – cộng các HĐ = dự án.</p>' : ''}${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính lúc ký HĐ: doanh thu HĐ + PL ký với CĐT · chi phí = gói / HĐ đầu vào ký + chi phí gián tiếp, tài chính. Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = giá trị ký (TĐ1) của từng HĐ / PL + các đợt điều chỉnh tăng / giảm; chi phí = HĐ đầu vào theo TĐ2 và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán từng HĐ / PL; văn bản chưa có số quyết toán tạm lấy theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>`}`;
+${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính lúc ký HĐ: doanh thu HĐ + PL ký với CĐT · chi phí = gói / HĐ đầu vào ký + chi phí gián tiếp, tài chính. Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = giá trị ký (TĐ1) của từng HĐ / PL + các đợt điều chỉnh tăng / giảm; chi phí = HĐ đầu vào theo TĐ2 và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán từng HĐ / PL; văn bản chưa có số quyết toán tạm lấy theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>`}`;
     })()}
 
     ${thHead('II', 'Dòng tiền thực tế', 'Tiền thật đã thu về và đã chi ra của dự án', [`Lũy kế đến ${dTo}`, vt[0].toUpperCase() + vt.slice(1)])}

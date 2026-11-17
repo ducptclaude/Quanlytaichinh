@@ -30,7 +30,7 @@ window.BKS_EN = {
 "Tăng / giảm": "Increase / decrease",
 "Trực tiếp chưa gắn HĐ": "Direct – not linked to a contract",
 "Trực tiếp": "Direct",
-"Chi phí từng HĐ đã gồm chi phí gián tiếp, tài chính chia theo tỷ lệ doanh thu HĐ – cộng các HĐ = dự án.": "Each contract's cost includes indirect and financial costs allocated by contract revenue share – contracts add up to the project.",
+"Các HĐ chủ đầu tư: doanh thu – chi phí trực tiếp (HĐ đầu vào, gói, mua lẻ) = lãi gộp": "Employer contracts: revenue – direct cost (procurement contracts, packages, ad-hoc purchases) = gross profit",
 "· Gián tiếp": "· Indirect",
 "· Tài chính": "· Financial",
 "Chi phí thời điểm 1": "M1 costs",
