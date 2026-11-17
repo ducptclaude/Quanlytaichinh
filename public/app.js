@@ -1954,13 +1954,13 @@ function khoanRows(kh) {
   if (!['B2', 'B3'].includes(kh) || costAll || !costData?.du_tru) return '';
   const k = tdDangChon(), KS = ptKhoan().filter((x) => x.khoi === kh), pt = costData.pt_td?.[kh];
   const cpK = costData.cp_khoi?.[kh]?.[k - 1];
-  if (!KS.length && !(pt?.gt && k < 3)) return '';
+  if (!KS.length && !(pt?.gt && !pt.bo_qua && k < 3)) return '';
   const svOf = (x, r) => x + Math.round((x * (Number(r?.vat) || 0)) / 100);
   const co = nhomOf(kh).some((n) => costOpen.has(n.code)) ? '<td class="c-o"></td><td class="c-o"></td>' : '', co1 = co ? '<td class="c-o"></td>' : ''; // bảng gọn: không có cột đối tác / ngày / ghi chú
   const row = (ten, sub, gt, sv, cls = '') => `<tr class="c-khoan ${cls}"><td></td><td>${ten}${sub ? `<div class="muted small">${sub}</div>` : ''}</td>${co}<td class="num">${dvT(gt)}</td><td class="num">${dvT(sv)}</td><td class="num c-pdt"></td>${co1}<td></td></tr>`;
   let h = `<tr class="c-khoan-h"><td></td><td colspan="1"><b>Dự trù theo khoản · TĐ${k}</b> <span class="muted small">(nhập ở khung "Khoản chi phí gián tiếp, tài chính" phía trên)</span></td>${co}<td class="num"></td><td class="num"></td><td class="num c-pdt"></td>${co1}<td></td></tr>`;
   h += KS.map((x) => row(`└ <b>${esc(x.r.noi_dung || 'Khoản')}</b>`, `${esc(NHOM().find((n) => n.code === x.r.nhom)?.ten || '')} · đã chi ${dvT(x.le)}${x.dong ? ' · đã đóng' : x.chot !== null ? ' · đã chốt' : ''}`, x.t[k - 1], svOf(x.t[k - 1], x.r))).join('');
-  if (pt?.gt && k < 3) h += row('<b>Dự trù đang dùng (% / số nhập)</b>', `TĐ${k} của khối lấy số này thay cho cộng các khoản`, pt.gt[k - 1], pt.gt[k - 1], 'c-khoan-pt');
+  if (pt?.gt && !pt.bo_qua && k < 3) h += row('<b>Dự trù đang dùng (% / số nhập)</b>', `TĐ${k} của khối lấy số này thay cho cộng các khoản`, pt.gt[k - 1], pt.gt[k - 1], 'c-khoan-pt');
   if (cpK !== undefined) h += row(`<b>Chi phí khối TĐ${k} (= thẻ phía trên, báo cáo)</b>`, k === 3 ? 'TĐ3 = thực chi (khoản đã chốt lấy số chốt)' : 'dự trù chưa chi hết + chi phí đã ghi', cpK, cpK, 'c-khoan-tong');
   return h;
 }
@@ -2127,7 +2127,37 @@ function costKpiTd() {
 // V10.16 + V04.17: chi phí gián tiếp / tài chính – (1) khoản chi tiết nhập như thầu phụ: TĐ1 dự trù · TĐ2 điều chỉnh theo khoản · TĐ3 = thực chi / số chốt;
 //  (2) khối chưa có khoản nào thì dùng % × doanh thu cùng TĐ (TĐ1, TĐ2). Số tiền ở đây là trước VAT.
 let ptEdit = null;
-document.addEventListener('change', (e) => { const sel = e.target.closest('#pt-form .pt-dv'); if (!sel) return; const ip = sel.form.elements[sel.name.replace(/_dv$/, '')]; if (ip) { ip.value = ''; ip.focus(); } }); // đổi % <-> đ: xoá ô để nhập lại // { id, kind: 'dc' | 'chot' } – dòng đang mở ô nhập
+// V16.17: đọc ô dự trù "thông minh": số (150tr, 1,2 tỷ, 150.000.000), % (7%) hoặc công thức (150tr+155tr, 1900tr*7%, (100+50)*2)
+//  -> { pt } (phần trăm × doanh thu) · { tien } (số tiền) · { trong } · { loi }. Không dùng eval (an toàn).
+function magicSo(raw) {
+  let t = String(raw ?? '').trim().replace(/^=/, '').toLowerCase().replace(/\s+/g, '');
+  if (!t) return { trong: true };
+  const pure = t.match(/^(\d+(?:[.,]\d+)?)%$/); if (pure) { const v = Number(pure[1].replace(',', '.')); return v <= 100 ? { pt: v } : { loi: 'Tỷ lệ phải từ 0 đến 100%' }; }
+  t = t.replace(/(\d)\.(?=\d{3}(?!\d))/g, '$1').replace(/,/g, '.');
+  t = t.replace(/(tỷ|tỉ|ty)/g, '*1e9').replace(/(triệu|trieu|tr)/g, '*1e6').replace(/(nghìn|ngàn|ngan|k)/g, '*1e3').replace(/[×x]/g, '*').replace(/[÷:]/g, '/');
+  t = t.replace(/(\d+(?:\.\d+)?)%/g, '($1/100)');
+  const tok = t.match(/\d+(?:\.\d+)?(?:e\d+)?|[-+*/()]/g);
+  if (!tok || tok.join('') !== t) return { loi: 'Không hiểu ô này – gõ số, % hoặc công thức (+ − × ÷)' };
+  let i = 0;
+  const so = () => { const x = tok[i]; if (x === '(') { i++; const v = cong(); if (tok[i++] !== ')') throw 0; return v; } if (x === '-') { i++; return -so(); } if (x === '+') { i++; return so(); } if (x === undefined || !/^\d/.test(x)) throw 0; i++; return Number(x); };
+  const nhan = () => { let v = so(); while (tok[i] === '*' || tok[i] === '/') { const o = tok[i++], w = so(); v = o === '*' ? v * w : v / w; } return v; };
+  const cong = () => { let v = nhan(); while (tok[i] === '+' || tok[i] === '-') { const o = tok[i++], w = nhan(); v = o === '+' ? v + w : v - w; } return v; };
+  let v; try { v = cong(); if (i !== tok.length) throw 0; } catch { return { loi: 'Công thức chưa đúng' }; }
+  if (!Number.isFinite(v) || v < 0) return { loi: 'Kết quả phải là số ≥ 0' };
+  if (/^\d+(\.\d+)?$/.test(t) && v <= 100) return { pt: v }; // chỉ gõ số nhỏ (≤ 100) = phần trăm
+  return { tien: Math.round(v) };
+}
+document.addEventListener('input', (e) => { // xem trước kết quả khi đang gõ
+  const ip = e.target.closest('#pt-form .pt-in'); if (!ip) return;
+  const r = magicSo(ip.value), dt = Number(ip.form.dataset.dt) || 0, out = ip.form.querySelector(`[data-pv="${ip.name}"]`); if (!out) return;
+  out.innerHTML = r.trong ? '<i class="muted">trống</i>' : r.loi ? `<span class="neg">${esc(r.loi)}</span>` : r.pt !== undefined ? `= <b>${dvT(Math.round((r.pt / 100) * dt))}</b> <small>${String(r.pt).replace('.', ',')}% doanh thu</small>` : `= <b>${dvT(r.tien)}</b>`;
+});
+document.addEventListener('click', async (e) => { // chọn cách tính khối: theo khoản / số nhập
+  const b = e.target.closest('#c-pt [data-ptcach]'); if (!b) return;
+  try { await api(`/api/du-an/${revProjectId}/ty-le`, { method: 'PUT', body: JSON.stringify({ [b.dataset.ptcach === 'B2' ? 'cach_gt' : 'cach_tc']: b.dataset.v }) }); await loadCost(); }
+  catch (err) { alert(err.message); }
+});
+ // { id, kind: 'dc' | 'chot' } – dòng đang mở ô nhập
 const PK_GOI_Y = { gt_luong: ['Lương ban chỉ huy', 'Thưởng', 'BHXH, BHYT'], gt_tien_ich: ['Lán trại, tiện ích', 'Điện nước thi công', 'Văn phòng phẩm'], gt_ngoai_giao: ['Tiếp khách', 'Ngoại giao'],
   tc_chi_phi: ['Phí bảo lãnh', 'Phí ngân hàng'], tc_tra_no: ['Lãi vay'], tc_phat: ['Phạt chậm tiến độ'] };
 function ptKhoan() {
@@ -2155,18 +2185,22 @@ function ptHtml(k) {
   if (k === 3) phan1 = `<div class="pt-head"><b>TĐ3 – Quyết toán</b><small>Gián tiếp, tài chính = <b>thực chi</b> (khoản đã chốt số lấy số chốt) · thực chi gián tiếp ${dvT(thuc('B2'))} · tài chính ${dvT(thuc('B3'))}</small></div>`;
   else {
     const f = (key) => d[key] ?? null;
-    // V15.17: mỗi ô nhập % (× doanh thu) HOẶC số tiền net (chọn đơn vị) – không khoá khi đã có khoản chi tiết
-    const tk = (key) => 'tien_' + key.slice(3), laTien = (key) => f(tk(key)) !== null;
-    const o1 = (key, ph) => `<input class="pt-in" name="${key}" inputmode="decimal" value="${laTien(key) ? money(f(tk(key))) : num(f(key))}" placeholder="${ph}" ${edit ? '' : 'disabled'} aria-label="${key}"><select class="pt-dv" name="${key}_dv" ${edit ? '' : 'disabled'} aria-label="Đơn vị"><option value="pt">%</option><option value="tien" ${laTien(key) ? 'selected' : ''}>đ</option></select>`;
+    // V16.17: ô thông minh – gõ số (150tr, 1,2 tỷ, 150.000.000), % (7%) hoặc công thức (150tr+155tr, 1900tr*7%); khối có khoản: chọn Theo khoản / Số nhập
+    const tk = (key) => 'tien_' + key.slice(3), ck = (key) => 'ct_' + key.slice(3);
+    const hien = (key) => f(ck(key)) ?? (f(tk(key)) !== null ? money(f(tk(key))) : f(key) !== null ? num(f(key)) + '%' : '');
     const gt = k === 1 ? 'pt_gt1' : 'pt_gt2', tc = k === 1 ? 'pt_tc1' : 'pt_tc2';
-    const ph = (k1) => (k === 2 && f(tk(k1)) !== null ? money(f(tk(k1))) : k === 2 && f(k1) !== null ? num(f(k1)) + ' %' : '0');
-    const val = (kh) => (pt[kh]?.gt ? pt[kh].gt[k - 1] : null);
-    const box = (cls, ten, key, k1, kh) => `<label class="pt-box ${cls}"><span class="pt-ten">${ten}</span><span class="pt-ip">${o1(key, ph(k1))}</span><span class="pt-val">${val(kh) !== null ? `= <b>${dvT(val(kh))}</b>` : '<i class="muted">chưa nhập</i>'}</span></label>`;
-    phan1 = `<form id="pt-form" class="pt-form">
+    const ph = (k1) => (k === 2 && hien(k1) ? `trống = theo TĐ1 (${hien(k1)})` : 'VD: 7% · 150tr · 150tr+155tr');
+    const theoKhoan = (kh) => coKhoan(kh) && d[kh === 'B2' ? 'cach_gt' : 'cach_tc'] !== 'nhap';
+    const box = (cls, ten, key, k1, kh) => {
+      const tkh = theoKhoan(kh), cpK = costData.cp_khoi?.[kh]?.[k - 1], nv = pt[kh]?.nhap?.[k - 1];
+      const seg = coKhoan(kh) ? `<span class="pt-seg" role="group" aria-label="Cách tính"><button type="button" data-ptcach="${kh}" data-v="khoan" class="${tkh ? 'on' : ''}" ${edit ? '' : 'disabled'}>Theo khoản</button><button type="button" data-ptcach="${kh}" data-v="nhap" class="${tkh ? '' : 'on'}" ${edit ? '' : 'disabled'}>Số nhập</button></span>` : '';
+      return `<div class="pt-box ${cls} ${tkh ? 'pt-off' : ''}"><span class="pt-ten">${ten}</span>${seg}<span class="pt-ip"><input class="pt-in" name="${key}" data-kh="${kh}" data-goc="${esc(hien(key))}" value="${esc(hien(key))}" placeholder="${esc(ph(k1))}" ${edit ? '' : 'disabled'} aria-label="${ten}" autocomplete="off"></span>
+        <span class="pt-val" data-pv="${key}">${tkh ? `= <b>${dvT(cpK ?? 0)}</b> <small>theo khoản</small>` : nv !== null && nv !== undefined ? `= <b>${dvT(nv)}</b>` : '<i class="muted">chưa nhập</i>'}</span></div>`; };
+    phan1 = `<form id="pt-form" class="pt-form" data-dt="${dt}">
     <div class="pt-head"><b>Dự trù gián tiếp, tài chính · TĐ${k}</b><small>Doanh thu TĐ${k} (trước VAT): <b>${dvT(dt)}</b></small></div>
     ${box('pt-b2', 'Chi phí gián tiếp', gt, 'pt_gt1', 'B2')}${box('pt-b3', 'Chi phí tài chính', tc, 'pt_tc1', 'B3')}
     ${edit ? '<button type="submit" class="primary pt-save">Lưu</button>' : ''}<span class="msg" id="pt-msg"></span>
-    <small class="pt-note">Nhập % (× doanh thu) hoặc số tiền dự trù → TĐ${k} lấy số này (khoản chi tiết bên dưới để theo dõi) · để trống = cộng theo khoản / chi phí đã ghi${k === 2 ? ' · TĐ2 trống = theo TĐ1' : ''} · TĐ3 = thực chi</small></form>`;
+    <small class="pt-note">Gõ số (150tr, 1,2 tỷ), % (7% = × doanh thu) hoặc công thức (150tr+155tr, 1900tr*7%) · khối đã có khoản: chọn <b>Theo khoản</b> (cộng các khoản) hoặc <b>Số nhập</b>${k === 2 ? ' · TĐ2 trống = theo TĐ1' : ''} · TĐ3 = thực chi</small></form>`;
   }
   // ---- (1) khoản chi tiết ----
   const nhB = NHOM().filter((n) => ['B2', 'B3'].includes(n.khoi));
@@ -2193,7 +2227,7 @@ function ptHtml(k) {
   const kyIds = new Set(KS.map((x) => x.r.id));
   const ngoai = (kh) => (costData.items || []).filter((r) => { const n = NHOM().find((x) => x.code === r.nhom); return n?.khoi === kh && !n.sub.find((sc) => sc.code === r.nhom_con)?.khong_tinh_cp && !kyIds.has(r.goi_id); }).reduce((a, r) => a + (Number(r.gia_tri) || 0), 0);
   // V15.17: khối có nhập % / số tiền dự trù -> TĐ1, TĐ2 của khối lấy số này (thẻ, báo cáo); dòng này cho thấy chênh với cộng các khoản
-  const ptRow = (kh, s) => { const g = pt[kh]?.gt; if (!g) return '';
+  const ptRow = (kh, s) => { const g = pt[kh]?.bo_qua ? null : pt[kh]?.gt; if (!g) return '';
     const ch = (i) => (i < 2 ? g[i] - s(i) : 0), o = (i) => `<td class="${c(i)}">${i < 2 ? dvT(g[i]) : '<span class="muted">= thực chi</span>'}</td>`;
     return `<tr class="pk-dung"><td><b>Dự trù đang dùng (% / số nhập)</b><div class="muted small">TĐ1, TĐ2 của khối lấy dòng này · chênh so với cộng khoản: TĐ1 ${dvT(ch(0))} · TĐ2 ${dvT(ch(1))}</div></td>${o(0)}${o(1)}${o(2)}<td></td><td></td><td></td></tr>`; };
   const tong = (kh) => { const ks = KS.filter((x) => x.khoi === kh); if (!ks.length) return '';
@@ -2212,7 +2246,7 @@ function ptHtml(k) {
   // V05.17: nút mở / thu gọn bảng khoản (mặc định gọn, nhớ theo máy); đang nhập điều chỉnh / chốt thì luôn mở
   let mo = false; try { mo = localStorage.getItem('pk_mo') === '1'; } catch {}
   mo = mo || Boolean(ptEdit);
-  const tomTat = KS.length ? ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `${kh === 'B2' ? 'Gián tiếp' : 'Tài chính'} <b>${dvT(k < 3 && pt[kh]?.gt ? pt[kh].gt[k - 1] : ks.reduce((a, x) => a + x.t[k - 1], 0) + ngoai(kh))}</b> (${ks.length} khoản${k < 3 && pt[kh]?.gt ? ', đang theo % / số nhập' : ''})` : ''; }).filter(Boolean).join(' · ') : '<span class="muted">chưa có khoản</span>';
+  const tomTat = KS.length ? ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `${kh === 'B2' ? 'Gián tiếp' : 'Tài chính'} <b>${dvT(k < 3 && pt[kh]?.gt && !pt[kh]?.bo_qua ? pt[kh].gt[k - 1] : ks.reduce((a, x) => a + x.t[k - 1], 0) + ngoai(kh))}</b> (${ks.length} khoản${k < 3 && pt[kh]?.gt && !pt[kh]?.bo_qua ? ', đang theo số nhập' : ''})` : ''; }).filter(Boolean).join(' · ') : '<span class="muted">chưa có khoản</span>';
   el.innerHTML = `${phan1}<div class="pk-wrap"><button type="button" class="pk-tog" data-pktog aria-expanded="${mo}"><span class="pk-tg">${mo ? '▾' : '▸'}</span> <b>Khoản chi phí gián tiếp, tài chính · TĐ${k}</b> <small>${tomTat}</small><span class="pk-tg-txt">${mo ? 'Thu gọn' : 'Mở ra'}</span></button>
     ${mo ? `${bang}${them}${KS.length || them ? huongDan : '<small class="muted">Chưa có khoản – thêm ở tab TĐ1.</small>'}` : ''}</div>`;
   $$('input.money', el).forEach(attachMoneyInput);
@@ -2237,8 +2271,13 @@ document.addEventListener('submit', async (e) => {
   const f = e.target;
   if (f.id === 'pt-form') {
     e.preventDefault();
-    const body = {}; for (const i of f.querySelectorAll('.pt-in')) { const dv = f.elements[i.name + '_dv']?.value, v = i.value.trim(), t = 'tien_' + i.name.slice(3);
-      if (dv === 'tien') { body[t] = v === '' ? '' : String(parseMoney(v)); body[i.name] = ''; } else { body[i.name] = v; body[t] = ''; } }
+    const body = {};
+    for (const i of f.querySelectorAll('.pt-in')) {
+      const v = i.value.trim(), r = magicSo(v), t = 'tien_' + i.name.slice(3), c = 'ct_' + i.name.slice(3);
+      if (r.loi) { i.focus(); return showMsg($('#pt-msg'), `${i.getAttribute('aria-label')}: ${r.loi}`, 'err'); }
+      body[i.name] = r.pt !== undefined ? String(r.pt) : ''; body[t] = r.tien !== undefined ? String(r.tien) : ''; body[c] = r.trong ? '' : v;
+      if (v !== (i.dataset.goc || '') && !r.trong) body[i.dataset.kh === 'B2' ? 'cach_gt' : 'cach_tc'] = 'nhap'; // vừa gõ số mới -> khối dùng số nhập
+    }
     try { await api(`/api/du-an/${revProjectId}/ty-le`, { method: 'PUT', body: JSON.stringify(body) }); await loadCost(); showMsg($('#pt-msg'), 'Đã lưu'); }
     catch (err) { showMsg($('#pt-msg'), err.message, 'err'); }
     return;

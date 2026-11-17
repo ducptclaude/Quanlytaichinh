@@ -3791,3 +3791,10 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .cost-table .c-khoan td { background: #fbfdfd; }
 .cost-table .c-khoan-pt td { background: #f1fbf9; }
 .cost-table .c-khoan-tong td { font-weight: 700; background: #e6f4f2; }
+/* V16.17: ô dự trù thông minh + chọn Theo khoản / Số nhập */
+.c-pt .pt-ip input.pt-in { width: 170px; text-align: right; }
+.c-pt .pt-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+.c-pt .pt-seg button { border: 0; border-radius: 0; padding: 5px 9px; font-size: 11.5px; font-weight: 700; background: var(--card, #fff); color: var(--muted); box-shadow: none; }
+.c-pt .pt-seg button.on { background: var(--navy); color: #fff; }
+.c-pt .pt-off .pt-ip { opacity: .45; }
+.c-pt .pt-box { flex-wrap: wrap; white-space: normal !important; }

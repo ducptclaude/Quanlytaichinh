@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V16.17.11.26 – Ô dự trù thông minh (số / % / công thức) + chọn Theo khoản / Số nhập (hết xung đột)
+- Ô gián tiếp / tài chính: gõ 150tr, 1,2 tỷ, 150.000.000, 7% (× doanh thu), 150tr+155tr, 1900tr*7%… (tự tính, xem trước khi gõ, báo lỗi nếu sai; không dùng eval). Lưu kèm công thức để hiện lại (ct_*).
+- Khối có khoản: mặc định THEO KHOẢN (cộng khoản); nút "Theo khoản / Số nhập" chọn rõ (cach_gt / cach_tc); gõ số mới rồi Lưu → tự chuyển Số nhập. Khối chưa có khoản: dùng số nhập như trước.
+- Kho dữ liệu: du_an thêm ct_gt1/2, ct_tc1/2, cach_gt, cach_tc (chỉ THÊM). DA-05 (7% + 3 khoản) nay mặc định theo khoản.
+- kiem-tra-goi 211 ĐẠT (bước 13–13d), tester 4565 ĐẠT; không tràn.
+
 ## V15.17.11.26 – Dự trù gián tiếp / tài chính: nhập % HOẶC số tiền, không khoá khi có khoản; bảng chi tiết nối số
 - Ô dự trù mỗi khối: chọn đơn vị % (× doanh thu) hoặc đ (số net). Có nhập → TĐ1, TĐ2 khối lấy số này (cả khi đã có khoản; khoản để theo dõi, có dòng "Dự trù đang dùng" + chênh). TĐ2 trống = theo TĐ1. TĐ3 = thực chi (khoản chốt = số chốt), không còn bị % đè.
 - Kho dữ liệu: du_an thêm tien_gt1/2, tien_tc1/2 (chỉ THÊM). API ty-le nhận tien_* (≥ 0; có số thì bỏ %).

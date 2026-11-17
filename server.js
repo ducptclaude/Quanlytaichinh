@@ -845,10 +845,14 @@ api.put('/du-an/:id/ty-le', canHd, wrap(async (req, res) => {
     d[k] = v === null ? null : Math.round(v);
     if (d[k] !== null) d['pt_' + k.slice(5)] = null;
   }
+  // V16.17: công thức đã gõ (chỉ để hiện lại) + cách tính khối
+  for (const k of ['ct_gt1', 'ct_gt2', 'ct_tc1', 'ct_tc2']) { const raw = req.body?.[k] === undefined ? cur[k] : req.body[k]; d[k] = raw === null || raw === undefined || String(raw).trim() === '' ? null : String(raw).trim().slice(0, 200); }
+  for (const k of ['cach_gt', 'cach_tc']) { const raw = req.body?.[k] === undefined ? cur[k] : req.body[k]; d[k] = ['khoan', 'nhap'].includes(raw) ? raw : null; }
   if (errs.length) return bad(res, errs[0]);
   await store.setProjectPt(id, d, req.user.id);
   const f = (k) => (d['tien_' + k] !== null && d['tien_' + k] !== undefined ? new Intl.NumberFormat('vi-VN').format(d['tien_' + k]) + ' đ' : d['pt_' + k] === null || d['pt_' + k] === undefined ? '—' : String(d['pt_' + k]).replace('.', ',') + '%');
-  audit.log(req, 'Sửa', 'Dự án', `Dự trù gián tiếp TĐ1 ${f('gt1')} · TĐ2 ${f('gt2')} · tài chính TĐ1 ${f('tc1')} · TĐ2 ${f('tc2')}`, { du_an: cur.ma_du_an });
+  const cc = (x) => (x === 'khoan' ? 'theo khoản' : x === 'nhap' ? 'theo số nhập' : 'tự động');
+  audit.log(req, 'Sửa', 'Dự án', `Dự trù gián tiếp TĐ1 ${f('gt1')} · TĐ2 ${f('gt2')} (${cc(d.cach_gt)}) · tài chính TĐ1 ${f('tc1')} · TĐ2 ${f('tc2')} (${cc(d.cach_tc)})`, { du_an: cur.ma_du_an });
   res.json({ id, ...d });
 }));
 
