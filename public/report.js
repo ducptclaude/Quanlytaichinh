@@ -808,7 +808,7 @@ function bTongHopHtml(list, v, P) {
   const hd = (cols) => `<thead><tr><th class="num th-stt">STT</th><th>Mã DA</th><th>Tên dự án</th><th>Tình trạng</th>${cols.map((c) => `<th class="${c === 'Hoàn thành' ? 'th-ht' : 'num'}">${c}</th>`).join('')}</tr></thead>`;
   const foot = (cells) => `<tfoot><tr><td></td><td colspan="3">Tổng cộng (${rows.length} dự án)</td>${cells.map((c) => `<td class="num">${c}</td>`).join('')}</tr></tfoot>`;
   // V14.12: nhóm dự án (dòng tổng, nút ▾ / ▸ dùng chung mục I, II, IV) -> từng HĐ chủ đầu tư (dòng con) -> dòng chưa phân theo HĐ
-  const gMo = (d) => !BST.iv_hd_dong?.includes(d.id);
+  const gMo = (d) => Boolean(BST.iv_hd_mo?.includes(d.id)); // V09.17: mặc định gọn, bấm ▸ ở dự án để mở
   const gPrj = (x, i) => { const hs = x.d.hds || []; return prj(x, i).replace(`<td class="th-ma"><b>`, `<td class="th-ma">${hs.length ? `<button type="button" class="iv-tg no-print" data-ivhd="${x.d.id}" title="${gMo(x.d) ? 'Thu gọn các HĐ' : 'Xem các HĐ của dự án'}">${gMo(x.d) ? '▾' : '▸'}</button>` : ''}<b>`); };
   const gTen = (h, i, j) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="kind-tag kind-hd">HĐ</span> ${esc(h.so_ma || h.so_hieu)}${h.so_pl ? ` <span class="muted small">+${h.so_pl} PL</span>` : ''}</td><td>${h.da_qt ? '<span class="iv-qt" title="HĐ đã quyết toán">✓ QT</span>' : ''}</td>`;
   const gKhac = (i, j, tip, ten = 'Chưa phân theo HĐ') => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="iv-chung" title="${tip}">${ten}</span></td><td></td>`;
@@ -928,15 +928,15 @@ function bTongHopHtml(list, v, P) {
           const tt = ex.filter((e) => e[3] === 'TT'), coNhom = true;
           const ng = ['B2', 'B3'].map((g) => ex.find((e) => e[3] === g) || [{ dt: 0, cp: 0 }, KH_TEN[g][0], KH_TEN[g][1], g]);
           const dongK = (c, ten) => `<tr class="iv-hd-row iv-grp-row">${ten}<td class="th-ht"></td><td class="num"></td><td class="num">${bTy(c.cp)}</td><td class="num"></td><td class="num"></td></tr>`;
-          let j = 0; const l2 = (h) => (coNhom ? h.replace('<td class="th-name">', '<td class="th-name iv-l2">') : h);
-          const hdR = con.map((c) => dong(c, l2(gTen(c.h, i, j++)))).join('') + tt.map(([c, ten, tip]) => dong(c, l2(gKhac(i, j++, esc(tip), ten)))).join('');
+          let j = 0; const l2 = (h, jj) => (coNhom ? h.replace('<td class="th-name">', '<td class="th-name iv-l2">').replace(`>${i + 1}.${jj + 1}</td>`, `>${i + 1}.1.${jj + 1}</td>`) : h);
+          const hdR = con.map((c) => { const jj = j++; return dong(c, l2(gTen(c.h, i, jj), jj)); }).join('') + tt.map(([c, ten, tip]) => { const jj = j++; return dong(c, l2(gKhac(i, jj, esc(tip), ten), jj)); }).join('');
           let head = '';
           if (coNhom) { const G = [...con, ...tt.map((e) => e[0])], sm = (f, b) => G.reduce((a, c) => a + (b ? (c.b ? c.b[f] : 0) : c[f]), 0);
             // V03.17: dòng khối chỉ ghi chi phí; bấm ▸ / ▾ để sổ / gọn chi tiết từng HĐ (mặc định gọn)
             const mo = (BST.iv_tt_mo || []).includes(r.x.d.id);
-            head = `<tr class="iv-hd-row iv-grp-row"><td class="num th-stt muted"></td><td></td><td class="th-name"><span class="iv-tree">└</span><button type="button" class="iv-tg no-print" data-ivtt="${r.x.d.id}" title="${mo ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ (doanh thu, chi phí trực tiếp, lợi nhuận)'}">${mo ? '▾' : '▸'}</button> <b class="iv-grp" title="Chi phí trực tiếp: HĐ đầu vào, gói, mua lẻ – chi tiết theo từng HĐ chủ đầu tư">Chi phí trực tiếp</b></td><td></td><td class="th-ht"></td><td class="num"></td><td class="num">${bTy(sm('cp'))}</td><td class="num"></td><td class="num"></td></tr>`;
-            if (!mo) return head + ng.map(([c, ten, tip]) => dongK(c, gKhac(i, (j++, con.length + tt.length + ng.findIndex((e) => e[1] === ten)), esc(tip), ten))).join(''); }
-          return head + hdR + ng.map(([c, ten, tip]) => dongK(c, gKhac(i, j++, esc(tip), ten))).join(''); })() : ''); void chungTip; void pbTen;
+            head = `<tr class="iv-hd-row iv-grp-row"><td class="num th-stt muted">${i + 1}.1</td><td></td><td class="th-name"><span class="iv-tree">└</span><button type="button" class="iv-tg no-print" data-ivtt="${r.x.d.id}" title="${mo ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ (doanh thu, chi phí trực tiếp, lợi nhuận)'}">${mo ? '▾' : '▸'}</button> <b class="iv-grp" title="Chi phí trực tiếp: HĐ đầu vào, gói, mua lẻ – chi tiết theo từng HĐ chủ đầu tư">Chi phí trực tiếp</b></td><td></td><td class="th-ht"></td><td class="num"></td><td class="num">${bTy(sm('cp'))}</td><td class="num"></td><td class="num"></td></tr>`;
+            if (!mo) return head + ng.map(([c, ten, tip], n) => dongK(c, gKhac(i, n + 1, esc(tip), ten))).join(''); }
+          return head + hdR + ng.map(([c, ten, tip], n) => dongK(c, gKhac(i, n + 1, esc(tip), ten))).join(''); })() : ''); void chungTip; void pbTen;
       }).join('')}</tbody>
       ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), bpct(TT.ln, TT.dt)])}
     </table></div>
@@ -1064,7 +1064,7 @@ function bMuc4Html(list, v) {
   };
   const tipCell = (k, label, val) => `<td class="num iv-tip"${splitTip(k, label)}>${val}</td>`;
   // Dòng con theo HĐ chủ đầu tư (dùng cho cả 3 bảng chi tiết) + dòng "Chi phí chung – không gắn HĐ" để tổng khớp dòng dự án
-  const hdOpen = (x) => !BST.iv_hd_dong?.includes(x.d.id);
+  const hdOpen = (x) => Boolean(BST.iv_hd_mo?.includes(x.d.id));
   const tgBtn = (x) => ((x.d.hds || []).length ? `<button type="button" class="iv-tg no-print" data-ivhd="${x.d.id}" title="${hdOpen(x) ? 'Thu gọn các HĐ' : 'Xem các HĐ của dự án'}">${hdOpen(x) ? '▾' : '▸'}</button>` : '');
   const prjP = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma">${tgBtn(x)}<b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}"><b>${esc(x.d.ten_du_an)}</b>${(x.d.hds || []).length ? ` <span class="muted small">(${x.d.hds.length} HĐ)</span>` : ''}</td>`;
   const hdName = (h, i, j) => `<td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name"><span class="iv-tree">└</span><span class="kind-tag kind-hd">HĐ</span> ${esc(h.so_ma || h.so_hieu)}${h.so_pl ? ` <span class="muted small">+${h.so_pl} PL</span>` : ''}${h.da_qt ? ' <span class="iv-qt" title="HĐ đã quyết toán">✓ QT</span>' : ''}</td>`;
@@ -1078,7 +1078,7 @@ function bMuc4Html(list, v) {
       `<tr><th class="num th-stt">STT</th><th>Mã DA</th><th>Tên dự án</th><th class="num">TĐ1</th><th class="num" title="Bấm số TĐ2 để xem các lần tăng / giảm">TĐ2</th><th class="num">TĐ3</th><th class="num">Đã nhận</th>
         <th class="num">Còn lại</th><th class="num">BH/Khác</th><th>Ghi chú</th>${edit ? '<th class="no-print"></th>' : ''}</tr>`,
       rows.map((x, i) => { // dự án = dòng tổng · các HĐ với chủ đầu tư = dòng con (bấm ▸ / ▾ để mở / thu gọn)
-        const hds = x.d.hds || [], mo = !BST.iv_hd_dong?.includes(x.d.id);
+        const hds = x.d.hds || [], mo = Boolean(BST.iv_hd_mo?.includes(x.d.id));
         const plH = (h) => Object.fromEntries((h.pl || []).reduce((a, p) => { const o = a.find((y) => y[0] === p.ma); if (o) o[1] += p[v]; else a.push([p.ma, p[v]]); return a; }, []));
         const nhanH = (h) => (v === 'sv' || !h.td3?.sv ? h.tien_ve : Math.round(h.tien_ve * (h.td3.gt / h.td3.sv)));
         return `<tr class="iv-prj-row"><td class="num th-stt">${i + 1}</td><td class="th-ma">${hds.length ? `<button type="button" class="iv-tg no-print" data-ivhd="${x.d.id}" title="${mo ? 'Thu gọn các HĐ' : 'Xem các HĐ của dự án'}">${mo ? '▾' : '▸'}</button>` : ''}<b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}"><b>${esc(x.d.ten_du_an)}</b>${hds.length ? ` <span class="muted small">(${hds.length} HĐ)</span>` : ''}</td>
@@ -1771,7 +1771,7 @@ $('#b-report').addEventListener('click', (e) => {
   const ivh = e.target.closest('[data-ivhd]');
   const ivt = e.target.closest('[data-ivtt]'); // V03.17: sổ / gọn chi tiết HĐ trong khối Chi phí trực tiếp (mục I)
   if (ivt) { const id = Number(ivt.dataset.ivtt), s = new Set(BST.iv_tt_mo || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_tt_mo = [...s]; bSave(); return renderKeepPos(`[data-ivtt="${id}"]`); }
-  if (ivh) { const id = Number(ivh.dataset.ivhd), s = new Set(BST.iv_hd_dong || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_hd_dong = [...s]; bSave(); return renderKeepPos(`[data-ivhd="${id}"]`); }
+  if (ivh) { const id = Number(ivh.dataset.ivhd), s = new Set(BST.iv_hd_mo || []); s.has(id) ? s.delete(id) : s.add(id); BST.iv_hd_mo = [...s]; bSave(); return renderKeepPos(`[data-ivhd="${id}"]`); }
   const w = e.target.closest('[data-wlink]');
   if (w) bGoWarn(Number(w.dataset.wda), JSON.parse(w.dataset.wlink)).catch((err) => alert(err.message));
 });

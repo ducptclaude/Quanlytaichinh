@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.17.11.26 – Mục I, IV: mặc định thu gọn dòng con dưới dự án; sửa số thứ tự
+- Bảng chỉ hiện dòng dự án; bấm ▸ ở dự án mở 3 khối (Trực tiếp / Gián tiếp / Tài chính), bấm ▸ ở Chi phí trực tiếp mở các HĐ (trạng thái dùng chung mục I, IV; BST.iv_hd_mo thay iv_hd_dong).
+- Số thứ tự mục I: Trực tiếp x.1 · HĐ x.1.1… · Gián tiếp x.2 · Tài chính x.3. tester 4612 ĐẠT, không tràn.
+
 ## V08.17.11.26 – Chi tiết lợi nhuận gọn lại · ô tiêu đề Báo cáo nền gradient navy → teal
 - Chi tiết lợi nhuận: 1 hàng tiêu đề; mỗi TĐ 1 cột LN; tỷ suất gom 1 cột "TĐ1 → TĐ3"; Tăng / giảm TĐ3 so TĐ1 chỉ ghi số (bỏ %); dòng trừ = 0 ghi "–"; ghi chú cách đọc 1 dòng.
 - Ô tiêu đề Báo cáo: nền gradient như thanh tiêu đề, chữ trắng (in vẫn nền trắng). tester 4612 ĐẠT, không tràn.
