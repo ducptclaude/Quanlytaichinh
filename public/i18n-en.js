@@ -30,6 +30,8 @@ window.BKS_EN = {
 "Tăng / giảm": "Increase / decrease",
 "Trực tiếp chưa gắn HĐ": "Direct – not linked to a contract",
 "Trực tiếp": "Direct",
+"Xoá khoản": "Delete item",
+"Sửa dự trù TĐ1": "Edit M1 estimate",
 "Nhập chi phí": "Enter costs",
 "① Chi thật": "① Actual expenditure",
 "② Dự trù / khoản": "② Estimate / items",

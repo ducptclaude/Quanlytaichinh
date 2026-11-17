@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V22.17.11.26 – Xoá khoản / đợt điều chỉnh ghi sai (trong hộp chi tiết khoản)
+- Bấm tên khoản → hộp chi tiết: nút "Xoá khoản" (xoá dự trù + các đợt điều chỉnh; các lần chi giữ lại, chuyển thành "chi chưa gắn khoản"), nút "Xoá" từng đợt điều chỉnh. Nhóm đã quyết toán: khoá, báo cách mở.
+- Thử: khoản sai 100 +20 −5, chi 30 → gián tiếp 285 → xoá đợt +20: 265 → xoá khoản: 200 (chi 30 còn, không gắn khoản). tester ĐẠT.
+
 ## V21.17.11.26 – Điều chỉnh khoản TĐ2: nhập SỐ CUỐI, hệ thống tự tính phần tăng / giảm
 - ② Dự trù / khoản · TĐ2 · ± Điều chỉnh: ô "Số tiền TĐ2" = số cuối của khoản; hiện "Hiện tại x → chênh ±y" khi gõ; lưu 1 đợt = chênh lệch (nội dung tự ghi "Điều chỉnh thành …"); bằng số hiện tại thì báo không đổi.
 - Thử: 150 → 200 → 295 → 180 → 200, TĐ2 khoản đúng từng lần. tester, kiem-tra-goi ĐẠT.

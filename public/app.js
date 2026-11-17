@@ -2314,17 +2314,30 @@ function openKhoan(id) {
       if (t.dataset.pkgo === 'chi' && cForm) { cForm.elements.nhom.value = x.r.nhom; cForm.elements.nhom.dispatchEvent(new Event('change', { bubbles: true })); setTimeout(() => { const s = cForm.elements.le_goi; if (s) { s.value = String(id); s.dataset.keep = String(id); } cForm.elements.noi_dung?.focus(); }, 60); }
       return $('#c-pt')?.closest('.card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     if (t.dataset.pksua !== undefined) { dlg.close(); return openDtr(x.r.nhom); }
+    // V22.17: xoá khoản ghi sai (kèm các đợt điều chỉnh của khoản; các lần chi giữ lại -> thành "chi chưa gắn khoản") · xoá 1 đợt điều chỉnh
+    if (t.dataset.pkxoa !== undefined) {
+      if (!confirm(`Xoá khoản "${x.r.noi_dung || ''}"?\n– Xoá dự trù và ${x.dcs.length} đợt điều chỉnh của khoản\n– ${chi.length} lần chi đã ghi vẫn giữ, chuyển thành "chi chưa gắn khoản"`)) return;
+      try { await api(`/api/du-tru/${id}`, { method: 'DELETE' }); dlg.close(); await loadCost(); } catch (err) { alert(err.message); }
+      return;
+    }
+    if (t.dataset.pkxoadc) {
+      if (!confirm('Xoá đợt điều chỉnh này?')) return;
+      try { await api(`/api/du-tru/${t.dataset.pkxoadc}`, { method: 'DELETE' }); await loadCost(); openKhoan(id); } catch (err) { alert(err.message); }
+      return;
+    }
   });
-  const dong = (a, b, v0, cls = '') => `<tr class="${cls}"><td>${a}</td><td class="muted">${b || ''}</td><td class="num">${dvT(v0)}</td></tr>`;
+  const sua = can('hd') && !costAll && !x.khoa;
+  const dong = (a, b, v0, cls = '', xoa = '') => `<tr class="${cls}"><td>${a}</td><td class="muted">${b || ''}</td><td class="num">${dvT(v0)}</td><td class="row-actions">${xoa}</td></tr>`;
   dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">${esc(n?.khoi === 'B2' ? 'Chi phí gián tiếp' : 'Chi phí tài chính')} · ${esc(n?.ten || '')}</div><h3>${esc(x.r.noi_dung || 'Khoản')}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
     <div class="kpis tp-kpis">${['TĐ1 · Dự trù', 'TĐ2 · Điều chỉnh', 'TĐ3 · Quyết toán'].map((t, i) => `<div class="kpi ${i + 1 === k ? 'kpi-on' : ''}"><div class="label">${t}</div><div class="value">${dvT(x.t[i])}</div></div>`).join('')}<div class="kpi"><div class="label">Đã chi</div><div class="value">${dvT(x.le)}</div><div class="sub">${chi.length} lần chi</div></div></div>
-    <div class="table-wrap"><table class="tp-dtl"><thead><tr><th>Nội dung</th><th>Ngày · đối tác</th><th class="num">Số tiền (trước VAT)</th></tr></thead><tbody>
+    <div class="table-wrap"><table class="tp-dtl"><thead><tr><th>Nội dung</th><th>Ngày · đối tác</th><th class="num">Số tiền (trước VAT)</th><th></th></tr></thead><tbody>
       ${dong('<b>Dự trù TĐ1</b>', x.r.ngay ? isoToDmy(x.r.ngay) : '', Number(x.r.so_tien) || 0)}
-      ${x.dcs.map((y, i) => dong(`Điều chỉnh TĐ2 · đợt ${i + 1}: ${esc(y.noi_dung || '')}`, y.ngay ? isoToDmy(y.ngay) : '', Number(y.so_tien) || 0)).join('')}
-      ${chi.map((r) => dong(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', esc(r.doi_tac || '')].filter(Boolean).join(' · '), Number(r.gia_tri) || 0, 'pk-chi')).join('') || '<tr><td colspan="3" class="muted">Chưa có lần chi nào thuộc khoản này</td></tr>'}
+      ${x.dcs.map((y, i) => dong(`Điều chỉnh TĐ2 · đợt ${i + 1}: ${esc(y.noi_dung || '')}`, y.ngay ? isoToDmy(y.ngay) : '', Number(y.so_tien) || 0, '', sua ? `<button class="danger sm" data-pkxoadc="${y.id}" title="Xoá đợt điều chỉnh ghi sai">Xoá</button>` : '')).join('')}
+      ${chi.map((r) => dong(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', esc(r.doi_tac || '')].filter(Boolean).join(' · '), Number(r.gia_tri) || 0, 'pk-chi')).join('') || '<tr><td colspan="4" class="muted">Chưa có lần chi nào thuộc khoản này</td></tr>'}
       ${x.chot !== null ? dong('<b>Số chốt TĐ3</b>', '', x.chot, 'pk-chot') : ''}
     </tbody></table></div>
-    ${can('hd') && !costAll ? `<div class="tv-tools"><button class="primary sm" data-pkgo="dc">${k === 3 ? 'Chốt số khoản này' : k === 2 ? 'Điều chỉnh / đóng khoản này' : 'Sửa ở ② Dự trù / khoản'}</button><button class="sm" data-pkgo="chi">Ghi chi cho khoản này</button>${k === 1 ? '<button class="sm" data-pksua>Sửa / xoá dự trù TĐ1</button>' : ''}</div>` : ''}`;
+    ${can('hd') && !costAll ? `<div class="tv-tools"><button class="primary sm" data-pkgo="dc">${k === 3 ? 'Chốt số khoản này' : k === 2 ? 'Điều chỉnh / đóng khoản này' : 'Sửa ở ② Dự trù / khoản'}</button><button class="sm" data-pkgo="chi">Ghi chi cho khoản này</button>${k === 1 ? '<button class="sm" data-pksua>Sửa dự trù TĐ1</button>' : ''}${sua ? '<button class="danger sm pk-xoa" data-pkxoa title="Xoá khoản ghi sai">Xoá khoản</button>' : ''}</div>` : ''}
+    ${x.khoa ? '<p class="muted small">🔒 Nhóm đã quyết toán – muốn sửa / xoá: mở khoá nhóm ở tab TĐ3 (cần Passcode).</p>' : ''}`;
   void sv;
   if (!dlg.open) dlg.showModal();
 }
