@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V14.17.11.26 – Giao diện tự phóng to theo màn hình máy tính rộng (Mac, Win)
+- style.css: --uiz theo độ rộng (≥1420: 1,05 · 1500: 1,09 · 1600: 1,14 · 1700: 1,2 · 1900: 1,28 · 2200: 1,4); phóng thanh tiêu đề + nội dung + chân trang (zoom), hộp thoại / gợi ý ngoài vùng phóng giữ nguyên; bản đồ trả về tỷ lệ gốc (bấm / kéo đúng). Dashboard: bảng danh mục + bản đồ luôn xếp dọc.
+- Đo 1280×800, 1366×768, 1440×900, 1512×982 (Mac 14"), 1728×1117 (Mac 16"), 1920×1080, 2560×1440: không tràn ngang, bản đồ mở đúng điểm, hộp chọn kỳ trong màn hình. Dưới 1420px giữ nguyên. tester ĐẠT.
+
 ## V13.17.11.26 – Mục III: bỏ chữ "mới nhất" ở tiêu đề cột cho gọn
 - Cột "Doanh thu" / "Chi phí" (rê chuột xem giải thích thời điểm mới nhất), ghi chú dưới bảng gọn lại. 1366px / 1280px: bảng vừa khung, không phải kéo ngang. tester 4518 ĐẠT.
 
