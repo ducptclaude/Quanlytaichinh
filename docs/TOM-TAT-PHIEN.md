@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V20.17.11.26 – Trang Chi phí: "Bảng để xem – Form để nhập" (người dùng duyệt)
+- Khung "Nhập chi phí" 1 chỗ, 3 lựa chọn: ① Chi thật (form gốc, ô "Thuộc gói / khoản") · ② Dự trù / khoản (TĐ1 thêm khoản · TĐ2 chọn khoản ± điều chỉnh / đóng / mở hoặc "Khoản mới (phát sinh TĐ2)" · TĐ3 chốt số) · ③ Dự trù nhanh (% / số / công thức). Mỗi lựa chọn 1 dòng hướng dẫn; ghi "Đang nhập cho TĐk".
+- Bảng "Nhóm chi phí" chỉ để xem, mặc định gọn 3 khối I / II / III; ▸ khối → nhóm → khoản (1 dòng, nhãn nhỏ: phát sinh TĐ2 / còn dự trù / đã chốt (TĐ3) / đã đóng). Bấm tên khoản → hộp chi tiết (dự trù, đợt điều chỉnh, lần chi, số chốt) + nút "Điều chỉnh / chốt khoản này", "Ghi chi cho khoản này" (đưa lên form, điền sẵn).
+- Bỏ nút trên dòng bảng và ô nhập trong bảng. Công thức không đổi. tester 4706, kiem-tra-goi 211 ĐẠT; không tràn.
+
 ## V19.17.11.26 – Khoản gián tiếp / tài chính: xem chi tiết (▸) + thêm khoản phát sinh ở TĐ2
 - Bấm ▸ ở khoản (bảng Nhóm chi phí): dự trù TĐ1, từng đợt điều chỉnh TĐ2, từng lần chi (ngày, đối tác, số CT), số chốt TĐ3.
 - Tab TĐ2: "+ Thêm khoản phát sinh TĐ2" (VD: lương các tháng tiếp theo) = khoản TĐ1 = 0 + đợt điều chỉnh của khoản; nhãn "Phát sinh TĐ2".

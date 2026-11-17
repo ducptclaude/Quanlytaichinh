@@ -1732,7 +1732,7 @@ function resetCostForm(nhom, sub) {
   cForm.elements.id.value = '';
   cForm.elements.nhom.value = keepNhom;
   fillSubOptions(keepNhom, keepSub);
-  $('#c-form-title').textContent = 'Thêm chi phí';
+  $('#c-form-title').textContent = 'Nhập chi phí';
   setCostMode();
   updateCostPreview();
 }
@@ -2255,14 +2255,75 @@ function ptHtml(k) {
   const mo = false;
   const tomTat = KS.length ? ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `${kh === 'B2' ? 'Gián tiếp' : 'Tài chính'} <b>${dvT(k < 3 && pt[kh]?.gt && !pt[kh]?.bo_qua ? pt[kh].gt[k - 1] : ks.reduce((a, x) => a + x.t[k - 1], 0) + ngoai(kh))}</b> (${ks.length} khoản${k < 3 && pt[kh]?.gt && !pt[kh]?.bo_qua ? ', đang theo số nhập' : ''})` : ''; }).filter(Boolean).join(' · ') : '<span class="muted">chưa có khoản</span>';
   // V18.17: bảng khoản chuyển vào bảng "Nhóm chi phí" (khối II, III); khung này nằm trong "Thêm chi phí": ô dự trù + thêm khoản
-  void bang; void tong; void mo;
-  const card = cForm?.closest('.card'); if (card && el.parentElement !== card) card.appendChild(el);
-  el.innerHTML = `${phan1}${them ? `<div class="pk-wrap">${them}${huongDan}</div>` : ''}`;
+  // ---- V20.17: 1 khung "Nhập chi phí" – ① Chi thật (form gốc) · ② Dự trù / khoản (theo TĐ) · ③ Dự trù nhanh % / số ----
+  void them; void huongDan; void bang; void tong; void mo;
+  if (cForm?.elements.id?.value) cfMode = '1'; // đang sửa 1 dòng chi phí -> form chi thật
+  const nhOpt = nhB.map((n) => `<option value="${n.code}">${n.khoi === 'B2' ? 'Gián tiếp' : 'Tài chính'} · ${esc(n.ten)}</option>`).join('');
+  const khOpt = (moi) => `<option value="">— Chọn khoản —</option>${moi ? '<option value="moi">＋ Khoản mới (phát sinh TĐ2)</option>' : ''}` + ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `<optgroup label="${kh === 'B2' ? 'Chi phí gián tiếp' : 'Chi phí tài chính'}">${ks.map((x) => `<option value="${x.r.id}" ${pk2Sel === x.r.id ? 'selected' : ''}>${esc(x.r.noi_dung || 'Khoản')} · ${esc(NHOM().find((n) => n.code === x.r.nhom)?.ten || '')} · ${dvT(x.t[k - 1], 'trieu')}${x.dong ? ' (đã đóng)' : x.chot !== null ? ' (đã chốt)' : ''}</option>`).join('')}</optgroup>` : ''; }).join('');
+  const lab = (t, inner, cls = '') => `<label class="${cls}">${t}${inner}</label>`;
+  let panel2;
+  if (k === 1) panel2 = `<form id="pk-f" class="grid-form pk-f" data-k="1">
+      ${lab('Nhóm chi phí *', `<select name="nhom">${nhOpt}</select>`)}${lab('Tên khoản *', `<input name="noi_dung" list="pk-goi-y" maxlength="300" placeholder="VD: Lương tháng 10" required><datalist id="pk-goi-y"></datalist>`)}
+      ${lab('Dự trù TĐ1 (trước VAT) *', '<input name="so_tien" class="money num" placeholder="0" required>')}
+      <div class="actions"><button type="submit" class="primary">Thêm khoản</button><span class="msg" id="pk-f-msg"></span></div></form>`;
+  else if (k === 2) panel2 = `<form id="pk-f" class="grid-form pk-f" data-k="2">
+      ${lab('Khoản *', `<select name="khoan">${khOpt(true)}</select>`)}
+      ${lab('Việc *', '<select name="viec"><option value="dc">± Điều chỉnh số</option><option value="dong">Đóng khoản (không dùng nữa: TĐ2 = đã chi)</option><option value="mo">Mở lại khoản đã đóng</option></select>', 'pk-cu')}
+      ${lab('Nhóm chi phí *', `<select name="nhom">${nhOpt}</select>`, 'pk-moi')}${lab('Tên khoản *', '<input name="ten" list="pk-goi-y" maxlength="300" placeholder="VD: Lương tháng 11"><datalist id="pk-goi-y"></datalist>', 'pk-moi')}
+      ${lab('Số tiền (trước VAT) *', '<input name="so_tien" class="money num" placeholder="+ tăng · − giảm">', 'pk-so')}${lab('Nội dung', '<input name="noi_dung" maxlength="300" placeholder="VD: Theo bảng lương thật">', 'pk-nd')}
+      <div class="actions"><button type="submit" class="primary">Lưu</button><span class="msg" id="pk-f-msg"></span></div></form>`;
+  else panel2 = `<form id="pk-f" class="grid-form pk-f" data-k="3">
+      ${lab('Khoản *', `<select name="khoan">${khOpt(false)}</select>`)}${lab('Số chốt TĐ3 (trước VAT)', '<input name="so_tien" class="money num" placeholder="để trống = theo đã chi">')}
+      <div class="actions"><button type="submit" class="primary">Lưu chốt số</button><span class="msg" id="pk-f-msg"></span></div></form>`;
+  const HINT = { 1: 'Ghi tiền đã chi thật (trả thầu phụ, mua vật tư, trả lương, lãi…). Chọn "Thuộc gói / khoản" để trừ vào dự trù.',
+    2: k === 1 ? 'Thêm khoản dự trù gián tiếp / tài chính (VD: Lương tháng 10). Gói thầu phụ, vật tư… dự trù ở ① với Cách nhập = Gói.' : k === 2 ? 'Chọn khoản để điều chỉnh / đóng, hoặc "Khoản mới" cho chi phí phát sinh ở TĐ2 (VD: lương các tháng tiếp theo).' : 'Chọn khoản để chốt số cuối. Để trống = TĐ3 lấy theo số đã chi.',
+    3: 'Nhập nhanh tổng gián tiếp / tài chính: số (150tr), % (7% × doanh thu) hoặc công thức. Để trống = cộng theo các khoản.' };
+  const seg = edit ? `<div class="cf-seg" role="tablist">${[['1', '① Chi thật'], ['2', '② Dự trù / khoản'], ['3', '③ Dự trù nhanh']].map(([m, t]) => `<button type="button" role="tab" data-cfmode="${m}" class="${cfMode === m ? 'on' : ''}" aria-selected="${cfMode === m}">${t}</button>`).join('')}<span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
+  const card = cForm?.closest('.card');
+  if (card && el.parentElement !== card) card.insertBefore(el, cForm);
+  if (cForm) cForm.hidden = edit && cfMode !== '1';
+  el.innerHTML = seg + (cfMode === '2' ? panel2 : cfMode === '3' ? phan1 : '');
   $$('input.money', el).forEach(attachMoneyInput);
-  const sel = $('#pk-add [name=nhom]', el);
-  if (sel) { const goiY = () => { $('#pk-goi-y', el).innerHTML = (PK_GOI_Y[sel.value] || []).map((t) => `<option value="${esc(t)}">`).join(''); }; sel.addEventListener('change', goiY); goiY(); }
-  if (ptEdit) setTimeout(() => { $$('#tp-tbody input.money').forEach(attachMoneyInput); $('#tp-tbody .pk-form [name=so_tien]')?.focus(); }, 30);
+  const pf = $('#pk-f', el);
+  if (pf) {
+    const goiY = () => { const dl = $('#pk-goi-y', pf); if (dl) dl.innerHTML = (PK_GOI_Y[pf.elements.nhom?.value] || []).map((t) => `<option value="${esc(t)}">`).join(''); };
+    const hien = () => { if (pf.dataset.k !== '2') return; const moi = pf.elements.khoan.value === 'moi', cu = /^\d+$/.test(pf.elements.khoan.value), viec = pf.elements.viec.value;
+      $$('.pk-moi', pf).forEach((x) => (x.hidden = !moi)); $$('.pk-cu', pf).forEach((x) => (x.hidden = !cu)); $$('.pk-so', pf).forEach((x) => (x.hidden = !(moi || (cu && viec === 'dc')))); $$('.pk-nd', pf).forEach((x) => (x.hidden = !(cu && viec === 'dc'))); };
+    pf.addEventListener('change', () => { goiY(); hien(); }); goiY(); hien();
+  }
 }
+let cfMode = (() => { try { return localStorage.getItem('cf_mode') || '1'; } catch { return '1'; } })(), pk2Sel = null;
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('#c-pt [data-cfmode]'); if (!b) return;
+  cfMode = b.dataset.cfmode; try { localStorage.setItem('cf_mode', cfMode); } catch {}
+  costKpiTd();
+});
+// Hộp chi tiết 1 khoản (bấm tên khoản ở bảng): dự trù, các đợt điều chỉnh, các lần chi, số chốt + nút đi tới chỗ nhập
+function openKhoan(id) {
+  const k = tdDangChon(), x = ptKhoan().find((y) => y.r.id === id); if (!x) return;
+  const chi = (costData.items || []).filter((r) => r.goi_id === id), n = NHOM().find((y) => y.code === x.r.nhom), sv = (v0) => v0 + Math.round((v0 * (Number(x.r.vat) || 0)) / 100);
+  const dlg = dlgShell('pk-dlg', async (e) => {
+    const t = e.target;
+    if (t.dataset.close !== undefined) return dlg.close();
+    if (t.dataset.pkgo) { dlg.close(); cfMode = t.dataset.pkgo === 'chi' ? '1' : '2'; pk2Sel = id; try { localStorage.setItem('cf_mode', cfMode); } catch {} costKpiTd();
+      if (t.dataset.pkgo === 'chi' && cForm) { cForm.elements.nhom.value = x.r.nhom; cForm.elements.nhom.dispatchEvent(new Event('change', { bubbles: true })); setTimeout(() => { const s = cForm.elements.le_goi; if (s) { s.value = String(id); s.dataset.keep = String(id); } cForm.elements.noi_dung?.focus(); }, 60); }
+      return $('#c-pt')?.closest('.card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    if (t.dataset.pksua !== undefined) { dlg.close(); return openDtr(x.r.nhom); }
+  });
+  const dong = (a, b, v0, cls = '') => `<tr class="${cls}"><td>${a}</td><td class="muted">${b || ''}</td><td class="num">${dvT(v0)}</td></tr>`;
+  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">${esc(n?.khoi === 'B2' ? 'Chi phí gián tiếp' : 'Chi phí tài chính')} · ${esc(n?.ten || '')}</div><h3>${esc(x.r.noi_dung || 'Khoản')}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
+    <div class="kpis tp-kpis">${['TĐ1 · Dự trù', 'TĐ2 · Điều chỉnh', 'TĐ3 · Quyết toán'].map((t, i) => `<div class="kpi ${i + 1 === k ? 'kpi-on' : ''}"><div class="label">${t}</div><div class="value">${dvT(x.t[i])}</div></div>`).join('')}<div class="kpi"><div class="label">Đã chi</div><div class="value">${dvT(x.le)}</div><div class="sub">${chi.length} lần chi</div></div></div>
+    <div class="table-wrap"><table class="tp-dtl"><thead><tr><th>Nội dung</th><th>Ngày · đối tác</th><th class="num">Số tiền (trước VAT)</th></tr></thead><tbody>
+      ${dong('<b>Dự trù TĐ1</b>', x.r.ngay ? isoToDmy(x.r.ngay) : '', Number(x.r.so_tien) || 0)}
+      ${x.dcs.map((y, i) => dong(`Điều chỉnh TĐ2 · đợt ${i + 1}: ${esc(y.noi_dung || '')}`, y.ngay ? isoToDmy(y.ngay) : '', Number(y.so_tien) || 0)).join('')}
+      ${chi.map((r) => dong(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', esc(r.doi_tac || '')].filter(Boolean).join(' · '), Number(r.gia_tri) || 0, 'pk-chi')).join('') || '<tr><td colspan="3" class="muted">Chưa có lần chi nào thuộc khoản này</td></tr>'}
+      ${x.chot !== null ? dong('<b>Số chốt TĐ3</b>', '', x.chot, 'pk-chot') : ''}
+    </tbody></table></div>
+    ${can('hd') && !costAll ? `<div class="tv-tools"><button class="primary sm" data-pkgo="dc">${k === 3 ? 'Chốt số khoản này' : k === 2 ? 'Điều chỉnh / đóng khoản này' : 'Sửa ở ② Dự trù / khoản'}</button><button class="sm" data-pkgo="chi">Ghi chi cho khoản này</button>${k === 1 ? '<button class="sm" data-pksua>Sửa / xoá dự trù TĐ1</button>' : ''}</div>` : ''}`;
+  void sv;
+  if (!dlg.open) dlg.showModal();
+}
+document.addEventListener('click', (e) => { const b = e.target.closest('#tab-cost [data-pkxem]'); if (b) openKhoan(Number(b.dataset.pkxem)); });
 document.addEventListener('click', async (e) => {
   if (e.target.closest('#c-pt [data-pktog]')) { let mo = false; try { mo = localStorage.getItem('pk_mo') === '1'; localStorage.setItem('pk_mo', mo ? '0' : '1'); } catch {} if (mo) ptEdit = null; return costKpiTd(); }
   const b = e.target.closest('#tab-cost [data-pk]'); if (!b) return;
@@ -2291,6 +2352,36 @@ document.addEventListener('submit', async (e) => {
     try { await api(`/api/du-an/${revProjectId}/ty-le`, { method: 'PUT', body: JSON.stringify(body) }); await loadCost(); showMsg($('#pt-msg'), 'Đã lưu'); }
     catch (err) { showMsg($('#pt-msg'), err.message, 'err'); }
     return;
+  }
+  if (f.id === 'pk-f') { // V20.17: ② Dự trù / khoản – TĐ1 thêm khoản · TĐ2 điều chỉnh / đóng / mở / khoản mới phát sinh · TĐ3 chốt số
+    e.preventDefault();
+    const msg = (t, err) => showMsg($('#pk-f-msg'), t, err ? 'err' : undefined), k = Number(f.dataset.k), ngay = new Date().toISOString().slice(0, 10);
+    const E = f.elements, so = E.so_tien ? parseMoney(E.so_tien.value) : 0, id = /^\d+$/.test(E.khoan?.value || '') ? Number(E.khoan.value) : null;
+    const r = id ? (costData.du_tru || []).find((x) => x.id === id) : null, vatOf = (nh) => (NHOM().find((x) => x.code === nh)?.khong_vat ? 0 : 10);
+    try {
+      if (k === 1) {
+        if (!E.noi_dung.value.trim()) return msg('Nhập tên khoản', 1); if (!(so > 0)) return msg('Nhập số tiền dự trù', 1);
+        await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: E.nhom.value, loai: 'ky', noi_dung: E.noi_dung.value.trim(), so_tien: so, vat: vatOf(E.nhom.value), ngay }) });
+        await loadCost(); return msg('Đã thêm khoản');
+      }
+      if (k === 2 && E.khoan.value === 'moi') {
+        const ten = E.ten.value.trim(); if (!ten) return msg('Nhập tên khoản', 1); if (!(so > 0)) return msg('Nhập số tiền', 1);
+        const g = await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: E.nhom.value, loai: 'ky', noi_dung: ten, so_tien: 0, vat: vatOf(E.nhom.value), ngay }) });
+        if (g?.id) await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: E.nhom.value, loai: 'dc', noi_dung: `Phát sinh TĐ2 – ${ten}`, so_tien: so, vat: vatOf(E.nhom.value), ngay, goi_ref: g.id }) });
+        await loadCost(); return msg(g?.id ? 'Đã thêm khoản phát sinh TĐ2' : 'Khoản đang chờ duyệt – sau khi duyệt, chọn khoản và điều chỉnh số');
+      }
+      if (!r) return msg('Chọn khoản', 1);
+      pk2Sel = id;
+      if (k === 2) {
+        const viec = E.viec.value;
+        if (viec === 'dong' || viec === 'mo') await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ tinh_trang: viec === 'dong' ? 'dong' : '' }) });
+        else { if (!so) return msg('Nhập số tăng (+) hoặc giảm (−)', 1);
+          await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: r.nhom, loai: 'dc', so_tien: so, vat: r.vat || 0, noi_dung: E.noi_dung.value.trim() || `Điều chỉnh ${r.noi_dung}`, ngay, goi_ref: id }) }); }
+        await loadCost(); return msg('Đã lưu');
+      }
+      await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ gt_chot: E.so_tien.value.trim() === '' ? '' : so }) });
+      await loadCost(); return msg(E.so_tien.value.trim() === '' ? 'Đã bỏ chốt – TĐ3 theo đã chi' : 'Đã chốt số');
+    } catch (err) { return msg(err.message, 1); }
   }
   if (f.id === 'pk-add') {
     e.preventDefault();
@@ -2664,46 +2755,41 @@ function renderTpCard() {
   const cpK = (kh, k) => costData.cp_khoi?.[kh]?.[k - 1] || 0;
   const itemsK = (kh) => (costData.items || []).filter((r) => { const n = NHOM().find((x) => x.code === r.nhom); return n?.khoi === kh && !n.sub.find((sc) => sc.code === r.nhom_con)?.khong_tinh_cp; });
   const svX = (x, v0) => v0 + Math.round((v0 * (Number(x.r.vat) || 0)) / 100);
+  // V20.17: bảng CHỈ ĐỂ XEM, mặc định gọn: Khối (I / II / III) ▸ Nhóm ▸ Khoản (1 dòng); bấm tên khoản -> hộp chi tiết (nhập ở form "Nhập chi phí")
   const khoiSec = (kh, no) => {
     const ks = KSall.filter((x) => x.khoi === kh), its = itemsK(kh), daChi = its.reduce((a, r) => a + (Number(r.sau_vat) || 0), 0);
-    const ngoai = its.filter((r) => !kyAll.has(r.goi_id)).reduce((a, r) => a + (Number(r.sau_vat) || 0), 0);
-    const pt = costData.pt_td?.[kh], dung = pt?.gt && !pt.bo_qua && kTd < 3, open = !tpOpen.has(`khoi:${kh}:dong`);
-    let h = `<tr class="tp-c-cdt tp-c-khoi tp-k-${kh}"><td class="tp-c-ten"><button class="grp-toggle" data-tpkhoi="${kh}" title="${open ? 'Thu gọn' : 'Mở'}">${open ? '▾' : '▸'}</button><span class="tp-khoi-no">${no}</span><b>${kh === 'B2' ? 'CHI PHÍ GIÁN TIẾP' : 'CHI PHÍ TÀI CHÍNH'}</b><span class="tp-c-dem">${ks.length ? `${ks.length} khoản` : 'chưa có khoản'}${dung ? ' · theo số nhập' : ''}</span></td>
+    const pt = costData.pt_td?.[kh], dung = pt?.gt && !pt.bo_qua && kTd < 3, open = tpOpen.has(`khoi:${kh}:mo`);
+    let h = `<tr class="tp-c-cdt tp-c-khoi tp-k-${kh}"><td class="tp-c-ten"><button class="grp-toggle" data-tpkhoi="${kh}" title="${open ? 'Thu gọn' : 'Xem các nhóm'}">${open ? '▾' : '▸'}</button><span class="tp-khoi-no">${no}</span><b>${kh === 'B2' ? 'CHI PHÍ GIÁN TIẾP' : 'CHI PHÍ TÀI CHÍNH'}</b><span class="tp-c-dem">${ks.length ? `${ks.length} khoản` : 'chưa có khoản'}${dung ? ' · theo dự trù nhanh' : ''}</span></td>
       <td class="num strong">${mtr(cpK(kh, kTd))}</td>${ss2(cpK(kh, kTd), kTd > 1 ? cpK(kh, kTd - 1) : 0, 'strong')}${tienCl(cpK(kh, kTd) - daChi, 'strong')}</tr>`;
     if (!open) return h;
-    for (const x of ks) {
-      const tv = (k) => svX(x, x.t[k - 1]), le = leGoi(x.r.id), nTen = NHOM().find((n) => n.code === x.r.nhom)?.ten || '';
-      const chip = x.dong ? ' <span class="st st-tam-dung">Đã đóng</span>' : x.chot !== null ? ' <span class="st st-hoan-thanh">Đã chốt</span>' : kTd > 1 && le < tv(kTd) ? ' <span class="st st-tam-tinh" title="Còn phần dự trù chưa chi">Dự trù</span>' : '';
-      const act = !edit || x.khoa ? '' : kTd === 1 ? `<button type="button" class="sm" data-pk="sua" data-id="${x.r.id}">Sửa</button>`
-        : kTd === 2 ? (x.dong ? `<button type="button" class="sm" data-pk="mo" data-id="${x.r.id}">Mở lại</button>` : `<button type="button" class="sm" data-pk="dc" data-id="${x.r.id}">± Điều chỉnh</button><button type="button" class="sm" data-pk="dong" data-id="${x.r.id}" title="Không dùng nữa: TĐ2 = đã chi">Đóng</button>`)
-          : `<button type="button" class="sm" data-pk="chot" data-id="${x.r.id}">${x.chot !== null ? 'Sửa chốt' : 'Chốt số'}</button>${x.chot !== null ? `<button type="button" class="sm" data-pk="bochot" data-id="${x.r.id}">Bỏ chốt</button>` : ''}`;
-      const moK = tpOpen.has(`khoan:${x.r.id}`), chiK = (costData.items || []).filter((r) => r.goi_id === x.r.id);
-      const phatSinh = !Number(x.r.so_tien) && x.dc ? ' <span class="st st-tam-tinh" title="Không có ở TĐ1 – phát sinh ở TĐ2">Phát sinh TĐ2</span>' : '';
-      h += `<tr class="tp-c-loai tp-c-khoan"><td class="tp-c-ten"><button class="grp-toggle" data-tpkhoan="${x.r.id}" title="${moK ? 'Thu gọn' : 'Xem chi tiết: dự trù, các đợt điều chỉnh, các lần chi'}">${moK ? '▾' : '▸'}</button><span class="tp-khoan-ten"><b>${esc(x.r.noi_dung || 'Khoản')}</b>${phatSinh}${chip}<small class="muted">${esc(nTen)} · đã chi ${dvT(le, 'trieu')}${x.dcs.length ? ` · ${x.dcs.length} đợt điều chỉnh` : ''}</small></span><span class="tp-pk-act no-print">${act}</span></td>
-        <td class="num">${mtr(tv(kTd))}</td>${ss2(tv(kTd), kTd > 1 ? tv(kTd - 1) : 0)}${tienCl(tv(kTd) - le)}</tr>`;
-      if (moK) { // dòng chi tiết của khoản (sau VAT)
-        const ct = (ten, sub, v0, cls = '') => `<tr class="tp-c-ct ${cls}"><td class="tp-c-ten"><span class="tp-c-in2"></span>${ten}${sub ? ` <small class="muted">${sub}</small>` : ''}</td><td class="num">${v0 === null ? '' : mtr(v0)}</td><td class="num"></td><td class="num"></td></tr>`;
-        h += ct('TĐ1 · Dự trù ban đầu', x.r.ngay ? isoToDmy(x.r.ngay) : '', svX(x, Number(x.r.so_tien) || 0));
-        h += x.dcs.map((y, n) => ct(`TĐ2 · Đợt ${n + 1}: ${esc(y.noi_dung || 'Điều chỉnh')}`, y.ngay ? isoToDmy(y.ngay) : '', svX(x, Number(y.so_tien) || 0))).join('');
-        h += chiK.length ? chiK.map((r) => ct(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', r.doi_tac ? esc(r.doi_tac) : '', r.so_ct ? esc(r.so_ct) : ''].filter(Boolean).join(' · '), Number(r.sau_vat) || 0, 'tp-c-chi')).join('')
-          : ct('<i>Chưa có lần chi nào gắn khoản này</i>', 'ghi chi phí ở form, chọn "Gắn vào gói" = khoản', null);
-        if (x.chot !== null) h += ct('TĐ3 · Số chốt', 'quyết toán khoản', svX(x, x.chot), 'tp-c-chot');
+    if (dung) h += `<tr class="tp-c-loai tp-c-pt"><td class="tp-c-ten"><span class="tp-c-in"></span><b>Theo dự trù nhanh</b> <small class="muted">khối lấy số nhập ở ③ thay cho cộng các khoản</small></td><td class="num muted">${mtr(pt.gt[kTd - 1])}</td><td class="num muted">—</td><td class="num muted">—</td></tr>`;
+    for (const n of NHOM().filter((x) => x.khoi === kh)) {
+      const kn = ks.filter((x) => x.r.nhom === n.code), le0 = its.filter((r) => r.nhom === n.code && !kyAll.has(r.goi_id)), ng = le0.reduce((a, r) => a + (Number(r.sau_vat) || 0), 0);
+      if (!kn.length && Math.abs(ng) < 1) continue;
+      const vN = (k) => kn.reduce((a, x) => a + svX(x, x.t[k - 1]), 0) + ng, chiN = kn.reduce((a, x) => a + leGoi(x.r.id), 0) + ng, moN = tpOpen.has(`knhom:${n.code}:mo`);
+      h += `<tr class="tp-c-loai tp-c-knhom"><td class="tp-c-ten"><span class="tp-c-in"></span><button class="grp-toggle" data-tpknhom="${n.code}" title="${moN ? 'Thu gọn' : 'Xem các khoản'}">${moN ? '▾' : '▸'}</button><span class="tp-kind tp-k-${kh}">${esc(n.ten)}</span><span class="tp-c-dem">${[kn.length ? `${kn.length} khoản` : '', le0.length ? `${le0.length} lần chi chưa gắn khoản` : ''].filter(Boolean).join(' · ')}</span></td>
+        <td class="num">${mtr(vN(kTd))}</td>${ss2(vN(kTd), kTd > 1 ? vN(kTd - 1) : 0)}${tienCl(vN(kTd) - chiN)}</tr>`;
+      if (!moN) continue;
+      for (const x of kn) {
+        const tv = (k) => svX(x, x.t[k - 1]), le = leGoi(x.r.id);
+        const tags = [!Number(x.r.so_tien) && x.dc ? '<span class="tp-tag tp-tag-ps" title="Không có ở TĐ1 – phát sinh ở TĐ2">phát sinh TĐ2</span>' : '',
+          x.dong ? '<span class="tp-tag tp-tag-dong">đã đóng</span>' : x.chot !== null && kTd === 3 ? '<span class="tp-tag tp-tag-chot">đã chốt</span>' : kTd > 1 && le < tv(kTd) ? '<span class="tp-tag tp-tag-dt" title="Còn phần dự trù chưa chi">còn dự trù</span>' : ''].filter(Boolean).join('');
+        h += `<tr class="tp-c-hd tp-c-khoan"><td class="tp-c-ten"><span class="tp-c-in2"></span><button type="button" class="tp-khoan-link" data-pkxem="${x.r.id}" title="Xem chi tiết khoản: dự trù, điều chỉnh, các lần chi">${esc(x.r.noi_dung || 'Khoản')}</button>${tags}<small class="muted tp-khoan-sub">đã chi ${dvT(le, 'trieu')}</small></td>
+          <td class="num">${mtr(tv(kTd))}</td>${ss2(tv(kTd), kTd > 1 ? tv(kTd - 1) : 0)}${tienCl(tv(kTd) - le)}</tr>`;
       }
-      if (ptEdit && ptEdit.id === x.r.id) h += pkFormHtml(x, 4);
+      if (Math.abs(ng) >= 1) h += `<tr class="tp-c-hd"><td class="tp-c-ten"><span class="tp-c-in2"></span><i>Chi chưa gắn khoản</i> <small class="muted">${le0.length} lần chi – tính ở cả 3 TĐ</small></td><td class="num">${mtr(ng)}</td>${ss2(ng, ng)}${tienCl(0)}</tr>`;
     }
-    if (Math.abs(ngoai) >= 1) h += `<tr class="tp-c-loai"><td class="tp-c-ten"><span class="tp-c-in"></span><i>Chi chưa gắn khoản</i> <small class="muted">chi phí đã ghi, không chọn khoản – tính ở cả 3 TĐ</small></td><td class="num">${mtr(ngoai)}</td>${ss2(ngoai, ngoai)}${tienCl(0)}</tr>`;
-    if (dung) { const sk = ks.reduce((a, x) => a + svX(x, x.t[kTd - 1]), 0) + ngoai;
-      h += `<tr class="tp-c-loai tp-c-pt"><td class="tp-c-ten"><span class="tp-c-in"></span><b>Dự trù đang dùng (số nhập)</b> <small class="muted">khối lấy số này thay cho cộng khoản · chênh ${dvT(pt.gt[kTd - 1] - sk, 'trieu')}</small></td><td class="num">${mtr(pt.gt[kTd - 1])}</td><td class="num muted">—</td><td class="num muted">—</td></tr>`; }
     return h;
   };
   // khối I = số thẻ / báo cáo; phần chi phí trực tiếp đã ghi không thuộc HĐ / gói / mua lẻ (VD: chi phí khác, tổ chức thi công) -> 1 dòng riêng để cộng khớp
   const b1K = (k) => (coKhoi && costData.cp_khoi?.B1 ? cpK('B1', k) : totK(k)), b1Khac = (k) => b1K(k) - totK(k);
-  const b1Head = coKhoi ? `<tr class="tp-c-cdt tp-c-khoi tp-k-B1"><td class="tp-c-ten"><span class="grp-sp"></span><span class="tp-khoi-no">I</span><b>CHI PHÍ TRỰC TIẾP</b><span class="tp-c-dem">HĐ đầu vào, gói, mua lẻ – theo HĐ chủ đầu tư</span></td>
+  const moB1 = !coKhoi || tpOpen.has('khoi:B1:mo');
+  const b1Head = coKhoi ? `<tr class="tp-c-cdt tp-c-khoi tp-k-B1"><td class="tp-c-ten"><button class="grp-toggle" data-tpkhoi="B1" title="${moB1 ? 'Thu gọn' : 'Xem theo HĐ chủ đầu tư'}">${moB1 ? '▾' : '▸'}</button><span class="tp-khoi-no">I</span><b>CHI PHÍ TRỰC TIẾP</b><span class="tp-c-dem">HĐ đầu vào, gói, mua lẻ – theo HĐ chủ đầu tư</span></td>
       <td class="num strong">${mtr(b1K(kTd))}</td>${ss2(b1K(kTd), kTd > 1 ? b1K(kTd - 1) : 0, 'strong')}${tienCl(T.con_lai + gCL, 'strong')}</tr>` : '';
   const b1KhacRow = coKhoi && Math.abs(b1Khac(kTd)) >= 1 ? `<tr class="tp-c-cdt tp-c-le"><td class="tp-c-ten"><span class="grp-sp"></span><span class="kind-tag tp-le-tag">Khác</span><b>Chi phí trực tiếp khác</b><span class="tp-c-dem">chi phí đã ghi không thuộc HĐ / gói (xem bảng chi tiết chi phí)</span></td>
       <td class="num strong">${mtr(b1Khac(kTd))}</td>${ss2(b1Khac(kTd), kTd > 1 ? b1Khac(kTd - 1) : 0, 'strong')}${tienCl(0, 'strong')}</tr>` : '';
   const k23 = coKhoi ? khoiSec('B2', 'II') + khoiSec('B3', 'III') : '';
-  $('#tp-tbody').innerHTML = (b1Head + bodyHtml + leHtml + b1KhacRow + k23) || `<tr><td colspan="4" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
+  $('#tp-tbody').innerHTML = (b1Head + (moB1 ? bodyHtml + leHtml + b1KhacRow : '') + k23) || `<tr><td colspan="4" class="empty">${all.length ? 'Không có hợp đồng phù hợp bộ lọc' : `Chưa có hợp đồng. ${edit ? 'Ở form trên chọn nhóm Thầu phụ, hoặc Vật tư / MMTB / Nhân công với Hình thức = Hợp đồng để tạo.' : ''}`}</td></tr>`;
   const totAll = (k) => (coKhoi ? b1K(k) + cpK('B2', k) + cpK('B3', k) : totK(k));
   const clAll = T.con_lai + gCL + (coKhoi ? ['B2', 'B3'].reduce((a, kh) => a + cpK(kh, kTd) - itemsK(kh).reduce((t, r) => t + (Number(r.sau_vat) || 0), 0), 0) : 0);
   $('#tp-tfoot').innerHTML = `<tr class="tp-grand"><td class="tp-c-ten" title="HĐ đầu vào ngoài gói ${dvT(tdSum(listHd, kTd), 'trieu')} · ${kTd === 1 ? 'dự trù (gói)' : 'gói chi phí'} ${dvT(gT(kTd), 'trieu')}${leTot ? ` · mua lẻ ${dvT(leTot, 'trieu')}` : ''}">${filtered ? `TỔNG ĐANG LỌC` : coKhoi ? `TỔNG CHI PHÍ TĐ${kTd} (I + II + III)` : `TỔNG CHI PHÍ TĐ${kTd}`}</td>
@@ -2757,8 +2843,9 @@ function onTpTableClick(e) {
   const sub = e.target.dataset.tpsub;
   if (sub) { tpOpen.has(sub) ? tpOpen.delete(sub) : tpOpen.add(sub); return renderTpCard(); }
   if (e.target.dataset.tploai) { const kk = e.target.dataset.tploai + ':dong'; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
+  if (e.target.dataset.tpknhom) { const kk = `knhom:${e.target.dataset.tpknhom}:mo`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
   if (e.target.dataset.tpkhoan) { const kk = `khoan:${e.target.dataset.tpkhoan}`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
-  if (e.target.dataset.tpkhoi) { const kk = `khoi:${e.target.dataset.tpkhoi}:dong`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
+  if (e.target.dataset.tpkhoi) { const kk = `khoi:${e.target.dataset.tpkhoi}:mo`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
   if (e.target.dataset.tpcdt !== undefined) { const kk = `cdt:${e.target.dataset.tpcdt}:dong`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
   const k = e.target.dataset.tpgrp;
   if (k === undefined) return;

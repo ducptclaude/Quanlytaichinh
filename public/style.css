@@ -3824,3 +3824,26 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 /* V19.17: chi tiết 1 khoản */
 #tp-tbody .tp-c-ct td { background: #fbfcfe; font-size: 12.5px; } #tp-tbody .tp-c-ct .tp-c-in2 { display: inline-block; width: 52px; }
 #tp-tbody .tp-c-chi td:first-child { color: var(--text); } #tp-tbody .tp-c-chot td { background: #eefaf4; font-weight: 700; }
+/* V20.17: khoản gọn 1 dòng, nhãn nhỏ cùng hàng */
+#tp-tbody .tp-c-khoan .tp-c-ten { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+#tp-tbody .tp-khoan-ten { display: block !important; min-width: 0; flex: 1 1 auto; }
+#tp-tbody .tp-khoan-ten small { display: block; margin-top: 1px; }
+#tp-tbody .tp-tag { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; font-size: 10.5px; font-weight: 700; line-height: 18px; vertical-align: 1px; white-space: nowrap; }
+#tp-tbody .tp-tag-ps { background: #eef2ff; color: #4338ca; } #tp-tbody .tp-tag-dt { background: #fff4d6; color: #9a6b00; }
+#tp-tbody .tp-tag-chot { background: #e3f7ec; color: #12805c; } #tp-tbody .tp-tag-dong { background: #eef0f3; color: #64748b; }
+#tp-tbody .tp-c-in2 { display: inline-block; width: 28px; flex: none; } #tp-tbody .tp-c-in3 { display: inline-block; width: 64px; }
+#tp-tbody .grp-toggle.sm-tg { width: 20px; height: 20px; font-size: 10px; flex: none; }
+#tp-tbody .tp-k-B2.tp-kind { background: #e6f6f4; color: #0f766e; } #tp-tbody .tp-k-B3.tp-kind { background: #efeafd; color: #5b4bc4; }
+#tp-tbody .tp-c-ct td { padding-top: 4px; padding-bottom: 4px; }
+/* V20.17: 1 khung Nhập chi phí – 3 lựa chọn */
+.card > .c-pt { margin: 4px 0 12px; padding: 0; border: 0; background: transparent; }
+.cf-seg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cf-seg button { border: 1px solid var(--border); background: var(--card, #fff); border-radius: 999px; padding: 7px 14px; font-weight: 700; color: var(--muted); box-shadow: none; }
+.cf-seg button.on { background: var(--grad-brand, var(--navy)); color: #fff; border-color: transparent; }
+.cf-td { margin-left: auto; font-size: 12.5px; color: var(--muted); }
+.cf-hint { margin: 8px 0 10px; font-size: 12.5px; color: var(--muted); }
+.c-pt .pk-f { margin-top: 4px; } .c-pt .pk-f [hidden] { display: none !important; }
+#tp-tbody .tp-khoan-link { background: none; border: 0; padding: 0; font-weight: 700; color: var(--navy); cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; box-shadow: none; }
+#tp-tbody .tp-khoan-sub { margin-left: 8px; }
+.kpi.kpi-on { outline: 2px solid var(--teal); }
+#pk-dlg .pk-chi td { background: #fbfdfd; } #pk-dlg .pk-chot td { background: #eefaf4; font-weight: 700; }
