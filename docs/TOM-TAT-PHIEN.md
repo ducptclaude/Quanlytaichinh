@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.17.11.26 – Mục III: bỏ chữ "mới nhất" ở tiêu đề cột cho gọn
+- Cột "Doanh thu" / "Chi phí" (rê chuột xem giải thích thời điểm mới nhất), ghi chú dưới bảng gọn lại. 1366px / 1280px: bảng vừa khung, không phải kéo ngang. tester 4518 ĐẠT.
+
 ## V12.17.11.26 – Mục I: bỏ mũi tên dưới số; sổ được từng văn bản HĐ gốc / PL dưới mỗi HĐ
 - Bỏ ▲▼ dưới số (V11.17). Nút ▸ ở từng HĐ: sổ HĐ gốc, PL01, PL02… với doanh thu tại TĐ đang chọn (TĐ3 văn bản chưa có số QT = TĐ2); HĐ quyết toán theo hồ sơ cũ có thêm dòng "Chênh lệch quyết toán theo hồ sơ" để cộng khớp.
 - Máy chủ: hds[].vb (gt / sv × 3 TĐ từng văn bản). Thụt lề nhích trái (cấp 2: 16px, cấp 3: 32px). tester 4518–4612 ĐẠT, không tràn.

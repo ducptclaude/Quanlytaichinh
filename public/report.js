@@ -972,15 +972,15 @@ ${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính l
     <div class="table-wrap${MOT ? ' th-mot' : ''}"><table class="b-table th-table th-t3">
       <thead><tr class="t3-grp"><th rowspan="2" class="num th-stt">STT</th><th rowspan="2">Mã DA</th><th rowspan="2">${s3h('ten', 'Tên dự án')}</th><th rowspan="2">${s3h('tt', 'Tình trạng')}</th>
         <th colspan="3" class="g-thu">Thu (tiền về)</th><th colspan="3" class="g-chi">Chi (tiền ra)</th><th rowspan="2" class="num g-con">Còn lại (thu − chi)</th></tr>
-        <tr class="t3-sub"><th class="num c-thu g1" title="${MN_TIP}">Doanh thu ${MN}</th><th class="num c-thu">Dòng thu</th><th class="num c-thu">Còn phải thu</th>
-        <th class="num c-chi g1" title="${MN_TIP}">Chi phí ${MN}</th><th class="num c-chi">Dòng chi</th><th class="num c-chi">Còn phải chi</th></tr></thead>
+        <tr class="t3-sub"><th class="num c-thu g1" title="Doanh thu ${MN}. ${MN_TIP}">Doanh thu</th><th class="num c-thu">Dòng thu</th><th class="num c-thu">Còn phải thu</th>
+        <th class="num c-chi g1" title="Chi phí ${MN}. ${MN_TIP}">Chi phí</th><th class="num c-chi">Dòng chi</th><th class="num c-chi">Còn phải chi</th></tr></thead>
       <tbody>${R3.map((r, i) => `<tr>${prj(r.x, i)}<td class="num c-thu g1">${bTy(r.dt)}</td><td class="num c-thu">${bTy(r.thu)}</td><td class="num c-thu c-kq"><b>${ty(r.pt)}</b></td>
         <td class="num c-chi g1">${bTy(r.cp)}</td><td class="num c-chi">${bTy(r.chi)}</td><td class="num c-chi c-kq"><b>${ty(r.pc)}</b></td>
         <td class="num strong g-con ${r.con < 0 ? 'neg' : 'pos'}">${bTy(r.con)}</td></tr>`).join('')}</tbody>
       <tfoot><tr><td></td><td colspan="3">Tổng cộng (${R3.length} dự án)</td><td class="num c-thu g1">${bTy(T3.dt)}</td><td class="num c-thu">${bTy(T3.thu)}</td><td class="num c-thu">${ty(T3.pt)}</td>
         <td class="num c-chi g1">${bTy(T3.cp)}</td><td class="num c-chi">${bTy(T3.chi)}</td><td class="num c-chi">${ty(T3.pc)}</td><td class="num g-con">${ty(T3.con)}</td></tr></tfoot>
     </table></div>
-    <p class="muted small f-note">Còn phải thu = Doanh thu ${MN} − Dòng thu (mục II) · Còn phải chi = Chi phí ${MN} − Dòng chi (mục II) · Còn lại = Còn phải thu − Còn phải chi. ${MN_TIP}.</p>
+    <p class="muted small f-note">Doanh thu, chi phí lấy thời điểm mới nhất của từng dự án (có quyết toán = TĐ3, chưa có = TĐ2, chưa điều chỉnh = TĐ1) · Còn phải thu = Doanh thu − Dòng thu · Còn phải chi = Chi phí − Dòng chi · Còn lại = Còn phải thu − Còn phải chi.</p>
     ${bMuc4Html(list, v)}`;
 }
 
