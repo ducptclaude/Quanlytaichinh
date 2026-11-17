@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.17.11.26 – Mục IV › Chi tiết lợi nhuận: cùng cơ cấu mục I / IV chi phí
+- Rà số DA-01..05 trên web (ảnh người dùng): cộng HĐ − gián tiếp − tài chính = LN dự án ở cả 3 TĐ, cột LN TĐ3 − TĐ1, Thực tế, tổng cộng đều khớp.
+- Dưới mỗi dự án: Lãi gộp (sau chi phí trực tiếp) [▸ / ▾ sổ các HĐ + (−) trực tiếp chưa gắn HĐ] → (−) Chi phí gián tiếp → (−) Chi phí tài chính; dự án nào cũng đủ 3 dòng. tester 4612 ĐẠT, không tràn.
+
 ## V06.17.11.26 – Mục IV › Chi tiết chi phí: như mục I
 - Mọi dự án đủ 3 khối (Trực tiếp · Gián tiếp · Tài chính, chưa có = 0); dòng Chi phí trực tiếp có nút ▸ / ▾ sổ / gọn các HĐ (dùng chung với mục I, mặc định gọn). tester 4612 ĐẠT, không tràn.
 
