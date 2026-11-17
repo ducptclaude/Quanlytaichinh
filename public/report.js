@@ -1106,13 +1106,16 @@ function bMuc4Html(list, v) {
         const B1 = KH[0], S = (k) => cs.reduce((a, c) => a + c[k], 0), r = { c1: B1.c1 - S('c1'), c2: B1.c2 - S('c2'), c3: B1.c3 - S('c3'), chi: B1.chi - S('chi') };
         const tipK = (q) => esc(q.ns.map((n) => `${n.ten}: TĐ1 ${bTy(n[v][0])} · TĐ2 ${bTy(n[v][1])} · TĐ3 ${bTy(n[v][2])}`).join('\n'));
         const so = (q, key = '') => `<td class="num">${m(q.c1)}</td>${dash}${key ? t2(q.c2, key) : `<td class="num">${m(q.c2)}</td>`}<td class="num">${m(q.c3, !x.qt)}</td><td class="num">${m(q.chi)}</td><td class="num">${m(q.c3 - q.chi, !x.qt)}</td>`;
-        const khRow = (q, j) => `<tr class="iv-hd-row iv-khoi-row"><td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name" title="${tipK(q)}"><span class="iv-tree">└</span><b>${q.ten}</b></td>${so(q, 'K' + q.kh)}</tr>`;
+        // V05.17: như mục I – đủ 3 khối; Chi phí trực tiếp có nút ▸ / ▾ sổ / gọn các HĐ (dùng chung trạng thái với mục I, mặc định gọn)
+        const moTT = (BST.iv_tt_mo || []).includes(x.d.id);
+        const tgTT = (q) => (q.kh === 'B1' && hs.length + (conRow ? 1 : 0) ? `<button type="button" class="iv-tg no-print" data-ivtt="${x.d.id}" title="${moTT ? 'Thu gọn chi tiết HĐ' : 'Xem chi tiết từng HĐ'}">${moTT ? '▾' : '▸'}</button> ` : '');
+        const khRow = (q, j) => `<tr class="iv-hd-row iv-khoi-row"><td class="num th-stt muted">${i + 1}.${j + 1}</td><td></td><td class="th-name" title="${tipK(q)}"><span class="iv-tree">└</span>${tgTT(q)}<b>${q.ten}</b></td>${so(q, 'K' + q.kh)}</tr>`;
         const hdRow = (h, c, j) => `<tr class="iv-hd-row">${hdName(h, i, j).replace(`${i + 1}.${j + 1}</td>`, `${i + 1}.1.${j + 1}</td>`).replace('<span class="iv-tree">└</span>', '<span class="iv-tree iv-tree2">└</span>')}<td class="num">${m(c.c1)}</td>${dash}${t2(c.c2, 'H' + h.id)}<td class="num">${m(c.c3, !c.qt)}</td><td class="num">${m(c.chi)}</td><td class="num">${m(c.c3 - c.chi, !c.qt)}</td></tr>`;
         const conRow = Math.abs(r.c1) + Math.abs(r.c2) + Math.abs(r.c3) + Math.abs(r.chi) > 0.5 ? `<tr class="iv-hd-row iv-chung-row"><td class="num th-stt muted">${i + 1}.1.${hs.length + 1}</td><td></td><td class="th-name"><span class="iv-tree iv-tree2">└</span><span class="iv-chung" title="Chi phí trực tiếp chưa gắn HĐ chủ đầu tư: mua lẻ chưa gắn gói, gói / HĐ đầu vào chưa gắn HĐ CĐT, điều chỉnh – quyết toán cả nhóm">Trực tiếp chưa gắn HĐ</span></td>${so(r)}</tr>` : '';
         const coKhoi = (x.d.cp_td_nhom || []).length > 0;
         return `<tr class="iv-prj-row">${prjP(x, i)}<td class="num strong">${m(x.c1)}</td>${t2(x.c2, 'P', 'strong')}
         <td class="num strong">${m(x.c3, !x.qt)}</td><td class="num strong">${m(x.chi)}</td><td class="num strong">${m(x.con_chi, !x.qt)}</td></tr>` +
-        (!hdOpen(x) || !coKhoi ? '' : KH.map((q, j) => (j > 0 && !q.ns.length ? '' : khRow(q, j) + (j === 0 ? hs.map((h, jj) => hdRow(h, cs[jj], jj)).join('') + conRow : ''))).join(''));
+        (!hdOpen(x) ? '' : KH.map((q, j) => khRow(q, j) + (j === 0 && moTT ? hs.map((h, jj) => hdRow(h, cs[jj], jj)).join('') + conRow : '')).join('')); void coKhoi;
       }).join(''),
       `<tfoot><tr><td></td><td colspan="2">Tổng cộng (${rows.length} dự án)</td><td class="num">${bTy(T.c1)}</td><td class="num">${bTy(T.c2)}</td>
         ${tipCell('c3', 'TĐ3 – Quyết toán', bTy(T.c3))}<td class="num">${bTy(T.chi)}</td>${tipCell('con_chi', 'Còn phải chi = TĐ3 − Đã chi', bTy(T.con_chi))}</tr></tfoot>`,

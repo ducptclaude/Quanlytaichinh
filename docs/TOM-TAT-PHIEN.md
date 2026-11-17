@@ -2,6 +2,9 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.17.11.26 – Mục IV › Chi tiết chi phí: như mục I
+- Mọi dự án đủ 3 khối (Trực tiếp · Gián tiếp · Tài chính, chưa có = 0); dòng Chi phí trực tiếp có nút ▸ / ▾ sổ / gọn các HĐ (dùng chung với mục I, mặc định gọn). tester 4612 ĐẠT, không tràn.
+
 ## V05.17.11.26 – Bảng khoản gián tiếp / tài chính có nút mở / thu gọn
 - Mặc định gọn: 1 dòng tóm tắt (Gián tiếp x (n khoản) · Tài chính y) + nút "Mở ra"; nhớ theo máy; đang nhập điều chỉnh / chốt thì luôn mở. tester 4612 ĐẠT, không tràn.
 
