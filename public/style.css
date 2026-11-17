@@ -3848,3 +3848,8 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .kpi.kpi-on { outline: 2px solid var(--teal); }
 #pk-dlg .pk-chi td { background: #fbfdfd; } #pk-dlg .pk-chot td { background: #eefaf4; font-weight: 700; }
 #pk-dlg .tv-tools .pk-xoa { margin-left: auto; }
+/* V23.17: Dashboard – đổi TĐ không xô lệch: dòng phụ thẻ trên cố định 2 dòng, nhãn số lớn 1 dòng */
+.db-ks { min-height: 2.7em; }
+.db-big > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-blk.b4 .db-steps { min-height: 128px; align-items: flex-end; }
+.db-blk header p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; } .db-blk header > div { min-width: 0; }

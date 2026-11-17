@@ -82,8 +82,9 @@ function bDashRender(list, v, one) {
       `<ul class="db-lines">${line('Còn phải thu', T3.pt, mx3, DBC.dt)}${line('Còn phải chi', T3.pc, mx3, DBC.cp)}${line('Còn lại', T3.con, mx3, DBC.ln)}</ul>
       <div class="db-note2">Doanh thu mới nhất − dòng thu · chi phí mới nhất − dòng chi</div>`),
     arrow(),
-    blk('IV', 'b4', 'Lợi nhuận TĐ1 → TĐ3', 'Hợp đồng → điều chỉnh → quyết toán', MT['l' + k], `LN TĐ${k} · ${k === 1 ? 'lúc ký hợp đồng' : `${dlt(MT['l' + k], MT.l1)} so với TĐ1`}`, // V26.12: số lớn theo TĐ đang chọn (Báo cáo mục IV giữ nguyên)
-      `<div class="db-steps">${step}</div>`),
+    blk('IV', 'b4', 'Lợi nhuận TĐ1 → TĐ3', 'Ký HĐ → điều chỉnh → quyết toán', MT['l' + k], `Lợi nhuận TĐ${k} · ${pc(MT['l' + k], MT['t' + k])}`, // V23.17: nhãn 1 dòng như khối I (đổi TĐ không xô lệch); so sánh đưa xuống dòng ghi chú
+      `<div class="db-steps">${step}</div>
+      <div class="db-note2">${k === 1 ? 'TĐ1 = lúc ký hợp đồng · chọn TĐ2 / TĐ3 để so sánh' : `TĐ${k} ${dlt(MT['l' + k], MT.l1)} so với TĐ1 · tỷ suất ${pc(MT.l1, MT.t1)} → ${pc(MT['l' + k], MT['t' + k])}`}</div>`),
   ].join('');
 
   // ---- Tình trạng dự án ----

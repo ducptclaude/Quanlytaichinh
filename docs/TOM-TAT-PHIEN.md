@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V23.17.11.26 – Dashboard: cân đối khối IV, đổi TĐ không xô lệch
+- Khối IV: nhãn số lớn 1 dòng "Lợi nhuận TĐk · tỷ suất" (như khối I); so sánh với TĐ1 + tỷ suất TĐ1 → TĐk xuống dòng ghi chú dưới cột; tiêu đề phụ ngắn "Ký HĐ → điều chỉnh → quyết toán".
+- Thẻ trên: dòng phụ cố định 2 dòng. Đo 1366 / 1512 / điện thoại: chiều cao 4 khối + 3 thẻ và vị trí nút TĐ không đổi khi bấm TĐ1 / TĐ2 / TĐ3. tester ĐẠT, không tràn.
+
 ## V22.17.11.26 – Xoá khoản / đợt điều chỉnh ghi sai (trong hộp chi tiết khoản)
 - Bấm tên khoản → hộp chi tiết: nút "Xoá khoản" (xoá dự trù + các đợt điều chỉnh; các lần chi giữ lại, chuyển thành "chi chưa gắn khoản"), nút "Xoá" từng đợt điều chỉnh. Nhóm đã quyết toán: khoá, báo cách mở.
 - Thử: khoản sai 100 +20 −5, chi 30 → gián tiếp 285 → xoá đợt +20: 265 → xoá khoản: 200 (chi 30 còn, không gắn khoản). tester ĐẠT.
