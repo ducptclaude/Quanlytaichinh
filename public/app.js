@@ -2242,10 +2242,11 @@ function ptHtml(k) {
     const ngR = Math.abs(ng) >= 1 ? `<tr class="pk-ngoai"><td><i>Chi chưa gắn khoản</i><div class="muted small">chi phí đã ghi của khối, không chọn khoản – tính ở cả 3 TĐ</div></td><td class="${c(0)}">${dvT(ng)}</td><td class="${c(1)}">${dvT(ng)}</td><td class="${c(2)}">${dvT(ng)}</td><td class="num">${dvT(ng)}</td><td class="num">–</td><td></td></tr>` : '';
     return `<tr class="pk-khoi pk-${kh}"><td colspan="7"><b>${TEN_K[kh]}</b></td></tr>${ks.map(row).join('')}${ngR}
       <tr class="pk-tong"><td>Cộng ${TEN_K[kh].toLowerCase()}</td><td class="${c(0)}">${dvT(s(0))}</td><td class="${c(1)}">${dvT(s(1))}</td><td class="${c(2)}">${dvT(s(2))}</td><td class="num">${dvT(le)}</td><td class="num">${dvT(s(k - 1) - le)}</td><td></td></tr>${ptRow(kh, s)}`; };
-  const them = edit && k === 1 ? `<form class="pk-add" id="pk-add"><b>+ Thêm khoản</b>
+  // V19.17: TĐ1 thêm khoản dự trù; TĐ2 thêm khoản PHÁT SINH (VD: lương các tháng tiếp theo) – TĐ1 = 0, TĐ2 = số nhập
+  const them = edit && k < 3 ? `<form class="pk-add" id="pk-add" data-td="${k}"><b>+ Thêm khoản${k === 2 ? ' phát sinh TĐ2' : ''}</b>
       <select name="nhom" aria-label="Nhóm">${nhB.map((n) => `<option value="${n.code}">${n.khoi === 'B2' ? 'Gián tiếp' : 'Tài chính'} · ${esc(n.ten)}</option>`).join('')}</select>
-      <input name="noi_dung" list="pk-goi-y" maxlength="300" placeholder="Tên khoản (VD: Lương BCH)" required><datalist id="pk-goi-y"></datalist>
-      <input name="so_tien" class="money num" placeholder="Dự trù TĐ1 (trước VAT)" required>
+      <input name="noi_dung" list="pk-goi-y" maxlength="300" placeholder="${k === 2 ? 'Tên khoản (VD: Lương tháng 11)' : 'Tên khoản (VD: Lương tháng 10)'}" required><datalist id="pk-goi-y"></datalist>
+      <input name="so_tien" class="money num" placeholder="${k === 2 ? 'Số tiền TĐ2 (trước VAT)' : 'Dự trù TĐ1 (trước VAT)'}" required>
       <button type="submit" class="primary sm">Thêm</button><span class="msg" id="pk-add-msg"></span></form>` : '';
   const bang = KS.length ? `<div class="table-wrap"><table class="pk-table"><thead><tr><th>Khoản</th><th class="${c(0)}">TĐ1 dự trù</th><th class="${c(1)}">TĐ2 điều chỉnh</th><th class="${c(2)}">TĐ3 quyết toán</th><th class="num">Đã chi</th><th class="num">Còn</th><th class="no-print"></th></tr></thead>
     <tbody>${tong('B2')}${tong('B3')}</tbody></table></div>` : '';
@@ -2295,8 +2296,12 @@ document.addEventListener('submit', async (e) => {
     e.preventDefault();
     const nhom = f.elements.nhom.value, n = NHOM().find((x) => x.code === nhom), so = parseMoney(f.elements.so_tien.value);
     if (!(so > 0)) return showMsg($('#pk-add-msg'), 'Nhập số tiền dự trù', 'err');
-    try { await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom, loai: 'ky', noi_dung: f.elements.noi_dung.value.trim(), so_tien: so, vat: n?.khong_vat ? 0 : 10, ngay: new Date().toISOString().slice(0, 10) }) });
-      await loadCost(); showMsg($('#pk-add-msg'), 'Đã thêm khoản'); }
+    const td2 = f.dataset.td === '2', ngay = new Date().toISOString().slice(0, 10), ten = f.elements.noi_dung.value.trim(), vat = n?.khong_vat ? 0 : 10;
+    try { const g = await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom, loai: 'ky', noi_dung: ten, so_tien: td2 ? 0 : so, vat, ngay }) });
+      let note = 'Đã thêm khoản';
+      if (td2) { if (g?.id) await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom, loai: 'dc', noi_dung: `Phát sinh TĐ2 – ${ten}`, so_tien: so, vat, ngay, goi_ref: g.id }) });
+        else note = 'Khoản đang chờ duyệt – sau khi duyệt, bấm ± Điều chỉnh để nhập số TĐ2'; }
+      await loadCost(); showMsg($('#pk-add-msg'), note); }
     catch (err) { showMsg($('#pk-add-msg'), err.message, 'err'); }
     return;
   }
@@ -2672,8 +2677,18 @@ function renderTpCard() {
       const act = !edit || x.khoa ? '' : kTd === 1 ? `<button type="button" class="sm" data-pk="sua" data-id="${x.r.id}">Sửa</button>`
         : kTd === 2 ? (x.dong ? `<button type="button" class="sm" data-pk="mo" data-id="${x.r.id}">Mở lại</button>` : `<button type="button" class="sm" data-pk="dc" data-id="${x.r.id}">± Điều chỉnh</button><button type="button" class="sm" data-pk="dong" data-id="${x.r.id}" title="Không dùng nữa: TĐ2 = đã chi">Đóng</button>`)
           : `<button type="button" class="sm" data-pk="chot" data-id="${x.r.id}">${x.chot !== null ? 'Sửa chốt' : 'Chốt số'}</button>${x.chot !== null ? `<button type="button" class="sm" data-pk="bochot" data-id="${x.r.id}">Bỏ chốt</button>` : ''}`;
-      h += `<tr class="tp-c-loai tp-c-khoan"><td class="tp-c-ten"><span class="tp-c-in"></span><span class="tp-khoan-ten"><b>${esc(x.r.noi_dung || 'Khoản')}</b>${chip}<small class="muted">${esc(nTen)} · đã chi ${dvT(le, 'trieu')}${x.dcs.length ? ` · ${x.dcs.length} đợt điều chỉnh` : ''}</small></span><span class="tp-pk-act no-print">${act}</span></td>
+      const moK = tpOpen.has(`khoan:${x.r.id}`), chiK = (costData.items || []).filter((r) => r.goi_id === x.r.id);
+      const phatSinh = !Number(x.r.so_tien) && x.dc ? ' <span class="st st-tam-tinh" title="Không có ở TĐ1 – phát sinh ở TĐ2">Phát sinh TĐ2</span>' : '';
+      h += `<tr class="tp-c-loai tp-c-khoan"><td class="tp-c-ten"><button class="grp-toggle" data-tpkhoan="${x.r.id}" title="${moK ? 'Thu gọn' : 'Xem chi tiết: dự trù, các đợt điều chỉnh, các lần chi'}">${moK ? '▾' : '▸'}</button><span class="tp-khoan-ten"><b>${esc(x.r.noi_dung || 'Khoản')}</b>${phatSinh}${chip}<small class="muted">${esc(nTen)} · đã chi ${dvT(le, 'trieu')}${x.dcs.length ? ` · ${x.dcs.length} đợt điều chỉnh` : ''}</small></span><span class="tp-pk-act no-print">${act}</span></td>
         <td class="num">${mtr(tv(kTd))}</td>${ss2(tv(kTd), kTd > 1 ? tv(kTd - 1) : 0)}${tienCl(tv(kTd) - le)}</tr>`;
+      if (moK) { // dòng chi tiết của khoản (sau VAT)
+        const ct = (ten, sub, v0, cls = '') => `<tr class="tp-c-ct ${cls}"><td class="tp-c-ten"><span class="tp-c-in2"></span>${ten}${sub ? ` <small class="muted">${sub}</small>` : ''}</td><td class="num">${v0 === null ? '' : mtr(v0)}</td><td class="num"></td><td class="num"></td></tr>`;
+        h += ct('TĐ1 · Dự trù ban đầu', x.r.ngay ? isoToDmy(x.r.ngay) : '', svX(x, Number(x.r.so_tien) || 0));
+        h += x.dcs.map((y, n) => ct(`TĐ2 · Đợt ${n + 1}: ${esc(y.noi_dung || 'Điều chỉnh')}`, y.ngay ? isoToDmy(y.ngay) : '', svX(x, Number(y.so_tien) || 0))).join('');
+        h += chiK.length ? chiK.map((r) => ct(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', r.doi_tac ? esc(r.doi_tac) : '', r.so_ct ? esc(r.so_ct) : ''].filter(Boolean).join(' · '), Number(r.sau_vat) || 0, 'tp-c-chi')).join('')
+          : ct('<i>Chưa có lần chi nào gắn khoản này</i>', 'ghi chi phí ở form, chọn "Gắn vào gói" = khoản', null);
+        if (x.chot !== null) h += ct('TĐ3 · Số chốt', 'quyết toán khoản', svX(x, x.chot), 'tp-c-chot');
+      }
       if (ptEdit && ptEdit.id === x.r.id) h += pkFormHtml(x, 4);
     }
     if (Math.abs(ngoai) >= 1) h += `<tr class="tp-c-loai"><td class="tp-c-ten"><span class="tp-c-in"></span><i>Chi chưa gắn khoản</i> <small class="muted">chi phí đã ghi, không chọn khoản – tính ở cả 3 TĐ</small></td><td class="num">${mtr(ngoai)}</td>${ss2(ngoai, ngoai)}${tienCl(0)}</tr>`;
@@ -2742,6 +2757,7 @@ function onTpTableClick(e) {
   const sub = e.target.dataset.tpsub;
   if (sub) { tpOpen.has(sub) ? tpOpen.delete(sub) : tpOpen.add(sub); return renderTpCard(); }
   if (e.target.dataset.tploai) { const kk = e.target.dataset.tploai + ':dong'; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
+  if (e.target.dataset.tpkhoan) { const kk = `khoan:${e.target.dataset.tpkhoan}`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
   if (e.target.dataset.tpkhoi) { const kk = `khoi:${e.target.dataset.tpkhoi}:dong`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
   if (e.target.dataset.tpcdt !== undefined) { const kk = `cdt:${e.target.dataset.tpcdt}:dong`; tpOpen.has(kk) ? tpOpen.delete(kk) : tpOpen.add(kk); return renderTpCard(); }
   const k = e.target.dataset.tpgrp;

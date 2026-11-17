@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V19.17.11.26 – Khoản gián tiếp / tài chính: xem chi tiết (▸) + thêm khoản phát sinh ở TĐ2
+- Bấm ▸ ở khoản (bảng Nhóm chi phí): dự trù TĐ1, từng đợt điều chỉnh TĐ2, từng lần chi (ngày, đối tác, số CT), số chốt TĐ3.
+- Tab TĐ2: "+ Thêm khoản phát sinh TĐ2" (VD: lương các tháng tiếp theo) = khoản TĐ1 = 0 + đợt điều chỉnh của khoản; nhãn "Phát sinh TĐ2".
+- Thử đúng tình huống: TĐ1 dự trù lương T10 150 → TĐ2 chi T10 150 + phát sinh T11 145 → TĐ3 chốt T11 140: gián tiếp 140→290 / 465 / 460 (đúng). tester 4612, kiem-tra-goi 211 ĐẠT.
+
 ## V18.17.11.26 – Bảng "Nhóm chi phí" chia 3 khối I / II / III; ô dự trù + thêm khoản chuyển vào "Thêm chi phí"
 - Bảng HĐ đầu vào (Nhóm chi phí): I. CHI PHÍ TRỰC TIẾP (= thẻ; HĐ CĐT → loại, mua lẻ, dòng "Chi phí trực tiếp khác" để cộng khớp) · II. GIÁN TIẾP · III. TÀI CHÍNH (từng khoản: TĐ, ± so TĐ trước, còn lại, nút Sửa / ± Điều chỉnh / Đóng / Chốt số ngay trên dòng; chi chưa gắn khoản; dự trù số nhập). Tổng cuối = I + II + III = thẻ tổng.
 - Khung ô dự trù + "+ Thêm khoản" nằm cuối khung "Thêm chi phí". Khi lọc / tìm HĐ: chỉ hiện phần HĐ như cũ.

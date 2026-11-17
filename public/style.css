@@ -3821,3 +3821,6 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 #tp-tbody .pk-edit td { background: #fffbea; } #tp-tbody .pk-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
 #tp-tbody .pk-form label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; }
 .card > .c-pt { margin-top: 14px; border-top: 1px dashed var(--border); border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0; padding: 14px 0 0; background: transparent; }
+/* V19.17: chi tiết 1 khoản */
+#tp-tbody .tp-c-ct td { background: #fbfcfe; font-size: 12.5px; } #tp-tbody .tp-c-ct .tp-c-in2 { display: inline-block; width: 52px; }
+#tp-tbody .tp-c-chi td:first-child { color: var(--text); } #tp-tbody .tp-c-chot td { background: #eefaf4; font-weight: 700; }
