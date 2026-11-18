@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.18.11.26 – Hộp HĐ đầu vào: 2 nút riêng "+ Thêm PL" và "+ Chi phí khác" (không gắn HĐ)
+- "+ Thêm PLxx": phụ lục của HĐ (cộng vào giá trị HĐ, thanh toán theo HĐ). "+ Chi phí khác": dòng chi phí riêng cùng nhóm (không cộng vào
+  giá trị HĐ, không thanh toán theo HĐ, tính vào chi phí dự án), hiện ở bảng "Chi phí khác (không gắn HĐ)" trong hộp. Cả 2 có ở 3 tab,
+  cùng quy tắc phát sinh theo TĐ (thêm ở TĐ2 không tính TĐ1; TĐ3 không tính TĐ1, TĐ2).
+- Kho dữ liệu (chỉ THÊM): `chi_phi.tp_ref` (nhập từ hộp HĐ nào – chỉ để hiện kèm). Nhóm Thầu phụ: dòng lẻ chỉ ghi được khi nhập từ nút này.
+- Mục phát sinh TĐ2 ghi chú "không tính vào TĐ1" dưới số ký. Kiểm tra: kiem-tra-goi 211/0, tester 4598/0, cả PostgreSQL.
+
 ## V02.18.11.26 – Mục chi phí phát sinh theo TĐ (phụ lục HĐ đầu vào hoặc chi phí không gắn HĐ)
 - Kho dữ liệu (chỉ THÊM): `tp_hd_pl.td_ps`, `chi_phi.td_ps` = phát sinh tại TĐ (trống = TĐ1 -> số cũ không đổi).
 - Quy tắc: thêm ở TĐ1 -> tính từ TĐ1 (TĐ2 = TĐ1, TĐ3 = TĐ2) · thêm ở TĐ2 -> không tính TĐ1, tăng / giảm ở TĐ2, TĐ3 = TĐ2 ·

@@ -1,6 +1,12 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"không tính vào TĐ1": "not counted in M1",
+"Chi phí khác (không gắn HĐ)": "Other costs (not under the contract)",
+"TỔNG CHI PHÍ KHÁC": "TOTAL OTHER COSTS",
+"Đã lưu chi phí khác": "Other cost saved",
+"Đã xóa chi phí khác": "Other cost deleted",
+"+ Chi phí khác": "+ Other cost",
 "Thêm ở TĐ1: tính từ TĐ1 · TĐ2 = TĐ1 (điều chỉnh ở TĐ2) · TĐ3 = TĐ2 (quyết toán ở TĐ3)": "Added in M1: counted from M1 · M2 = M1 (adjust in M2) · M3 = M2 (final account in M3)",
 "Thêm ở TĐ2: không tính TĐ1 · tăng / giảm thêm ở TĐ2 · TĐ3 = TĐ2 (quyết toán ở TĐ3)": "Added in M2: not counted in M1 · adjust in M2 · M3 = M2 (final account in M3)",
 "Thêm ở TĐ3: không tính TĐ1, TĐ2 – chỉ tính ở TĐ3": "Added in M3: not counted in M1, M2 – counted in M3 only",
@@ -1679,6 +1685,8 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["+ Chi phí khác (phát sinh TĐ{})", "+ Other cost (arising at M{})"],
+["nhóm {} · không cộng vào giá trị HĐ, không thanh toán theo HĐ · tính vào chi phí dự án", "{} group · not added to the contract value, not paid under the contract · counted in project cost"],
 ["Dòng chi phí thêm ở đây = phát sinh TĐ{} – không tính vào TĐ1.", "Cost lines added here arise at M{} – not counted in M1."],
 ["Dòng chi phí thêm ở đây = phát sinh TĐ{} – không tính vào TĐ1, TĐ2.", "Cost lines added here arise at M{} – not counted in M1, M2."],
 ["Phát sinh TĐ{}", "Arising at M{}"],
