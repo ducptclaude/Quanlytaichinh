@@ -1001,7 +1001,8 @@ function bMuc4Data(list, v) {
     const t1 = dt.goc[v], t2 = dt.ps[v], t3 = dt.qt[v];
     // Đợt B: + dự trù chi phí theo nhóm cùng thời điểm (cộng dồn với chi tiết)
     const dr = cp.dtru?.[v] || [0, 0, 0], drB1 = cp.dtru_b1?.[v] || [0, 0, 0];
-    const c1 = cp.tp_goc[v] + cp.khac[v] + dr[0], c2 = cp.tp_ps[v] + cp.khac[v] + dr[1], c3 = cp.tp_qt[v] + cp.khac[v] + dr[2];
+    const kh = cp.khac_td?.[v] || [cp.khac[v], cp.khac[v], cp.khac[v]]; // chi phí khác theo TĐ (dòng phát sinh TĐ2 / TĐ3 không tính TĐ trước)
+    const c1 = cp.tp_goc[v] + kh[0] + dr[0], c2 = cp.tp_ps[v] + kh[1] + dr[1], c3 = cp.tp_qt[v] + kh[2] + dr[2];
     // Tiền thật (sau VAT); xem trước VAT thì quy đổi theo tỷ lệ trước/sau VAT của giá trị đối chiếu
     const rDt = dt.qt;
     const cSv = cp.tp_qt.sv + cp.khac.sv + (cp.dtru?.sv?.[2] || 0), cGt = cp.tp_qt.gt + cp.khac.gt + (cp.dtru?.gt?.[2] || 0);
@@ -1009,7 +1010,8 @@ function bMuc4Data(list, v) {
     const nhan = v === 'sv' || !rDt.sv ? nhanSv : Math.round((nhanSv * (rDt.gt / rDt.sv)) / 1e8) * 1e8; // quy đổi trước VAT: làm tròn 0,1 tỷ
     const chi = v === 'sv' || !cSv ? chiSv : Math.round((chiSv * (cGt / cSv)) / 1e8) * 1e8;
     const b1 = (cp.khac_b1 || { gt: 0, sv: 0 })[v]; // giá vốn = thầu phụ cùng mốc + chi phí trực tiếp khác (B1)
-    const g1 = t1 - cp.tp_goc[v] - b1 - drB1[0], g2 = t2 - cp.tp_ps[v] - b1 - drB1[1], g3 = t3 - cp.tp_qt[v] - b1 - drB1[2];
+    const b1k = cp.khac_b1_td?.[v] || [b1, b1, b1];
+    const g1 = t1 - cp.tp_goc[v] - b1k[0] - drB1[0], g2 = t2 - cp.tp_ps[v] - b1k[1] - drB1[1], g3 = t3 - cp.tp_qt[v] - b1k[2] - drB1[2];
     return { d, qt, t1, t2, t3, c1, c2, c3, l1: t1 - c1, l2: t2 - c2, l3: t3 - c3, g1, g2, g3,
       pl: Object.fromEntries(dt.pl.map((x) => [x.ma, x[v]])), cpl: Object.fromEntries((cp.tp_pl || []).map((x) => [x.ma, x[v]])),
       nhan, con: t3 - nhan, chi, con_chi: c3 - chi, thuc: nhan - chi, bh: d.bh_khac || 0, gc: d.ghi_chu_bh || '' };
@@ -2159,14 +2161,14 @@ const TD_HT = { 1: 'HĐ gốc', 2: 'HĐ + phụ lục', 3: 'quyết toán' };
 // V04.16: TĐ1 hệ thống của 1 dự án (trước / sau VAT) – cùng công thức mục IV (bMuc4Data: t1, c1)
 function bTd1He(d, v) {
   const dt = d.moc?.dt, cp = d.moc?.cp; if (!dt || !cp) return { dt1: 0, cp1: 0 };
-  return { dt1: dt.goc[v], cp1: cp.tp_goc[v] + cp.khac[v] + (cp.dtru?.[v]?.[0] || 0) };
+  return { dt1: dt.goc[v], cp1: cp.tp_goc[v] + (cp.khac_td?.[v]?.[0] ?? cp.khac[v]) + (cp.dtru?.[v]?.[0] || 0) };
 }
 function bSysMoc(d, td, ngay) {
   const m = d.moc || {};
   const dt = td === 1 ? m.dt_goc : td === 2 ? m.dt_ps : m.dt_qt;
   const khac = ngay && m.cp_khac_ngay
     ? Object.entries(m.cp_khac_ngay).reduce((a, [k, x]) => a + (k <= ngay ? x : 0), 0)
-    : m.cp_khac || 0;
+    : (m.cp_khac_td?.[td - 1] ?? m.cp_khac) || 0;
   const cp = (td === 1 ? m.tp_goc : td === 2 ? m.tp_ps : m.tp_qt) + khac + (m.cp?.dtru?.gt?.[td - 1] || 0); // + dự trù theo nhóm (Đợt B)
   return { dt: dt || 0, cp: cp || 0, ln: (dt || 0) - (cp || 0) };
 }

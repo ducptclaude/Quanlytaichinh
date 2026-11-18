@@ -6,7 +6,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|
-| **chot-18.11.26** | V01.18.11.26 | (mới nhất) | 18/11/2026 | Giao diện vừa màn hình rời 22–27" (không phóng to quá) |
+| **chot-18.11.26** | V02.18.11.26 | (mới nhất) | 18/11/2026 | Giao diện vừa màn hình rời 22–27"; mục chi phí phát sinh theo TĐ (PL / chi phí không gắn HĐ) |
 | phien-18.11.26-13h34 | V23.17.11.26 | `2dde144` | 18/11/2026 | Trước khi sửa ngày 18/11 |
 | **chot-07.11.26** | V03.07.11.26 | (mới nhất) | 07/11/2026 | Mục II bấm xem chi tiết theo VAT; Dashboard tối nền trong suốt, khối neon |
 | phien-07.11.26-08h01 | V30.06.11.26 | `f012cd5` | 07/11/2026 | Trước khi sửa ngày 07/11 |

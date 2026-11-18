@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Thêm ở TĐ1: tính từ TĐ1 · TĐ2 = TĐ1 (điều chỉnh ở TĐ2) · TĐ3 = TĐ2 (quyết toán ở TĐ3)": "Added in M1: counted from M1 · M2 = M1 (adjust in M2) · M3 = M2 (final account in M3)",
+"Thêm ở TĐ2: không tính TĐ1 · tăng / giảm thêm ở TĐ2 · TĐ3 = TĐ2 (quyết toán ở TĐ3)": "Added in M2: not counted in M1 · adjust in M2 · M3 = M2 (final account in M3)",
+"Thêm ở TĐ3: không tính TĐ1, TĐ2 – chỉ tính ở TĐ3": "Added in M3: not counted in M1, M2 – counted in M3 only",
 "Gián tiếp": "Indirect",
 "Tài chính": "Financial",
 "LN TĐ3 − TĐ1": "Profit M3 − M1",
@@ -1676,6 +1679,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["Dòng chi phí thêm ở đây = phát sinh TĐ{} – không tính vào TĐ1.", "Cost lines added here arise at M{} – not counted in M1."],
+["Dòng chi phí thêm ở đây = phát sinh TĐ{} – không tính vào TĐ1, TĐ2.", "Cost lines added here arise at M{} – not counted in M1, M2."],
+["Phát sinh TĐ{}", "Arising at M{}"],
+["+ Thêm PL{} (phát sinh TĐ{})", "+ Add addendum {} (arising at M{})"],
 [
 "({} khoản)",
 "({} items)"

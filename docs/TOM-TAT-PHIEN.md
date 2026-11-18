@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.18.11.26 – Mục chi phí phát sinh theo TĐ (phụ lục HĐ đầu vào hoặc chi phí không gắn HĐ)
+- Kho dữ liệu (chỉ THÊM): `tp_hd_pl.td_ps`, `chi_phi.td_ps` = phát sinh tại TĐ (trống = TĐ1 -> số cũ không đổi).
+- Quy tắc: thêm ở TĐ1 -> tính từ TĐ1 (TĐ2 = TĐ1, TĐ3 = TĐ2) · thêm ở TĐ2 -> không tính TĐ1, tăng / giảm ở TĐ2, TĐ3 = TĐ2 ·
+  thêm ở TĐ3 -> không tính TĐ1, TĐ2 (giá trị nhập = số quyết toán, khoá như quy tắc TĐ3).
+- Hộp HĐ đầu vào: nút "+ Thêm PLxx" ở cả 3 tab (ghi "phát sinh TĐk"), nhãn "Phát sinh TĐk", dòng chỉ hiện từ TĐ phát sinh; mục TĐ3 nhập ở cột TĐ3.
+- Chi phí không gắn HĐ (form Chi phí): dòng thêm ở tab TĐ2 / TĐ3 = phát sinh TĐ đó (có dòng nhắc ở form, nhãn ở bảng chi tiết).
+- Báo cáo: `tpLine` theo td_ps; chi phí khác theo TĐ (`khac_td`, `khac_b1_td`, `cp_khac_td`) dùng ở mục I / IV, giá vốn, số TĐ1 tự tính.
+
 ## V01.18.11.26 – Giao diện vừa với màn hình rời 22–27" (24" không còn bị quá to)
 - Nguyên nhân: V14.17 phóng to theo độ rộng (1920px -> 128%, 2200px -> 140%) – hợp với Mac Retina nhưng màn rời thường bị to quá.
 - Nay: màn hình mật độ điểm ảnh thường (≤ 1,49 – màn rời, Windows 100–125%): không phóng chữ (≥ 2200px chỉ 112%), nới vùng nội dung
