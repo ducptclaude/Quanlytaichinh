@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.18.11.26 – Giao diện vừa với màn hình rời 22–27" (24" không còn bị quá to)
+- Nguyên nhân: V14.17 phóng to theo độ rộng (1920px -> 128%, 2200px -> 140%) – hợp với Mac Retina nhưng màn rời thường bị to quá.
+- Nay: màn hình mật độ điểm ảnh thường (≤ 1,49 – màn rời, Windows 100–125%): không phóng chữ (≥ 2200px chỉ 112%), nới vùng nội dung
+  1320 -> 1520px (≥ 1600px) / 1680px (≥ 1880px). Màn hình mật độ cao (Mac 14"/16", laptop 2K/3K) giữ nguyên như V14.17.
+- Kiểm tra: 24" 1920, 27" 2560, Mac 14"/16" Retina, Windows 1536 @125%, laptop 1366, iPhone 13 – không tràn ngang, không lỗi trang.
+
 ## V23.17.11.26 – Dashboard: cân đối khối IV, đổi TĐ không xô lệch
 - Khối IV: nhãn số lớn 1 dòng "Lợi nhuận TĐk · tỷ suất" (như khối I); so sánh với TĐ1 + tỷ suất TĐ1 → TĐk xuống dòng ghi chú dưới cột; tiêu đề phụ ngắn "Ký HĐ → điều chỉnh → quyết toán".
 - Thẻ trên: dòng phụ cố định 2 dòng. Đo 1366 / 1512 / điện thoại: chiều cao 4 khối + 3 thẻ và vị trí nút TĐ không đổi khi bấm TĐ1 / TĐ2 / TĐ3. tester ĐẠT, không tràn.

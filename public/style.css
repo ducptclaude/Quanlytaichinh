@@ -3853,3 +3853,11 @@ td.td-ss .td-pct { font-weight: 500; font-size: 12px; opacity: .85; }
 .db-big > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .db-blk.b4 .db-steps { min-height: 128px; align-items: flex-end; }
 .db-blk header p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; } .db-blk header > div { min-width: 0; }
+/* V24.18: màn hình rời mật độ điểm ảnh thường (22–27", Windows 100–125%): KHÔNG phóng to chữ (trước đây 1920px phóng 128% -> quá to),
+   thay vào đó nới rộng vùng nội dung để dùng hết chỗ. Màn hình mật độ cao (Mac Retina, laptop 2K/3K) vẫn phóng như V14.17. */
+@media screen and (max-resolution: 1.49dppx) {
+  :root { --uiz: 1; }
+}
+@media screen and (max-resolution: 1.49dppx) and (min-width: 2200px) { :root { --uiz: 1.12; } }
+@media screen and (max-resolution: 1.49dppx) and (min-width: 1600px) { main { max-width: 1520px; } }
+@media screen and (max-resolution: 1.49dppx) and (min-width: 1880px) { main { max-width: 1680px; } }
