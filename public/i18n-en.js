@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Nội dung chi phí khác": "Other cost description",
 "không tính vào TĐ1": "not counted in M1",
 "Chi phí khác (không gắn HĐ)": "Other costs (not under the contract)",
 "TỔNG CHI PHÍ KHÁC": "TOTAL OTHER COSTS",

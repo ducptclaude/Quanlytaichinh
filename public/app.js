@@ -1561,7 +1561,7 @@ function setCostMode() {
     note.hidden = !chan && !td2Tp && !(tdDangChon() !== 1 && !cForm.elements.id.value);
     const psTxt = ` Dòng chi phí thêm ở đây = <b>phát sinh TĐ${tdDangChon()}</b> – không tính vào ${tdDangChon() === 2 ? 'TĐ1' : 'TĐ1, TĐ2'}.`;
     note.innerHTML = td2Tp
-      ? `<b>Đang ở TĐ2:</b> HĐ ${esc((TPN()[cForm.elements.nhom.value] || '').toLowerCase())} mới phải chọn <b>Gói chi phí</b>: gắn vào 1 gói dự trù TĐ1 (HĐ <b>thay</b> giá trị tạm tính của gói) hoặc <b>Phát sinh ngoài TĐ1</b> (TĐ1 = 0, VD vệ sinh công nghiệp).`
+      ? `<b>Đang ở TĐ2:</b> HĐ ${esc((TPN()[cForm.elements.nhom.value] || '').toLowerCase())} mới phải chọn <b>Gói chi phí</b>: gắn vào 1 gói dự trù TĐ1 (HĐ <b>thay</b> giá trị tạm tính của gói). Phát sinh ngoài TĐ1: mở HĐ đã có (nhấp đúp Số HĐ), bấm <b>+ Thêm PL</b> hoặc <b>+ Chi phí khác</b>.`
       : chan
       ? `<b>Đang ở TĐ${tdDangChon()}:</b> HĐ ${esc((TPN()[cForm.elements.nhom.value] || '').toLowerCase())} mới chỉ tạo ở tab <b>TĐ1</b>. Điều chỉnh / quyết toán HĐ đã có: nhấp đúp Số HĐ ở bảng "1. Hợp đồng đầu vào".`
       : tdDangChon() === 2 ? (HDV.includes(cForm.elements.nhom.value) ? `<b>Đang ở TĐ2:</b> chọn Hình thức <b>Hợp đồng</b> để tạo HĐ thật và gắn vào gói (như thầu phụ), hoặc <b>Dòng chi phí</b> để ghi mua lẻ.` : '<b>Đang ở TĐ2:</b>') + psTxt
@@ -1764,7 +1764,7 @@ async function saveCost() {
   let goi = {};
   if (costTpMode() && tdDangChon() === 2) {
     const g = e.goi?.value || '';
-    if (!g) return showMsg(msg, 'Ở TĐ2: chọn Gói chi phí (gắn vào gói dự trù TĐ1) hoặc "Phát sinh ngoài TĐ1"', 'err');
+    if (!g) return showMsg(msg, 'Ở TĐ2: chọn Gói chi phí (gắn vào gói dự trù TĐ1). Phát sinh ngoài TĐ1: mở HĐ đã có, bấm "+ Thêm PL" hoặc "+ Chi phí khác"', 'err');
     goi = g === 'ps' ? { phat_sinh: true } : { goi_id: Number(g) };
   }
   if (costTpMode()) {
@@ -2484,7 +2484,7 @@ function goiOptions(nhom) {
   const ds = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom && r.tinh_trang !== 'dong');
   const nHd = (id) => (costData?.thau_phu || []).filter((c) => c.goi_id === id).length;
   return '<option value="">— Chọn gói chi phí —</option>' + ds.map((r) => `<option value="${r.id}">${esc(r.noi_dung || 'Gói #' + r.id)} · tạm tính ${money(r.so_tien)} đ${nHd(r.id) ? ` · đã gắn ${nHd(r.id)} HĐ` : ''}</option>`).join('')
-    + (ds.length ? '' : '<option value="" disabled>(Nhóm này chưa có gói dự trù TĐ1)</option>') + '<option value="ps">➕ Phát sinh ngoài TĐ1 (TĐ1 = 0)</option>';
+    + (ds.length ? '' : '<option value="" disabled>(Nhóm này chưa có gói dự trù TĐ1)</option>');
 }
 // Giá trị 1 HĐ đầu vào tại TĐ k (sau VAT): TĐ1 ký (HĐ gắn gói / phát sinh = 0) · TĐ2 = ký + đợt · TĐ3 = HT/QT (trống = TĐ2)
 // Mục phát sinh tại TĐ (td_ps): TĐ2 -> TĐ1 = 0 · TĐ3 -> TĐ1 = TĐ2 = 0, TĐ3 = giá trị (hoặc số QT). HĐ gắn gói / phát sinh: TĐ1 = 0
@@ -3009,7 +3009,7 @@ function renderTpDlg() {
     const ok1 = editL && md === tdL && !lk, ok3 = editL && md === 3 && !lk;
     const q3 = draft ? null : nnV(l.gia_tri_qt);
     return `<tr data-k="${draft ? 'dl' + l.key : 'l' + l.id}" data-dc="${draft || md === 1 ? 0 : (Number(l.gia_tri) || 0) - ky}" class=""${draft ? 'tv-draft' : l.ma_loai === 'HĐ' ? 'tp-hd-row' : 'tp-pl-row'}">
-      <td>${l.ma_loai === 'HĐ' ? '' : '<span class="tree">└</span>'}<span class="kind-tag ${l.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${l.ma_loai}</span> <b>${esc(c.so_ma)}</b>${ps > 1 ? ` <span class="tp-ps" title="Phát sinh tại TĐ${ps}: không tính vào ${ps === 2 ? 'TĐ1' : 'TĐ1, TĐ2'}">Phát sinh TĐ${ps}</span>` : ''}${draft ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</td>
+      <td>${l.ma_loai === 'HĐ' ? '' : '<span class="tree">└</span>'}<span class="kind-tag ${l.ma_loai === 'HĐ' ? 'kind-hd' : ''}">${l.ma_loai}</span> <b>${esc(c.so_ma)}</b>${l.la_cp ? ' <span class="tp-cpk-tag" title="Chi phí khác – ghi như phụ lục phát sinh">Chi phí khác</span>' : ''}${ps > 1 ? ` <span class="tp-ps" title="Phát sinh tại TĐ${ps}: không tính vào ${ps === 2 ? 'TĐ1' : 'TĐ1, TĐ2'}">Phát sinh TĐ${ps}</span>` : ''}${draft ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</td>
       <td>${inp('ngay', draft ? '' : isoToDmy(l.ngay), 'class="date-dmy"', ok1 || draft)}</td>
       <td class="c1v">${ps === 3 ? '' : inp('gia_tri', gtStr, 'class="money num" placeholder="0 · giảm: số âm"', ok1 || draft) + (ps === 2 ? '<div class="muted small" title="Mục phát sinh TĐ2: giá trị này là giá trị ban đầu ở TĐ2, không cộng vào TĐ1">không tính vào TĐ1</div>' : '')}</td>
       <td class="num c2v">${draft ? '<span class="muted small">lưu dòng trước</span>' : `${editL && md === 2 && !lk ? `<button type="button" class="link-btn" data-tpdot="${l.id}" title="Xem / thêm điều chỉnh">${dvm(t2)}</button>` : dvm(t2)}${md === 2 ? tdDelta(t2, t1) : ''}${editL && md === 2 && !lk ? `<div><button type="button" class="sm" data-tpdot="${l.id}">± Điều chỉnh</button></div>` : ''}`}</td>
@@ -3019,7 +3019,7 @@ function renderTpDlg() {
         : ps === 3 ? inp('gia_tri', gtStr, 'class="money num" placeholder="Giá trị phát sinh TĐ3"', ok1 || draft) // mục phát sinh TĐ3: nhập giá trị ngay ở cột TĐ3
           : inp('gia_tri_qt', qtStr, 'class="money num" placeholder="= TĐ2"', ok3)}</td>
       <td class="num strong c3s" data-calc="qt">${dvm(qtSau) + (q3 !== null ? tdDelta(q3, t2) : '') + (!draft && !l.da_qt ? '<div class="muted small">chưa QT</div>' : '')}</td>
-      <td>${inp('ghi_chu', draft ? '' : l.ghi_chu, 'maxlength="500"', ok1 || draft)}</td>
+      <td>${inp('ghi_chu', draft ? '' : l.ghi_chu, `maxlength="500"${l.la_cp ? ' placeholder="Nội dung chi phí khác"' : ''}`, ok1 || draft)}</td>
       <td class="row-actions">${!editL ? '' : lk ? (md === 3 ? '<button class="sm" data-tpmoqt>🔓 Mở khoá</button>' : '<span class="muted small">🔒 Khoá</span>')
         : draft || md === tdL ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button>${l.ma_loai === 'HĐ' ? '' : `<button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>`}`
           : md === 3 ? '<button class="primary sm" data-save hidden>Lưu QT</button>' : ''}</td>
@@ -3074,34 +3074,15 @@ function renderTpDlg() {
         <td class="num c3s">${dvm(c.qt_sau_vat)}${tdDelta(c.qt_gia_tri, tpTdTong(c.lines)[1])}</td><td colspan="2"></td></tr></tfoot>
     </table></div>
     ${(() => { // V03.18: 2 nút riêng – phụ lục của HĐ / chi phí khác không gắn HĐ (cùng quy tắc phát sinh theo TĐ)
-      const md = tdDangChon(), coPl = editL && md >= tdKy && !(c.lines.length && c.lines.every((l) => nnV(l.gia_tri_qt) !== null)), coCp = can('tien') && !costAll;
+      const md = tdDangChon(), coPl = editL && md >= tdKy && !(c.lines.length && c.lines.every((l) => nnV(l.gia_tri_qt) !== null)), coCp = coPl;
       if (!coPl && !coCp) return '';
       const ps = md > 1 ? ` (phát sinh TĐ${md})` : '';
-      return `<div class="tv-tools">${coPl ? `<button class="sm" data-addpl="${nextPl}" title="Phụ lục của hợp đồng: cộng vào giá trị HĐ, thanh toán theo HĐ">+ Thêm ${nextPl}${ps}</button>` : ''}${coCp ? `<button class="sm" data-addcpk title="Chi phí khác cùng nhóm nhưng KHÔNG thuộc hợp đồng: không cộng vào giá trị HĐ, không thanh toán theo HĐ">+ Chi phí khác${ps}</button>` : ''}
+      return `<div class="tv-tools">${coPl ? `<button class="sm" data-addpl="${nextPl}" title="Phụ lục của hợp đồng: cộng vào giá trị HĐ, thanh toán theo HĐ">+ Thêm ${nextPl}${ps}</button>` : ''}${coCp ? `<button class="sm" data-addcpk="${nextPl}" title="Chi phí khác ghi như một phụ lục phát sinh của HĐ (giá trị dự kiến, không phải dòng chi thực)">+ Chi phí khác${ps}</button>` : ''}
       <span class="muted small">${{ 1: 'Thêm ở TĐ1: tính từ TĐ1 · TĐ2 = TĐ1 (điều chỉnh ở TĐ2) · TĐ3 = TĐ2 (quyết toán ở TĐ3)',
         2: 'Thêm ở TĐ2: không tính TĐ1 · tăng / giảm thêm ở TĐ2 · TĐ3 = TĐ2 (quyết toán ở TĐ3)',
         3: 'Thêm ở TĐ3: không tính TĐ1, TĐ2 – chỉ tính ở TĐ3' }[md]}</span></div>`; })()}
 
-    ${(() => { // V03.18: Chi phí khác (không gắn HĐ) nhập từ hộp này – dòng chi phí riêng của nhóm, hiện từ TĐ phát sinh trở đi
-      const md = tdDangChon(), okC = can('tien') && !costAll, nh = NHOM().find((n) => n.code === (c.nhom || 'thau_phu'));
-      const ds = (costData.items || []).filter((r) => r.tp_ref === c.id && (Number(r.td_ps) || 1) <= md);
-      if (!ds.length && !tpDrafts.cps.length) return '';
-      const subSel = (val, ok) => (nh?.sub.length ? `<select data-f="nhom_con" ${ok ? '' : 'disabled'}>${nh.sub.filter((x) => !x.khong_tinh_cp).map((x) => `<option value="${x.code}" ${x.code === val ? 'selected' : ''}>${esc(x.ten)}</option>`).join('')}</select>` : '');
-      const row = (r, draft) => { const ps = Number(r.td_ps) || 1, ok = okC && (draft || md === ps);
-        return `<tr data-k="${draft ? 'dk' + r.key : 'k' + r.id}">
-        <td>${inp('noi_dung', draft ? '' : r.noi_dung, 'maxlength="300" placeholder="VD: Thuê máy ngoài HĐ"', ok)}${subSel(draft ? nh?.sub[0]?.code : r.nhom_con, ok)}${ps > 1 || draft ? `<div class="tp-tag-dong">${ps > 1 ? `<span class="tp-ps">Phát sinh TĐ${ps}</span>` : ''}${draft ? ' <span class="st st-tam-tinh">Chưa lưu</span>' : ''}</div>` : ''}</td>
-        <td>${inp('ngay', draft ? '' : isoToDmy(r.ngay), 'class="date-dmy"', ok)}</td>
-        <td>${inp('gia_tri', draft ? '' : money(r.gia_tri), 'class="money num" placeholder="0"', ok)}</td>
-        <td>${inp('vat', draft ? (nh?.khong_vat ? 0 : '') : r.vat || '', 'type="number" min="0" max="100" step="1" class="vat-in" placeholder="0"', ok && !nh?.khong_vat)}</td>
-        <td class="num strong" data-calc="cpk">${dDong(draft ? 0 : r.sau_vat)}</td>
-        <td class="row-actions">${ok ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button><button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>` : ''}</td></tr>`; };
-      const tong = ds.reduce((a, r) => a + (Number(r.sau_vat) || 0), 0);
-      return `<h4 class="tp-sep">Chi phí khác (không gắn HĐ) <span class="muted small">nhóm ${esc(nh?.ten || '')} · không cộng vào giá trị HĐ, không thanh toán theo HĐ · tính vào chi phí dự án</span></h4>
-    <div class="table-wrap"><table class="tp-dtl tp-cpk">
-      <thead><tr><th>Nội dung</th><th>Ngày</th><th class="num">Giá trị<br><span class="muted small">trước VAT</span></th><th>VAT %</th><th class="num">Sau VAT</th><th></th></tr></thead>
-      <tbody>${ds.map((r) => row(r, false)).join('')}${tpDrafts.cps.map((d) => row(d, true)).join('')}</tbody>
-      ${ds.length ? `<tfoot><tr><td colspan="4">TỔNG CHI PHÍ KHÁC</td><td class="num">${dDong(tong)}</td><td></td></tr></tfoot>` : ''}
-    </table></div>`; })()}
+
 
     ${tdDangChon() > 1 ? (() => { // Danh sách các đợt điều chỉnh TĐ2 (theo dõi) – từ TĐ2 trở đi
       const ds = c.lines.filter((l) => (l.dot || []).length);
@@ -3196,7 +3177,7 @@ async function onTpDlgClick(e) {
     catch (err) { showMsg($('#tp-msg'), err.message, 'err'); }
     return;
   }
-  if (t.dataset.addcpk !== undefined) { tpDrafts.cps.push({ key: ++tpSeq, td_ps: tdDangChon() > 1 ? tdDangChon() : null }); return renderTpDlg(); }
+  if (t.dataset.addcpk) { tpDrafts.lines.push({ key: ++tpSeq, ma_loai: t.dataset.addcpk, la_cp: true, td_ps: tdDangChon() > 1 ? tdDangChon() : null }); return renderTpDlg(); }
   if (t.dataset.addpl) { tpDrafts.lines.push({ key: ++tpSeq, ma_loai: t.dataset.addpl, td_ps: tdDangChon() > 1 ? tdDangChon() : null }); return renderTpDlg(); }
   if (t.dataset.addpay) {
     const loai = t.dataset.addpay;
@@ -3249,7 +3230,7 @@ async function onTpDlgClick(e) {
         if (await call(`/api/tp-hd-pl/${cur.id}/qt`, 'PUT', { gt_qt: q })) await after(`Đã lưu số quyết toán ${cur.ma_loai} – dòng đã khoá`);
         return;
       }
-      const body = { ma_loai: cur.ma_loai, ngay, gia_tri: parseMoney(v('gia_tri')), vat: v('vat'), gia_tri_qt: parseMoney(v('gia_tri_qt')), ghi_chu: v('ghi_chu'), giu_qt: true, ...(draft && cur.td_ps ? { td_ps: cur.td_ps } : {}) };
+      const body = { ma_loai: cur.ma_loai, ngay, gia_tri: parseMoney(v('gia_tri')), vat: v('vat'), gia_tri_qt: parseMoney(v('gia_tri_qt')), ghi_chu: v('ghi_chu'), giu_qt: true, ...(draft && cur.td_ps ? { td_ps: cur.td_ps } : {}), ...(draft && cur.la_cp ? { la_cp: true } : {}) };
       if (draft && Number(cur.td_ps) === 3) body.gia_tri_qt = body.gia_tri; // phát sinh TĐ3: giá trị nhập = số quyết toán -> khoá như quy tắc TĐ3
       if (await call(draft ? `/api/thau-phu/${c.id}/hd-pl` : `/api/tp-hd-pl/${cur.id}`, draft ? 'POST' : 'PUT', body)) {
         if (draft) tpDrafts.lines = tpDrafts.lines.filter((d) => d !== cur);

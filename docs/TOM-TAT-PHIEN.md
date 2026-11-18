@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.18.11.26 – "+ Chi phí khác" ghi như phụ lục phát sinh (trong bảng HĐ / PL); bỏ "Phát sinh ngoài TĐ1" ở ô chọn gói
+- "+ Chi phí khác": thêm 1 dòng PLxx có nhãn "Chi phí khác" (giá trị dự kiến, không phải dòng chi thực) ngay trong bảng HĐ / PL của hộp HĐ
+  đầu vào – tính, điều chỉnh, quyết toán, thanh toán như phụ lục, cùng quy tắc phát sinh theo TĐ. Bỏ bảng riêng "Chi phí khác (không gắn HĐ)" (V03.18).
+- Kho dữ liệu (chỉ THÊM): `tp_hd_pl.la_cp`. Ô chọn gói khi tạo HĐ ở TĐ2: bỏ "➕ Phát sinh ngoài TĐ1 (TĐ1 = 0)" – phát sinh ngoài TĐ1 nhập bằng
+  "+ Thêm PL" / "+ Chi phí khác" trong HĐ đã có. HĐ đã tạo theo cách cũ (phat_sinh) vẫn tính như trước.
+
 ## V03.18.11.26 – Hộp HĐ đầu vào: 2 nút riêng "+ Thêm PL" và "+ Chi phí khác" (không gắn HĐ)
 - "+ Thêm PLxx": phụ lục của HĐ (cộng vào giá trị HĐ, thanh toán theo HĐ). "+ Chi phí khác": dòng chi phí riêng cùng nhóm (không cộng vào
   giá trị HĐ, không thanh toán theo HĐ, tính vào chi phí dự án), hiện ở bảng "Chi phí khác (không gắn HĐ)" trong hộp. Cả 2 có ở 3 tab,
