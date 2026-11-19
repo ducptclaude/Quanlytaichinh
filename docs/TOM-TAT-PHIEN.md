@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.19.11.26 – Ghi chú nhanh: bỏ "Đang nhập liệu" và số cảnh báo; đổi màu (nhãn xanh ngọc, chữ trắng trên nền tối)
+
 ## V02.19.11.26 – Khoá số dự án khi Còn lại = 0 + Ghi chú nhanh đầu báo cáo
 - Dự án đã có doanh thu, **còn phải thu = 0 và còn phải chi = 0** (cùng số mục III, thời điểm mới nhất, sau VAT) -> tự khoá nhập
   mọi số liệu của dự án (doanh thu, tiền về, chi phí, HĐ đầu vào, thanh toán, dự trù, đợt điều chỉnh, quyết toán, TĐ…). Còn số -> không khoá.

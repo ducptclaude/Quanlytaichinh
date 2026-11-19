@@ -3869,8 +3869,10 @@ button.da-ic { cursor: pointer; border-radius: 6px; }
 button.da-ic:hover { background: rgba(0, 0, 0, .06); }
 .da-khoa { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; margin: 6px 0; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; }
 .da-khoa.mo { color: #075985; background: #f0f9ff; border-color: #7dd3fc; }
-.b-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 8px; padding: 7px 10px; border-radius: 10px; font-size: 12.5px; background: rgba(37, 99, 235, .06); border: 1px dashed rgba(37, 99, 235, .35); }
-.b-note em { font-style: normal; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: #1d4ed8; margin-right: 2px; }
-.b-note > span:not(:last-child)::after { content: '·'; margin-left: 8px; color: var(--muted); }
+.b-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 8px; padding: 7px 12px; border-radius: 10px; font-size: 12.5px; color: #e8f1fb; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .22); }
+.b-note b { color: #ffffff; }
+.b-note em { font-style: normal; font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: #0f3d5c; background: #5eead4; padding: 2px 8px; border-radius: 6px; margin-right: 2px; }
+.b-note > span:not(:last-child)::after { content: '·'; margin-left: 8px; color: rgba(255, 255, 255, .45); }
+.b-note b.neg { color: #fca5a5; }
 .b-note .b-note-w { color: #b45309; }
 @media print { .da-khoa { display: none; } button.da-ic { pointer-events: none; } }
