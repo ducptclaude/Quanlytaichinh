@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Đơn vị hiển thị số tiền": "Currency display unit",
+"Khoá số dự án": "Project lock",
+"Dòng Tình trạng (đầu báo cáo)": "Status line (report header)",
 "Đơn vị tiền": "Currency unit",
 "Ngôn ngữ": "Language",
 "Chỉ đổi cách hiện, không đổi số liệu": "Display only – data unchanged",

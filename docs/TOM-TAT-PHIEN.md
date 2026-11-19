@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.19.11.26 – Ngôn ngữ chuyển vào menu tên người dùng (Cá nhân · Liên hệ · Ngôn ngữ · Đăng xuất); nút ⚙ chỉ còn Đơn vị. Cập nhật trang Hướng dẫn: khoá số dự án, dòng Tình trạng đầu báo cáo, + Thêm PL / + Chi phí khác (thay "Phát sinh ngoài TĐ1"), vị trí nút ⚙ / ngôn ngữ / sáng-tối / ?
+
 ## V08.19.11.26 – Đầu trang gọn: nút ⚙ (Đơn vị tiền + Ngôn ngữ, cạnh nút hiện đơn vị đang chọn), nút sáng / tối biểu tượng nét mảnh, Hướng dẫn thành nút "?" tròn (bỏ khỏi thanh menu)
 
 ## V07.19.11.26 – Dashboard: bỏ khung "Bản đồ dự án" (bảng Danh mục dự án chiếm cả hàng; ô tọa độ dự án vẫn giữ số cũ)
