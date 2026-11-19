@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.19.11.26 – Báo cáo: bỏ chú thích dưới mục I, II, III; tiêu đề mục I–IV to hơn 2pt (19px, điện thoại 17px), màu theo mục; "Đã khoá số" bỏ chữ (thu đủ, chi đủ)
+
 ## V04.19.11.26 – Dòng ghi chú đầu báo cáo: nhãn đổi thành "Tình trạng" (bỏ chữ Ghi chú nhanh)
 
 ## V03.19.11.26 – Ghi chú nhanh: bỏ "Đang nhập liệu" và số cảnh báo; đổi màu (nhãn xanh ngọc, chữ trắng trên nền tối)

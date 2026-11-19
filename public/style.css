@@ -3876,3 +3876,14 @@ button.da-ic:hover { background: rgba(0, 0, 0, .06); }
 .b-note b.neg { color: #fca5a5; }
 .b-note .b-note-w { color: #b45309; }
 @media print { .da-khoa { display: none; } button.da-ic { pointer-events: none; } }
+/* V05.19.11.26: tiêu đề mục I–IV báo cáo to hơn 2pt (16 -> 19px), màu theo màu của mục */
+#b-report .th-sec .th-ttl h3 { font-size: 19px; letter-spacing: .5px; }
+#b-report .th-sec-I .th-ttl h3 { color: #2559c4; }
+#b-report .th-sec-II .th-ttl h3 { color: #1f3b73; }
+#b-report .th-sec-III .th-ttl h3 { color: #c8621e; }
+#b-report .th-sec-IV .th-ttl h3 { color: #0d8a73; }
+:root[data-theme="dark"] #b-report .th-sec-I .th-ttl h3 { color: #7fa8ff; }
+:root[data-theme="dark"] #b-report .th-sec-II .th-ttl h3 { color: #a9c1f0; }
+:root[data-theme="dark"] #b-report .th-sec-III .th-ttl h3 { color: #f5a467; }
+:root[data-theme="dark"] #b-report .th-sec-IV .th-ttl h3 { color: #4fd8bb; }
+@media (max-width: 600px) { #b-report .th-sec .th-ttl h3 { font-size: 17px; } }

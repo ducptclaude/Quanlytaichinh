@@ -782,7 +782,7 @@ function bGhiChuNhanh(list, v, warnN) {
   if (one) it.push(`<b>${esc(one.trang_thai)}</b>${one.ht_tu_dong != null ? ` (${Math.round(one.ht_tu_dong * 100)}% hoàn thành)` : ''}`);
   else { const c = {}; for (const d of list) c[d.trang_thai] = (c[d.trang_thai] || 0) + 1; it.push(`<b>${list.length}</b> dự án: ${Object.entries(c).map(([k, n]) => `${n} ${esc(k)}`).join(' · ')}`); }
   it.push(`Còn phải thu ${ty(T.pt)}`, `Còn phải chi ${ty(T.pc)}`, `Còn lại ${ty(T.con)}`);
-  if (one && one.con_lai?.khoa) it.push(one.mo_khoa_so ? '🔓 Đang mở khoá tạm' : '🔒 Đã khoá số (thu đủ, chi đủ)');
+  if (one && one.con_lai?.khoa) it.push(one.mo_khoa_so ? '🔓 Đang mở khoá tạm' : '🔒 Đã khoá số');
   else if (khoaN) it.push(`🔒 ${khoaN} dự án đã khoá số`);
   return `<div class="b-note" title="Tự động theo số liệu – thời điểm mới nhất (như mục III)"><em>Tình trạng</em>${it.map((x) => `<span>${x}</span>`).join('')}</div>`;
 }
@@ -972,7 +972,7 @@ function bTongHopHtml(list, v, P) {
       }).join('')}</tbody>
       ${foot([bpct(RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.gtht || 0), 0), RR.reduce((a, r) => a + (GH.get(r.x.d.id)?.dt3 || 0), 0)), bTy(TT.dt), bTy(TT.cp), ty(TT.ln), bpct(TT.ln, TT.dt)])}
     </table></div>
-${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính lúc ký HĐ: doanh thu HĐ + PL ký với CĐT · chi phí = gói / HĐ đầu vào ký + chi phí gián tiếp, tài chính. Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>` : `<p class="muted small f-note">${k === 2 ? 'TĐ2 = giá trị ký (TĐ1) của từng HĐ / PL + các đợt điều chỉnh tăng / giảm; chi phí = HĐ đầu vào theo TĐ2 và chi phí khác đã ghi nhận.' : 'TĐ3 = giá trị quyết toán từng HĐ / PL; văn bản chưa có số quyết toán tạm lấy theo TĐ2.'} Mũi tên: tăng / giảm so với TĐ${k - 1} (xanh = có lợi, đỏ = bất lợi). Cột Hoàn thành: % giá trị hoàn thành = GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost).</p>`}`;
+`; // V05.19.11.26: bỏ chú thích dưới bảng (theo yêu cầu)
     })()}
 
     ${thHead('II', 'Dòng tiền thực tế', 'Tiền thật đã thu về và đã chi ra của dự án', [`Lũy kế đến ${dTo}`, vt[0].toUpperCase() + vt.slice(1)])}
@@ -982,8 +982,6 @@ ${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính l
       ${card('ln', 'Còn lại (thu − chi)', T.con, [T.con < 0 ? 'Đang chi nhiều hơn thu' : 'Tiền dự án đang có', 'Không gồm tiền vay, trả nợ gốc'], 'tỷ', 'con')}
     </div>
     ${/* V03.17: bỏ bảng từng dự án (người dùng yêu cầu) – xem chi tiết bằng cách bấm số trên 3 ô */ ''}
-    <p class="muted small f-note tt-hint no-print">Bấm vào số <b>Dòng thu</b> / <b>Dòng chi</b> / <b>Còn lại</b> để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.</p>
-    ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án.</p>' : ''}
 
     ${thHead('III', 'Dòng tiền còn lại phải thu – chi', 'Doanh thu, chi phí thời điểm mới nhất trừ dòng thu, dòng chi thực tế (mục II)', ['Thời điểm mới nhất', vt[0].toUpperCase() + vt.slice(1)])}
     <div class="f-grid th-grid3">
@@ -1002,7 +1000,6 @@ ${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính l
       <tfoot><tr><td></td><td colspan="3">Tổng cộng (${R3.length} dự án)</td><td class="num c-thu g1">${bTy(T3.dt)}</td><td class="num c-thu">${bTy(T3.thu)}</td><td class="num c-thu">${ty(T3.pt)}</td>
         <td class="num c-chi g1">${bTy(T3.cp)}</td><td class="num c-chi">${bTy(T3.chi)}</td><td class="num c-chi">${ty(T3.pc)}</td><td class="num g-con">${ty(T3.con)}</td></tr></tfoot>
     </table></div>
-    <p class="muted small f-note">Doanh thu, chi phí lấy thời điểm mới nhất của từng dự án (có quyết toán = TĐ3, chưa có = TĐ2, chưa điều chỉnh = TĐ1) · Còn phải thu = Doanh thu − Dòng thu · Còn phải chi = Chi phí − Dòng chi · Còn lại = Còn phải thu − Còn phải chi.</p>
     ${bMuc4Html(list, v)}`;
 }
 
