@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.19.11.26 – Dashboard: bỏ khung "Bản đồ dự án" (bảng Danh mục dự án chiếm cả hàng; ô tọa độ dự án vẫn giữ số cũ)
+
 ## V06.19.11.26 – Bỏ khu "Báo cáo theo công trình" (thẻ dự án) ở cuối trang Báo cáo + dòng hướng dẫn tương ứng (hàm bPcSection giữ lại)
 
 ## V05.19.11.26 – Báo cáo: bỏ chú thích dưới mục I, II, III; tiêu đề mục I–IV to hơn 2pt (19px, điện thoại 17px), màu theo mục; "Đã khoá số" bỏ chữ (thu đủ, chi đủ)

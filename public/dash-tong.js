@@ -139,8 +139,6 @@ function bDashRender(list, v, one) {
         <div class="table-wrap"><table class="db-table no-mcard"><thead><tr><th class="num">STT</th><th>Mã DA</th><th>Tên dự án</th><th>Tình trạng</th>
           <th class="num">Doanh thu ${'TĐ' + k}</th><th class="num">Lợi nhuận ${'TĐ' + k}</th><th>Tỷ suất LN</th><th>Đã thu / DT</th><th class="num">Còn phải thu</th></tr></thead>
           <tbody>${tRows}</tbody><tfoot>${tFoot}</tfoot></table></div></section>
-      <section class="db-card db-c-map"><h5>Bản đồ dự án <small>vòng tròn = doanh thu</small></h5>
-        <div class="map-box"><div id="b-map" class="map-c db-mapc" role="region" aria-label="Bản đồ phân bổ dự án"></div></div></section>
     </div>
     <p class="db-note muted small">Số liệu cùng nguồn với chế độ Báo cáo: khối I = mục I (TĐ1), II = mục II, III = mục III, IV và thanh chỉ số = mục IV (đã quyết toán lấy TĐ3, chưa quyết toán tạm tính theo TĐ2). Bấm "Xem mục" để mở phần chi tiết tương ứng.</p>
   </div>`;
@@ -150,7 +148,7 @@ function bDashRender(list, v, one) {
     { height: 300, tipExtra: (p) => `<tr class="sum"><td>Chênh lệch</td><td class="${p.thu - p.chi < 0 ? 'neg' : ''}">${bn(p.thu - p.chi)}</td></tr>` });
   const cg = bCostGroups(list, v);
   bDonut($('#db-ch-cost'), cg.map((x, i) => ({ label: x.ten, val: x.val, color: DB_COST_COL[i % DB_COST_COL.length] })));
-  if (typeof bMapInit === 'function') bMapInit(list, v);
+  // V07.19.11.26: bỏ Bản đồ dự án (theo yêu cầu)
 }
 
 // Chọn TĐ cho nhóm DT – CP – LN (và cột của bảng dự án)
