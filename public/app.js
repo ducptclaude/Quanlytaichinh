@@ -67,9 +67,29 @@ const NHAP_LIEU = ['projects', 'revenue', 'cost'];
 // Menu Xuất: chọn xong một mục thì đóng menu
 $('#xuat-grp .tab-menu')?.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(closeMenus); });
 // Chọn đơn vị tiền (toàn hệ thống): lưu theo trình duyệt rồi vẽ lại trang đang xem
-const caiDv = () => { const s = $('#dv-pick'), o = $('#cai-dv'); if (s && o) o.textContent = s.options[s.selectedIndex]?.text || ''; }; // nhãn đơn vị cạnh nút ⚙
+// Nhãn nút: "VND · Tự động", "USD · Triệu"… (ngoại tệ chưa có tỷ giá: báo ngay trong bảng chọn)
+const caiDv = () => {
+  const s = $('#dv-pick'), o = $('#cai-dv'), t = $('#tien-pick'); if (!s || !o) return;
+  const ngoai = TIEN_MA !== 'VND';
+  for (const op of s.options) { if (op.value === 'dong') op.textContent = ngoai ? 'Đầy đủ' : 'Đồng'; if (op.value === 'ty') op.hidden = ngoai; }
+  if (ngoai && s.value === 'ty') s.value = 'trieu';
+  o.innerHTML = `<b>${TIEN_MA}</b><span class="cai-dv2"> · ${esc(s.options[s.selectedIndex]?.text || '')}</span>`;
+  if (t) t.value = TIEN_MA;
+  const tg = $('#tien-tg'); if (tg) tg.textContent = ngoai ? (tienTyGiaTxt() || 'Chưa lấy được tỷ giá – đang hiện VND') : '';
+};
+async function taiTyGia() {
+  try { TY_GIA = await api('/api/ty-gia'); } catch { TY_GIA = null; }
+  caiDv();
+  if (TIEN_MA !== 'VND' && TIEN_TAB === 'report' && typeof renderKeepPos === 'function' && typeof BC !== 'undefined' && BC) renderKeepPos(null); // tỷ giá về sau khi báo cáo đã vẽ
+}
 if ($('#dv-pick')) {
-  $('#dv-pick').value = DV_CHON; caiDv();
+  $('#dv-pick').value = DV_CHON; caiDv(); taiTyGia();
+  $('#tien-pick')?.addEventListener('change', (e) => {
+    TIEN_MA = ['USD', 'EUR'].includes(e.target.value) ? e.target.value : 'VND';
+    try { localStorage.setItem('tien_te', TIEN_MA); } catch {}
+    if (TIEN_MA !== 'VND' && DV_CHON === 'ty') { DV_CHON = 'trieu'; $('#dv-pick').value = 'trieu'; }
+    $('#dv-pick').dispatchEvent(new Event('change'));
+  });
   $('#dv-pick').addEventListener('change', (e) => {
     DV_CHON = DV[e.target.value] ? e.target.value : 'auto'; caiDv();
     try { localStorage.setItem('dv_tien', DV_CHON); } catch {}
@@ -94,6 +114,7 @@ function showTab(name) {
   $('#subnav').hidden = !NHAP_LIEU.includes(name);
   if ($('#xuat-grp')) $('#xuat-grp').hidden = name !== 'report' || !can('xuat'); // nút Xuất chỉ hiện ở trang Báo cáo, vai có quyền xuất
   $$('main > .tab-panel').forEach((p) => (p.hidden = p.id !== 'tab-' + name));
+  TIEN_TAB = name; // ngoại tệ chỉ áp dụng ở Báo cáo
   try { localStorage.setItem('tab', name); } catch {}
   return Promise.resolve(loaders[name]()).catch((err) => alert(err.message));
 }

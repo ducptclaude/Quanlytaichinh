@@ -1,6 +1,15 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Tiền tệ": "Currency",
+"VND – Việt Nam đồng": "VND – Vietnamese dong",
+"USD – Đô la Mỹ": "USD – US dollar",
+"EUR – Euro": "EUR – Euro",
+"Đầy đủ": "Full",
+"Tiền tệ và đơn vị hiển thị số tiền": "Currency and display unit",
+"Tỷ giá": "Exchange rate",
+"Chỉ đổi cách hiện, không đổi số liệu. USD / EUR áp dụng cho Báo cáo và file xuất; trang nhập liệu luôn VND.": "Display only – data unchanged. USD / EUR apply to Reports and exports; data entry pages always use VND.",
+"Chưa lấy được tỷ giá – đang hiện VND": "Exchange rate unavailable – showing VND",
 "Đơn vị hiển thị số tiền": "Currency display unit",
 "Khoá số dự án": "Project lock",
 "Dòng Tình trạng (đầu báo cáo)": "Status line (report header)",
@@ -1706,6 +1715,7 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["Tỷ giá Vietcombank (giá bán) {}/{}/{} {}:{}: 1 {} = {} đ", "Vietcombank rate (selling) {}/{}/{} {}:{}: 1 {} = {} VND"],
 ["{} dự án: ", "{} projects: "],
 ["🔒 {} dự án đã khoá số", "🔒 {} projects locked"],
 ["⚠ {} cảnh báo", "⚠ {} warnings"],

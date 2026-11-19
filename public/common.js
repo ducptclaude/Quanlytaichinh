@@ -96,8 +96,29 @@ const DV = {
 };
 let DV_CHON = 'auto';
 try { const x = localStorage.getItem('dv_tien'); if (DV[x]) DV_CHON = x; } catch {}
-const dvKey = (def) => (DV_CHON === 'auto' ? def : DV_CHON);
-const dvU = (def) => DV[dvKey(def)];
+// V10.19.11.26: TIỀN TỆ hiển thị VND / USD / EUR (tỷ giá Vietcombank – giá bán, máy chủ tự cập nhật).
+// Chỉ áp dụng ở trang Báo cáo (màn hình + file xuất). Trang nhập liệu luôn VND vì ô nhập bằng đồng.
+let TIEN_MA = 'VND', TY_GIA = null, TIEN_TAB = '';
+try { const x = localStorage.getItem('tien_te'); if (x === 'USD' || x === 'EUR') TIEN_MA = x; } catch {}
+const tienNgoai = () => TIEN_MA !== 'VND' && TY_GIA?.[TIEN_MA] > 0 && TIEN_TAB === 'report';
+const tienRate = () => (tienNgoai() ? TY_GIA[TIEN_MA] : 1);
+const tienMa = () => (tienNgoai() ? TIEN_MA : 'VND');
+const TK = () => (tienNgoai() ? TIEN_MA : 'đ'); // ký hiệu sau số tiền đầy đủ
+const DV_NGOAI_AUTO = { ty: 'trieu', trieu: 'nghin', nghin: 'dong', dong: 'dong' }; // ngoại tệ: bậc nhỏ hơn VND (1 tỷ đ ≈ 38 nghìn USD)
+const dvKey = (def) => {
+  const k = DV_CHON === 'auto' ? def : DV_CHON;
+  if (!tienNgoai()) return k;
+  return DV_CHON === 'auto' ? DV_NGOAI_AUTO[k] : k === 'ty' ? 'trieu' : k;
+};
+const dvU = (def) => {
+  const k = dvKey(def);
+  if (!tienNgoai()) return DV[k];
+  const C = TIEN_MA, r = tienRate();
+  const u = { dong: { k: 1, ten: C, ngan: C, d: [0, 0] }, nghin: { k: 1e3, ten: `nghìn ${C}`, ngan: `nghìn ${C}`, d: [0, 1] }, trieu: { k: 1e6, ten: `triệu ${C}`, ngan: `tr ${C}`, d: [2, 2] } }[k];
+  return { ...u, k: u.k * r };
+};
+// Dòng tỷ giá: "Tỷ giá Vietcombank (giá bán) 19/11/2026 15:45: 1 USD = 26.340 đ"
+const tienTyGiaTxt = (ma = TIEN_MA) => (TY_GIA?.[ma] ? `Tỷ giá Vietcombank (giá bán)${TY_GIA.ngay ? ' ' + TY_GIA.ngay : ''}${TY_GIA.cu ? ' – bản lưu gần nhất' : ''}: 1 ${ma} = ${new Intl.NumberFormat('vi-VN').format(TY_GIA[ma])} đ` : '');
 const DV_NF = new Map();
 // Số theo đơn vị đang chọn; autoD = số lẻ riêng của màn hình khi để Tự động
 function dvNum(n, def, autoD) {

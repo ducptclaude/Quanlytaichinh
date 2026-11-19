@@ -11,6 +11,7 @@ const { buildContracts, summarizeContracts } = require('./lib/subcontract');
 const { KHOI_CHI_PHI, NHOM_CHI_PHI, summarizeCost, sortCost, costLine } = require('./lib/cost');
 const { summarizeProject } = require('./lib/dashboard');
 const { projectReport } = require('./lib/report');
+const { layTyGia } = require('./lib/tygia');
 const { DEMO_PREFIX, seedDemo } = require('./lib/demo');
 const { buildDtcp, costLinesFor, congTy } = require('./lib/export-dtcp');
 const PHIEN_BAN = require('./lib/version').readVersion(); // đọc 1 lần khi khởi động
@@ -133,6 +134,8 @@ const canMoKhoa = auth.requireRole(...new Set([...QUYEN.hd, ...QUYEN.tien])); //
 api.use(security.sameOrigin);
 api.use(auth.csrfGuard);
 
+// V10.19.11.26: tỷ giá USD / EUR (Vietcombank – giá bán) để hiện / xuất báo cáo theo ngoại tệ
+api.get('/ty-gia', wrap(async (_req, res) => res.json((await layTyGia(store)) || { USD: null, EUR: null }))); 
 api.get('/meta', wrap(async (_req, res) => {
   const s = await store.getSettings();
   res.json({
@@ -1041,7 +1044,9 @@ api.get('/bao-cao/dtcp.xlsx', quyen('xuat'), wrap(async (req, res) => {
   const du_an = ids.length ? all.filter((d) => ids.includes(d.id)) : all;
   if (!du_an.length) return bad(res, 'Không có dự án để xuất');
   const ngay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
-  const buf = await buildDtcp({ du_an, ngay, nguoi_lap: req.user.full_name || req.user.username, ten_cong_ty: (await store.getSettings()).ten_cong_ty });
+  let tien = null; // ?tien=USD|EUR -> quy đổi theo tỷ giá Vietcombank (giá bán) mới nhất
+  if (['USD', 'EUR'].includes(req.query.tien)) { const tg = await layTyGia(store); if (!tg?.[req.query.tien]) return bad(res, 'Chưa lấy được tỷ giá – thử lại sau hoặc xuất bằng VND'); tien = { ma: req.query.tien, ty_gia: tg[req.query.tien], ngay: tg.ngay }; }
+  const buf = await buildDtcp({ du_an, ngay, nguoi_lap: req.user.full_name || req.user.username, ten_cong_ty: (await store.getSettings()).ten_cong_ty, tien });
   audit.log(req, 'Xuất báo cáo', 'Báo cáo', `Excel mẫu trình ký (DT–CP) · ${du_an.length} dự án`);
   const ten = `BaoCao_DTCP_${ngay.replace(/-/g, '')}.xlsx`;
   res.set({ 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition': `attachment; filename="${ten}"` });

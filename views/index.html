@@ -55,10 +55,12 @@
       </div>
       <!-- V08.19.11.26: gom Đơn vị + Ngôn ngữ vào 1 nút ⚙; sáng / tối và Hướng dẫn thành nút biểu tượng nhỏ -->
       <div class="tab-grp cai-grp" data-grp="cai">
-        <button type="button" class="tab-grp-btn cai-btn" data-grp-toggle aria-expanded="false" aria-haspopup="true" title="Đơn vị hiển thị số tiền"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span id="cai-dv" class="cai-dv"></span><span class="caret">▾</span></button>
+        <button type="button" class="tab-grp-btn cai-btn" data-grp-toggle aria-expanded="false" aria-haspopup="true" title="Tiền tệ và đơn vị hiển thị số tiền"><span id="cai-dv" class="cai-dv">VND</span><span class="caret">▾</span></button>
         <div class="tab-menu right cai-menu" role="menu">
-          <label class="cai-row"><span>Đơn vị tiền</span><select id="dv-pick"><option value="auto">Tự động</option><option value="dong">Đồng</option><option value="nghin">Nghìn</option><option value="trieu">Triệu</option><option value="ty">Tỷ</option></select></label>
-          <p class="cai-note">Chỉ đổi cách hiện, không đổi số liệu</p>
+          <label class="cai-row"><span>Tiền tệ</span><select id="tien-pick"><option value="VND">VND – Việt Nam đồng</option><option value="USD">USD – Đô la Mỹ</option><option value="EUR">EUR – Euro</option></select></label>
+          <label class="cai-row"><span>Đơn vị</span><select id="dv-pick"><option value="auto">Tự động</option><option value="dong">Đồng</option><option value="nghin">Nghìn</option><option value="trieu">Triệu</option><option value="ty">Tỷ</option></select></label>
+          <p class="cai-note" id="tien-tg"></p>
+          <p class="cai-note">Chỉ đổi cách hiện, không đổi số liệu. USD / EUR áp dụng cho Báo cáo và file xuất; trang nhập liệu luôn VND.</p>
         </div>
       </div>
       <button type="button" class="ic-btn theme-btn" data-theme-toggle title="Giao diện sáng / tối" aria-label="Giao diện sáng / tối"></button>
@@ -457,7 +459,7 @@
 
         <h3 class="gd-h3">Quy tắc nhập số</h3>
         <div class="gd-grid">
-          <div class="gd-rule"><span class="gd-ico">💰</span><b>Nhập bằng đồng, trước VAT</b><p>Hệ thống tự tính tiền VAT và giá trị sau VAT. Nút <b>⚙ Đơn vị</b> (Đồng / Triệu / Tỷ) chỉ đổi cách hiện, không đổi số.</p></div>
+          <div class="gd-rule"><span class="gd-ico">💰</span><b>Nhập bằng đồng, trước VAT</b><p>Hệ thống tự tính tiền VAT và giá trị sau VAT. Nút <b>Đơn vị</b> góc phải trên (VND / USD / EUR · Đồng / Triệu / Tỷ) chỉ đổi cách hiện, không đổi số.</p></div>
           <div class="gd-rule"><span class="gd-ico">⌨️</span><b>Gõ nhanh</b><p><code>180tr</code> · <code>1,5 tỷ</code> · <code>500k</code> · <code>+50tr</code> (tăng) · <code>-30.000.000</code> (giảm) · <code>=120*2,5tr</code>. Dán thẳng số từ Excel / Word.</p></div>
           <div class="gd-rule"><span class="gd-ico">📅</span><b>Ngày dd/mm/yyyy</b><p>VD <code>15/11/2026</code>. Ngày dùng để xếp đợt và tính dòng tiền theo kỳ.</p></div>
           <div class="gd-rule"><span class="gd-ico">🧩</span><b>Đúng chỗ – đúng TĐ</b><p>TĐ1: thêm HĐ / PL / gói. TĐ2: chỉ ghi <b>đợt điều chỉnh</b>, không sửa số ký. TĐ3: nhập <b>số quyết toán</b>.</p></div>
@@ -642,7 +644,7 @@
           <div class="gd-rule"><span class="gd-ico">✅</span><b>Duyệt</b><p>Lãnh đạo / Quản trị duyệt số liệu nhập; người nhập xem hồ sơ đã gửi, kết quả và lý do.</p></div>
           <div class="gd-rule"><span class="gd-ico">✍️</span><b>Nhập liệu</b><p>Dự án · Doanh thu · Chi phí. Thanh chuyển nhanh giữa 3 trang ở đầu trang.</p></div>
           <div class="gd-rule"><span class="gd-ico">🛡️</span><b>Quản trị</b><p>Tài khoản &amp; vai trò, nhật ký hoạt động, Cài đặt (Passcode, tên công ty, dữ liệu mẫu).</p></div>
-          <div class="gd-rule"><span class="gd-ico">🔢</span><b>Đơn vị tiền</b><p>Nút <b>⚙</b> góc phải trên: Tự động / Đồng / Nghìn / Triệu / Tỷ – áp dụng toàn hệ thống, chỉ đổi cách hiện.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🔢</span><b>Đơn vị tiền</b><p>Nút <b>VND · Tự động ▾</b> góc phải trên: chọn <b>Tiền tệ</b> VND / USD / EUR và <b>Đơn vị</b> Tự động / Đầy đủ / Nghìn / Triệu / Tỷ. USD, EUR quy đổi theo tỷ giá <b>Vietcombank – giá bán</b> mới nhất (tự cập nhật), áp dụng cho Báo cáo, Dashboard và file xuất; trang nhập liệu luôn VND. Chỉ đổi cách hiện, không đổi số liệu.</p></div>
           <div class="gd-rule"><span class="gd-ico">🌐</span><b>Ngôn ngữ</b><p>Bấm <b>tên người dùng ▾</b> → <b>Ngôn ngữ</b>: Việt Nam / English. Dữ liệu người dùng nhập không dịch.</p></div>
           <div class="gd-rule"><span class="gd-ico">🌙</span><b>Giao diện sáng / tối</b><p>Nút tròn hình trăng / mặt trời góc phải trên. Trang Hướng dẫn: nút tròn <b>?</b> bên cạnh.</p></div>
           <div class="gd-rule"><span class="gd-ico">📱</span><b>Điện thoại, máy tính bảng</b><p>Bảng tự gọn; vuốt ngang xem cột số; chạm thay cho nhấp đúp.</p></div>

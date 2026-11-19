@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.19.11.26 – Tiền tệ VND / USD / EUR (tỷ giá Vietcombank – giá bán, tự cập nhật) + nút đơn vị gọn (bỏ bánh răng)
+- Nút góc phải: "VND · Tự động ▾" -> chọn Tiền tệ (VND / USD / EUR) + Đơn vị (Tự động / Đầy đủ / Nghìn / Triệu / Tỷ; ngoại tệ không có Tỷ). Dòng tỷ giá + ngày giờ.
+- Máy chủ `lib/tygia.js`: đọc bảng tỷ giá XML Vietcombank (giá bán = Sell), giữ 1 giờ, lưu bản tốt gần nhất vào Cài đặt (`ty_gia_vcb`) để dùng khi lỗi mạng. `GET /api/ty-gia`.
+- Áp dụng: trang Báo cáo + Dashboard + Trợ lý (màn hình) và file xuất: Excel, Excel mẫu trình ký (`?tien=USD`), PowerPoint, Dashboard PDF – ghi đơn vị + tỷ giá.
+  Trang nhập liệu luôn VND (ô nhập bằng đồng). Số liệu gốc không đổi. Tự động ngoại tệ: báo cáo = triệu USD, HĐ đầu vào = nghìn USD.
+- Kiểm tra (tỷ giá giả lập vì môi trường thử chặn trang Vietcombank): 1.899,61 tỷ ÷ 26.340 = 72,12 tr USD khớp; Excel mẫu EUR tổng = màn hình; tester 0 lỗi.
+
 ## V09.19.11.26 – Ngôn ngữ chuyển vào menu tên người dùng (Cá nhân · Liên hệ · Ngôn ngữ · Đăng xuất); nút ⚙ chỉ còn Đơn vị. Cập nhật trang Hướng dẫn: khoá số dự án, dòng Tình trạng đầu báo cáo, + Thêm PL / + Chi phí khác (thay "Phát sinh ngoài TĐ1"), vị trí nút ⚙ / ngôn ngữ / sáng-tối / ?
 
 ## V08.19.11.26 – Đầu trang gọn: nút ⚙ (Đơn vị tiền + Ngôn ngữ, cạnh nút hiện đơn vị đang chọn), nút sáng / tối biểu tượng nét mảnh, Hướng dẫn thành nút "?" tròn (bỏ khỏi thanh menu)

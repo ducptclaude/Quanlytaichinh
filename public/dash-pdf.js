@@ -21,12 +21,12 @@ function dpHtml(list, v) {
   const vs = (cur, base, good) => (k === 1 ? '<span class="dp-eq">Kế hoạch lúc ký hợp đồng</span>' : d(cur, base, good));
   const kpi = (lab, val, unit, sub, col) => `<div class="dp-k" style="--c:${col}"><div class="dp-kl">${lab}</div><div class="dp-kv">${val}<small>${unit}</small></div><div class="dp-ks">${sub}</div></div>`;
   const kpis = [
-    kpi(`Doanh thu · TĐ${k}`, ty(tk), 'tỷ', vs(tk, TC.dt1, true), DP.dt),
-    kpi(`Chi phí · TĐ${k}`, ty(ck), 'tỷ', `Bằng <b>${pc(ck, tk)}</b> doanh thu`, DP.cp),
-    kpi(`Lợi nhuận · TĐ${k}`, ty(lk), 'tỷ', `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · lúc ký ${pc(TC.dt1 - TC.cp1, TC.dt1)}`}`, DP.ln),
+    kpi(`Doanh thu · TĐ${k}`, ty(tk), XUN(), vs(tk, TC.dt1, true), DP.dt),
+    kpi(`Chi phí · TĐ${k}`, ty(ck), XUN(), `Bằng <b>${pc(ck, tk)}</b> doanh thu`, DP.cp),
+    kpi(`Lợi nhuận · TĐ${k}`, ty(lk), XUN(), `Tỷ suất <b>${pc(lk, tk)}</b>${k === 1 ? '' : ` · lúc ký ${pc(TC.dt1 - TC.cp1, TC.dt1)}`}`, DP.ln),
   ].join('');
   const mxR = (lab, col, a, b2, c) => `<tr><th><i style="background:${col}"></i>${lab}</th><td>${ty(a)}</td><td>${ty(b2)}</td><td class="dp-mxc">${ty(c)}</td></tr>`;
-  const mxT = `<table class="dp-mx"><thead><tr><th>Tỷ đồng</th><th>Kế hoạch <small>Mới nhất</small></th><th>Thực <small>Mục II · lũy kế</small></th><th class="dp-mxc">Còn lại <small>Mục III</small></th></tr></thead>
+  const mxT = `<table class="dp-mx"><thead><tr><th>${XUT().replace(/^./, (c) => c.toUpperCase())}</th><th>Kế hoạch <small>Mới nhất</small></th><th>Thực <small>Mục II · lũy kế</small></th><th class="dp-mxc">Còn lại <small>Mục III</small></th></tr></thead>
     <tbody>${mxR('Doanh thu', DP.dt, M3.dt, M3.thu, M3.pt)}${mxR('Chi phí', DP.cp, M3.cp, M3.chi, M3.pc)}${mxR('Lợi nhuận', DP.ln, M3.dt - M3.cp, M3.thu - M3.chi, M3.con)}</tbody></table>`;
   // Biểu đồ cột 3 thời điểm (thực tế) – trục từ 0
   const TV = [[T.t1, T.c1, T.l1], [T.t2, T.c2, T.l2], [T.t3, T.c3, T.l3]];
@@ -34,7 +34,7 @@ function dpHtml(list, v) {
   const raw = mx / 4, mag = 10 ** Math.floor(Math.log10(raw)), step = [1, 2, 2.5, 5, 10].map((k) => k * mag).find((x) => x >= raw), hi = Math.ceil((mx * 1.12) / step) * step;
   const Y = (x) => B - (Math.max(0, x) / hi) * (B - top), gw = (W - L) / 3, bw = 22;
   let svg = '';
-  for (let t = 0; t <= hi + 1; t += step) svg += `<line x1="${L}" x2="${W}" y1="${Y(t)}" y2="${Y(t)}" stroke="#ece6dc"/><text x="${L - 5}" y="${Y(t) + 3}" text-anchor="end" font-size="8" fill="#8a7b6b">${(t / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</text>`;
+  for (let t = 0; t <= hi + 1; t += step) svg += `<line x1="${L}" x2="${W}" y1="${Y(t)}" y2="${Y(t)}" stroke="#ece6dc"/><text x="${L - 5}" y="${Y(t) + 3}" text-anchor="end" font-size="8" fill="#8a7b6b">${(t / XK()).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</text>`;
   TV.forEach((g, i) => { const cx = L + gw * (i + 0.5);
     g.forEach((x, j) => { const xx = cx + (j - 1.5) * (bw + 4) + 2, col = [DP.dt, DP.cp, x < 0 ? DP.bad : DP.ln][j];
       svg += `<rect x="${xx}" y="${Y(x)}" width="${bw}" height="${Math.max(1, B - Y(x))}" rx="3" fill="${col}"/><text x="${xx + bw / 2}" y="${Y(x) - 3}" text-anchor="middle" font-size="7.5" font-weight="700" fill="#2b2118">${bTyFix(x)}</text>`; });
@@ -43,7 +43,7 @@ function dpHtml(list, v) {
   const lp = T.t3 > 0 ? Math.max(0, Math.min(1, T.l3 / T.t3)) : 0, r0 = 46, C0 = 2 * Math.PI * r0;
   const donut = `<svg viewBox="0 0 120 120" width="${A.rows.length > 6 ? 92 : 112}" height="${A.rows.length > 6 ? 92 : 112}"><circle cx="60" cy="60" r="${r0}" fill="none" stroke="${T.l3 < 0 ? DP.bad : DP.cp}" stroke-width="16"/>
     ${lp ? `<circle cx="60" cy="60" r="${r0}" fill="none" stroke="${DP.ln}" stroke-width="16" stroke-dasharray="${(C0 * lp).toFixed(1)} ${C0.toFixed(1)}" transform="rotate(-90 60 60)"/>` : ''}
-    <text x="60" y="58" text-anchor="middle" font-size="15" font-weight="800" fill="#2b2118">${bTyFix(T.t3)}</text><text x="60" y="72" text-anchor="middle" font-size="8" fill="#8a7b6b">tỷ doanh thu</text></svg>`;
+    <text x="60" y="58" text-anchor="middle" font-size="15" font-weight="800" fill="#2b2118">${bTyFix(T.t3)}</text><text x="60" y="72" text-anchor="middle" font-size="8" fill="#8a7b6b">${XUN()} doanh thu</text></svg>`;
   // Thanh ngang
   const bar = (rows, max, col) => rows.map(([nm, x, e]) => `<div class="dp-hb"><span class="dp-hn" title="${esc(nm)}">${esc(nm)}</span><span class="dp-tr"><i style="width:${max ? Math.min(100, (Math.abs(x) / max) * 100) : 0}%;background:${x < 0 ? DP.bad : col}"></i></span><b>${bTyFix(x)}</b><em>${e}</em></div>`).join('');
   const prj = [...A.rows].sort((a, b) => b.l3 - a.l3), pmx = Math.max(1, ...prj.map((x) => Math.abs(x.l3)));
@@ -59,9 +59,9 @@ function dpHtml(list, v) {
   const st = {}; A.rows.forEach((x) => { st[x.d.trang_thai] = (st[x.d.trang_thai] || 0) + 1; });
   const cell = (ic, lab, main, sub) => `<div class="dp-in"><span class="dp-ic">${ic}</span><div><div class="dp-il">${lab}</div><div class="dp-iv">${main}</div><div class="dp-is">${sub}</div></div></div>`;
   const ins = [
-    cell('★', 'Lãi cao nhất', best ? `${esc(best.d.ma_du_an)} · ${bTyFix(best.l3)} tỷ` : '–', best ? `${esc(best.d.ten_du_an)} · tỷ suất ${pc(best.l3, best.t3)}` : ''),
+    cell('★', 'Lãi cao nhất', best ? `${esc(best.d.ma_du_an)} · ${bTyFix(best.l3)} ${XUN()}` : '–', best ? `${esc(best.d.ten_du_an)} · tỷ suất ${pc(best.l3, best.t3)}` : ''),
     cell('%', 'Tỷ suất thấp nhất', low ? `${esc(low.d.ma_du_an)} · ${pc(low.l3, low.t3)}` : '–', low ? esc(low.d.ten_du_an) : ''),
-    cell('₫', 'Còn phải thu lớn nhất', owe ? `${esc(owe.d.ma_du_an)} · ${bTyFix(owe.t3 - (byThu.get(owe.d.id) || 0))} tỷ` : '–', `Tổng còn phải thu ${bTyFix(T.t3 - TC.thu)} tỷ`),
+    cell('₫', 'Còn phải thu lớn nhất', owe ? `${esc(owe.d.ma_du_an)} · ${bTyFix(owe.t3 - (byThu.get(owe.d.id) || 0))} ${XUN()}` : '–', `Tổng còn phải thu ${bTyFix(T.t3 - TC.thu)} tỷ`),
     cell('▣', 'Tình trạng dự án', Object.entries(st).map(([k, x]) => `${x} ${esc(({ 'Đang thi công': 'thi công', 'Hoàn thành': 'xong', 'Chuẩn bị': 'chuẩn bị', 'Tạm dừng': 'tạm dừng' })[k] || k.toLowerCase())}`).join(' · '), `Lợi nhuận ${T.l3 - T.l1 >= 0 ? 'tăng' : 'giảm'} ${bTyFix(Math.abs(T.l3 - T.l1))} tỷ so với lúc ký`),
   ].join('');
   // Bảng dự án: tối đa 12 dòng, còn lại gộp 1 dòng
@@ -74,7 +74,7 @@ function dpHtml(list, v) {
   const S = (arr, k) => arr.reduce((a, x) => a + x[k], 0), thuR = rest.reduce((a, x) => a + (byC.get(x.d.id)?.thu || 0), 0);
   return `<div class="dp">
     <div class="dp-hd"><img src="/img/logo-icon.png?v=mm1" alt=""><div class="dp-ht"><div class="dp-co">${esc(BC.ten_cong_ty || '')}</div><h1>DASHBOARD TÀI CHÍNH DỰ ÁN</h1>
-      <div class="dp-sc">${one ? `Dự án: <b>${esc(one.ma_du_an)} – ${esc(one.ten_du_an)}</b>` : `Phạm vi: <b>Tất cả dự án (${n})</b>`} · Đơn vị: tỷ đồng, ${vt} · Số thực tế theo dữ liệu hệ thống, dòng tiền lũy kế đến ${ngay}</div></div>
+      <div class="dp-sc">${one ? `Dự án: <b>${esc(one.ma_du_an)} – ${esc(one.ten_du_an)}</b>` : `Phạm vi: <b>Tất cả dự án (${n})</b>`} · Đơn vị: ${XUT()}${tienNgoai() ? ' (' + tienTyGiaTxt() + ')' : ''}, ${vt} · Số thực tế theo dữ liệu hệ thống, dòng tiền lũy kế đến ${ngay}</div></div>
       <div class="dp-dt"><span>Ngày lập</span><b>${ngay}</b></div></div>
     <div class="dp-top">${kpis}${mxT}</div>
     <div class="dp-r2">
@@ -82,8 +82,8 @@ function dpHtml(list, v) {
         <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${svg}</svg>
         <table class="dp-mini"><tr><th></th><th>TĐ1</th><th>TĐ2</th><th>TĐ3</th></tr>${[['Tỷ suất', 2], ['CP / DT', 1]].map(([lb, j]) => `<tr><td>${lb}</td>${TV.map((g) => `<td>${pc(g[j], g[0])}</td>`).join('')}</tr>`).join('')}</table></div>
       <div class="dp-c"><div class="dp-ct">Cơ cấu doanh thu · TĐ3</div><div class="dp-dn">${donut}<div>
-        <div class="dp-li"><i style="background:${DP.cp}"></i>Chi phí<b>${pc(T.c3, T.t3)}</b><small>${bTyFix(T.c3)} tỷ</small></div>
-        <div class="dp-li"><i style="background:${DP.ln}"></i>Lợi nhuận<b>${pc(T.l3, T.t3)}</b><small>${bTyFix(T.l3)} tỷ</small></div></div></div>
+        <div class="dp-li"><i style="background:${DP.cp}"></i>Chi phí<b>${pc(T.c3, T.t3)}</b><small>${bTyFix(T.c3)} ${XUN()}</small></div>
+        <div class="dp-li"><i style="background:${DP.ln}"></i>Lợi nhuận<b>${pc(T.l3, T.t3)}</b><small>${bTyFix(T.l3)} ${XUN()}</small></div></div></div>
         <div class="dp-ct dp-ct2">Doanh thu theo khu vực</div>${bar(kv.slice(0, A.rows.length > 6 ? 4 : 5).map(([k, x]) => [k, x, pc(x, kvT)]), kv[0]?.[1] || 0, DP.dt)}</div>
       <div class="dp-c"><div class="dp-ct">Lợi nhuận theo dự án · TĐ3</div>${bar(prj.slice(0, nTop).map((x) => [`${x.d.ma_du_an}`, x.l3, pc(x.l3, x.t3)]), pmx, DP.ln)}
         ${prj.length > nTop ? `<div class="dp-note">… và ${prj.length - nTop} dự án khác</div>` : ''}
