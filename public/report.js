@@ -1688,7 +1688,7 @@ function renderReport() {
 
   ${bHtSection(list, v)}
 
-  ${bPcSection(list, v)}
+  ${'' /* V06.19.11.26: bỏ khu "Báo cáo theo công trình" (theo yêu cầu) – hàm bPcSection giữ lại để bật lại khi cần */}
 
   ${'' /* Đã bỏ nhóm "Phân tích chi tiết" (I → V) theo yêu cầu người dùng – V05.10.11.26 */}
   <div class="b-foot">Nguồn: ${esc(BC.ten_he_thong || 'PROJECT PROFIT')} · ${esc(BC.phien_ban)} · Số liệu lấy tự động từ các tab Doanh thu, Chi phí, Thầu phụ, Tiền về tại thời điểm lập báo cáo.</div>`;
