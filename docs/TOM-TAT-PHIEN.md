@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.19.11.26 – Đầu trang gọn: nút ⚙ (Đơn vị tiền + Ngôn ngữ, cạnh nút hiện đơn vị đang chọn), nút sáng / tối biểu tượng nét mảnh, Hướng dẫn thành nút "?" tròn (bỏ khỏi thanh menu)
+
 ## V07.19.11.26 – Dashboard: bỏ khung "Bản đồ dự án" (bảng Danh mục dự án chiếm cả hàng; ô tọa độ dự án vẫn giữ số cũ)
 
 ## V06.19.11.26 – Bỏ khu "Báo cáo theo công trình" (thẻ dự án) ở cuối trang Báo cáo + dòng hướng dẫn tương ứng (hàm bPcSection giữ lại)

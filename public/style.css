@@ -3887,3 +3887,20 @@ button.da-ic:hover { background: rgba(0, 0, 0, .06); }
 :root[data-theme="dark"] #b-report .th-sec-III .th-ttl h3 { color: #f5a467; }
 :root[data-theme="dark"] #b-report .th-sec-IV .th-ttl h3 { color: #4fd8bb; }
 @media (max-width: 600px) { #b-report .th-sec .th-ttl h3 { font-size: 17px; } }
+/* V08.19.11.26: đầu trang gọn – nút ⚙ (Đơn vị + Ngôn ngữ), nút biểu tượng sáng / tối và Hướng dẫn */
+.user-box .ic-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-height: 0; padding: 0; border-radius: 50%;
+  font-size: 15px; font-weight: 800; line-height: 1; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); box-shadow: none; cursor: pointer; }
+.user-box .ic-btn:hover { background: rgba(255,255,255,.24); }
+.user-box .guide-btn.active, .user-box .guide-btn[aria-current="page"] { color: var(--fg-navy); background: #fff; }
+.cai-grp .cai-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 999px; font-size: 12.5px;
+  color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); }
+.cai-grp .cai-btn:hover { background: rgba(255,255,255,.24); }
+.cai-menu { min-width: 280px; padding: 10px 12px; }
+.cai-menu .cai-row > span:first-child { white-space: nowrap; }
+.cai-menu .cai-note { white-space: nowrap; }
+.cai-menu .cai-row { display: flex !important; flex-direction: row !important; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 6px 2px; font-size: 13px; font-weight: 600; color: var(--fg-1e293b); }
+.cai-menu select, .cai-menu .lang-pick { width: auto; min-width: 120px; padding: 6px 8px; font-size: 13px; font-weight: 600; border-radius: 8px; color: var(--fg-1e293b); background: var(--card); border: 1px solid var(--border); }
+.cai-menu .lang-pick option, .cai-menu select option { color: var(--fg-1e293b); background: var(--card); }
+.cai-menu .cai-note { margin: 4px 2px 0; font-size: 11.5px; color: var(--muted); }
+@media (max-width: 640px) { .cai-grp .cai-dv { display: none; } .cai-grp .cai-btn { padding: 0 9px; } .cai-grp .tab-menu.cai-menu { left: 0; right: auto; min-width: 260px; max-width: calc(100vw - 32px); } }
+@media print { .cai-grp, .user-box .ic-btn { display: none !important; } }

@@ -67,10 +67,11 @@ const NHAP_LIEU = ['projects', 'revenue', 'cost'];
 // Menu Xuất: chọn xong một mục thì đóng menu
 $('#xuat-grp .tab-menu')?.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(closeMenus); });
 // Chọn đơn vị tiền (toàn hệ thống): lưu theo trình duyệt rồi vẽ lại trang đang xem
+const caiDv = () => { const s = $('#dv-pick'), o = $('#cai-dv'); if (s && o) o.textContent = s.options[s.selectedIndex]?.text || ''; }; // nhãn đơn vị cạnh nút ⚙
 if ($('#dv-pick')) {
-  $('#dv-pick').value = DV_CHON;
+  $('#dv-pick').value = DV_CHON; caiDv();
   $('#dv-pick').addEventListener('change', (e) => {
-    DV_CHON = DV[e.target.value] ? e.target.value : 'auto';
+    DV_CHON = DV[e.target.value] ? e.target.value : 'auto'; caiDv();
     try { localStorage.setItem('dv_tien', DV_CHON); } catch {}
     const cur = $$('main > .tab-panel').find((x) => !x.hidden)?.id.replace('tab-', '');
     if (cur === 'report' && typeof renderKeepPos === 'function') return renderKeepPos(null); // báo cáo: vẽ lại tại chỗ, giữ kỳ / mục đang mở
