@@ -2,6 +2,8 @@
 
 Người dùng là quản lý dự án xây dựng / tài chính / Ban Kiểm soát, **không biết lập trình**.
 
+> **Claude mới tiếp nhận:** đọc `docs/BAN-GIAO-CLAUDE-19112026.md` trước (tình trạng hệ thống, GitHub, Railway, quy tắc nghiệp vụ, việc đang chờ).
+
 ## Giao tiếp
 - **Tiết kiệm token:** không đọc / chụp / quét thừa, báo ngắn; chỉ kiểm tra đủ phần bị ảnh hưởng.
 - Luôn trả lời **tiếng Việt**, ngắn gọn, thẳng vấn đề, **không dùng thuật ngữ IT** khi báo cáo.
