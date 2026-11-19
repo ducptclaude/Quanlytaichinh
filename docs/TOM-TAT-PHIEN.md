@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.19.11.26 – Sửa lỗi: tiền thật quy đổi trước VAT bị làm tròn 0,1 tỷ (lệch tới ~50 triệu / dự án)
+- Trước: xem Trước VAT, Đã nhận / Đã chi / Dòng thu / Dòng chi của dự án (mục II, III, IV, bảng tổng hợp) làm tròn 100 triệu
+  (VD 429.000.000 -> 400.000.000, Còn lại sai 29 triệu) và lệch với dòng HĐ con. Nay chỉ làm tròn tới đồng (`bQ01`, `q01`, mục IV nhan / chi).
+- Dữ liệu mẫu: 84 ô thay đổi, lệch lớn nhất 44,9 triệu; dòng dự án = tổng các HĐ con (± 1 đồng). Sửa chú thích "làm tròn 0,1 tỷ" + câu dịch.
+
 ## V04.18.11.26 – "+ Chi phí khác" ghi như phụ lục phát sinh (trong bảng HĐ / PL); bỏ "Phát sinh ngoài TĐ1" ở ô chọn gói
 - "+ Chi phí khác": thêm 1 dòng PLxx có nhãn "Chi phí khác" (giá trị dự kiến, không phải dòng chi thực) ngay trong bảng HĐ / PL của hộp HĐ
   đầu vào – tính, điều chỉnh, quyết toán, thanh toán như phụ lục, cùng quy tắc phát sinh theo TĐ. Bỏ bảng riêng "Chi phí khác (không gắn HĐ)" (V03.18).

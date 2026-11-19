@@ -262,7 +262,7 @@ function bVatR(d) {
   const dtSv = d.du_kien.doanh_thu.sv, cpGt = d.du_kien.chi_phi.gt, cpSv = d.du_kien.chi_phi.sv;
   return { rT: dtSv ? d.du_kien.doanh_thu.gt / dtSv : 1 / 1.1, rC: cpSv ? cpGt / cpSv : 1 };
 }
-const bQ01 = (x, r) => (r === 1 ? x : Math.round((x * r) / 1e8) * 1e8); // làm tròn 0,1 tỷ như mục II
+const bQ01 = (x, r) => (r === 1 ? x : Math.round(x * r)); // V05.19: quy đổi trước VAT – làm tròn tới đồng (bỏ làm tròn 0,1 tỷ: lệch tới 50tr / dự án)
 // pid: chỉ 1 công trình (bấm từ thẻ công trình, lũy kế đến hiện tại – giống số trên thẻ)
 // sec2: mở từ mục II -> cùng kỳ "lũy kế đến" và cùng cơ sở VAT (Trước VAT: quy đổi theo tỷ lệ từng dự án)
 function bThucDrill(key, pid = 0, sec2 = false) {
@@ -325,7 +325,7 @@ function bThucDrill(key, pid = 0, sec2 = false) {
   dlg.innerHTML = `<div class="stack">
     <div class="tt-dlg-h"><h3>${cfg.t}</h3><button type="button" class="pc-x" data-x title="Đóng">×</button></div>
     <div class="tt-formula">${cfg.f}</div>
-    <p class="muted small">${cfg.lines === 'kh' ? 'Theo hợp đồng' : `Lũy kế đến hết ${ymTxt(to)}`} · ${dvU('trieu').ten}, ${gt ? 'trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án; số tổng mỗi dự án làm tròn 0,1 tỷ như mục II)' : 'sau VAT'} · ${pid ? `<b>${esc(list[0].ma_du_an)}</b> ${esc(list[0].ten_du_an)}` : `${list.length} công trình`} · bấm <b>Mở</b> để tới tab ${cfg.go === 'cost' ? 'Chi phí' : 'Doanh thu'} của công trình</p>
+    <p class="muted small">${cfg.lines === 'kh' ? 'Theo hợp đồng' : `Lũy kế đến hết ${ymTxt(to)}`} · ${dvU('trieu').ten}, ${gt ? 'trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án)' : 'sau VAT'} · ${pid ? `<b>${esc(list[0].ma_du_an)}</b> ${esc(list[0].ten_du_an)}` : `${list.length} công trình`} · bấm <b>Mở</b> để tới tab ${cfg.go === 'cost' ? 'Chi phí' : 'Doanh thu'} của công trình</p>
     <div class="table-wrap"><table class="b-table"><thead><tr><th>Công trình</th>${cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}<th></th></tr></thead>
       <tbody>${rows.map((x) => `<tr><td><b>${esc(x.d.ma_du_an)}</b> <span class="muted small">${esc(x.d.ten_du_an)}</span></td>${cols.map(([k]) => cell(x[k])).join('')}
         <td><button type="button" class="sm" data-tgo="${cfg.go}" data-id="${x.d.id}">Mở</button></td></tr>`).join('')}</tbody>
@@ -608,7 +608,7 @@ function bTongHopData(list, v, P) {
     // Tiền thật luôn sau VAT; xem trước VAT thì quy đổi theo tỷ lệ trước/sau VAT (thu theo DT, chi theo CP) để 4 mục cùng một nền VAT
     const dtSv = d.du_kien.doanh_thu.sv;
     const rT = v === 'sv' ? 1 : (dtSv ? d.du_kien.doanh_thu.gt / dtSv : 1 / 1.1), rC = v === 'sv' || !cpSv ? 1 : cpGt / cpSv;
-    const q01 = (x, r) => (r === 1 ? x : Math.round((x * r) / 1e8) * 1e8); // quy đổi trước VAT: làm tròn 0,1 tỷ
+    const q01 = (x, r) => (r === 1 ? x : Math.round(x * r)); // quy đổi trước VAT: làm tròn tới đồng (V05.19)
     const thu = q01(c.thu, rT), chi = q01(c.chi, rC);
     // V04.16: TĐ1 – ký hợp đồng = số HỆ THỐNG tự tính (HĐ + PL ký · gói / HĐ đầu vào ký · chi phí gián tiếp, tài chính), cùng nguồn mục IV;
     //  bỏ số chốt TĐ nhập tay và bỏ làm tròn 0,1 tỷ khi xem sau VAT (người dùng yêu cầu)
@@ -961,7 +961,7 @@ ${k === 1 ? `<p class="muted small f-note">TĐ1 = số hệ thống tự tính l
     </div>
     ${/* V03.17: bỏ bảng từng dự án (người dùng yêu cầu) – xem chi tiết bằng cách bấm số trên 3 ô */ ''}
     <p class="muted small f-note tt-hint no-print">Bấm vào số <b>Dòng thu</b> / <b>Dòng chi</b> / <b>Còn lại</b> để xem bảng chi tiết: từng lần tiền về, chi phí theo nhóm, đã trả từng HĐ đầu vào.</p>
-    ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án, làm tròn tới 0,1 tỷ.</p>' : ''}
+    ${v === 'gt' ? '<p class="muted small f-note">Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án.</p>' : ''}
 
     ${thHead('III', 'Dòng tiền còn lại phải thu – chi', 'Doanh thu, chi phí thời điểm mới nhất trừ dòng thu, dòng chi thực tế (mục II)', ['Thời điểm mới nhất', vt[0].toUpperCase() + vt.slice(1)])}
     <div class="f-grid th-grid3">
@@ -1007,8 +1007,8 @@ function bMuc4Data(list, v) {
     const rDt = dt.qt;
     const cSv = cp.tp_qt.sv + cp.khac.sv + (cp.dtru?.sv?.[2] || 0), cGt = cp.tp_qt.gt + cp.khac.gt + (cp.dtru?.gt?.[2] || 0);
     const nhanSv = dt.da_nhan, chiSv = bThuc(d, to).chi;
-    const nhan = v === 'sv' || !rDt.sv ? nhanSv : Math.round((nhanSv * (rDt.gt / rDt.sv)) / 1e8) * 1e8; // quy đổi trước VAT: làm tròn 0,1 tỷ
-    const chi = v === 'sv' || !cSv ? chiSv : Math.round((chiSv * (cGt / cSv)) / 1e8) * 1e8;
+    const nhan = v === 'sv' || !rDt.sv ? nhanSv : Math.round(nhanSv * (rDt.gt / rDt.sv)); // quy đổi trước VAT: làm tròn tới đồng (V05.19)
+    const chi = v === 'sv' || !cSv ? chiSv : Math.round(chiSv * (cGt / cSv));
     const b1 = (cp.khac_b1 || { gt: 0, sv: 0 })[v]; // giá vốn = thầu phụ cùng mốc + chi phí trực tiếp khác (B1)
     const b1k = cp.khac_b1_td?.[v] || [b1, b1, b1];
     const g1 = t1 - cp.tp_goc[v] - b1k[0] - drB1[0], g2 = t2 - cp.tp_ps[v] - b1k[1] - drB1[1], g3 = t3 - cp.tp_qt[v] - b1k[2] - drB1[2];

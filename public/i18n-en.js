@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án.": "Before VAT: actual cash (VAT inclusive) is converted by each project's before / after VAT ratio of revenue (collections) and cost (expenditure).",
 "Nội dung chi phí khác": "Other cost description",
 "không tính vào TĐ1": "not counted in M1",
 "Chi phí khác (không gắn HĐ)": "Other costs (not under the contract)",
@@ -1686,6 +1687,8 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["Lũy kế đến hết {} · đồng, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án) · {} công trình · bấm", "Cumulative to end of {} · VND, before VAT (converted by each project's before / after VAT ratio) · {} projects · click"],
+["Lũy kế đến hết {} · {}, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án) · {} công trình · bấm", "Cumulative to end of {} · {}, before VAT (converted by each project's before / after VAT ratio) · {} projects · click"],
 ["+ Chi phí khác (phát sinh TĐ{})", "+ Other cost (arising at M{})"],
 ["nhóm {} · không cộng vào giá trị HĐ, không thanh toán theo HĐ · tính vào chi phí dự án", "{} group · not added to the contract value, not paid under the contract · counted in project cost"],
 ["Dòng chi phí thêm ở đây = phát sinh TĐ{} – không tính vào TĐ1.", "Cost lines added here arise at M{} – not counted in M1."],
