@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.19.11.26 – Khoá số dự án khi Còn lại = 0 + Ghi chú nhanh đầu báo cáo
+- Dự án đã có doanh thu, **còn phải thu = 0 và còn phải chi = 0** (cùng số mục III, thời điểm mới nhất, sau VAT) -> tự khoá nhập
+  mọi số liệu của dự án (doanh thu, tiền về, chi phí, HĐ đầu vào, thanh toán, dự trù, đợt điều chỉnh, quyết toán, TĐ…). Còn số -> không khoá.
+- Biểu tượng 🔒 cạnh Tình trạng (Báo cáo mục I, Nhập liệu › Dự án); thanh vàng ở trang Doanh thu / Chi phí; bấm 🔓 Mở khoá (Passcode) -> mở tạm
+  60 phút (🔓, nút Khoá lại). Máy chủ chặn ghi (mã 423) – `lib/report.js conLai`, `server.js` mục KHOÁ SỐ DỰ ÁN, `/du-an/:id/mo-khoa-so`, `/khoa-so`.
+- Đầu báo cáo thêm dòng **Ghi chú nhanh**: tình trạng (% hoàn thành) / số dự án theo tình trạng, còn phải thu, còn phải chi, còn lại, khoá số, cảnh báo.
+- Bài kiểm tra mới `scripts/kiem-tra-them/khoa-du-an.js`. Kết quả: tester 0 lỗi, kiem-tra-goi 211, dcA 22, tdk 31, duyet 28.
+
 ## V01.19.11.26 – Sửa lỗi: tiền thật quy đổi trước VAT bị làm tròn 0,1 tỷ (lệch tới ~50 triệu / dự án)
 - Trước: xem Trước VAT, Đã nhận / Đã chi / Dòng thu / Dòng chi của dự án (mục II, III, IV, bảng tổng hợp) làm tròn 100 triệu
   (VD 429.000.000 -> 400.000.000, Còn lại sai 29 triệu) và lệch với dòng HĐ con. Nay chỉ làm tròn tới đồng (`bQ01`, `q01`, mục IV nhan / chi).

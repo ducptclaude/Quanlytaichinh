@@ -171,7 +171,7 @@ async function loadProjects() {
   let tt;
   [projects, dash, tt] = await Promise.all([api('/api/du-an'), api('/api/dashboard'), api('/api/du-an-tinh-trang').catch(() => [])]);
   const m = new Map(tt.map((x) => [x.id, x.tt]));
-  for (const r of projects) { r.trang_thai_nhap = r.trang_thai; if (m.has(r.id)) r.trang_thai = m.get(r.id); } // trạng thái tự động theo số liệu
+  for (const r of projects) { r.trang_thai_nhap = r.trang_thai; if (m.has(r.id)) r.trang_thai = m.get(r.id); const k = tt.find((x) => x.id === r.id); r._khoa = k?.khoa ? (k.mo ? 'mo' : 'khoa') : ''; } // trạng thái tự động theo số liệu
   renderProjects();
 }
 
@@ -189,7 +189,7 @@ function renderProjects() {
         <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình"><b class="p-ma">${esc(r.ma_du_an)}</b></a></td>
         <td><a href="#" class="p-open" data-brep="${r.id}" title="Xem báo cáo công trình">${esc(r.ten_du_an)}</a></td>
         <td>${esc(r.chu_dau_tu)}</td>
-        <td><span class="st st-${slug(r.trang_thai)}" title="Tự động theo số liệu${r.trang_thai_nhap === 'Tạm dừng' ? ' (đang chọn Tạm dừng)' : ''}">${esc(r.trang_thai)}</span></td>
+        <td><span class="st st-${slug(r.trang_thai)}" title="Tự động theo số liệu${r.trang_thai_nhap === 'Tạm dừng' ? ' (đang chọn Tạm dừng)' : ''}">${esc(r.trang_thai)}</span>${r._khoa ? ` <span class="da-ic" title="${r._khoa === 'mo' ? 'Đang mở khoá tạm' : 'Đã thu đủ, chi đủ (còn lại = 0) – khoá nhập số liệu'}">${r._khoa === 'mo' ? '🔓' : '🔒'}</span>` : ''}</td>
         <td class="num">${days(r)}</td>
         <td class="small">${dmy(r.ngay_bat_dau)}${r.ngay_ket_thuc ? '<br>→ ' + dmy(r.ngay_ket_thuc) : ''}</td>
         <td class="muted">${esc(r.nguoi_cap_nhat || '')}</td>
@@ -624,6 +624,41 @@ function resetRevForm(f) {
   updateRevPreview(f);
 }
 
+// V02.19.11.26: KHOÁ SỐ DỰ ÁN khi còn lại = 0 (đã thu đủ, chi đủ – cùng số Báo cáo mục III). Mở khoá tạm 60 phút bằng Passcode.
+async function daKhoaBar(pid, infoId) {
+  const info = document.getElementById(infoId); if (!info) return;
+  let el = document.getElementById(infoId + '-khoa');
+  if (!el) { el = document.createElement('div'); el.id = infoId + '-khoa'; info.before(el); }
+  el.hidden = true; el.innerHTML = '';
+  if (!pid) return;
+  let s; try { s = (await api('/api/du-an-tinh-trang')).find((x) => x.id === pid); } catch { return; }
+  if (!s?.khoa || pid !== (infoId === 'r-project-info' ? (revAll ? null : revProjectId) : (costAll ? null : revProjectId))) return;
+  el.className = 'da-khoa' + (s.mo ? ' mo' : '');
+  el.innerHTML = s.mo
+    ? `<span>🔓 <b>Đang mở khoá tạm</b> – dự án đã thu đủ, chi đủ (còn lại = 0). Sửa xong bấm Khoá lại (tự khoá sau 60 phút).</span><button type="button" class="sm" data-dakhoa="${pid}">🔒 Khoá lại</button>`
+    : `<span>🔒 <b>Dự án đã khoá số</b> – đã thu đủ, chi đủ (còn lại = 0), không nhập / sửa số liệu.</span><button type="button" class="sm" data-damk="${pid}">🔓 Mở khoá (Passcode)</button>`;
+  el.hidden = false;
+}
+async function daKhoaLamMoi() {
+  if (!$('#tab-revenue').hidden) await loadRevenue();
+  else if (!$('#tab-cost').hidden) await loadCost();
+  else if (typeof loadReport === 'function' && !$('#tab-report')?.hidden) await loadReport();
+}
+document.addEventListener('click', async (e) => {
+  const mk = e.target.closest('[data-damk]'), kl = e.target.closest('[data-dakhoa]');
+  if (!mk && !kl) return;
+  e.preventDefault(); e.stopPropagation();
+  const id = Number((mk || kl).dataset.damk || (mk || kl).dataset.dakhoa);
+  try {
+    if (mk) {
+      const pc = await askPasscode('Mở khoá số liệu dự án?', 'Dự án đã thu đủ, chi đủ (còn lại = 0) nên đang khoá nhập số liệu. Mở khoá tạm 60 phút để điều chỉnh – số liệu giữ nguyên.', 'Mở khoá');
+      if (pc === null) return;
+      await api(`/api/du-an/${id}/mo-khoa-so`, { method: 'POST', body: JSON.stringify({ passcode: pc }) });
+    } else await api(`/api/du-an/${id}/khoa-so`, { method: 'POST', body: '{}' });
+    await daKhoaLamMoi();
+  } catch (err) { alert(err.message); }
+}, true);
+
 async function loadRevenueTab() {
   buildRevenueSections();
   projects = await api('/api/du-an');
@@ -658,6 +693,7 @@ async function loadRevenue() {
     $$('.rev-form').forEach(resetRevForm);
   }
   revData = await api(revAll ? '/api/doanh-thu-tong' : `/api/du-an/${revProjectId}/doanh-thu`);
+  daKhoaBar(revAll ? null : revProjectId, 'r-project-info');
   const p = revData.du_an;
   $('#r-project-info').innerHTML = revAll
     ? `<b>Tổng hợp ${revData.so_du_an} dự án</b> · chỉ xem – muốn nhập, sửa doanh thu hãy chọn từng dự án`
@@ -1509,6 +1545,7 @@ $('#c-project').addEventListener('change', (e) => {
 async function loadCost() {
   if (!costAll) try { localStorage.setItem('revProject', revProjectId); } catch {}
   costData = await api(costAll ? '/api/chi-phi-tong' : `/api/du-an/${revProjectId}/chi-phi`);
+  daKhoaBar(costAll ? null : revProjectId, 'c-project-info');
   const p = costData.du_an;
   $('#c-project-info').innerHTML = costAll
     ? `<b>Tổng hợp ${costData.so_du_an} dự án</b> · chỉ xem – muốn nhập, sửa chi phí hãy chọn từng dự án`

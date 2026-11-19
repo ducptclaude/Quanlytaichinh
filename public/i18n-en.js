@@ -1,6 +1,18 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Ghi chú nhanh": "Quick note",
+"🔒 Đã khoá số (thu đủ, chi đủ)": "🔒 Locked (fully collected and spent)",
+"🔓 Đang mở khoá tạm": "🔓 Temporarily unlocked",
+"✏️ Đang nhập liệu": "✏️ Open for entry",
+"🔒 Khoá lại": "🔒 Lock again",
+"🔓 Mở khoá (Passcode)": "🔓 Unlock (Passcode)",
+"Mở khoá": "Unlock",
+"Mở khoá số liệu dự án?": "Unlock project data?",
+"Dự án đã khoá số": "Project locked",
+"Đang mở khoá tạm": "Temporarily unlocked",
+"– đã thu đủ, chi đủ (còn lại = 0), không nhập / sửa số liệu.": "– fully collected and spent (remaining = 0); data entry is locked.",
+"– dự án đã thu đủ, chi đủ (còn lại = 0). Sửa xong bấm Khoá lại (tự khoá sau 60 phút).": "– project fully collected and spent (remaining = 0). Press Lock again when done (auto-locks after 60 minutes).",
 "Trước VAT: tiền thật (đã gồm VAT) được quy đổi theo tỷ lệ trước / sau VAT của doanh thu (dòng thu) và chi phí (dòng chi) từng dự án.": "Before VAT: actual cash (VAT inclusive) is converted by each project's before / after VAT ratio of revenue (collections) and cost (expenditure).",
 "Nội dung chi phí khác": "Other cost description",
 "không tính vào TĐ1": "not counted in M1",
@@ -1687,6 +1699,10 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["{} dự án: ", "{} projects: "],
+["🔒 {} dự án đã khoá số", "🔒 {} projects locked"],
+["⚠ {} cảnh báo", "⚠ {} warnings"],
+["Tình trạng {} ({}% hoàn thành)", "Status {} ({}% complete)"],
 ["Lũy kế đến hết {} · đồng, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án) · {} công trình · bấm", "Cumulative to end of {} · VND, before VAT (converted by each project's before / after VAT ratio) · {} projects · click"],
 ["Lũy kế đến hết {} · {}, trước VAT (quy đổi theo tỷ lệ trước / sau VAT từng dự án) · {} công trình · bấm", "Cumulative to end of {} · {}, before VAT (converted by each project's before / after VAT ratio) · {} projects · click"],
 ["+ Chi phí khác (phát sinh TĐ{})", "+ Other cost (arising at M{})"],

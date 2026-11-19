@@ -408,6 +408,36 @@ api.use(wrap(async (req, res, next) => {
   }
   next();
 }));
+// ===================== KHOÁ SỐ DỰ ÁN KHI CÒN LẠI = 0 (V02.19.11.26) =====================
+// Đã có doanh thu, còn phải thu = 0 và còn phải chi = 0 (cùng số Báo cáo mục III) -> khoá nhập số liệu của cả dự án.
+// Mở khoá tạm 60 phút bằng Passcode (khoá lại khi bấm Khoá lại hoặc hết giờ); còn lại ≠ 0 thì tự mở.
+const daMoKhoa = new Map(); // id dự án -> hết hạn mở khoá
+const DA_MO_KHOA_MS = 60 * 60 * 1000;
+async function baoCaoDa(p) {
+  const [rev, tienVe, cost, tp, duTru] = await Promise.all([store.listRevenue(p.id), store.listTienVe(p.id), store.listCost(p.id), store.listTp(p.id), store.listDuTru(p.id)]);
+  return projectReport(p, { rev: sortRevenue(rev).map(calcLine), tienVe: sortTienVe(tienVe), cost: sortCost(cost).map(costLine), tp: buildContracts(tp), duTru });
+}
+const daMo = (id) => { const e = daMoKhoa.get(id); if (e && e > Date.now()) return true; if (e) daMoKhoa.delete(id); return false; };
+async function daKhoaSo(duAnId) {
+  if (!duAnId || daMo(duAnId)) return false;
+  const p = await store.getProject(duAnId); if (!p) return false;
+  return Boolean((await baoCaoDa(p)).con_lai?.khoa);
+}
+const DA_KHOA_MSG = (ma) => `Dự án ${ma} đã thu đủ, chi đủ (còn lại = 0) – đang khoá nhập số liệu. Muốn sửa: bấm 🔓 Mở khoá dự án (cần Passcode).`;
+api.use(wrap(async (req, res, next) => {
+  if (req.noiBo !== undefined || !req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
+  const r = DUYET_TRUOC.find(([m, re]) => m === req.method && re.test(req.path));
+  if (!r) return next();
+  const tim = r[4], kind = r[3], id = Number(req.path.match(r[1])[1]) || 0, body = req.body || {};
+  let du_an_id = null;
+  if (tim === 'p') du_an_id = id;
+  else if (tim === 'tp') du_an_id = (await store.getTp(id))?.du_an_id || null;
+  else if (tim === 'vb') du_an_id = (await vanBanOf(body.loai, Number(body.vb_id)))?.du_an_id || null;
+  else if (tim === 'r') { const before = await store.auditInfo(kind, id); du_an_id = before ? (await store.listProjects()).find((x) => x.ma_du_an === before.ma_du_an)?.id || null : null; }
+  else if (kind === 'sddk') du_an_id = Number(body.du_an_id) || null;
+  if (du_an_id && (await daKhoaSo(du_an_id))) { const p = await store.getProject(du_an_id); return bad(res, DA_KHOA_MSG(p?.ma_du_an || ''), 423); }
+  next();
+}));
 const soTien = (x) => { const n = Number(String(x ?? '').replace(/[.,\s]/g, '')); return Number.isFinite(n) && String(x ?? '').trim() !== '' ? n : null; };
 api.use(wrap(async (req, res, next) => {
   if (req.noiBo !== undefined || !req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
@@ -795,7 +825,18 @@ api.use('/users', users);
 
 api.get('/du-an', wrap(async (_req, res) => res.json(await store.listProjects())));
 // Tình trạng tự động theo số liệu (không trả số tiền): [{ id, tt }]
-api.get('/du-an-tinh-trang', wrap(async (_req, res) => res.json((await reportProjects()).map((d) => ({ id: d.id, tt: d.trang_thai_tu_dong })))));
+api.get('/du-an-tinh-trang', wrap(async (_req, res) => res.json((await reportProjects()).map((d) => ({ id: d.id, tt: d.trang_thai_tu_dong, khoa: Boolean(d.con_lai?.khoa), mo: daMo(d.id) })))));
+// Mở khoá tạm dự án đã khoá số (còn lại = 0) – cần Passcode; Khoá lại ngay
+api.post('/du-an/:id/mo-khoa-so', canMoKhoa, wrap(async (req, res) => {
+  const p = await store.getProject(parseId(req.params.id)); if (!p) return bad(res, 'Không tìm thấy dự án', 404);
+  if (!(await requirePasscode(req, res))) return;
+  daMoKhoa.set(p.id, Date.now() + DA_MO_KHOA_MS);
+  console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã MỞ KHOÁ SỐ dự án "${p.ma_du_an}" (#${p.id})`);
+  res.json({ ok: true, het_han: DA_MO_KHOA_MS / 60000 });
+}));
+api.post('/du-an/:id/khoa-so', canMoKhoa, wrap(async (req, res) => {
+  const id = parseId(req.params.id); daMoKhoa.delete(id); res.json({ ok: true });
+}));
 
 api.post('/du-an', canHd, wrap(async (req, res) => {
   const { data, errors } = validateProject(req.body || {});
@@ -956,6 +997,7 @@ async function reportProjects({ withCost = false } = {}) {
   }));
   const tds = await store.listThoiDiem();
   for (const d of du_an) d.thoi_diem = tds.filter((t) => t.du_an_id === d.id).map(({ du_an_id, ...t }) => t);
+  for (const d of du_an) d.mo_khoa_so = daMo(d.id); // V02.19.11.26: đang mở khoá tạm (dự án khoá số)
   return du_an;
 }
 // Số dư đầu kỳ (nhập tay, đồng): 1 số chung của công ty + số từng dự án – lưu trong Cài đặt (không đổi cấu trúc kho dữ liệu)

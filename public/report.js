@@ -764,6 +764,29 @@ function bHtSection(list, v) {
 }
 // Mục III – Dòng tiền còn lại phải thu – chi (theo TĐ k; mặc định TĐ đang chọn ở mục I)
 //  DT, CP: cùng số mục I (TĐ1 = số chốt TĐ1 / hệ thống; TĐ2, TĐ3 = mục IV) · Dòng thu, dòng chi: mục II (lũy kế, theo nút VAT)
+// V02.19.11.26: biểu tượng khoá số dự án (còn lại = 0: đã thu đủ, chi đủ) – bấm để mở / khoá lại (người nhập HĐ / tiền)
+function bKhoaIc(d) {
+  if (!d.con_lai?.khoa) return '';
+  const quyen = ['admin', 'editor', 'qs', 'ke_toan'].includes(ME.role);
+  const t = d.mo_khoa_so ? 'Đang mở khoá tạm để điều chỉnh' + (quyen ? ' – bấm để khoá lại' : '') : 'Đã thu đủ, chi đủ (còn lại = 0) – khoá nhập số liệu' + (quyen ? '. Bấm để mở khoá (Passcode)' : '');
+  const ic = d.mo_khoa_so ? '🔓' : '🔒';
+  return quyen ? `<button type="button" class="da-ic ${d.mo_khoa_so ? 'mo' : ''}" ${d.mo_khoa_so ? 'data-dakhoa' : 'data-damk'}="${d.id}" title="${t}">${ic}</button>` : `<span class="da-ic" title="${t}">${ic}</span>`;
+}
+// Ghi chú nhanh cho Lãnh đạo (đầu báo cáo): tình trạng, còn phải thu / chi (thời điểm mới nhất, như mục III), khoá số, cảnh báo
+function bGhiChuNhanh(list, v, warnN) {
+  if (!list.length) return '';
+  const { T } = bMuc3Data(list, v, bTongHopData(list, v, { to: bNowYm() }).rows, 3);
+  const ty = (x) => `<b class="${x < 0 ? 'neg' : ''}">${bTy(x)}</b> ${TY()}`;
+  const khoaN = list.filter((d) => d.con_lai?.khoa).length, one = list.length === 1 ? list[0] : null;
+  const it = [];
+  if (one) it.push(`Tình trạng <b>${esc(one.trang_thai)}</b>${one.ht_tu_dong != null ? ` (${Math.round(one.ht_tu_dong * 100)}% hoàn thành)` : ''}`);
+  else { const c = {}; for (const d of list) c[d.trang_thai] = (c[d.trang_thai] || 0) + 1; it.push(`<b>${list.length}</b> dự án: ${Object.entries(c).map(([k, n]) => `${n} ${esc(k)}`).join(' · ')}`); }
+  it.push(`Còn phải thu ${ty(T.pt)}`, `Còn phải chi ${ty(T.pc)}`, `Còn lại ${ty(T.con)}`);
+  if (one) it.push(one.con_lai?.khoa ? (one.mo_khoa_so ? '🔓 Đang mở khoá tạm' : '🔒 Đã khoá số (thu đủ, chi đủ)') : '✏️ Đang nhập liệu');
+  else if (khoaN) it.push(`🔒 ${khoaN} dự án đã khoá số`);
+  if (warnN) it.push(`<span class="b-note-w">⚠ ${warnN} cảnh báo</span>`);
+  return `<div class="b-note" title="Tự động theo số liệu – thời điểm mới nhất (như mục III)"><em>Ghi chú nhanh</em>${it.map((x) => `<span>${x}</span>`).join('')}</div>`;
+}
 function bMuc3Data(list, v, rows, k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1) {
   const m4 = new Map(bMuc4Data(list, v).rows.map((x) => [x.d.id, x]));
   const R = rows.map((x) => {
@@ -802,7 +825,7 @@ function bTongHopHtml(list, v, P) {
   // Cột dự án tách riêng: STT | Mã DA | Tên dự án | Tình trạng
   // Số trong bảng mục II bấm được -> bảng chi tiết của dự án đó (pid) hoặc tất cả (dòng tổng)
   const tlk = (key, val, pid = 0) => `<button type="button" class="tt-link tt-sm ${val < 0 ? 'neg' : ''}" data-ttd="${key}" data-tts="1"${pid ? ` data-ttp="${pid}"` : ''} title="Bấm để xem bảng chi tiết">${bTy(val)}</button>`;
-  const prj = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma"><b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}">${esc(x.d.ten_du_an)}</td><td class="th-tt2"><span class="st st-${slug(x.d.trang_thai)} th-st" title="Tự động theo số liệu (% hoàn thành, quyết toán)${x.d.trang_thai_nhap && x.d.trang_thai_nhap !== x.d.trang_thai ? ` – nhập tay: ${esc(x.d.trang_thai_nhap)}` : ''}">${esc(x.d.trang_thai)}</span></td>`;
+  const prj = (x, i) => `<td class="num th-stt">${i + 1}</td><td class="th-ma"><b>${esc(x.d.ma_du_an)}</b></td><td class="th-prj th-name" title="${esc(x.d.ten_du_an)}">${esc(x.d.ten_du_an)}</td><td class="th-tt2"><span class="st st-${slug(x.d.trang_thai)} th-st" title="Tự động theo số liệu (% hoàn thành, quyết toán)${x.d.trang_thai_nhap && x.d.trang_thai_nhap !== x.d.trang_thai ? ` – nhập tay: ${esc(x.d.trang_thai_nhap)}` : ''}">${esc(x.d.trang_thai)}</span>${bKhoaIc(x.d)}</td>`;
   // Cột Hoàn thành = thanh mức đạt (tách từ ô tỷ lệ), cột tỷ lệ % bên phải
   const dTo = to === bNowYm() ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : `${lastDay(to)}/${to.slice(5)}/${to.slice(0, 4)}`;
   const hd = (cols) => `<thead><tr><th class="num th-stt">STT</th><th>Mã DA</th><th>Tên dự án</th><th>Tình trạng</th>${cols.map((c) => `<th class="${c === 'Hoàn thành' ? 'th-ht' : 'num'}">${c}</th>`).join('')}</tr></thead>`;
@@ -1646,6 +1669,7 @@ function renderReport() {
       <h1>BÁO CÁO TỔNG QUAN <span class="b-h1-acc">TÀI CHÍNH DỰ ÁN</span></h1>
       <div class="b-tag">Theo dõi nhanh hiệu quả kinh doanh và tình hình tài chính</div>
       <div class="b-meta"><span class="b-mi"><em>Phạm vi</em><b>${esc(scope)}</b></span><span class="b-mi"><em>Đơn vị</em>VNĐ · ${vt}</span><span class="b-mi b-in"><em>Lập lúc</em>${lap.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}</span><span class="b-mi b-in"><em>Người lập</em>${esc(BC.nguoi_lap)}</span><span class="b-mi b-ver b-in">${esc(BC.phien_ban)}</span></div>
+      ${bGhiChuNhanh(list, v, warnN)}
     </div></div>    ${(() => { // Dòng tiền lũy kế đến hôm nay (= mục II khi xem Toàn bộ thời gian): thu − chi, không gồm vay / trả gốc
       const { T: C } = bTongHopData(list, v, { to: '9999-12' });
       // Số dư đầu kỳ (nhập tay): xem 1 dự án = số dư dự án đó; xem nhiều dự án = số dư chung + tổng số dư các dự án
