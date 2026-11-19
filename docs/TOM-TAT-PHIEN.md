@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.19.11.26 – Dòng ghi chú đầu báo cáo: nhãn đổi thành "Tình trạng" (bỏ chữ Ghi chú nhanh)
+
 ## V03.19.11.26 – Ghi chú nhanh: bỏ "Đang nhập liệu" và số cảnh báo; đổi màu (nhãn xanh ngọc, chữ trắng trên nền tối)
 
 ## V02.19.11.26 – Khoá số dự án khi Còn lại = 0 + Ghi chú nhanh đầu báo cáo

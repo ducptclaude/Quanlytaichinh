@@ -779,12 +779,12 @@ function bGhiChuNhanh(list, v, warnN) {
   const ty = (x) => `<b class="${x < 0 ? 'neg' : ''}">${bTy(x)}</b> ${TY()}`;
   const khoaN = list.filter((d) => d.con_lai?.khoa).length, one = list.length === 1 ? list[0] : null;
   const it = [];
-  if (one) it.push(`Tình trạng <b>${esc(one.trang_thai)}</b>${one.ht_tu_dong != null ? ` (${Math.round(one.ht_tu_dong * 100)}% hoàn thành)` : ''}`);
+  if (one) it.push(`<b>${esc(one.trang_thai)}</b>${one.ht_tu_dong != null ? ` (${Math.round(one.ht_tu_dong * 100)}% hoàn thành)` : ''}`);
   else { const c = {}; for (const d of list) c[d.trang_thai] = (c[d.trang_thai] || 0) + 1; it.push(`<b>${list.length}</b> dự án: ${Object.entries(c).map(([k, n]) => `${n} ${esc(k)}`).join(' · ')}`); }
   it.push(`Còn phải thu ${ty(T.pt)}`, `Còn phải chi ${ty(T.pc)}`, `Còn lại ${ty(T.con)}`);
   if (one && one.con_lai?.khoa) it.push(one.mo_khoa_so ? '🔓 Đang mở khoá tạm' : '🔒 Đã khoá số (thu đủ, chi đủ)');
   else if (khoaN) it.push(`🔒 ${khoaN} dự án đã khoá số`);
-  return `<div class="b-note" title="Tự động theo số liệu – thời điểm mới nhất (như mục III)"><em>Ghi chú nhanh</em>${it.map((x) => `<span>${x}</span>`).join('')}</div>`;
+  return `<div class="b-note" title="Tự động theo số liệu – thời điểm mới nhất (như mục III)"><em>Tình trạng</em>${it.map((x) => `<span>${x}</span>`).join('')}</div>`;
 }
 function bMuc3Data(list, v, rows, k = [1, 2, 3].includes(Number(BST.i_td)) ? Number(BST.i_td) : 1) {
   const m4 = new Map(bMuc4Data(list, v).rows.map((x) => [x.d.id, x]));
