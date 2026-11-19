@@ -6,6 +6,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 
 | Bản chốt ngày (nhánh) | Phiên bản | Mã lưu | Ngày | Nội dung chính |
 |---|---|---|---|---|
+| **quanlytaichinh19112026** | V01.19.11.26 | `01c29ea` | 19/11/2026 | Bản lưu theo yêu cầu để quay lại (rollback) – KHÔNG xóa |
 | **chot-19.11.26** | V01.19.11.26 | (mới nhất) | 19/11/2026 | Bỏ làm tròn 0,1 tỷ khi quy đổi tiền thật trước VAT |
 | phien-19.11.26-13h10 | V04.18.11.26 | `caa9d6d` | 19/11/2026 | Trước khi sửa ngày 19/11 |
 | **chot-18.11.26** | V04.18.11.26 | (lần lưu cuối ngày) | 18/11/2026 | Giao diện vừa màn hình rời; mục chi phí phát sinh theo TĐ; + Chi phí khác ghi như phụ lục phát sinh |
