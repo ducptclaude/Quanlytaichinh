@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.20.11.26 – Đẩy lại bản V10 (trang web bị Railway báo "Application not found" lúc lưu V10 nên vẫn chạy V09). Kiểm tra lại với PostgreSQL: tỷ giá lưu vào Cài đặt, Vietcombank lỗi thì dùng bản lưu (ghi "bản lưu gần nhất").
+
 ## V10.19.11.26 – Tiền tệ VND / USD / EUR (tỷ giá Vietcombank – giá bán, tự cập nhật) + nút đơn vị gọn (bỏ bánh răng)
 - Nút góc phải: "VND · Tự động ▾" -> chọn Tiền tệ (VND / USD / EUR) + Đơn vị (Tự động / Đầy đủ / Nghìn / Triệu / Tỷ; ngoại tệ không có Tỷ). Dòng tỷ giá + ngày giờ.
 - Máy chủ `lib/tygia.js`: đọc bảng tỷ giá XML Vietcombank (giá bán = Sell), giữ 1 giờ, lưu bản tốt gần nhất vào Cài đặt (`ty_gia_vcb`) để dùng khi lỗi mạng. `GET /api/ty-gia`.
