@@ -2,6 +2,15 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.23.11.26 – Bảo mật cấp cao + chống sao chép + sao lưu (nhánh `bao-mat-cap-cao`, CHỜ DUYỆT mới gộp vào `staging`)
+- Khóa mã giao diện (`lib/bao-ve-ma.js`): rút gọn + làm rối mã lúc khởi động (~12 giây), chưa đăng nhập chỉ tải được tệp trang Đăng nhập / Khởi tạo; nén brotli (app.js 322 KB -> 114 KB); HTML bỏ chú thích.
+- Dấu chìm tên + tên đăng nhập + giờ phủ toàn trang và bản in (`public/bao-ve.js`); Excel / Excel mẫu trình ký / PowerPoint ghi "Xuất bởi … lúc …".
+- Chỉ xem / khách: chặn chuột phải, bôi đen, sao chép, Ctrl+S/U/P, F12, che nội dung khi mở công cụ lập trình.
+- Xác thực 2 lớp TOTP (`lib/totp.js`, có mã QR): tự bật ở Cá nhân; Quản trị bắt buộc theo vai (Cài đặt → Bảo mật nâng cao) + gỡ khi mất điện thoại. Cột mới `users.totp_secret`, `users.totp_on` (chỉ THÊM).
+- Sao lưu: bảng mới `sao_luu`, tự động 02:00, nút Sao lưu ngay, giữ 7 bản, tải về cần Passcode + ghi nhật ký.
+- Bịt lộ thông tin: `/health` chỉ trả trạng thái; `/api/meta` không trả danh mục / phân quyền khi chưa đăng nhập; trang lỗi CSDL không hiện địa chỉ CSDL; Railway bắt buộc `SETUP_TOKEN`; vá thư viện body-parser.
+- Kiểm tra: tester 4.518 ĐẠT 0 LỖI; kiem-tra-goi 211 ĐẠT 0 LỖI; mọi tab chạy không lỗi với mã đã làm rối; đăng nhập 2 lớp (sai mã bị chặn); xuất Excel / PPT / Excel mẫu; máy tính 1366 + iPhone 13 không tràn ngang.
+
 ## V01.20.11.26 – Đẩy lại bản V10 (trang web bị Railway báo "Application not found" lúc lưu V10 nên vẫn chạy V09). Kiểm tra lại với PostgreSQL: tỷ giá lưu vào Cài đặt, Vietcombank lỗi thì dùng bản lưu (ghi "bản lưu gần nhất").
 
 ## V10.19.11.26 – Tiền tệ VND / USD / EUR (tỷ giá Vietcombank – giá bán, tự cập nhật) + nút đơn vị gọn (bỏ bánh răng)

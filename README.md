@@ -104,6 +104,15 @@ Các ràng buộc an toàn:
 - Không ai tự hạ quyền, tự khóa hoặc tự xóa tài khoản của chính mình.
 - Khi bị khóa, đổi quyền hoặc đặt lại mật khẩu, người dùng bị đăng xuất ngay.
 
+## Bảo mật & chống sao chép (V01.23.11.26)
+- **Mã giao diện:** khi máy chủ khởi động, mã được rút gọn + làm rối (`lib/bao-ve-ma.js`); chỉ tệp của trang Đăng nhập / Khởi tạo tải được khi chưa đăng nhập; trang HTML bỏ chú thích. Nén sẵn brotli/gzip. Tắt làm rối khi gỡ lỗi: `BAO_VE_MA=0`.
+- **Dấu chìm:** tên + tên đăng nhập + giờ in mờ phủ toàn trang và bản in / PDF; file Excel / PowerPoint ghi "Xuất bởi … lúc …" ở chân trang.
+- **Chỉ xem / khách:** chặn chuột phải, bôi đen, sao chép, Ctrl+S/U/P, F12; mở công cụ lập trình thì nội dung bị che.
+- **Xác thực 2 lớp (TOTP):** mỗi người tự bật ở Cá nhân; Quản trị có thể bắt buộc cho Quản trị / Lãnh đạo / Kỹ thuật (Cài đặt → Bảo mật nâng cao) và gỡ khi người dùng mất điện thoại. Nên đặt `TOTP_KEY`.
+- **Sao lưu:** tự động 02:00 hằng ngày + "Sao lưu ngay", giữ 7 bản trong bảng `sao_luu`; tải về cần Passcode, ghi nhật ký.
+- `/health` chỉ trả `ok` / `db_error`; `/api/meta` không trả danh mục, phân quyền khi chưa đăng nhập; trang lỗi CSDL không hiện địa chỉ CSDL.
+- Máy chủ Railway bắt buộc `SETUP_TOKEN` khi khởi tạo lần đầu.
+
 ## Phiên bản
 Dạng **V[lần cập nhật trong ngày].[dd].[mm].[yy]**, ví dụ `V01.16.10.26` = lần cập nhật thứ 1 trong ngày 16/10/2026; lần 2 cùng ngày là `V02.16.10.26`; sang ngày mới quay về `V01`.
 Lưu trong `version.json`, hiển thị ở tab **Liên hệ**. Trước mỗi lần phát hành chạy `node scripts/bump-version.js` (tự tính theo giờ Việt Nam).

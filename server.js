@@ -14,6 +14,8 @@ const { projectReport } = require('./lib/report');
 const { layTyGia } = require('./lib/tygia');
 const { DEMO_PREFIX, seedDemo } = require('./lib/demo');
 const { buildDtcp, costLinesFor, congTy } = require('./lib/export-dtcp');
+const totp = require('./lib/totp');
+const zlib = require('zlib');
 const PHIEN_BAN = require('./lib/version').readVersion(); // đọc 1 lần khi khởi động
 // Tài khoản khách (Chỉ xem, dùng 1 lần): dùng 30 phút tính từ lần đăng nhập đầu, hết hạn thì tự xóa; tạo mà quá 24 giờ chưa đăng nhập cũng tự xóa
 const KHACH_PHUT = Math.max(1, Math.round(Number(process.env.KHACH_PHUT) || 30)), KHACH_CHUA_DUNG_GIO = 24; // KHACH_PHUT: biến môi trường để chạy thử nhanh (mặc định 30)
@@ -60,32 +62,29 @@ const dbState = { ready: false, error: null, attempts: 0 };
 
 // Health check cho Railway: luôn trả 200 khi web đang chạy, kèm tình trạng CSDL
 app.get('/health', async (_req, res) => {
-  if (dbState.ready) {
-    try {
-      await store.ping();
-    } catch (e) {
-      return res.json({ status: 'db_error', db: store.kind, target: store.target, error: e.message });
-    }
-  }
-  res.json({
-    status: dbState.ready ? 'ok' : 'db_error',
-    db: store.kind,
-    target: store.target,
-    ...(dbState.ready ? {} : { error: dbState.error || 'Đang kết nối...', attempts: dbState.attempts }),
-  });
+  // Công khai cho Railway kiểm tra sức khỏe: chỉ trả trạng thái, KHÔNG lộ loại / địa chỉ / lỗi CSDL (xem chi tiết ở Deploy Logs)
+  let ok = dbState.ready;
+  if (ok) { try { await store.ping(); } catch (e) { ok = false; console.error('Kiểm tra CSDL lỗi:', e.message); } }
+  res.json({ status: ok ? 'ok' : 'db_error' });
 });
 
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+// Mã giao diện: chỉ tệp của trang Đăng nhập / Khởi tạo tải được khi chưa đăng nhập (lib/bao-ve-ma.js)
+const baoVeMa = require('./lib/bao-ve-ma');
+app.use(baoVeMa.congKhai);
+app.use('/img', express.static(path.join(__dirname, 'public', 'img'), { index: false }));
 
 // Khi CSDL chưa sẵn sàng: trả trang báo lỗi rõ ràng thay vì 502
 app.use((req, res, next) => {
   if (dbState.ready) return next();
   if (req.path.startsWith('/api/')) {
-    return res.status(503).json({ errors: ['Chưa kết nối được cơ sở dữ liệu: ' + (dbState.error || 'đang kết nối...')] });
+    return res.status(503).json({ errors: ['Chưa kết nối được cơ sở dữ liệu, vui lòng thử lại sau ít phút'] });
   }
   res.status(503).type('html').send(dbErrorPage());
 });
 app.use(auth.loadUser);
+app.use(baoVeMa.canDangNhap); // mã đã rút gọn + làm rối, bắt buộc đăng nhập
+app.use(baoVeMa.tepKhac);
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // Yêu cầu nội bộ khi duyệt: chạy dưới tên người nhập (nhật ký ghi đúng người nhập)
 app.use((req, _res, next) => {
   if (req.noiBo === undefined) return next();
@@ -94,6 +93,12 @@ app.use((req, _res, next) => {
 
 const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 const view = (name) => path.join(__dirname, 'views', name);
+// Trang HTML gửi đi: bỏ chú thích (ghi chú nội bộ của người lập trình) – đọc 1 lần khi khởi động
+const VIEW_CACHE = new Map();
+const sendView = (res, name) => {
+  if (!VIEW_CACHE.has(name)) VIEW_CACHE.set(name, require('fs').readFileSync(view(name), 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/\n\s*\n+/g, '\n'));
+  res.set('Cache-Control', 'no-store').type('html').send(VIEW_CACHE.get(name));
+};
 const parseId = (v) => {
   const id = Number(v);
   return Number.isInteger(id) && id > 0 ? id : null;
@@ -110,16 +115,16 @@ const safeEq = (a, b) => {
 app.get('/', wrap(async (req, res) => {
   if ((await store.countUsers()) === 0) return res.redirect('/setup');
   if (!req.user) return res.redirect('/login');
-  res.sendFile(view('index.html'));
+  sendView(res, 'index.html');
 }));
 app.get('/login', wrap(async (req, res) => {
   if ((await store.countUsers()) === 0) return res.redirect('/setup');
   if (req.user) return res.redirect('/');
-  res.sendFile(view('login.html'));
+  sendView(res, 'login.html');
 }));
 app.get('/setup', wrap(async (_req, res) => {
   if ((await store.countUsers()) > 0) return res.redirect('/login');
-  res.sendFile(view('setup.html'));
+  sendView(res, 'setup.html');
 }));
 
 // =====================================================================
@@ -136,15 +141,18 @@ api.use(auth.csrfGuard);
 
 // V10.19.11.26: tỷ giá USD / EUR (Vietcombank – giá bán) để hiện / xuất báo cáo theo ngoại tệ
 api.get('/ty-gia', wrap(async (_req, res) => res.json((await layTyGia(store)) || { USD: null, EUR: null }))); 
-api.get('/meta', wrap(async (_req, res) => {
+api.get('/meta', wrap(async (req, res) => {
   const s = await store.getSettings();
   res.json({
-    trang_thai: TRANG_THAI,
-    loai_doanh_thu: LOAI_DOANH_THU,
-    nhom_chi_phi: NHOM_CHI_PHI,
-    khoi_chi_phi: KHOI_CHI_PHI,
-    roles: ROLES, quyen: QUYEN, tp_nhom: TP_NHOM,
-    db: store.kind,
+    // Cấu hình nghiệp vụ (danh mục, phân quyền) chỉ trả cho người đã đăng nhập
+    ...(req.user ? {
+      trang_thai: TRANG_THAI,
+      loai_doanh_thu: LOAI_DOANH_THU,
+      nhom_chi_phi: NHOM_CHI_PHI,
+      khoi_chi_phi: KHOI_CHI_PHI,
+      roles: ROLES, quyen: QUYEN, tp_nhom: TP_NHOM,
+      db: store.kind,
+    } : {}),
     ten_cong_ty: s.ten_cong_ty,
     ten_he_thong: s.ten_he_thong,
     needs_setup: (await store.countUsers()) === 0,
@@ -158,6 +166,8 @@ api.get('/meta', wrap(async (_req, res) => {
 // ---------- Setup lần đầu ----------
 api.post('/setup', wrap(async (req, res) => {
   const body = req.body || {};
+  // Máy chủ thật (Railway) bắt buộc có SETUP_TOKEN: tránh người lạ vào trước, chiếm tài khoản Quản trị đầu tiên
+  if (!SETUP_TOKEN && process.env.RAILWAY_ENVIRONMENT) return bad(res, 'Chưa đặt biến SETUP_TOKEN trên Railway – đặt xong mới khởi tạo được', 403);
   if (SETUP_TOKEN && !safeEq(body.setup_token || '', SETUP_TOKEN)) return bad(res, 'Mã khởi tạo (SETUP_TOKEN) không đúng', 403);
   const s = validateSettings(body);
   const u = validateUser({ ...body, role: 'admin' }, true);
@@ -174,6 +184,10 @@ api.post('/setup', wrap(async (req, res) => {
 }));
 
 // ---------- Đăng nhập / đăng xuất ----------
+const OTP_HOI = 'Nhập mã xác thực 2 lớp (6 số trên ứng dụng xác thực)';
+// Quản trị bật "bắt buộc 2 lớp" -> Quản trị, Lãnh đạo, Kỹ thuật hệ thống phải bật xác thực 2 lớp mới làm việc được
+const VAI_BAT_BUOC_2_LOP = ['admin', 'lanh_dao', 'it'];
+const batBuoc2Lop = (s, u) => s?.bat_buoc_2_lop === '1' && u && !u.khach && VAI_BAT_BUOC_2_LOP.includes(u.role);
 api.post('/auth/login', wrap(async (req, res) => {
   const ip = req.ip;
   const username = String(req.body?.username || '').trim().toLowerCase();
@@ -193,6 +207,18 @@ api.post('/auth/login', wrap(async (req, res) => {
     return bad(res, 'Sai tên đăng nhập hoặc mật khẩu', 401);
   }
   if (!user.active) return bad(res, 'Tài khoản đã bị khóa. Liên hệ quản trị viên', 403);
+  // Xác thực 2 lớp: đã bật -> bắt buộc mã 6 số từ ứng dụng xác thực; sai mã tính như đăng nhập sai
+  if (user.totp_on) {
+    const ma = String(req.body?.ma_otp || '').trim();
+    if (!ma) return res.status(401).json({ errors: [OTP_HOI], can_otp: true });
+    const t = await store.getTotp(user.id);
+    if (!totp.verify(totp.open(t?.totp_secret), ma, user.id)) {
+      auth.loginFailed(ip); auth.loginFailed('u:' + username); security.loginFailedIp(ip);
+      security.log(`Sai mã 2 lớp: "${username.slice(0, 50)}" từ IP ${ip}`);
+      audit.log(req, 'Đăng nhập sai', 'Tài khoản', 'Sai mã xác thực 2 lớp', { username: user.username, ho_ten: user.full_name, user_id: user.id });
+      return res.status(401).json({ errors: ['Mã xác thực 2 lớp không đúng hoặc đã hết hạn'], can_otp: true });
+    }
+  }
   if (khachHetHan(user)) {
     audit.log(req, 'Đăng nhập sai', 'Tài khoản khách', `Đăng nhập khi đã hết ${KHACH_PHUT} phút sử dụng`, { username: user.username, ho_ten: user.full_name, user_id: user.id });
     donKhach();
@@ -241,6 +267,12 @@ api.post('/auth/away', wrap(async (req, res) => {
 
 // Từ đây trở xuống: bắt buộc đăng nhập
 api.use(auth.requireAuth);
+// Bắt buộc 2 lớp mà chưa bật: chỉ được vào phần thiết lập 2 lớp / đăng xuất / đổi mật khẩu
+api.use(wrap(async (req, res, next) => {
+  if (req.noiBo !== undefined || req.user.totp_on || /^\/(meta|auth\/)/.test(req.path)) return next();
+  if (batBuoc2Lop(await store.getSettings(), req.user)) return res.status(403).json({ errors: ['Vai trò của bạn bắt buộc bật xác thực 2 lớp. Vào mục Cá nhân để thiết lập.'], can_bat_2_lop: true });
+  next();
+}));
 // Khách hết hạn: đăng xuất ngay, xóa tài khoản
 api.use(wrap(async (req, res, next) => {
   if (!khachHetHan(req.user)) return next();
@@ -252,7 +284,7 @@ api.use(wrap(async (req, res, next) => {
 const IT_DUOC_VAO = /^\/(meta|auth\/|users(\/|$)|nhat-ky|lien-he$|settings$)/;
 api.use((req, res, next) => (req.user?.role === 'it' && !IT_DUOC_VAO.test(req.path) ? bad(res, 'Vai trò Kỹ thuật hệ thống không xem số liệu dự án', 403) : next()));
 // Chỉ xem: chặn mọi lệnh ghi (trừ đăng xuất / tạm vắng / tự đổi mật khẩu) – chỉ đọc số liệu; đổi đơn vị tiền hiển thị lưu trên trình duyệt, không qua máy chủ
-const CHI_XEM_DUOC_GHI = /^\/auth\/(logout|away|change-password)$/;
+const CHI_XEM_DUOC_GHI = /^\/auth\/(logout|away|change-password|2fa\/(tao|bat|tat))$/;
 api.use((req, res, next) => (req.user?.role === 'viewer' && !['GET', 'HEAD'].includes(req.method) && !CHI_XEM_DUOC_GHI.test(req.path)
   ? bad(res, 'Vai trò Chỉ xem không được thay đổi hoặc xuất dữ liệu', 403) : next()));
 // ===================== PHÊ DUYỆT (V02.09.11.26) =====================
@@ -629,6 +661,41 @@ api.get('/nhat-ky', quyen('nhat_ky'), wrap(async (req, res) => {
 
 api.get('/auth/me', (req, res) => res.json(req.user));
 
+// ---------- Xác thực 2 lớp (tự bật / tắt ở mục Cá nhân; Quản trị gỡ giúp ở trang Tài khoản) ----------
+const otpCho = new Map(); // userId -> { secret, het } khóa đang chờ xác nhận (10 phút)
+api.get('/auth/2fa', wrap(async (req, res) => {
+  const s = await store.getSettings();
+  res.json({ bat: Boolean((await store.getTotp(req.user.id))?.totp_on), bat_buoc: batBuoc2Lop(s, req.user) });
+}));
+api.post('/auth/2fa/tao', wrap(async (req, res) => {
+  if (req.user.khach) return bad(res, 'Tài khoản khách không dùng xác thực 2 lớp', 403);
+  if (!(await auth.verifyPassword(String(req.body?.current_password || ''), await store.getPasswordHash(req.user.id)))) return bad(res, 'Mật khẩu hiện tại không đúng', 403);
+  const secret = totp.newSecret();
+  otpCho.set(req.user.id, { secret, het: Date.now() + 10 * 60e3 });
+  const s = await store.getSettings();
+  res.json({ khoa: secret.replace(/(.{4})/g, '$1 ').trim(), url: totp.otpauthUrl(secret, req.user.username, s.ten_he_thong || 'MyMoney') });
+}));
+api.post('/auth/2fa/bat', wrap(async (req, res) => {
+  const c = otpCho.get(req.user.id);
+  if (!c || c.het < Date.now()) return bad(res, 'Hết thời gian thiết lập, vui lòng bắt đầu lại');
+  if (!totp.verify(c.secret, req.body?.ma_otp)) return bad(res, 'Mã 6 số không đúng – kiểm tra giờ trên điện thoại và nhập mã mới nhất');
+  await store.setTotp(req.user.id, totp.seal(c.secret), true);
+  otpCho.delete(req.user.id);
+  audit.log(req, 'Sửa', 'Tài khoản', 'Bật xác thực 2 lớp');
+  res.json({ ok: true });
+}));
+api.post('/auth/2fa/tat', wrap(async (req, res) => {
+  if (batBuoc2Lop(await store.getSettings(), req.user)) return bad(res, 'Vai trò của bạn bắt buộc dùng xác thực 2 lớp – không tự tắt được', 403);
+  const t = await store.getTotp(req.user.id);
+  if (!t?.totp_on) return res.json({ ok: true });
+  if (!(await auth.verifyPassword(String(req.body?.current_password || ''), await store.getPasswordHash(req.user.id)))) return bad(res, 'Mật khẩu hiện tại không đúng', 403);
+  if (!totp.verify(totp.open(t.totp_secret), req.body?.ma_otp, req.user.id)) return bad(res, 'Mã 6 số không đúng');
+  await store.setTotp(req.user.id, null, false);
+  audit.log(req, 'Sửa', 'Tài khoản', 'Tắt xác thực 2 lớp');
+  res.json({ ok: true });
+}));
+
+
 api.post('/auth/change-password', wrap(async (req, res) => {
   if (req.user.khach) return bad(res, 'Tài khoản khách không đổi được mật khẩu', 403);
   const { current_password, new_password } = req.body || {};
@@ -660,6 +727,64 @@ api.put('/settings/passcode', auth.requireRole('admin'), wrap(async (req, res) =
   await store.saveSettings({ [PASSCODE_KEY]: await auth.hashPassword(String(passcode)) });
   console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã đặt/đổi Passcode xóa HĐ/PL`);
   res.json({ ok: true });
+}));
+
+// ---------- Bảo mật nâng cao (chỉ Quản trị) ----------
+api.get('/settings/bao-mat', auth.requireRole('admin'), wrap(async (_req, res) => {
+  const s = await store.getSettings();
+  const ds = await store.listUsers();
+  res.json({ bat_buoc_2_lop: s.bat_buoc_2_lop === '1', vai: VAI_BAT_BUOC_2_LOP,
+    chua_bat: ds.filter((u) => u.active && !u.khach && VAI_BAT_BUOC_2_LOP.includes(u.role) && !u.totp_on).map((u) => u.full_name || u.username) });
+}));
+api.put('/settings/bao-mat', auth.requireRole('admin'), wrap(async (req, res) => {
+  if (!(await auth.verifyPassword(String(req.body?.current_password || ''), await store.getPasswordHash(req.user.id)))) return bad(res, 'Mật khẩu đăng nhập không đúng');
+  const bat = Boolean(req.body?.bat_buoc_2_lop);
+  if (bat && !req.user.totp_on) return bad(res, 'Bạn cần tự bật xác thực 2 lớp (mục Cá nhân) trước khi bắt buộc cho người khác');
+  await store.saveSettings({ bat_buoc_2_lop: bat ? '1' : '0' });
+  audit.log(req, 'Sửa', 'Cài đặt', bat ? 'Bắt buộc xác thực 2 lớp cho Quản trị / Lãnh đạo / Kỹ thuật' : 'Bỏ bắt buộc xác thực 2 lớp');
+  res.json({ ok: true });
+}));
+
+// ---------- Sao lưu toàn bộ dữ liệu (chỉ Quản trị) ----------
+// Tự động mỗi ngày lúc 02:00 (giờ Việt Nam) + nút "Sao lưu ngay"; giữ 7 bản mới nhất trong CSDL (chống xóa nhầm / nhập sai).
+// Tải về: phải nhập Passcode xóa; mỗi lần tải ghi nhật ký. Không chống được mất toàn bộ CSDL -> nên tải 1 bản về máy mỗi tuần.
+async function taoSaoLuu(ly_do) {
+  const t0 = Date.now();
+  const json = JSON.stringify({ he_thong: 'MYMONEY-BKS', phien_ban: PHIEN_BAN?.ma || '', tao_luc: new Date().toISOString(), du_lieu: await store.dumpAll() },
+    (_k, v) => (typeof v === 'bigint' ? String(v) : v));
+  const buf = zlib.gzipSync(Buffer.from(json, 'utf8'), { level: 9 });
+  const r = await store.addBackup(ly_do, buf, 7);
+  console.log(`[SAO LƯU] ${ly_do}: ${(buf.length / 1024).toFixed(0)} KB trong ${Date.now() - t0} ms`);
+  return r;
+}
+let saoLuuNgay = '';
+function henSaoLuu() {
+  setInterval(() => {
+    const vn = new Date(Date.now() + 7 * 3600e3);
+    const ngay = vn.toISOString().slice(0, 10);
+    if (vn.getUTCHours() === 2 && saoLuuNgay !== ngay && dbState.ready) {
+      saoLuuNgay = ngay;
+      taoSaoLuu('Tự động hằng ngày').catch((e) => console.error('Lỗi sao lưu tự động:', e.message));
+    }
+  }, 5 * 60e3).unref();
+}
+api.get('/sao-luu', auth.requireRole('admin'), wrap(async (_req, res) => res.json({ items: await store.listBackups() })));
+api.post('/sao-luu', auth.requireRole('admin'), wrap(async (req, res) => {
+  const r = await taoSaoLuu('Sao lưu ngay – ' + (req.user.full_name || req.user.username));
+  audit.log(req, 'Thêm', 'Sao lưu', 'Tạo bản sao lưu dữ liệu');
+  res.status(201).json(r);
+}));
+api.post('/sao-luu/:id/tai', auth.requireRole('admin'), wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return bad(res, 'ID không hợp lệ');
+  if (!(await requirePasscode(req, res))) return;
+  const b = await store.getBackup(id);
+  if (!b) return bad(res, 'Không tìm thấy bản sao lưu', 404);
+  const ten = 'mymoney-saoluu-' + new Date(b.tao_luc).toISOString().slice(0, 16).replace(/[-:T]/g, '') + '.json.gz';
+  audit.log(req, 'Xuất báo cáo', 'Sao lưu', `Tải bản sao lưu #${id} (${ten})`);
+  security.log(`${req.user.username} tải bản sao lưu #${id} từ IP ${req.ip}`);
+  res.set({ 'Content-Type': 'application/gzip', 'Content-Disposition': `attachment; filename="${ten}"` });
+  res.send(Buffer.from(b.du_lieu));
 }));
 
 // Chống dò passcode: sai 5 lần / 15 phút / tài khoản -> khóa xóa
@@ -809,6 +934,16 @@ users.delete('/:id/sessions/:sid?', wrap(async (req, res) => {
   res.json({ ok: true, so_phien: n });
 }));
 
+users.delete('/:id/2fa', wrap(async (req, res) => {
+  const id = parseId(req.params.id);
+  const target = id && (await store.getUserById(id));
+  if (!target) return bad(res, 'Không tìm thấy tài khoản', 404);
+  if (laIT(req) && target.role === 'admin') return bad(res, 'Kỹ thuật hệ thống không được sửa tài khoản Quản trị', 403);
+  await store.setTotp(id, null, false);
+  await store.deleteUserSessions(id);
+  audit.log(req, 'Sửa', 'Tài khoản', `Gỡ xác thực 2 lớp của ${target.username} (mất điện thoại / đổi máy)`);
+  res.json({ ok: true });
+}));
 users.delete('/:id', wrap(async (req, res) => {
   if (laIT(req)) return bad(res, 'Kỹ thuật hệ thống chỉ được khóa, không được xóa tài khoản', 403);
   const id = parseId(req.params.id);
@@ -1046,7 +1181,8 @@ api.get('/bao-cao/dtcp.xlsx', quyen('xuat'), wrap(async (req, res) => {
   const ngay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
   let tien = null; // ?tien=USD|EUR -> quy đổi theo tỷ giá Vietcombank (giá bán) mới nhất
   if (['USD', 'EUR'].includes(req.query.tien)) { const tg = await layTyGia(store); if (!tg?.[req.query.tien]) return bad(res, 'Chưa lấy được tỷ giá – thử lại sau hoặc xuất bằng VND'); tien = { ma: req.query.tien, ty_gia: tg[req.query.tien], ngay: tg.ngay }; }
-  const buf = await buildDtcp({ du_an, ngay, nguoi_lap: req.user.full_name || req.user.username, ten_cong_ty: (await store.getSettings()).ten_cong_ty, tien });
+  const buf = await buildDtcp({ du_an, ngay, nguoi_lap: req.user.full_name || req.user.username, ten_cong_ty: (await store.getSettings()).ten_cong_ty, tien,
+    dau_vet: `Xuất bởi ${req.user.full_name || req.user.username} (${req.user.username}) lúc ${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}` });
   audit.log(req, 'Xuất báo cáo', 'Báo cáo', `Excel mẫu trình ký (DT–CP) · ${du_an.length} dự án`);
   const ten = `BaoCao_DTCP_${ngay.replace(/-/g, '')}.xlsx`;
   res.set({ 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition': `attachment; filename="${ten}"` });
@@ -1764,9 +1900,8 @@ function dbErrorPage() {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap&subset=vietnamese"><link rel="stylesheet" href="/style.css"></head>
 <body class="auth-page"><div class="auth-box wide"><div class="auth-brand"><img class="logo-full" src="/img/logo-full.png?v=mm1" alt="MyMoney">
 <h1>Chưa kết nối được cơ sở dữ liệu</h1><p class="muted">Web đang chạy, đang tự thử kết nối lại (lần ${dbState.attempts}). Trang tự tải lại sau 10 giây.</p></div>
-<div class="stack"><div><b>Nguyên nhân có thể:</b><br>${e(dbHint(dbState.error))}</div>
-<div><b>Lỗi chi tiết:</b><br><code>${e(dbState.error || 'Đang kết nối...')}</code></div>
-<div><b>DATABASE_URL đang trỏ tới:</b><br><code>${e(store.target)}</code></div></div></div>
+<div class="stack">
+<div><b>Chi tiết lỗi:</b> xem Railway → Deploy Logs (không hiện ra trang công khai để tránh lộ thông tin máy chủ).</div></div></div>
 <div class="auth-foot">Produced by the Supervisory Board</div></body></html>`;
 }
 
@@ -1774,6 +1909,7 @@ function dbErrorPage() {
 // Khởi động: mở cổng web NGAY, rồi kết nối CSDL (tự thử lại mãi, không tắt web)
 // =====================================================================
 console.log(`Khởi động... PORT=${PORT} | CSDL: ${store.kind} | DATABASE_URL: ${store.target}`);
+baoVeMa.build(); // rút gọn + làm rối mã giao diện (vài giây, trước khi mở cổng)
 app.listen(PORT, '0.0.0.0', () => console.log(`Server chạy tại cổng ${PORT}`));
 
 (async function connectDb() {
@@ -1791,6 +1927,7 @@ app.listen(PORT, '0.0.0.0', () => console.log(`Server chạy tại cổng ${PORT
       dbState.ready = true;
       dbState.error = null;
       audit.startPrune();
+      henSaoLuu();
       donKhach(); setInterval(donKhach, 60e3).unref(); // dọn tài khoản khách hết hạn mỗi phút
       console.log(`Đã kết nối CSDL (${store.kind}) sau ${dbState.attempts} lần thử`);
       return;

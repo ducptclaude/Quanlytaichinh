@@ -3911,3 +3911,22 @@ button.da-ic:hover { background: rgba(0, 0, 0, .06); }
 .cai-menu #tien-tg { color: var(--fg-1e293b); font-weight: 600; white-space: normal; }
 .cai-menu .cai-note { white-space: normal; max-width: 300px; }
 .cai-menu .cai-row select { width: 175px; min-width: 175px; }
+
+/* ===== Bảo vệ dữ liệu (public/bao-ve.js) ===== */
+#bv-wm { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; background-repeat: repeat; }
+html.bv-khoa body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-select: text; user-select: text; }
+#bv-che { position: fixed; inset: 0; z-index: 2147483001; background: var(--card, #fff); color: var(--text, #111); display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-weight: 600; }
+#bv-che[hidden] { display: none; }
+#bv-ep { position: fixed; inset: 0; z-index: 2147482000; background: rgba(15, 23, 42, .55); overflow: auto; padding: 24px 16px; }
+#bv-ep .card { margin: 0 auto; }
+#tf-card, #tab-settings .card.narrow + .card.narrow { margin-top: 16px; }
+.tf-qr { width: 200px; max-width: 70%; margin: 8px auto; background: #fff; padding: 6px; border-radius: 8px; }
+.tf-qr svg { width: 100%; height: auto; display: block; }
+.tf-key { word-break: break-all; font-size: 14px; letter-spacing: .5px; }
+#bm-form label.chk { display: flex; align-items: center; gap: 8px; flex-direction: row; }
+#bm-form label.chk input { width: auto; }
+@media print {
+  #bv-wm { position: fixed; display: block !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #bv-che, #bv-ep { display: none !important; }
+}

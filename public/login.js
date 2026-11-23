@@ -24,6 +24,12 @@ $('#form').addEventListener('submit', async (e) => {
     location.href = '/';
   } catch (err) {
     showMsg($('#msg'), err.message, 'err');
+    // Tài khoản đã bật xác thực 2 lớp: hiện ô mã 6 số, giữ mật khẩu đã nhập
+    if (/xác thực 2 lớp/.test(err.message)) {
+      const row = $('#otp-row'), o = e.target.ma_otp;
+      row.hidden = false; o.disabled = false; o.required = true; o.value = ''; o.focus();
+      return;
+    }
     e.target.password.value = '';
     e.target.password.focus();
   } finally {

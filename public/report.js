@@ -2635,8 +2635,11 @@ $('#b-xlsx-mau').addEventListener('click', (e) => bBusy(e.target, async () => {
 const XL = { FONT: 'Times New Roman', NAVY: 'FF002060', YELLOW: 'FFFFFF00', PEACH: 'FFF8CBAD', RED: 'FFFF0000',
   NUM: '#,##0;(#,##0);"-"', NUM2: '#,##0.00;(#,##0.00);"-"', PCT: '0.0%;-0.0%;"-"' };
 const xlDate = (s) => (/^\d{4}-\d{2}-\d{2}$/.test(String(s || '')) ? s.split('-').reverse().join('/') : s || '');
+// Dấu nhận diện người xuất (truy vết khi tài liệu bị lộ): tên + tên đăng nhập + thời điểm
+const bvNguoiXuat = () => { const u = typeof ME !== 'undefined' && ME ? ME : {}; return `Xuất bởi ${u.full_name || u.username || '?'} (${u.username || '?'}) lúc ${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`; };
 function xlBook() {
   const wb = new ExcelJS.Workbook();
+  wb.lastModifiedBy = bvNguoiXuat(); wb.description = bvNguoiXuat();
   wb.creator = BC.nguoi_lap || 'PROJECT PROFIT';
   wb.created = new Date();
   return wb;
@@ -2677,7 +2680,7 @@ function xlHeader(wb, ws, logoId, { title, sub, widths: w0 }) {
   ws.getRow(8).height = 20;
   ws.pageSetup = { orientation: 'landscape', paperSize: n > 10 ? 8 : 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true,
     margins: { left: 0.35, right: 0.35, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 } };
-  ws.headerFooter = { oddFooter: '&L&"Times New Roman"&9PROJECT PROFIT · Ban Kiểm soát&R&"Times New Roman"&9Trang &P/&N' };
+  ws.headerFooter = { oddFooter: '&L&"Times New Roman"&9PROJECT PROFIT · Ban Kiểm soát&C&"Times New Roman"&7' + bvNguoiXuat().replace(/&/g, '&&') + '&R&"Times New Roman"&9Trang &P/&N' };
   return 10;
 }
 const xlBox = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
@@ -2902,6 +2905,7 @@ $('#b-pptx').addEventListener('click', (e) => bBusy(e.target, async () => {
   pptx.layout = 'LAYOUT_WIDE';
   pptx.company = BC.ten_cong_ty || '';
   pptx.title = 'Báo cáo tổng quan dự án';
+  pptx.subject = bvNguoiXuat();
   const FONT = 'Arial';
   const scope = one ? `${one.ma_du_an} – ${one.ten_du_an}` : `Tất cả dự án (${list.length})`;
   const dateTxt = new Date(BC.lap_luc).toLocaleDateString('vi-VN');
@@ -2909,7 +2913,8 @@ $('#b-pptx').addEventListener('click', (e) => bBusy(e.target, async () => {
     title: 'MAU', background: { color: 'FFFFFF' },
     objects: [
       { rect: { x: 0, y: 0, w: 13.33, h: 0.12, fill: { color: TEAL } } },
-      { text: { text: `${BC.ten_cong_ty || ''} · Báo cáo tổng quan dự án · ${dateTxt}`, options: { x: 0.5, y: 7.05, w: 9, h: 0.3, fontFace: FONT, fontSize: 9, color: MUTED } } },
+      { text: { text: `${BC.ten_cong_ty || ''} · Báo cáo tổng quan dự án · ${dateTxt}`, options: { x: 0.5, y: 7.05, w: 6.2, h: 0.3, fontFace: FONT, fontSize: 9, color: MUTED } } },
+      { text: { text: bvNguoiXuat(), options: { x: 6.7, y: 7.05, w: 5.5, h: 0.3, fontFace: FONT, fontSize: 8, color: MUTED, align: 'right' } } },
     ],
     slideNumber: { x: 12.3, y: 7.05, w: 0.6, h: 0.3, fontFace: FONT, fontSize: 9, color: MUTED, align: 'right' },
   });

@@ -22,6 +22,7 @@
     <form id="form" class="stack">
       <label>Tên đăng nhập<input name="username" autocomplete="username" required autofocus></label>
       <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required></label>
+      <label id="otp-row" hidden>Mã xác thực 2 lớp (6 số)<input name="ma_otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" disabled></label>
       <button type="submit" class="primary block">Đăng nhập</button>
       <div id="msg" class="msg" role="alert"></div>
     </form>
