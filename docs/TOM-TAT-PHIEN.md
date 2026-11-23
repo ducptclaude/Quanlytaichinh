@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.23.11.26 – Dấu chìm chỉ áp dụng cho vai Chỉ xem và tài khoản khách (nhánh `bao-mat-cap-cao`, chờ duyệt)
+- `public/bao-ve.js`: dấu chìm màn hình + bản in chỉ hiện với Chỉ xem / khách (cùng lớp chặn sao chép). Các vai khác không còn dấu chìm. Dòng "Xuất bởi … lúc …" trong file Excel / PowerPoint giữ nguyên.
+- Kiểm tra: đăng nhập 5 vai (Quản trị, Lãnh đạo, Nhập liệu, Chỉ xem, khách) – chỉ Chỉ xem và khách có dấu chìm + chặn sao chép, không lỗi trang.
+
 ## V01.23.11.26 – Bảo mật cấp cao + chống sao chép + sao lưu (nhánh `bao-mat-cap-cao`, CHỜ DUYỆT mới gộp vào `staging`)
 - Khóa mã giao diện (`lib/bao-ve-ma.js`): rút gọn + làm rối mã lúc khởi động (~12 giây), chưa đăng nhập chỉ tải được tệp trang Đăng nhập / Khởi tạo; nén brotli (app.js 322 KB -> 114 KB); HTML bỏ chú thích.
 - Dấu chìm tên + tên đăng nhập + giờ phủ toàn trang và bản in (`public/bao-ve.js`); Excel / Excel mẫu trình ký / PowerPoint ghi "Xuất bởi … lúc …".

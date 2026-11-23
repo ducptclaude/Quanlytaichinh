@@ -1,5 +1,5 @@
 // BẢO VỆ DỮ LIỆU TRÊN TRANG (chạy sau app.js)
-//  1. Dấu chìm: tên người xem + tên đăng nhập + giờ in mờ phủ toàn trang và trên bản in / PDF -> lộ ảnh chụp là biết ai làm lộ.
+//  1. Dấu chìm (chỉ Chỉ xem / khách): tên người xem + tên đăng nhập + giờ in mờ phủ toàn trang và trên bản in / PDF -> lộ ảnh chụp là biết ai làm lộ.
 //  2. Vai Chỉ xem / khách: chặn chuột phải, bôi đen, sao chép, lưu trang, xem mã nguồn, công cụ lập trình (F12).
 //  3. Xác thực 2 lớp: bật / tắt ở mục Cá nhân; bắt buộc theo vai -> hiện màn hình thiết lập.
 //  4. Quản trị: Cài đặt -> Bảo mật nâng cao (bắt buộc 2 lớp, gỡ 2 lớp) + Sao lưu dữ liệu (tự động 02:00, sao lưu ngay, tải về).
@@ -191,8 +191,8 @@
   async function khoiDong() {
     try { me = await api('/api/auth/me'); } catch { return; }
     if (!me) return;
-    giuDauChim();
-    if (me.role === 'viewer' || me.khach) chongSaoChep();
+    // Dấu chìm + chặn sao chép: chỉ vai Chỉ xem và tài khoản khách
+    if (me.role === 'viewer' || me.khach) { giuDauChim(); chongSaoChep(); }
     // Cá nhân: thêm khung 2 lớp (khách không có mục Cá nhân)
     const prof = document.querySelector('#tab-profile');
     if (prof && !me.khach) {

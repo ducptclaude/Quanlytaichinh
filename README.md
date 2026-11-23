@@ -106,7 +106,7 @@ Các ràng buộc an toàn:
 
 ## Bảo mật & chống sao chép (V01.23.11.26)
 - **Mã giao diện:** khi máy chủ khởi động, mã được rút gọn + làm rối (`lib/bao-ve-ma.js`); chỉ tệp của trang Đăng nhập / Khởi tạo tải được khi chưa đăng nhập; trang HTML bỏ chú thích. Nén sẵn brotli/gzip. Tắt làm rối khi gỡ lỗi: `BAO_VE_MA=0`.
-- **Dấu chìm:** tên + tên đăng nhập + giờ in mờ phủ toàn trang và bản in / PDF; file Excel / PowerPoint ghi "Xuất bởi … lúc …" ở chân trang.
+- **Dấu chìm (chỉ vai Chỉ xem và tài khoản khách):** tên + tên đăng nhập + giờ in mờ phủ toàn trang và bản in / PDF; file Excel / PowerPoint ghi "Xuất bởi … lúc …" ở chân trang.
 - **Chỉ xem / khách:** chặn chuột phải, bôi đen, sao chép, Ctrl+S/U/P, F12; mở công cụ lập trình thì nội dung bị che.
 - **Xác thực 2 lớp (TOTP):** mỗi người tự bật ở Cá nhân; Quản trị có thể bắt buộc cho Quản trị / Lãnh đạo / Kỹ thuật (Cài đặt → Bảo mật nâng cao) và gỡ khi người dùng mất điện thoại. Nên đặt `TOTP_KEY`.
 - **Sao lưu:** tự động 02:00 hằng ngày + "Sao lưu ngay", giữ 7 bản trong bảng `sao_luu`; tải về cần Passcode, ghi nhật ký.
