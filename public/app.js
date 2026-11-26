@@ -3341,7 +3341,7 @@ function renderTpDlg() {
           : inp('gia_tri_qt', qtStr, 'class="money num" placeholder="= TĐ2"', ok3)}</td>
       <td class="num strong c3s" data-calc="qt">${dvm(qtSau) + (q3 !== null ? tdDelta(q3, t2) : '') + (!draft && !l.da_qt ? '<div class="muted small">chưa QT</div>' : '')}</td>
       <td>${inp('ghi_chu', draft ? '' : l.ghi_chu, `maxlength="500"${l.la_cp ? ' placeholder="Nội dung chi phí khác"' : ''}`, ok1 || draft)}</td>
-      <td class="row-actions">${!editL ? '' : lk ? (md === 3 ? '<button class="sm" data-tpmoqt>🔓 Mở khoá</button>' : '<span class="muted small">🔒 Khoá</span>')
+      <td class="row-actions">${!editL ? '' : lk ? (md === 3 ? '<button class="sm" data-tpmoqt>🔓 Mở khoá</button>' : '<span class="muted small">🔒 Khoá</span>') + (l.ma_loai === 'HĐ' ? '' : '<button class="danger sm" data-del title="Xoá dòng đang khoá: nhập Passcode 1 lần – tự bỏ số quyết toán rồi xoá">Xóa</button>')
         : draft || md === tdL ? `<button class="primary sm" data-save ${draft ? '' : 'hidden'}>Lưu</button>${l.ma_loai === 'HĐ' ? '' : `<button class="danger sm" data-del>${draft ? 'Bỏ' : 'Xóa'}</button>`}`
           : md === 3 ? '<button class="primary sm" data-save hidden>Lưu QT</button>' : ''}</td>
     </tr>`;
@@ -3580,8 +3580,10 @@ async function onTpDlgClick(e) {
     if (k.startsWith('dp')) { tpDrafts.pays = tpDrafts.pays.filter((d) => 'dp' + d.key !== k); return renderTpDlg(); }
     if (k.startsWith('l')) {
       const l = c.lines.find((x) => 'l' + x.id === k);
-      const pc = await askPasscode(`Xóa "${l.so_hieu}"?`, `Giá trị sau VAT: ${money(l.sau_vat)} đ. Thao tác này không hoàn tác được.`);
+      const coQt = nnV(l.gia_tri_qt) !== null; // V11.26.11.26: dòng đang khoá (có số quyết toán) -> bỏ số quyết toán rồi xoá, 1 lần Passcode
+      const pc = await askPasscode(`Xóa "${l.so_hieu}"?`, `Giá trị sau VAT: ${money(l.sau_vat)} đ.${coQt ? ' Dòng đang khoá (có số quyết toán) – sẽ bỏ số quyết toán rồi xoá.' : ''} Thao tác này không hoàn tác được.`);
       if (pc === null) return;
+      if (coQt && !(await call(`/api/tp-hd-pl/${l.id}/qt`, 'DELETE', { passcode: pc }))) return;
       if (await call(`/api/tp-hd-pl/${l.id}`, 'DELETE', { passcode: pc })) await after(`Đã xóa ${l.ma_loai}`);
     } else {
       const p = c.pays.find((x) => 'p' + x.id === k);

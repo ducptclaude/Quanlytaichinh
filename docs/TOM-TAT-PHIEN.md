@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.26.11.26 – Hộp HĐ đầu vào: dòng PL đang khoá (có số quyết toán) có nút **Xóa** – nhập Passcode 1 lần, tự bỏ số quyết toán rồi xoá (trước phải 🔓 Mở khoá rồi mới Xóa). Dòng HĐ gốc không xoá riêng. Kiểm tra: PL phát sinh TĐ3 có QT 7,8 tr xoá được; tester, kiem-tra-goi 0 lỗi.
+
 ## V10.26.11.26 – Hộp chi tiết nhóm HĐ đầu vào: "+ HĐ" (nhiều nhà thầu) và "+ CP khác" phát sinh theo TĐ
 - Cuối hộp chi tiết nhóm (Thầu phụ / Vật tư / MMTB / Nhân công…, theo từng HĐ CĐT): **+ HĐ** -> hộp "Ghi khoản đã chi" điền sẵn nhóm, HĐ CĐT, cách nhập HĐ;
   ở TĐ2 HĐ ghi phát sinh (`phat_sinh`, TĐ1 = 0), ở TĐ3 dòng HĐ gốc `td_ps = 3` (TĐ1 = TĐ2 = 0). **+ CP khác** -> khoản dự trù `ky` của nhóm gắn HĐ CĐT,
