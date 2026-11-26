@@ -1853,13 +1853,16 @@ async function saveCost() {
     goi_id: $('#c-legoi-wrap')?.hidden ? null : Number(e.le_goi?.value) || null, // V27.12: gắn mua lẻ vào gói
     ...(!id && tdDangChon() > 1 ? { td_ps: tdDangChon() } : {}), // V02.18: thêm ở tab TĐ2 / TĐ3 = phát sinh tại TĐ đó (không tính TĐ trước)
   };
+  { const c = canhBaoChi(body, id); // V01.26: ngày tương lai -> chặn · trùng chứng từ -> hỏi · vượt dự trù -> báo, vẫn lưu
+    if (c.chan.length) { veCanhBao(); return showMsg(msg, 'Ngày chứng từ ở tương lai – sửa lại ngày', 'err'); }
+    if (c.hoi.length && !confirm('Có thể TRÙNG chứng từ đã ghi (cùng số CT, đối tác, số tiền).\nĐây là chứng từ khác, vẫn lưu?')) return showMsg(msg, 'Chưa lưu – kiểm tra lại chứng từ', 'err'); }
   try {
     await api(id ? `/api/chi-phi/${id}` : `/api/du-an/${revProjectId}/chi-phi`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) });
     costOpen.add(body.nhom); moKhoiCua(body.nhom);
     if (body.nhom_con) costOpen.add(`${body.nhom}:${body.nhom_con}`);
     resetCostForm(body.nhom, body.nhom_con);
     showMsg(msg, id ? 'Đã cập nhật' : 'Đã thêm dòng');
-    await loadCost();
+    await loadCost(); veCanhBao();
   } catch (err) {
     showMsg(msg, err.message, 'err');
   }
@@ -2188,6 +2191,141 @@ function costKpiTd() {
 // V10.16 + V04.17: chi phí gián tiếp / tài chính – (1) khoản chi tiết nhập như thầu phụ: TĐ1 dự trù · TĐ2 điều chỉnh theo khoản · TĐ3 = thực chi / số chốt;
 //  (2) khối chưa có khoản nào thì dùng % × doanh thu cùng TĐ (TĐ1, TĐ2). Số tiền ở đây là trước VAT.
 let ptEdit = null;
+// ===== V01.26: ① BẢNG DT-CP TĐ1 (khung chuẩn: khối → nhóm) · ② trình / duyệt / khoá TĐ1 =====
+//  Mỗi nhóm: Thành tiền TĐ1 = phần TỰ ĐỘNG (gói, HĐ đầu vào, khoản, chi đã ghi) + ô NHẬP (số / % doanh thu / công thức) -> lưu 1 dòng dự trù "DT-CP" của nhóm
+function td1Info() {
+  const d = costData?.du_an || {}, tt = d.td1_tt || '';
+  const so = (() => { try { return JSON.parse(d.td1_so || 'null'); } catch { return null; } })();
+  return { tt, khoa: tt === 'trinh' || tt === 'duyet', d, so };
+}
+function td1Bar() {
+  const { tt, d, so } = td1Info(), laDuyet = ['admin', 'lanh_dao'].includes(ME.role), tuMinh = d.td1_trinh_by === ME.id;
+  const chip = { '': '<span class="td1-chip td1-lap">✏ Đang lập · chưa trình</span>', trinh: `<span class="td1-chip td1-cho">⏳ Chờ duyệt · ${esc(d.td1_trinh_ten || '')} trình ${esc(d.td1_trinh_at || '')}</span>`,
+    duyet: `<span class="td1-chip td1-ok">🔒 Đã duyệt · ${esc(d.td1_duyet_ten || '')} · ${esc(d.td1_duyet_at || '')}</span>`, tra: `<span class="td1-chip td1-tra">↩ Bị trả lại: ${esc(d.td1_ly_do || '')}</span>` }[tt];
+  const nut = [can('hd') && ['', 'tra'].includes(tt) ? '<button type="button" class="primary sm" data-td1="trinh">Trình duyệt TĐ1 →</button>' : '',
+    laDuyet && tt === 'trinh' ? (tuMinh ? '<span class="muted small">Bạn là người trình – nhờ người khác duyệt</span>' : '<button type="button" class="primary sm" data-td1="duyet">✓ Duyệt & khoá</button><button type="button" class="sm" data-td1="tra">↩ Trả lại</button>') : '',
+    laDuyet && tt === 'duyet' ? '<button type="button" class="sm" data-td1="mo">Mở khoá</button>' : ''].join('');
+  const buoc = `<span class="td1-b ${tt ? 'ok' : 'now'}">${tt ? '✓' : '1'} Lập</span>→<span class="td1-b ${tt === 'trinh' ? 'now' : tt === 'duyet' ? 'ok' : ''}">${tt === 'duyet' ? '✓' : '2'} Trình · chờ duyệt</span>→<span class="td1-b ${tt === 'duyet' ? 'ok' : ''}">${tt === 'duyet' ? '✓' : '3'} Duyệt · khoá</span>`;
+  const soTxt = so && tt === 'duyet' ? `<span class="muted small">Giá cơ sở: DT ${dvT(so.dt)} · CP ${dvT(so.cp)} · LN ${dvT(so.ln)} (${so.dt ? ((so.ln / so.dt) * 100).toFixed(1).replace('.', ',') : 0}%)</span>` : '';
+  return `<div class="td1-bar">${chip}<span class="td1-steps">${buoc}</span>${soTxt}<span class="td1-nut">${nut}</span></div>`;
+}
+function dtcpHtml() {
+  const dt = Number(costData.dt_td_gt?.[0]) || 0, edit = can('hd') && !costAll, { khoa } = td1Info();
+  const cpN = new Map((costData.cp_nhom || []).map((n) => [n.code, n]));
+  const dong = (code) => (costData.du_tru || []).find((r) => r.loai === 'ky' && r.dtcp && r.nhom === code);
+  const pdt = (x) => (dt ? `${((x / dt) * 100).toFixed(1).replace('.', ',')}%` : '—');
+  const TEN_K = { B1: 'CHI PHÍ TRỰC TIẾP', B2: 'CHI PHÍ GIÁN TIẾP', B3: 'CHI PHÍ TÀI CHÍNH' }, SO_K = { B1: 'I', B2: 'II', B3: 'III' };
+  let body = '', stt = 0;
+  for (const kh of ['B1', 'B2', 'B3']) {
+    const ns = NHOM().filter((n) => n.khoi === kh);
+    body += `<tr class="dtcp-k dtcp-${kh}" data-khoi="${kh}"><td>${SO_K[kh]}</td><td colspan="2"><b>${TEN_K[kh]}</b></td><td></td><td class="num" data-tk="${kh}"></td><td class="num" data-pk="${kh}"></td><td class="dtcp-src"></td></tr>`;
+    for (const n of ns) {
+      stt++;
+      const r = dong(n.code), tien = Number(cpN.get(n.code)?.gt?.[0]) || 0, nhap = Number(r?.so_tien) || 0, auto = tien - nhap;
+      const goc = r ? (r.ct_nhap || money(nhap)) : '';
+      body += `<tr class="dtcp-n" data-nhom="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-id="${r ? r.id : ''}">
+        <td class="muted">${stt}</td><td>${esc(n.code === 'tc_tra_no' ? 'Lãi vay' : n.ten)}</td><td class="dtcp-cach"></td>
+        <td class="num"><input class="dtcp-in" value="${esc(goc)}" data-goc="${esc(goc)}" ${edit && !khoa ? '' : 'disabled'} autocomplete="off" aria-label="${esc(n.ten)}"></td>
+        <td class="num dtcp-tt"></td><td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(gói, HĐ, khoản, chi đã ghi)</small>` : ''}</td></tr>`;
+    }
+    const pt = (costData.cp_nhom || []).find((x) => x.code === '_pt_' + kh);
+    if (pt) body += `<tr class="dtcp-n dtcp-pt" data-khoi="${kh}" data-auto="${Number(pt.gt[0]) || 0}"><td></td><td>Dự trù nhanh ③ (% / số)</td><td><span class="tag-c c-auto">Tự động</span></td><td></td><td class="num dtcp-tt"></td><td class="num muted dtcp-pdt"></td><td class="dtcp-src">nhập ở ③ Dự trù nhanh</td></tr>`;
+  }
+  return `${td1Bar()}
+    <div class="table-wrap"><table class="dtcp-table" data-dt="${dt}"><thead><tr><th>STT</th><th>Nội dung</th><th>Cách điền</th><th class="num">Nhập (số · % · công thức)</th><th class="num">Thành tiền TĐ1</th><th class="num">% DT</th><th>Nguồn</th></tr></thead>
+    <tbody><tr class="dtcp-a"><td>A</td><td colspan="2"><b>DOANH THU TĐ1</b> <small class="muted">(trước VAT, theo HĐ chủ đầu tư)</small></td><td></td><td class="num">${dvT(dt)}</td><td class="num">100%</td><td></td></tr>
+      <tr class="dtcp-a"><td>B</td><td colspan="2"><b>CHI PHÍ TĐ1</b></td><td></td><td class="num" data-tb></td><td class="num" data-pb></td><td></td></tr>${body}
+      <tr class="dtcp-ln"><td></td><td colspan="2"><b>LỢI NHUẬN DỰ KIẾN (A − B)</b></td><td></td><td class="num" data-tln></td><td class="num" data-pln></td><td></td></tr></tbody></table></div>
+    ${edit && !khoa ? '<div class="dtcp-act"><button type="button" class="primary" data-dtcpluu>Lưu bảng</button><span class="msg" id="dtcp-msg"></span><span class="muted small">Gõ 150tr · 1,2 tỷ · 6% (× doanh thu) · 150tr+20tr. Để trống = chỉ lấy phần tự động.</span></div>' : khoa ? '<p class="muted small">🔒 TĐ1 đang khoá – xem số, không sửa. Thay đổi sau ký HĐ nhập ở tab TĐ2.</p>' : ''}`;
+}
+function dtcpTinh() { // tính lại cả bảng khi gõ (xem trước, chưa lưu)
+  const t = $('.dtcp-table'); if (!t) return;
+  const dt = Number(t.dataset.dt) || 0, pdt = (x) => (dt ? `${((x / dt) * 100).toFixed(1).replace('.', ',')}%` : '—'), K = { B1: 0, B2: 0, B3: 0 };
+  let loi = false;
+  for (const tr of t.querySelectorAll('tr.dtcp-n')) {
+    const ip = tr.querySelector('.dtcp-in'), auto = Number(tr.dataset.auto) || 0, r = ip ? magicSo(ip.value) : { trong: true };
+    const nhap = r.trong || r.loi ? 0 : r.pt !== undefined ? Math.round((r.pt / 100) * dt) : r.tien;
+    const v = auto + nhap; K[tr.dataset.khoi] += v;
+    tr.querySelector('.dtcp-tt').innerHTML = r.loi ? `<span class="neg" title="${esc(r.loi)}">lỗi</span>` : dvT(v);
+    tr.querySelector('.dtcp-pdt').textContent = pdt(v);
+    if (ip) { ip.classList.toggle('err', Boolean(r.loi)); loi ||= Boolean(r.loi);
+      const c = tr.querySelector('.dtcp-cach'), raw = ip.value.trim();
+      c.innerHTML = r.trong ? (Math.abs(auto) >= 1 ? '<span class="tag-c c-auto">Tự động</span>' : '<span class="muted">—</span>') : r.loi ? '' : r.pt !== undefined ? '<span class="tag-c c-pt">% DT</span>' : /[+\-*/()×÷x]/i.test(raw.replace(/^=/, '').replace(/[.,]/g, '')) ? '<span class="tag-c c-ct">Công thức</span>' : '<span class="tag-c c-nhap">Nhập</span>';
+      if (!r.trong && Math.abs(auto) >= 1 && !r.loi) c.innerHTML = '<span class="tag-c c-auto">Tự động</span> + ' + c.innerHTML; }
+  }
+  const B = K.B1 + K.B2 + K.B3;
+  for (const kh of ['B1', 'B2', 'B3']) { const a = t.querySelector(`[data-tk="${kh}"]`), b = t.querySelector(`[data-pk="${kh}"]`); if (a) a.textContent = dvT(K[kh]); if (b) b.textContent = pdt(K[kh]); }
+  t.querySelector('[data-tb]').textContent = dvT(B); t.querySelector('[data-pb]').textContent = pdt(B);
+  t.querySelector('[data-tln]').textContent = dvT(dt - B); t.querySelector('[data-pln]').textContent = pdt(dt - B);
+  return !loi;
+}
+document.addEventListener('input', (e) => { if (e.target.closest('.dtcp-table .dtcp-in')) dtcpTinh(); });
+document.addEventListener('click', async (e) => {
+  const luu = e.target.closest('[data-dtcpluu]'), td = e.target.closest('[data-td1]');
+  if (luu) {
+    const t = $('.dtcp-table'); if (!t) return; if (!dtcpTinh()) return showMsg($('#dtcp-msg'), 'Có ô gõ chưa đúng (ô đỏ) – sửa lại', 'err');
+    const dt = Number(t.dataset.dt) || 0, ngay = new Date().toISOString().slice(0, 10); let n = 0;
+    try {
+      for (const tr of t.querySelectorAll('tr.dtcp-n[data-nhom]')) {
+        const ip = tr.querySelector('.dtcp-in'), raw = ip.value.trim(); if (raw === (ip.dataset.goc || '')) continue;
+        const r = magicSo(raw), so = r.trong ? 0 : r.pt !== undefined ? Math.round((r.pt / 100) * dt) : r.tien, nhom = tr.dataset.nhom, id = Number(tr.dataset.id) || 0;
+        const ten = NHOM().find((x) => x.code === nhom)?.ten || nhom, vat = NHOM().find((x) => x.code === nhom)?.khong_vat ? 0 : 10;
+        if (!so && id) await api(`/api/du-tru/${id}`, { method: 'DELETE' });
+        else if (so && id) await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ so_tien: so, noi_dung: `DT-CP · ${ten}`, ngay, vat, ct_nhap: raw }) });
+        else if (so) await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom, loai: 'ky', dtcp: true, ct_nhap: raw, noi_dung: `DT-CP · ${ten}`, so_tien: so, vat, ngay }) });
+        n++;
+      }
+      await loadCost(); showMsg($('#dtcp-msg'), n ? `Đã lưu ${n} dòng` : 'Không có gì thay đổi');
+    } catch (err) { showMsg($('#dtcp-msg'), err.message, 'err'); }
+    return;
+  }
+  if (td) {
+    const viec = td.dataset.td1, body = { viec };
+    if (viec === 'trinh' && !confirm('Trình duyệt TĐ1? Khi đã trình, bảng TĐ1 khoá lại chờ người duyệt.')) return;
+    if (viec === 'tra') { const ly = prompt('Lý do trả lại TĐ1:'); if (!ly) return; body.ly_do = ly; }
+    if (viec === 'duyet' && !confirm('Duyệt và KHOÁ TĐ1 làm giá cơ sở?')) return;
+    if (viec === 'mo') { const pc = await askPasscode('Mở khoá TĐ1 đã duyệt?', 'TĐ1 sẽ về trạng thái đang lập (có ghi nhật ký).', '🔓 Mở khoá'); if (pc === null) return; body.passcode = pc; }
+    try { await api(`/api/du-an/${revProjectId}/td1`, { method: 'POST', body: JSON.stringify(body) }); await loadCost(); }
+    catch (err) { alert(err.message); }
+  }
+});
+// ===== V01.26: ③ Kiểm tra khi ghi chi thật: ngày tương lai (chặn) · trùng chứng từ (hỏi) · vượt dự trù gói / khoản (báo, vẫn lưu) =====
+const homNayVN = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
+const normCt = (s) => String(s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+function canhBaoChi(b, id) {
+  const out = { chan: [], hoi: [], bao: [] };
+  if (b.ngay && b.ngay > homNayVN()) out.chan.push(`<b>Ngày chứng từ ở tương lai</b> (${isoToDmy(b.ngay)} &gt; hôm nay ${isoToDmy(homNayVN())}). Sửa lại ngày trước khi lưu.`);
+  if (normCt(b.so_ct) && b.gia_tri) {
+    const tr = (costData?.items || []).find((r) => r.id !== Number(id) && normCt(r.so_ct) === normCt(b.so_ct) && normCt(r.doi_tac) === normCt(b.doi_tac) && Math.abs((Number(r.gia_tri) || 0) - b.gia_tri) < 1);
+    if (tr) out.hoi.push(`<b>Có thể trùng chứng từ:</b> đã ghi <b>${esc(tr.so_ct)} · ${esc(tr.doi_tac || '—')} · ${money(tr.gia_tri)}</b>${tr.ngay ? ` ngày ${isoToDmy(tr.ngay)}` : ''} (“${esc(tr.noi_dung || '')}”).`);
+  }
+  if (b.goi_id && b.gia_tri) {
+    const g = (costData?.du_tru || []).find((r) => r.id === b.goi_id);
+    if (g) {
+      const dtru = (Number(g.so_tien) || 0) + (costData.du_tru || []).filter((y) => y.loai === 'dc' && y.goi_ref === g.id).reduce((a, y) => a + (Number(y.so_tien) || 0), 0);
+      const cu = id ? Number((costData.items || []).find((r) => r.id === Number(id) && r.goi_id === g.id)?.gia_tri) || 0 : 0;
+      const daChi = leGoi(g.id, 'gia_tri') - cu, tong = daChi + b.gia_tri;
+      if (tong > dtru) out.bao.push(`<b>Vượt dự trù "${esc(g.noi_dung || 'gói')}":</b> dự trù ${money(dtru)} · đã chi ${money(daChi)} · dòng này ${money(b.gia_tri)} → tổng <b>${money(tong)}, vượt ${money(tong - dtru)}</b>${dtru ? ` (${(((tong - dtru) / dtru) * 100).toFixed(0)}%)` : ''}. Vẫn lưu được; TĐ2 tự lấy số chi thật.`);
+      else if (dtru) out.ok = `Sau khi lưu: "${esc(g.noi_dung || 'gói')}" đã chi ${money(tong)} / dự trù ${money(dtru)} · còn ${money(dtru - tong)}.`;
+    }
+  }
+  return out;
+}
+function cfBody() { // dữ liệu đang gõ ở form chi thật (không phải HĐ / gói)
+  const e = cForm?.elements; if (!e || costTpMode() || costGoiMode()) return null;
+  const ngay = dmyToIso(e.ngay.value);
+  return { ngay: ngay || null, so_ct: e.so_ct?.value || '', doi_tac: e.doi_tac?.value || '', gia_tri: parseMoney(e.gia_tri.value) || 0,
+    goi_id: $('#c-legoi-wrap')?.hidden ? null : Number(e.le_goi?.value) || null };
+}
+function veCanhBao() {
+  if (!cForm) return; let el = $('#c-canh-bao');
+  if (!el) { el = document.createElement('div'); el.id = 'c-canh-bao'; el.className = 'c-canh-bao'; cForm.after(el); }
+  const b = cfBody(); if (!b || cForm.hidden) { el.innerHTML = ''; return; }
+  const c = canhBaoChi(b, cForm.elements.id.value);
+  el.innerHTML = c.chan.map((t) => `<div class="cb cb-do">⛔ <div>${t}</div></div>`).join('') + c.hoi.map((t) => `<div class="cb cb-do">⛔ <div>${t} Bấm Lưu sẽ hỏi lại.</div></div>`).join('')
+    + c.bao.map((t) => `<div class="cb cb-vang">⚠ <div>${t}</div></div>`).join('') + (c.ok && !c.bao.length ? `<div class="cb cb-xanh">✓ <div>${c.ok}</div></div>` : '');
+}
+if (cForm) { cForm.addEventListener('input', () => veCanhBao()); cForm.addEventListener('change', () => setTimeout(veCanhBao, 0)); }
 // V16.17: đọc ô dự trù "thông minh": số (150tr, 1,2 tỷ, 150.000.000), % (7%) hoặc công thức (150tr+155tr, 1900tr*7%, (100+50)*2)
 //  -> { pt } (phần trăm × doanh thu) · { tien } (số tiền) · { trong } · { loi }. Không dùng eval (an toàn).
 const k1Of = (name) => /1$/.test(name); // ô TĐ1
@@ -2323,10 +2461,10 @@ function ptHtml(k) {
   const khOpt = (moi) => `<option value="">— Chọn khoản —</option>${moi ? '<option value="moi">＋ Khoản mới (phát sinh TĐ2)</option>' : ''}` + ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `<optgroup label="${kh === 'B2' ? 'Chi phí gián tiếp' : 'Chi phí tài chính'}">${ks.map((x) => `<option value="${x.r.id}" ${pk2Sel === x.r.id ? 'selected' : ''}>${esc(x.r.noi_dung || 'Khoản')} · ${esc(NHOM().find((n) => n.code === x.r.nhom)?.ten || '')} · ${dvT(x.t[k - 1], 'trieu')}${x.dong ? ' (đã đóng)' : x.chot !== null ? ' (đã chốt)' : ''}</option>`).join('')}</optgroup>` : ''; }).join('');
   const lab = (t, inner, cls = '') => `<label class="${cls}">${t}${inner}</label>`;
   let panel2;
-  if (k === 1) panel2 = `<form id="pk-f" class="grid-form pk-f" data-k="1">
+  if (k === 1) panel2 = `${dtcpHtml()}<details class="pk-them"><summary>+ Thêm khoản chi tiết (gián tiếp, tài chính – VD: lương từng tháng)</summary><form id="pk-f" class="grid-form pk-f" data-k="1">
       ${lab('Nhóm chi phí *', `<select name="nhom">${nhOpt}</select>`)}${lab('Tên khoản *', `<input name="noi_dung" list="pk-goi-y" maxlength="300" placeholder="VD: Lương tháng 10" required><datalist id="pk-goi-y"></datalist>`)}
       ${lab('Dự trù TĐ1 (trước VAT) *', '<input name="so_tien" class="money num" placeholder="0" required>')}
-      <div class="actions"><button type="submit" class="primary">Thêm khoản</button><span class="msg" id="pk-f-msg"></span></div></form>`;
+      <div class="actions"><button type="submit" class="primary">Thêm khoản</button><span class="msg" id="pk-f-msg"></span></div></form></details>`;
   else if (k === 2) panel2 = `<form id="pk-f" class="grid-form pk-f" data-k="2">
       ${lab('Khoản *', `<select name="khoan">${khOpt(true)}</select>`)}
       ${lab('Việc *', '<select name="viec"><option value="dc">± Điều chỉnh số</option><option value="dong">Đóng khoản (không dùng nữa: TĐ2 = đã chi)</option><option value="mo">Mở lại khoản đã đóng</option></select>', 'pk-cu')}
@@ -2337,14 +2475,16 @@ function ptHtml(k) {
       ${lab('Khoản *', `<select name="khoan">${khOpt(false)}</select>`)}${lab('Số chốt TĐ3 (trước VAT)', '<input name="so_tien" class="money num" placeholder="để trống = theo đã chi">')}
       <div class="actions"><button type="submit" class="primary">Lưu chốt số</button><span class="msg" id="pk-f-msg"></span></div></form>`;
   const HINT = { 1: 'Ghi tiền đã chi thật (trả thầu phụ, mua vật tư, trả lương, lãi…). Chọn "Thuộc gói / khoản" để trừ vào dự trù.',
-    2: k === 1 ? 'Thêm khoản dự trù gián tiếp / tài chính (VD: Lương tháng 10). Gói thầu phụ, vật tư… dự trù ở ① với Cách nhập = Gói.' : k === 2 ? 'Chọn khoản rồi nhập SỐ CUỐI tại TĐ2 (hệ thống tự tính phần tăng / giảm), hoặc "Khoản mới" cho chi phí phát sinh ở TĐ2.' : 'Chọn khoản để chốt số cuối. Để trống = TĐ3 lấy theo số đã chi.',
+    2: k === 1 ? 'Bảng DT-CP TĐ1 theo khung chuẩn: mỗi nhóm = phần tự động (gói, HĐ, khoản, chi đã ghi) + ô nhập (số / % doanh thu / công thức). Xong bấm "Trình duyệt TĐ1".' : k === 2 ? 'Chọn khoản rồi nhập SỐ CUỐI tại TĐ2 (hệ thống tự tính phần tăng / giảm), hoặc "Khoản mới" cho chi phí phát sinh ở TĐ2.' : 'Chọn khoản để chốt số cuối. Để trống = TĐ3 lấy theo số đã chi.',
     3: 'Nhập nhanh tổng gián tiếp / tài chính: số (150tr), % (7% × doanh thu) hoặc công thức. Để trống = cộng theo các khoản.' };
-  const seg = edit ? `<div class="cf-seg" role="tablist">${[['1', '① Chi thật'], ['2', '② Dự trù / khoản'], ['3', '③ Dự trù nhanh']].map(([m, t]) => `<button type="button" role="tab" data-cfmode="${m}" class="${cfMode === m ? 'on' : ''}" aria-selected="${cfMode === m}">${t}</button>`).join('')}<span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
+  const seg = edit ? `<div class="cf-seg" role="tablist">${[['1', '① Chi thật'], ['2', k === 1 ? '② Bảng DT-CP TĐ1' : '② Dự trù / khoản'], ['3', '③ Dự trù nhanh']].map(([m, t]) => `<button type="button" role="tab" data-cfmode="${m}" class="${cfMode === m ? 'on' : ''}" aria-selected="${cfMode === m}">${t}</button>`).join('')}<span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
   const card = cForm?.closest('.card');
   if (card && el.parentElement !== card) card.insertBefore(el, cForm);
   if (cForm) cForm.hidden = edit && cfMode !== '1';
   el.innerHTML = seg + (cfMode === '2' ? panel2 : cfMode === '3' ? phan1 : '');
   $$('input.money', el).forEach(attachMoneyInput);
+  if ($('.dtcp-table', el)) dtcpTinh();
+  setTimeout(veCanhBao, 0);
   const pf = $('#pk-f', el);
   if (pf) {
     const goiY = () => { const dl = $('#pk-goi-y', pf); if (dl) dl.innerHTML = (PK_GOI_Y[pf.elements.nhom?.value] || []).map((t) => `<option value="${esc(t)}">`).join(''); };

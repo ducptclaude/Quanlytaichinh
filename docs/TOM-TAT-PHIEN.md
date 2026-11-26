@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.26.11.26 – ① Bảng DT-CP TĐ1 · ② Trình / duyệt / khoá TĐ1 · ③ Kiểm tra khi ghi chi (người dùng duyệt mẫu)
+- Điểm khôi phục trước khi sửa: `phien-26.11.26-13h28` (V01.26.11.26, bản đang chạy).
+- ① Nhập chi phí › ② Bảng DT-CP TĐ1: khung khối I/II/III → nhóm; mỗi nhóm = phần TỰ ĐỘNG (gói, HĐ, khoản, chi đã ghi) + ô NHẬP (số / % doanh thu / công thức) → lưu 1 dòng dự trù `du_tru.dtcp` (kèm `ct_nhap`). Dòng cha tự cộng, % DT, Lợi nhuận dự kiến; xem trước khi gõ, ô sai báo đỏ, không lưu.
+- ② Trình (QUYEN.hd) → Duyệt / Trả lại (Quản trị, Lãnh đạo; người lập ≠ người duyệt) → khoá: chặn thêm / sửa / xoá dự trù TĐ1 (gói, khoản, bảng, dự trù nhanh TĐ1) (423); khoản phát sinh TĐ2 (TĐ1 = 0), điều chỉnh, đóng, chốt vẫn được. Mở khoá cần Passcode. Lưu giá cơ sở td1_so (DT, CP, LN). API POST /du-an/:id/td1. Kho: du_an.td1_* + du_tru.dtcp/ct_nhap (chỉ THÊM).
+- ③ Form chi thật: ngày tương lai → chặn; trùng số CT + đối tác + số tiền → hỏi lại; vượt dự trù gói / khoản → báo (vẫn lưu). Hiện ngay dưới form khi gõ.
+- kiem-tra-goi 233 ĐẠT (thêm bước 15 + trình / duyệt / khoá / người lập ≠ người duyệt), tester 4565 ĐẠT; không tràn. Chưa khoá: giá trị HĐ chủ đầu tư / HĐ đầu vào TĐ1 (sửa ở trang Doanh thu, HĐ đầu vào).
 ## V01.26.11.26 – Sửa lỗi "Xoá khoản" báo "Không tìm thấy dòng dự trù"
 - Nguyên nhân: hộp chi tiết dùng chung (`dlgShell`) chỉ gắn xử lý bấm ở LẦN MỞ ĐẦU -> mở khoản thứ 2 rồi bấm Xoá / Ghi chi / Sửa lại chạy theo khoản đầu
   (đã xoá -> báo không tìm thấy; nếu khoản đầu còn -> xoá nhầm khoản đó). Nay luôn chạy theo lần mở hiện tại (`dlg._onClick`). Áp dụng cho cả 5 hộp dùng chung.

@@ -9,7 +9,8 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | **quanlytaichinh19112026** | V01.19.11.26 | `01c29ea` | 19/11/2026 | Bản lưu theo yêu cầu để quay lại (rollback) – KHÔNG xóa |
 | **chot-19.11.26** | V10.19.11.26 | `7471700` | 19/11/2026 | Ghi chú nhanh gọn + đổi màu; khoá số dự án khi còn lại = 0 (mở bằng Passcode) + Ghi chú nhanh đầu báo cáo |
 | **chot-20.11.26** | V01.20.11.26 | `40f1f0a` | 20/11/2026 | Đẩy lại bản tiền tệ VND/USD/EUR (Railway chưa nhận V10 hôm 19/11) |
-| **chot-26.11.26** | V01.26.11.26 | (mới nhất) | 26/11/2026 | Sửa lỗi Xoá khoản (hộp chi tiết nhớ nhầm khoản mở lần đầu) |
+| **chot-26.11.26** | V02.26.11.26 | (mới nhất) | 26/11/2026 | V01: sửa lỗi Xoá khoản · V02: bảng DT-CP TĐ1 theo khung chuẩn; trình / duyệt / khoá TĐ1; kiểm tra ngày, trùng chứng từ, vượt dự trù khi ghi chi |
+| phien-26.11.26-13h28 | V01.26.11.26 | `0f3f318` | 26/11/2026 | Đầu phiên (đúng bản đang chạy) – trước khi làm bảng DT-CP TĐ1, trình / duyệt TĐ1, cảnh báo ghi chi |
 | phien-26.11.26-10h22 | V02.23.11.26 | `b7c4245` | 26/11/2026 | Đầu phiên 26/11 |
 | bao-mat-cap-cao | V02.23.11.26 | (mới nhất) | 23/11/2026 | Bảo mật cấp cao, chống sao chép, 2 lớp, sao lưu; dấu chìm chỉ Chỉ xem / khách – CHỜ DUYỆT gộp vào staging |
 | phien-23.11.26-23h38 | V01.20.11.26 | `40f1f0a` | 23/11/2026 | Đầu phiên 23/11 (trước khi làm bảo mật) |
@@ -26,6 +27,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | **chot-12.11.26** | V29.12.11.26 | (đã chốt) | 12/11/2026 | Bảng HĐ đầu vào chỉ nhóm chính, nhấp đúp mở bảng chi tiết; % doanh thu ở bảng chi phí · mục III Báo cáo lấy thời điểm mới nhất · Dashboard dùng chung TĐ và số với Báo cáo |
 | phien-12.11.26-11h36 | V15.11.11.26 | `1fb6782` | 12/11/2026 | (phiên song song) Trước khi sửa mục III Báo cáo |
 | phien-12.11.26-10h11 | V08.12.11.26 | `7280fed` | 12/11/2026 | Trước khi sửa TĐ mới nhất ở Báo cáo |
+| phien-26.11.26-13h21 | V23.17.11.26 | `2dde144` | 26/11/2026 | (trỏ bản cũ 17/11 – dùng 13h28) Trước khi làm bảng nhập TĐ1 theo DT-CP chuẩn, trình duyệt / khoá TĐ1, cảnh báo khi ghi chi |
 | phien-17.11.26-07h33 | V13.16.11.26 | `81d48ab` | 17/11/2026 | Đầu phiên – trước khi chia mục I theo cơ cấu Trực tiếp / Gián tiếp / Tài chính |
 | phien-16.11.26-08h18 | V29.12.11.26 | `0dc8746` | 16/11/2026 | Đầu phiên – trước khi xoá ma trận TĐ, sửa chi phí TĐ1 / mục IV / thẻ mục I |
 | phien-12.11.26-08h15 | V32.11.11.26 | `71cd34c` | 12/11/2026 | Trước khi sửa ngày 12/11 |

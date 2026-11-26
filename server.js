@@ -397,6 +397,17 @@ api.use(wrap(async (req, res, next) => {
     const ls = t ? (await store.listTp(t.du_an_id)).lines.filter((l) => l.tp_id === t.id) : [];
     if (ls.length && ls.every((l) => l.gia_tri_qt !== null && l.gia_tri_qt !== undefined)) return bad(res, `HĐ ${t.so_ma} đã quyết toán hết HĐ và PL – đã đóng, không thêm phụ lục. Muốn thêm: mở khoá 1 văn bản ở tab TĐ3 (cần Passcode).`, 423);
   }
+  // V01.26: TĐ1 đã trình / đã duyệt -> khoá dự trù TĐ1 (gói, khoản, bảng DT-CP, dự trù nhanh TĐ1). Khoản phát sinh TĐ2 (TĐ1 = 0), điều chỉnh, đóng, chốt vẫn làm được.
+  {
+    const KHOA1 = (tt) => (tt === 'duyet' ? 'TĐ1 đã duyệt – đang khoá (giá cơ sở). Muốn sửa: Mở khoá TĐ1 (Quản trị / Lãnh đạo, cần Passcode).' : 'TĐ1 đang chờ duyệt – không sửa dự trù TĐ1. Người duyệt trả lại thì sửa được.');
+    const ttCua = async (duAnId) => { const d = duAnId && (await store.getProject(Number(duAnId))); return d && ['trinh', 'duyet'].includes(d.td1_tt) ? d.td1_tt : null; };
+    let tt = null;
+    if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'ky' && Number(String(b.so_tien ?? 0).replace(/[.,\s]/g, '')) !== 0) tt = await ttCua(m[1]);
+    if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/du-tru\/(\d+)$/))) { const x = await store.getDuTru(Number(m[1]));
+      if (x && x.loai === 'ky' && (req.method === 'DELETE' ? Number(x.so_tien) !== 0 : 'so_tien' in b)) tt = await ttCua(x.du_an_id); }
+    if (req.method === 'PUT' && (m = p.match(/^\/du-an\/(\d+)\/ty-le$/)) && ['pt_gt1', 'pt_tc1', 'tien_gt1', 'tien_tc1', 'ct_gt1', 'ct_tc1'].some((k) => k in b)) tt = await ttCua(m[1]);
+    if (tt) return bad(res, KHOA1(tt), 423);
+  }
   // Dự trù: nhóm đã có quyết toán (TĐ3) -> khoá nhóm; mở khoá = xóa dòng quyết toán (cần Passcode)
   if ((m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && req.method === 'POST') {
     const ds = (await store.listDuTru(Number(m[1]))).filter((x) => x.nhom === b.nhom);
@@ -1369,6 +1380,48 @@ api.delete('/tp-hd-pl/:id/qt', canHd, wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
+// ---------- V01.26: Trình / duyệt / trả lại / mở khoá TĐ1 (giá cơ sở) – người lập ≠ người duyệt ----------
+async function bcCua(id) {
+  const du_an = await store.getProject(id); if (!du_an) return null;
+  const items = sortCost(await store.listCost(id)).map(costLine), thau_phu = buildContracts(await store.listTp(id));
+  const [revAll, tienVe, du_tru] = await Promise.all([store.listRevenue(id), store.listTienVe(id), store.listDuTru(id)]);
+  return projectReport(du_an, { rev: sortRevenue(revAll).map(calcLine), tienVe: sortTienVe(tienVe), cost: items, tp: thau_phu, duTru: du_tru });
+}
+api.post('/du-an/:id/td1', wrap(async (req, res) => {
+  const id = parseId(req.params.id), d = id && (await store.getProject(id));
+  if (!d) return bad(res, 'Không tìm thấy dự án', 404);
+  const viec = req.body?.viec, tt = d.td1_tt || '', ten = req.user.full_name || req.user.username || '';
+  if (viec === 'trinh') {
+    if (!QUYEN.hd.includes(req.user.role)) return bad(res, 'Không có quyền trình TĐ1', 403);
+    if (!['', 'tra'].includes(tt)) return bad(res, tt === 'trinh' ? 'TĐ1 đang chờ duyệt' : 'TĐ1 đã duyệt');
+    const bc = await bcCua(id), m = bc.moc, cp = m.cp.tp_goc.gt + m.cp.khac.gt + (m.cp.dtru?.gt?.[0] || 0), dt = m.dt.goc.gt;
+    if (!(dt > 0)) return bad(res, 'Chưa có doanh thu TĐ1 (HĐ chủ đầu tư) – chưa trình được');
+    await store.setProjectTd1(id, { tt: 'trinh', trinh_by: req.user.id, trinh_ten: ten, so: JSON.stringify({ dt, cp, ln: dt - cp }) });
+    audit.log(req, 'Trình', 'Dự án', `Trình duyệt TĐ1: doanh thu ${fmtD(dt)} · chi phí ${fmtD(cp)} · lợi nhuận ${fmtD(dt - cp)}`, { du_an: d.ma_du_an });
+    return res.json({ ok: true });
+  }
+  if (!laDuyet(req)) return bad(res, 'Chỉ Quản trị / Lãnh đạo được duyệt, trả lại hoặc mở khoá TĐ1', 403);
+  if (viec === 'duyet' || viec === 'tra') {
+    if (tt !== 'trinh') return bad(res, 'TĐ1 chưa được trình');
+    if (d.td1_trinh_by === req.user.id) return bad(res, 'Người lập không tự duyệt / trả lại TĐ1 của mình – nhờ người khác có quyền duyệt');
+    if (viec === 'tra') { const ly = String(req.body?.ly_do || '').trim().slice(0, 300); if (!ly) return bad(res, 'Nhập lý do trả lại');
+      await store.setProjectTd1(id, { tt: 'tra', ly_do: ly }); audit.log(req, 'Trả lại', 'Dự án', `Trả lại TĐ1: ${ly}`, { du_an: d.ma_du_an }); return res.json({ ok: true }); }
+    const bc = await bcCua(id), m = bc.moc, cp = m.cp.tp_goc.gt + m.cp.khac.gt + (m.cp.dtru?.gt?.[0] || 0), dt = m.dt.goc.gt;
+    await store.setProjectTd1(id, { tt: 'duyet', duyet_ten: ten, so: JSON.stringify({ dt, cp, ln: dt - cp }) });
+    audit.log(req, 'Duyệt', 'Dự án', `Duyệt TĐ1 (khoá giá cơ sở): doanh thu ${fmtD(dt)} · chi phí ${fmtD(cp)} · lợi nhuận ${fmtD(dt - cp)}`, { du_an: d.ma_du_an });
+    return res.json({ ok: true });
+  }
+  if (viec === 'mo') {
+    if (tt !== 'duyet') return bad(res, 'TĐ1 chưa duyệt – không cần mở khoá');
+    if (!(await requirePasscode(req, res))) return;
+    await store.setProjectTd1(id, { tt: '', ly_do: 'Mở khoá sau khi đã duyệt' });
+    audit.log(req, 'Mở khoá', 'Dự án', 'Mở khoá TĐ1 đã duyệt', { du_an: d.ma_du_an });
+    return res.json({ ok: true });
+  }
+  return bad(res, 'Việc không hợp lệ');
+}));
+const fmtD = (x) => new Intl.NumberFormat('vi-VN').format(Math.round(Number(x) || 0)) + ' đ';
+
 // ---------- Dự trù chi phí theo nhóm (Đợt B): TĐ1 dự trù · TĐ2 điều chỉnh / ngoài dự trù · TĐ3 quyết toán ----------
 api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   const id = parseId(req.params.id);
@@ -1376,6 +1429,7 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   const { data, errors } = validateDuTru(req.body || {});
   if (errors.length) return bad(res, errors);
   if (data.loai !== 'ky') data.hd_cdt_id = null; // chỉ gói (dòng TĐ1) mới gắn HĐ CĐT
+  if (data.loai === 'ky' && req.body?.dtcp) { data.dtcp = true; data.ct_nhap = String(req.body.ct_nhap ?? '').trim().slice(0, 200) || null; } // V01.26: dòng nhập ở bảng DT-CP TĐ1
   if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
   // V04.17: đợt điều chỉnh TĐ2 của riêng 1 khoản (gián tiếp / tài chính): khoản TĐ1 cùng dự án, cùng nhóm, chưa đóng
   const gr = req.body?.goi_ref === '' || req.body?.goi_ref == null ? null : Number(req.body.goi_ref);
@@ -1437,6 +1491,7 @@ api.put('/du-tru/:id', canHd, wrap(async (req, res) => {
   if (!errors.length && cur.loai !== 'dc' && data.so_tien < 0) errors.push('Dự trù / quyết toán không được âm');
   if (errors.length) return bad(res, errors);
   await store.updateDuTru(id, data, req.user.id);
+  if (cur.dtcp && req.body && 'ct_nhap' in req.body) await store.setDuTruCt(id, String(req.body.ct_nhap ?? '').trim().slice(0, 200));
   res.json({ ok: true });
 }));
 api.delete('/du-tru/:id', canHd, wrap(async (req, res) => {
@@ -1655,7 +1710,8 @@ api.get('/du-an/:id/chi-phi', wrap(async (req, res) => {
   const dt_td_gt = [bc.moc?.dt?.goc?.gt || 0, bc.moc?.dt?.ps?.gt || 0, bc.moc?.dt?.qt?.gt || 0];
   // V10.16: chi phí theo khối × TĐ (sau VAT, cùng số Báo cáo) + dự trù % gián tiếp / tài chính
   const cp_khoi = ['B1', 'B2', 'B3'].reduce((o, kh) => { o[kh] = [0, 1, 2].map((j) => (bc.cp_td_nhom || []).filter((n) => n.khoi === kh).reduce((a, n) => a + n.sv[j], 0)); return o; }, {});
-  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]), du_tru, dt_td, dt_td_gt, cp_khoi, pt_td: bc.moc?.cp?.pt_td || {} });
+  const cp_nhom = (bc.cp_td_nhom || []).map((n) => ({ code: n.code, khoi: n.khoi, ten: n.ten, gt: n.gt, sv: n.sv })); // V01.26: bảng DT-CP TĐ1
+  res.json({ du_an, items, thau_phu, hd_cdt, tong_tp: summarizeContracts(thau_phu), tong: summarizeCost([...items, ...tpAsCost]), du_tru, dt_td, dt_td_gt, cp_khoi, cp_nhom, pt_td: bc.moc?.cp?.pt_td || {} });
 }));
 
 // Chi phí tổng hợp TẤT CẢ dự án (chỉ xem): ghép dữ liệu từng dự án, tính tổng bằng cùng hàm như từng dự án

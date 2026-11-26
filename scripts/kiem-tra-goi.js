@@ -132,6 +132,28 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
   await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '', pt_tc1: '', tien_gt1: '', tien_tc1: '', ct_gt1: '', cach_gt: '' });
   await api('PUT', `/du-tru/${K1}`, { gt_chot: '' });
   await doiChieu('14) Bỏ % và bỏ chốt → TĐ3 về thực chi', [860, 900, 890], [400, 360, 360], [320, 350, 340], [140, 190, 190]);
+  // ---- V01.26: bảng DT-CP TĐ1 (dòng dtcp) · trình / duyệt / khoá TĐ1 (người lập ≠ người duyệt) ----
+  const D1 = (await api('POST', `/du-an/${id}/du-tru`, { nhom: 'may_moc', loai: 'ky', dtcp: true, ct_nhap: '31tr', noi_dung: 'DT-CP · Máy móc thiết bị', so_tien: 31 * U, vat: 0, ngay: NGAY })).id;
+  await doiChieu('15) Bảng DT-CP: máy móc nhập 31tr → TĐ1, TĐ2, TĐ3 +31 (dự trù TĐ1 của nhóm)', [891, 931, 921], [400, 360, 360], [320, 350, 340], [171, 221, 221]);
+  check((await api('GET', `/du-an/${id}/chi-phi`)).du_tru.find((r) => r.id === D1)?.ct_nhap === '31tr', 'Lưu công thức đã gõ của dòng DT-CP');
+  check((await api('POST', `/du-an/${id}/td1`, { viec: 'trinh' }, true)).status === 200, 'Trình duyệt TĐ1');
+  check((await api('POST', `/du-an/${id}/du-tru`, { nhom: 'khac', loai: 'ky', so_tien: 5 * U, vat: 0, noi_dung: 'gói mới', ngay: NGAY }, true)).status === 423, 'Đã trình: chặn thêm dự trù TĐ1');
+  check((await api('PUT', `/du-tru/${D1}`, { so_tien: 40 * U, noi_dung: 'x', vat: 0, ngay: NGAY }, true)).status === 423, 'Đã trình: chặn sửa số dự trù TĐ1');
+  check((await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '5' }, true)).status === 423, 'Đã trình: chặn sửa dự trù nhanh TĐ1');
+  const PS = await api('POST', `/du-an/${id}/du-tru`, { nhom: 'gt_luong', loai: 'ky', so_tien: 0, vat: 0, noi_dung: 'Lương phát sinh', ngay: NGAY }, true);
+  check(PS.status === 201, 'Đã trình: vẫn thêm được khoản phát sinh TĐ2 (TĐ1 = 0)', `mã ${PS.status}`);
+  check((await api('POST', `/du-an/${id}/td1`, { viec: 'duyet' }, true)).status === 400, 'Người lập không tự duyệt TĐ1');
+  // người duyệt khác (Lãnh đạo) – đăng nhập phiên riêng
+  const tk = 'ktduyet' + Date.now().toString().slice(-5), mk = 'Kt@' + Date.now().toString().slice(-6) + 'a';
+  const tao = await api('POST', '/users', { username: tk, full_name: 'Kiểm thử duyệt', role: 'lanh_dao', password: mk, active: true }, true);
+  if (tao.status === 201 || tao.status === 200) {
+    const c0 = cookie; cookie = ''; await api('POST', '/auth/login', { username: tk, password: mk });
+    check((await api('POST', `/du-an/${id}/td1`, { viec: 'duyet' }, true)).status === 200, 'Lãnh đạo khác duyệt TĐ1 → khoá');
+    cookie = c0;
+    const da = (await api('GET', `/du-an/${id}/chi-phi`)).du_an;
+    check(da.td1_tt === 'duyet' && JSON.parse(da.td1_so || '{}').cp === 891 * U, 'Lưu giá cơ sở TĐ1 (CP 891)', `${da.td1_tt} ${da.td1_so}`);
+    check((await api('PUT', `/du-tru/${D1}`, { so_tien: 40 * U, noi_dung: 'x', vat: 0, ngay: NGAY }, true)).status === 423, 'Đã duyệt: khoá sửa dự trù TĐ1');
+  } else check(false, 'Tạo tài khoản duyệt thử', `mã ${tao.status} ${JSON.stringify(tao.j)}`);
   console.log(`\nKẾT QUẢ: ${pass} kiểm tra ĐẠT, ${fail} LỖI`);
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.log('Dừng vì lỗi:', e.message); process.exit(1); });

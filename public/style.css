@@ -3930,3 +3930,26 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
   #bv-wm { position: fixed; display: block !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   #bv-che, #bv-ep { display: none !important; }
 }
+/* V01.26: bảng DT-CP TĐ1 · trình / duyệt TĐ1 · cảnh báo khi ghi chi */
+.td1-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 4px 0 10px; }
+.td1-chip { padding: 5px 12px; border-radius: 999px; font-weight: 700; font-size: 12.5px; }
+.td1-lap { background: #fff4d6; color: #9a6b00; } .td1-cho { background: #e0ecff; color: #1d4ed8; } .td1-ok { background: #d1fae5; color: #065f46; } .td1-tra { background: #fee2e2; color: #991b1b; }
+.td1-steps { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 12px; } .td1-b { padding: 3px 9px; border-radius: 999px; background: #eef2f7; font-weight: 700; }
+.td1-b.ok { background: #d1fae5; color: #065f46; } .td1-b.now { background: var(--navy); color: #fff; }
+.td1-nut { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; }
+.dtcp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dtcp-table th { font-size: 11px; text-transform: uppercase; color: var(--muted); text-align: left; padding: 7px 8px; border-bottom: 2px solid var(--border); background: var(--bg-soft, #f7f9fc); white-space: nowrap; }
+.dtcp-table th.num, .dtcp-table td.num { text-align: right; } .dtcp-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
+.dtcp-table .dtcp-a td { background: #eaf1fb; font-weight: 800; color: var(--navy); } .dtcp-table .dtcp-k td { background: #f1f5fb; font-weight: 700; }
+.dtcp-table .dtcp-B1 td:first-child { box-shadow: inset 4px 0 0 var(--navy); } .dtcp-table .dtcp-B2 td:first-child { box-shadow: inset 4px 0 0 var(--teal); } .dtcp-table .dtcp-B3 td:first-child { box-shadow: inset 4px 0 0 #6d5bd0; }
+.dtcp-table .dtcp-ln td { background: var(--navy); color: #fff; font-weight: 800; }
+.dtcp-table .dtcp-in { width: 150px; text-align: right; font-weight: 700; padding: 5px 8px; } .dtcp-table .dtcp-in.err { border-color: #d92d35; background: #fff5f5; }
+.dtcp-table .dtcp-src { color: var(--muted); font-size: 11.5px; } .dtcp-table .dtcp-pt td { background: #f1fbf9; }
+.tag-c { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; } .c-auto { background: #e6f6f4; color: #0f766e; } .c-nhap { background: #eef2ff; color: #4338ca; } .c-pt { background: #fff4d6; color: #9a6b00; } .c-ct { background: #f3e8ff; color: #7e22ce; }
+.dtcp-act { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+.pk-them { margin-top: 12px; } .pk-them > summary { cursor: pointer; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.c-canh-bao { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; } .c-canh-bao:empty { display: none; }
+.c-canh-bao .cb { display: flex; gap: 10px; border-radius: 12px; padding: 10px 14px; font-size: 13px; line-height: 1.5; }
+.cb-do { background: #fff1f1; border: 1px solid #fecaca; color: #991b1b; } .cb-vang { background: #fffaeb; border: 1px solid #fde68a; color: #92400e; } .cb-xanh { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+@media (max-width: 700px) { .dtcp-table .dtcp-src, .dtcp-table th:last-child, .dtcp-table th:nth-child(3), .dtcp-table .dtcp-cach { display: none; } .dtcp-table .dtcp-in { width: 100px; } .td1-nut { margin-left: 0; } }
+.dtcp-table td { color: var(--text, #1e293b); } .dtcp-table .dtcp-k td, .dtcp-table .dtcp-a td { color: var(--navy); } .dtcp-table .dtcp-ln td { color: #fff; } .dtcp-table .dtcp-src, .dtcp-table .muted { color: var(--muted); }
