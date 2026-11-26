@@ -2,6 +2,17 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.26.11.26 – TĐ2, TĐ3 theo logic TĐ1: bảng DT-CP + Trình → Duyệt / Trả lại → Khoá
+- Bảng DT-CP (Nhập liệu › Chi phí › ② ở tab TĐ2 / TĐ3): cột TĐ trước · ô nhập · Thành tiền TĐk · ± so TĐ trước · % DT.
+  TĐ2: ô nhập = điều chỉnh ± cả nhóm (số / % doanh thu TĐ2 / công thức) -> 1 dòng dự trù `dc` có `dtcp` mỗi nhóm (hạng mục). TĐ3: chỉ xem (quyết toán HĐ, số chốt khoản, thực chi).
+  Form cũ (điều chỉnh / đóng từng khoản TĐ2, chốt số khoản TĐ3) thu vào mục mở rộng dưới bảng.
+- Trình / duyệt: cột mới `du_an.td2_*`, `td3_*` (chỉ thêm); `POST /api/du-an/:id/td/:k` (giữ `/td1`). TĐk chỉ trình khi TĐ(k−1) đã duyệt; mở khoá TĐk khi TĐ(k+1) chưa trình;
+  Quản trị tự duyệt được (Lãnh đạo: người lập ≠ người duyệt). Trang Duyệt: bảng chung TĐ1 · TĐ2 · TĐ3.
+- Khoá khi đã trình / đã duyệt (theo người dùng chọn: cả dự trù VÀ HĐ): TĐ2 – đợt điều chỉnh HĐ/PL (doanh thu, HĐ đầu vào), điều chỉnh dự trù, đóng / mở gói, % gián tiếp / tài chính TĐ2;
+  TĐ3 – số quyết toán văn bản, chốt quyết toán HĐ, quyết toán nhóm, số chốt khoản (423).
+- Kiểm tra: `scripts/kiem-tra-them/td23.js` 26 ĐẠT (+50tr TĐ2 -> CP nhóm +50.000.000 đúng; khoá; thứ tự; trả lại hết khoá); tester 4518 ĐẠT; kiem-tra-goi 246 ĐẠT
+  (bỏ 1 kiểm tra cũ "Quản trị không tự duyệt TĐ1" vì đổi quy tắc V05.26). Máy tính + iPhone 13 không tràn.
+
 ## V05.26.11.26 – Quản trị toàn quyền: được tự duyệt / trả lại TĐ1 do chính mình trình (bỏ "người lập ≠ người duyệt" với vai Quản trị; Lãnh đạo giữ nguyên)
 
 ## V04.26.11.26 – Lãnh đạo duyệt TĐ1 ngay ở trang Duyệt

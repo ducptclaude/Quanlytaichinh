@@ -147,7 +147,7 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
   check((await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '5' }, true)).status === 423, 'Đã trình: chặn sửa dự trù nhanh TĐ1');
   const PS = await api('POST', `/du-an/${id}/du-tru`, { nhom: 'gt_luong', loai: 'ky', so_tien: 0, vat: 0, noi_dung: 'Lương phát sinh', ngay: NGAY }, true);
   check(PS.status === 201, 'Đã trình: vẫn thêm được khoản phát sinh TĐ2 (TĐ1 = 0)', `mã ${PS.status}`);
-  check((await api('POST', `/du-an/${id}/td1`, { viec: 'duyet' }, true)).status === 400, 'Người lập không tự duyệt TĐ1');
+  // V06.26.11.26: Quản trị toàn quyền – được tự duyệt (kiểm tra ở kiem-tra-them/td23.js); ở đây để Lãnh đạo khác duyệt
   // người duyệt khác (Lãnh đạo) – đăng nhập phiên riêng
   const tk = 'ktduyet' + Date.now().toString().slice(-5), mk = 'Kt@' + Date.now().toString().slice(-6) + 'a';
   const tao = await api('POST', '/users', { username: tk, full_name: 'Kiểm thử duyệt', role: 'lanh_dao', password: mk, active: true }, true);

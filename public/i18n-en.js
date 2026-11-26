@@ -1,6 +1,11 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"± điều chỉnh": "± adjustment",
+"Điều chỉnh ± (số · % · công thức)": "Adjustment ± (amount · % · formula)",
+"± Điều chỉnh / đóng từng khoản (gián tiếp, tài chính)": "± Adjust / close individual items (indirect, financial)",
+"Chốt số TĐ3 từng khoản (gián tiếp, tài chính)": "Lock M3 figure per item (indirect, financial)",
+"Không có thời điểm nào chờ duyệt.": "No milestone awaiting approval.",
 "Xác thực 2 lớp": "Two-factor authentication",
 "Mã xác thực 2 lớp (6 số)": "Two-factor code (6 digits)",
 "Bắt đầu thiết lập": "Start setup",
@@ -1764,6 +1769,13 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["Trình duyệt TĐ{} →", "Submit M{} for approval →"],
+["Trình được khi TĐ{} đã duyệt", "Can submit once M{} is approved"],
+["Thành tiền TĐ{}", "Amount M{}"],
+["± so TĐ{}", "± vs M{}"],
+["DOANH THU TĐ{}", "REVENUE M{}"],
+["CHI PHÍ TĐ{}", "COST M{}"],
+["② Bảng DT-CP TĐ{}", "② Revenue–cost table M{}"],
 ["Tỷ giá Vietcombank (giá bán) {}/{}/{} {}:{}: 1 {} = {} đ", "Vietcombank rate (selling) {}/{}/{} {}:{}: 1 {} = {} VND"],
 ["{} dự án: ", "{} projects: "],
 ["🔒 {} dự án đã khoá số", "🔒 {} projects locked"],

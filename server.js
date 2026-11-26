@@ -366,6 +366,31 @@ api.use(wrap(async (req, res, next) => {
   // Văn bản HĐ / PL doanh thu đã có số quyết toán -> khoá văn bản (TĐ1, TĐ2, TĐ3)
   const vbDt = async (id) => { const r = await store.getRevenue(Number(id)); if (!r || r.loai !== 'hd') return null; const g = await nhomHd(r.du_an_id, r.so_ma); return { r: g.ds.find((x) => x.id === r.id) || r, g }; };
   const coQt = (x) => x && x.gt_qt !== null && x.gt_qt !== undefined && x.gt_qt !== '';
+  // V06.26.11.26: TĐ2 / TĐ3 đã trình / đã duyệt -> khoá số liệu của thời điểm đó (dự trù VÀ HĐ / PL)
+  //  TĐ2: đợt điều chỉnh HĐ / PL (doanh thu, HĐ đầu vào), điều chỉnh dự trù (cả bảng DT-CP TĐ2), đóng / mở gói, % gián tiếp / tài chính TĐ2
+  //  TĐ3: số quyết toán văn bản, chốt quyết toán HĐ, quyết toán nhóm dự trù, số chốt khoản
+  {
+    const KHOA = (k, tt) => (tt === 'duyet' ? `TĐ${k} đã duyệt – đang khoá. Muốn sửa: Mở khoá TĐ${k} (Quản trị / Lãnh đạo, cần Passcode).` : `TĐ${k} đang chờ duyệt – không sửa số TĐ${k}. Người duyệt trả lại thì sửa được.`);
+    const ttK = async (duAnId, k) => { const d = duAnId && (await store.getProject(Number(duAnId))); const t = d?.[`td${k}_tt`]; return ['trinh', 'duyet'].includes(t) ? t : null; };
+    const daRev = async (rid) => (await store.getRevenue(Number(rid)))?.du_an_id || null;
+    const daTpLine = async (lid) => { const l = await store.getTpLine(Number(lid)); return l ? (await store.getTp(l.tp_id))?.du_an_id || null : null; };
+    let k = 0, da = null;
+    // ---- TĐ2 ----
+    if (req.method === 'POST' && p === '/dieu-chinh') { k = 2; da = (await vanBanOf(b.loai, Number(b.vb_id)))?.du_an_id || null; }
+    if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/dieu-chinh\/(\d+)$/))) { const x = await store.getDieuChinh(Number(m[1])); if (x) { k = 2; da = (await vanBanOf(x.loai, Number(x.vb_id)))?.du_an_id || null; } }
+    if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'dc') { k = 2; da = Number(m[1]); }
+    if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'qt') { k = 3; da = Number(m[1]); }
+    if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/du-tru\/(\d+)$/))) { const x = await store.getDuTru(Number(m[1]));
+      if (x?.loai === 'dc') { k = 2; da = x.du_an_id; }
+      else if (x?.loai === 'qt') { k = 3; da = x.du_an_id; }
+      else if (x?.loai === 'ky' && req.method === 'PUT' && 'tinh_trang' in b && !('so_tien' in b)) { k = 2; da = x.du_an_id; } // đóng / mở gói -> đổi TĐ2
+      else if (x?.loai === 'ky' && req.method === 'PUT' && 'gt_chot' in b && !('so_tien' in b)) { k = 3; da = x.du_an_id; } } // số chốt khoản -> TĐ3
+    if (req.method === 'PUT' && (m = p.match(/^\/du-an\/(\d+)\/ty-le$/)) && ['pt_gt2', 'pt_tc2', 'tien_gt2', 'tien_tc2', 'ct_gt2', 'ct_tc2'].some((x) => x in b)) { k = 2; da = Number(m[1]); }
+    // ---- TĐ3 ----
+    if ((m = p.match(/^\/doanh-thu\/(\d+)\/(qt|quyet-toan)$/)) && (req.method === 'PUT' || req.method === 'DELETE')) { k = 3; da = await daRev(m[1]); }
+    if ((m = p.match(/^\/tp-hd-pl\/(\d+)\/qt$/)) && (req.method === 'PUT' || req.method === 'DELETE')) { k = 3; da = await daTpLine(m[1]); }
+    if (k && da) { const t = await ttK(da, k); if (t) return bad(res, KHOA(k, t), 423); }
+  }
   if ((m = p.match(/^\/doanh-thu\/(\d+)\/qt$/))) {
     const v = await vbDt(m[1]); if (!v) return bad(res, 'Không tìm thấy HĐ / PL', 404);
     if (req.method === 'PUT' && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423);
@@ -1387,40 +1412,52 @@ async function bcCua(id) {
   const [revAll, tienVe, du_tru] = await Promise.all([store.listRevenue(id), store.listTienVe(id), store.listDuTru(id)]);
   return projectReport(du_an, { rev: sortRevenue(revAll).map(calcLine), tienVe: sortTienVe(tienVe), cost: items, tp: thau_phu, duTru: du_tru });
 }
-api.post('/du-an/:id/td1', wrap(async (req, res) => {
+// V06.26.11.26: TĐ2, TĐ3 cùng cách TĐ1 – Trình → Duyệt / Trả lại → Khoá. TĐk chỉ trình khi TĐ(k−1) đã duyệt; mở khoá TĐk khi TĐ(k+1) chưa trình.
+// Số trình: DT, CP, LN tại TĐk (trước VAT, cùng số Báo cáo mục IV: TĐ1 ký · TĐ2 điều chỉnh · TĐ3 quyết toán)
+function soTd(m, k) {
+  const dt = [m.dt.goc.gt, m.dt.ps.gt, m.dt.qt.gt][k - 1];
+  const tp = [m.cp.tp_goc.gt, m.cp.tp_ps.gt, m.cp.tp_qt.gt][k - 1], kh = k === 1 ? m.cp.khac.gt : m.cp.khac_td?.gt?.[k - 1] ?? m.cp.khac.gt;
+  const cp = tp + kh + (m.cp.dtru?.gt?.[k - 1] || 0);
+  return { dt, cp, ln: dt - cp };
+}
+const TD_TEN_S = { 1: 'TĐ1', 2: 'TĐ2', 3: 'TĐ3' };
+async function tdDuyetHandler(req, res, k) {
   const id = parseId(req.params.id), d = id && (await store.getProject(id));
   if (!d) return bad(res, 'Không tìm thấy dự án', 404);
-  const viec = req.body?.viec, tt = d.td1_tt || '', ten = req.user.full_name || req.user.username || '';
+  const T = TD_TEN_S[k], viec = req.body?.viec, tt = d[`td${k}_tt`] || '', ten = req.user.full_name || req.user.username || '';
   if (viec === 'trinh') {
-    if (!QUYEN.hd.includes(req.user.role)) return bad(res, 'Không có quyền trình TĐ1', 403);
-    if (!['', 'tra'].includes(tt)) return bad(res, tt === 'trinh' ? 'TĐ1 đang chờ duyệt' : 'TĐ1 đã duyệt');
-    const bc = await bcCua(id), m = bc.moc, cp = m.cp.tp_goc.gt + m.cp.khac.gt + (m.cp.dtru?.gt?.[0] || 0), dt = m.dt.goc.gt;
-    if (!(dt > 0)) return bad(res, 'Chưa có doanh thu TĐ1 (HĐ chủ đầu tư) – chưa trình được');
-    await store.setProjectTd1(id, { tt: 'trinh', trinh_by: req.user.id, trinh_ten: ten, so: JSON.stringify({ dt, cp, ln: dt - cp }) });
-    audit.log(req, 'Trình', 'Dự án', `Trình duyệt TĐ1: doanh thu ${fmtD(dt)} · chi phí ${fmtD(cp)} · lợi nhuận ${fmtD(dt - cp)}`, { du_an: d.ma_du_an });
+    if (!QUYEN.hd.includes(req.user.role)) return bad(res, `Không có quyền trình ${T}`, 403);
+    if (!['', 'tra'].includes(tt)) return bad(res, tt === 'trinh' ? `${T} đang chờ duyệt` : `${T} đã duyệt`);
+    if (k > 1 && d[`td${k - 1}_tt`] !== 'duyet') return bad(res, `Chưa trình được ${T}: TĐ${k - 1} chưa được duyệt`);
+    const so = soTd((await bcCua(id)).moc, k);
+    if (!(so.dt > 0)) return bad(res, `Chưa có doanh thu ${T} (HĐ chủ đầu tư) – chưa trình được`);
+    await store.setProjectTd(id, k, { tt: 'trinh', trinh_by: req.user.id, trinh_ten: ten, so: JSON.stringify(so) });
+    audit.log(req, 'Trình', 'Dự án', `Trình duyệt ${T}: doanh thu ${fmtD(so.dt)} · chi phí ${fmtD(so.cp)} · lợi nhuận ${fmtD(so.ln)}`, { du_an: d.ma_du_an });
     return res.json({ ok: true });
   }
-  if (!laDuyet(req)) return bad(res, 'Chỉ Quản trị / Lãnh đạo được duyệt, trả lại hoặc mở khoá TĐ1', 403);
+  if (!laDuyet(req)) return bad(res, `Chỉ Quản trị / Lãnh đạo được duyệt, trả lại hoặc mở khoá ${T}`, 403);
   if (viec === 'duyet' || viec === 'tra') {
-    if (tt !== 'trinh') return bad(res, 'TĐ1 chưa được trình');
-    if (d.td1_trinh_by === req.user.id && req.user.role !== 'admin') return bad(res, // V05.26.11.26: Quản trị toàn quyền – được tự duyệt
-      'Người lập không tự duyệt / trả lại TĐ1 của mình – nhờ người khác có quyền duyệt');
+    if (tt !== 'trinh') return bad(res, `${T} chưa được trình`);
+    if (d[`td${k}_trinh_by`] === req.user.id && req.user.role !== 'admin') return bad(res, `Người lập không tự duyệt / trả lại ${T} của mình – nhờ người khác có quyền duyệt`); // Quản trị toàn quyền
     if (viec === 'tra') { const ly = String(req.body?.ly_do || '').trim().slice(0, 300); if (!ly) return bad(res, 'Nhập lý do trả lại');
-      await store.setProjectTd1(id, { tt: 'tra', ly_do: ly }); audit.log(req, 'Trả lại', 'Dự án', `Trả lại TĐ1: ${ly}`, { du_an: d.ma_du_an }); return res.json({ ok: true }); }
-    const bc = await bcCua(id), m = bc.moc, cp = m.cp.tp_goc.gt + m.cp.khac.gt + (m.cp.dtru?.gt?.[0] || 0), dt = m.dt.goc.gt;
-    await store.setProjectTd1(id, { tt: 'duyet', duyet_ten: ten, so: JSON.stringify({ dt, cp, ln: dt - cp }) });
-    audit.log(req, 'Duyệt', 'Dự án', `Duyệt TĐ1 (khoá giá cơ sở): doanh thu ${fmtD(dt)} · chi phí ${fmtD(cp)} · lợi nhuận ${fmtD(dt - cp)}`, { du_an: d.ma_du_an });
+      await store.setProjectTd(id, k, { tt: 'tra', ly_do: ly }); audit.log(req, 'Trả lại', 'Dự án', `Trả lại ${T}: ${ly}`, { du_an: d.ma_du_an }); return res.json({ ok: true }); }
+    const so = soTd((await bcCua(id)).moc, k);
+    await store.setProjectTd(id, k, { tt: 'duyet', duyet_ten: ten, so: JSON.stringify(so) });
+    audit.log(req, 'Duyệt', 'Dự án', `Duyệt ${T} (khoá): doanh thu ${fmtD(so.dt)} · chi phí ${fmtD(so.cp)} · lợi nhuận ${fmtD(so.ln)}`, { du_an: d.ma_du_an });
     return res.json({ ok: true });
   }
   if (viec === 'mo') {
-    if (tt !== 'duyet') return bad(res, 'TĐ1 chưa duyệt – không cần mở khoá');
+    if (tt !== 'duyet') return bad(res, `${T} chưa duyệt – không cần mở khoá`);
+    if (k < 3 && ['trinh', 'duyet'].includes(d[`td${k + 1}_tt`])) return bad(res, `TĐ${k + 1} đã trình / đã duyệt – mở khoá TĐ${k + 1} trước`);
     if (!(await requirePasscode(req, res))) return;
-    await store.setProjectTd1(id, { tt: '', ly_do: 'Mở khoá sau khi đã duyệt' });
-    audit.log(req, 'Mở khoá', 'Dự án', 'Mở khoá TĐ1 đã duyệt', { du_an: d.ma_du_an });
+    await store.setProjectTd(id, k, { tt: '', ly_do: 'Mở khoá sau khi đã duyệt' });
+    audit.log(req, 'Mở khoá', 'Dự án', `Mở khoá ${T} đã duyệt`, { du_an: d.ma_du_an });
     return res.json({ ok: true });
   }
   return bad(res, 'Việc không hợp lệ');
-}));
+}
+api.post('/du-an/:id/td1', wrap((req, res) => tdDuyetHandler(req, res, 1)));
+api.post('/du-an/:id/td/:k([123])', wrap((req, res) => tdDuyetHandler(req, res, Number(req.params.k))));
 const fmtD = (x) => new Intl.NumberFormat('vi-VN').format(Math.round(Number(x) || 0)) + ' đ';
 
 // ---------- Dự trù chi phí theo nhóm (Đợt B): TĐ1 dự trù · TĐ2 điều chỉnh / ngoài dự trù · TĐ3 quyết toán ----------
@@ -1430,7 +1467,8 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   const { data, errors } = validateDuTru(req.body || {});
   if (errors.length) return bad(res, errors);
   if (data.loai !== 'ky') data.hd_cdt_id = null; // chỉ gói (dòng TĐ1) mới gắn HĐ CĐT
-  if (data.loai === 'ky' && req.body?.dtcp) { data.dtcp = true; data.ct_nhap = String(req.body.ct_nhap ?? '').trim().slice(0, 200) || null; // V01.26: dòng nhập ở bảng DT-CP TĐ1
+  if (['ky', 'dc'].includes(data.loai) && req.body?.dtcp) { data.dtcp = true; // V06.26.11.26: cả dòng điều chỉnh TĐ2 nhập ở bảng DT-CP TĐ2
+    data.ct_nhap = String(req.body.ct_nhap ?? '').trim().slice(0, 200) || null; // V01.26: dòng nhập ở bảng DT-CP TĐ1
     const con = String(req.body.nhom_con || ''); if (con) { if (!NHOM_CHI_PHI.find((n) => n.code === data.nhom)?.sub.some((x) => x.code === con)) return bad(res, 'Hạng mục không thuộc nhóm'); data.nhom_con = con; } } // V03.26: Vật tư chính / phụ
   if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
   // V04.17: đợt điều chỉnh TĐ2 của riêng 1 khoản (gián tiếp / tài chính): khoản TĐ1 cùng dự án, cùng nhóm, chưa đóng
