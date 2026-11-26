@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.26.11.26 – Quản trị toàn quyền: được tự duyệt / trả lại TĐ1 do chính mình trình (bỏ "người lập ≠ người duyệt" với vai Quản trị; Lãnh đạo giữ nguyên)
+
 ## V04.26.11.26 – Lãnh đạo duyệt TĐ1 ngay ở trang Duyệt
 - Lãnh đạo không có trang Nhập liệu nên trước đây không thấy nút Duyệt TĐ1 → thêm khung "TĐ1 (giá cơ sở) chờ duyệt" đầu trang Duyệt:
   danh sách dự án đang trình (người trình, DT / CP / LN TĐ1), nút ✓ Duyệt & khoá / ↩ Trả lại (ghi lý do); mục "TĐ1 đã duyệt" có nút Mở khoá (cần mã xác nhận).

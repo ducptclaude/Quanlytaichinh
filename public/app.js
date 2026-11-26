@@ -2199,7 +2199,7 @@ function td1Info() {
   return { tt, khoa: tt === 'trinh' || tt === 'duyet', d, so };
 }
 function td1Bar() {
-  const { tt, d, so } = td1Info(), laDuyet = ['admin', 'lanh_dao'].includes(ME.role), tuMinh = d.td1_trinh_by === ME.id;
+  const { tt, d, so } = td1Info(), laDuyet = ['admin', 'lanh_dao'].includes(ME.role), tuMinh = d.td1_trinh_by === ME.id && ME.role !== 'admin'; // V05.26.11.26: Quản trị tự duyệt được
   const chip = { '': '<span class="td1-chip td1-lap">✏ Đang lập · chưa trình</span>', trinh: `<span class="td1-chip td1-cho">⏳ Chờ duyệt · ${esc(d.td1_trinh_ten || '')} trình ${esc(d.td1_trinh_at || '')}</span>`,
     duyet: `<span class="td1-chip td1-ok">🔒 Đã duyệt · ${esc(d.td1_duyet_ten || '')} · ${esc(d.td1_duyet_at || '')}</span>`, tra: `<span class="td1-chip td1-tra">↩ Bị trả lại: ${esc(d.td1_ly_do || '')}</span>` }[tt];
   const nut = [can('hd') && ['', 'tra'].includes(tt) ? '<button type="button" class="primary sm" data-td1="trinh">Trình duyệt TĐ1 →</button>' : '',
@@ -4035,7 +4035,7 @@ async function veTd1Duyet() {
   const cho = ds.filter((d) => d.td1_tt === 'trinh'), da = ds.filter((d) => d.td1_tt === 'duyet');
   const so = (d) => { try { return JSON.parse(d.td1_so || 'null'); } catch { return null; } };
   const pc = (x, y) => (y ? `${((x / y) * 100).toFixed(1).replace('.', ',')}%` : '—');
-  const dong = (d, cho1) => { const s = so(d) || {}; const tuMinh = d.td1_trinh_by === ME.id;
+  const dong = (d, cho1) => { const s = so(d) || {}; const tuMinh = d.td1_trinh_by === ME.id && ME.role !== 'admin';
     return `<tr><td><b>${esc(d.ma_du_an)}</b> <span class="muted">${esc(d.ten_du_an || '')}</span></td>
       <td class="muted small">${cho1 ? `${esc(d.td1_trinh_ten || '')} trình ${esc(d.td1_trinh_at || '')}` : `${esc(d.td1_duyet_ten || '')} duyệt ${esc(d.td1_duyet_at || '')}`}</td>
       <td class="num">${dvT(s.dt || 0)}</td><td class="num">${dvT(s.cp || 0)}</td><td class="num"><b>${dvT(s.ln || 0)}</b> <small class="muted">${pc(s.ln || 0, s.dt || 0)}</small></td>

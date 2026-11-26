@@ -1403,7 +1403,8 @@ api.post('/du-an/:id/td1', wrap(async (req, res) => {
   if (!laDuyet(req)) return bad(res, 'Chỉ Quản trị / Lãnh đạo được duyệt, trả lại hoặc mở khoá TĐ1', 403);
   if (viec === 'duyet' || viec === 'tra') {
     if (tt !== 'trinh') return bad(res, 'TĐ1 chưa được trình');
-    if (d.td1_trinh_by === req.user.id) return bad(res, 'Người lập không tự duyệt / trả lại TĐ1 của mình – nhờ người khác có quyền duyệt');
+    if (d.td1_trinh_by === req.user.id && req.user.role !== 'admin') return bad(res, // V05.26.11.26: Quản trị toàn quyền – được tự duyệt
+      'Người lập không tự duyệt / trả lại TĐ1 của mình – nhờ người khác có quyền duyệt');
     if (viec === 'tra') { const ly = String(req.body?.ly_do || '').trim().slice(0, 300); if (!ly) return bad(res, 'Nhập lý do trả lại');
       await store.setProjectTd1(id, { tt: 'tra', ly_do: ly }); audit.log(req, 'Trả lại', 'Dự án', `Trả lại TĐ1: ${ly}`, { du_an: d.ma_du_an }); return res.json({ ok: true }); }
     const bc = await bcCua(id), m = bc.moc, cp = m.cp.tp_goc.gt + m.cp.khac.gt + (m.cp.dtru?.gt?.[0] || 0), dt = m.dt.goc.gt;

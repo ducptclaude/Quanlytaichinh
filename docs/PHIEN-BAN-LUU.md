@@ -9,7 +9,7 @@ Muốn quay lại: nhắn **"quay về bản chot-dd.mm.yy"**, **"quay về bả
 | **quanlytaichinh19112026** | V01.19.11.26 | `01c29ea` | 19/11/2026 | Bản lưu theo yêu cầu để quay lại (rollback) – KHÔNG xóa |
 | **chot-19.11.26** | V10.19.11.26 | `7471700` | 19/11/2026 | Ghi chú nhanh gọn + đổi màu; khoá số dự án khi còn lại = 0 (mở bằng Passcode) + Ghi chú nhanh đầu báo cáo |
 | **chot-20.11.26** | V01.20.11.26 | `40f1f0a` | 20/11/2026 | Đẩy lại bản tiền tệ VND/USD/EUR (Railway chưa nhận V10 hôm 19/11) |
-| **chot-26.11.26** | V04.26.11.26 | (mới nhất) | 26/11/2026 | V01: sửa lỗi Xoá khoản · V04: Lãnh đạo duyệt TĐ1 ở trang Duyệt · V03: Vật tư chính / phụ · V02: bảng DT-CP TĐ1 theo khung chuẩn; trình / duyệt / khoá TĐ1; kiểm tra ngày, trùng chứng từ, vượt dự trù khi ghi chi |
+| **chot-26.11.26** | V05.26.11.26 | (mới nhất) | 26/11/2026 | V01: sửa lỗi Xoá khoản · V04: Lãnh đạo duyệt TĐ1 ở trang Duyệt · V03: Vật tư chính / phụ · V02: bảng DT-CP TĐ1 theo khung chuẩn; trình / duyệt / khoá TĐ1; kiểm tra ngày, trùng chứng từ, vượt dự trù khi ghi chi |
 | phien-26.11.26-13h28 | V01.26.11.26 | `0f3f318` | 26/11/2026 | Đầu phiên (đúng bản đang chạy) – trước khi làm bảng DT-CP TĐ1, trình / duyệt TĐ1, cảnh báo ghi chi |
 | phien-26.11.26-10h22 | V02.23.11.26 | `b7c4245` | 26/11/2026 | Đầu phiên 26/11 |
 | bao-mat-cap-cao | V02.23.11.26 | (mới nhất) | 23/11/2026 | Bảo mật cấp cao, chống sao chép, 2 lớp, sao lưu; dấu chìm chỉ Chỉ xem / khách – CHỜ DUYỆT gộp vào staging |
