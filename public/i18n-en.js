@@ -1,6 +1,12 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"＋ Ghi khoản đã chi": "＋ Record a payment",
+"Ghi khoản đã chi": "Record a payment",
+"Sửa khoản đã chi": "Edit payment",
+"Thêm HĐ cho gói": "Add contract to package",
+"số nhập nhanh trước đây (% / số)": "earlier quick estimate (% / amount)",
+"Dự trù nhanh (số cũ)": "Quick estimate (earlier)",
 "HĐ ›": "Contracts ›",
 "Chưa gắn HĐ CĐT ›": "Not linked to employer contract ›",
 "HĐ đầu vào · chọn HĐ chủ đầu tư": "Procurement contracts · choose employer contract",
@@ -1772,6 +1778,7 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["Bảng DT-CP TĐ{}", "Revenue–cost table M{}"],
 ["Trình duyệt TĐ{} →", "Submit M{} for approval →"],
 ["Trình được khi TĐ{} đã duyệt", "Can submit once M{} is approved"],
 ["Thành tiền TĐ{}", "Amount M{}"],

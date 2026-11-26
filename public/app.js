@@ -2058,8 +2058,8 @@ $('#tab-cost').addEventListener('click', async (e) => {
   if (cadd) {
     costOpen.add(cadd);
     resetCostForm(cadd, csub);
+    moFormChi();
     showMsg($('#c-msg'), `Thêm vào: ${NHOM().find((n) => n.code === cadd).ten}${csub ? ' › ' + NHOM().find((n) => n.code === cadd).sub.find((s) => s.code === csub).ten : ''}`);
-    cForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
     cForm.elements.noi_dung.focus({ preventScroll: true });
   }
   if (cedit) {
@@ -2074,9 +2074,9 @@ $('#tab-cost').addEventListener('click', async (e) => {
     if (el.le_goi) el.le_goi.dataset.keep = r.goi_id || '';
     $('#c-form-title').textContent = 'Sửa chi phí';
     setCostMode();
+    moFormChi('Sửa khoản đã chi');
     showMsg($('#c-msg'), 'Đang sửa: ' + r.noi_dung);
     updateCostPreview();
-    cForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   if (cdel) {
     const r = costData.items.find((x) => x.id === Number(cdel));
@@ -2253,7 +2253,7 @@ function dtcpHtml(k = 1) {
         <td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${SRC})</small>` : ''}</td></tr>`;
     }
     const pt = (costData.cp_nhom || []).find((x) => x.code === '_pt_' + kh);
-    if (pt) { const pv = Number(pt.gt[k - 2]) || 0; body += `<tr class="dtcp-n dtcp-pt" data-khoi="${kh}" data-auto="${Number(pt.gt[k - 1]) || 0}" data-prev="${pv}"><td></td><td>Dự trù nhanh ③ (% / số)</td><td><span class="tag-c c-auto">Tự động</span></td>${cTruoc(pv)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">nhập ở ③ Dự trù nhanh</td></tr>`; }
+    if (pt) { const pv = Number(pt.gt[k - 2]) || 0; body += `<tr class="dtcp-n dtcp-pt" data-khoi="${kh}" data-auto="${Number(pt.gt[k - 1]) || 0}" data-prev="${pv}"><td></td><td>Dự trù nhanh (số cũ)${moO && k < 3 ? ` <button type="button" class="sm dtcp-hd" data-ptbo="${kh}" title="Bỏ số dự trù nhanh cũ – nhập trực tiếp ở ô của từng nhóm">Bỏ</button>` : ''}</td><td><span class="tag-c c-auto">Tự động</span></td>${cTruoc(pv)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">số nhập nhanh trước đây (% / số)</td></tr>`; }
   }
   const dtP = Number(costData.dt_td_gt?.[k - 2]) || 0, cP = k > 1 ? `<td class="num muted">${dvT(dtP)}</td>` : '', lP = k > 1 ? `<td class="num">${dtcpLech(dt - dtP, true)}</td>` : '';
   const HDR = `<th>STT</th><th>Nội dung</th><th>Cách điền</th>${k > 1 ? `<th class="num">${TP}</th>` : ''}<th class="num">${k === 1 ? 'Nhập (số · % · công thức)' : k === 2 ? 'Điều chỉnh ± (số · % · công thức)' : ''}</th><th class="num">Thành tiền ${T}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th>Nguồn</th>`;
@@ -2301,6 +2301,14 @@ function dtcpTinh() { // tính lại cả bảng khi gõ (xem trước, chưa l�
   return !loi;
 }
 document.addEventListener('input', (e) => { if (e.target.closest('.dtcp-table .dtcp-in')) dtcpTinh(); });
+// V09.26.11.26: bỏ số "Dự trù nhanh" cũ của 1 khối (gián tiếp / tài chính) tại TĐ đang xem
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-ptbo]'); if (!b) return;
+  const k = Number($('.dtcp-table')?.dataset.k) || 1, x = b.dataset.ptbo === 'B2' ? 'gt' : 'tc';
+  if (!confirm(`Bỏ số dự trù nhanh ${x === 'gt' ? 'gián tiếp' : 'tài chính'} TĐ${k}? Sau đó nhập trực tiếp ở ô từng nhóm.`)) return;
+  const body = { [`pt_${x}${k}`]: '', [`tien_${x}${k}`]: '', [`ct_${x}${k}`]: '' }; if (k === 1) body[x === 'gt' ? 'cach_gt' : 'cach_tc'] = '';
+  try { await api(`/api/du-an/${revProjectId}/ty-le`, { method: 'PUT', body: JSON.stringify(body) }); await loadCost(); } catch (err) { alert(err.message); }
+});
 // V07.26.11.26: "HĐ ›" ở bảng DT-CP -> chi tiết gói / HĐ đầu vào của nhóm (1 HĐ CĐT: mở ngay; nhiều: chọn)
 document.addEventListener('click', (e) => {
   const bt = e.target.closest('[data-dtcphd]'); if (!bt) return;
@@ -2512,7 +2520,6 @@ function ptHtml(k) {
   // V18.17: bảng khoản chuyển vào bảng "Nhóm chi phí" (khối II, III); khung này nằm trong "Thêm chi phí": ô dự trù + thêm khoản
   // ---- V20.17: 1 khung "Nhập chi phí" – ① Chi thật (form gốc) · ② Dự trù / khoản (theo TĐ) · ③ Dự trù nhanh % / số ----
   void them; void huongDan; void bang; void tong; void mo;
-  if (cForm?.elements.id?.value) cfMode = '1'; // đang sửa 1 dòng chi phí -> form chi thật
   const nhOpt = nhB.map((n) => `<option value="${n.code}">${n.khoi === 'B2' ? 'Gián tiếp' : 'Tài chính'} · ${esc(n.ten)}</option>`).join('');
   const khOpt = (moi) => `<option value="">— Chọn khoản —</option>${moi ? '<option value="moi">＋ Khoản mới (phát sinh TĐ2)</option>' : ''}` + ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `<optgroup label="${kh === 'B2' ? 'Chi phí gián tiếp' : 'Chi phí tài chính'}">${ks.map((x) => `<option value="${x.r.id}" ${pk2Sel === x.r.id ? 'selected' : ''}>${esc(x.r.noi_dung || 'Khoản')} · ${esc(NHOM().find((n) => n.code === x.r.nhom)?.ten || '')} · ${dvT(x.t[k - 1], 'trieu')}${x.dong ? ' (đã đóng)' : x.chot !== null ? ' (đã chốt)' : ''}</option>`).join('')}</optgroup>` : ''; }).join('');
   const lab = (t, inner, cls = '') => `<label class="${cls}">${t}${inner}</label>`;
@@ -2533,11 +2540,12 @@ function ptHtml(k) {
   const HINT = { 1: 'Ghi tiền đã chi thật (trả thầu phụ, mua vật tư, trả lương, lãi…). Chọn "Thuộc gói / khoản" để trừ vào dự trù.',
     2: k === 1 ? 'Bảng DT-CP TĐ1 theo khung chuẩn: mỗi nhóm = phần tự động (gói, HĐ, khoản, chi đã ghi) + ô nhập (số / % doanh thu / công thức). Xong bấm "Trình duyệt TĐ1".' : k === 2 ? 'Bảng DT-CP TĐ2: so với TĐ1, ô nhập = điều chỉnh ± cả nhóm (số / % doanh thu / công thức). Điều chỉnh từng khoản ở mục bên dưới. Xong bấm "Trình duyệt TĐ2" (TĐ1 phải đã duyệt).' : 'Bảng DT-CP TĐ3 (quyết toán) tự động – so với TĐ2. Chốt số từng khoản ở mục bên dưới. Kiểm tra xong bấm "Trình duyệt TĐ3" (TĐ2 phải đã duyệt).',
     3: 'Nhập nhanh tổng gián tiếp / tài chính: số (150tr), % (7% × doanh thu) hoặc công thức. Để trống = cộng theo các khoản.' };
-  const seg = edit ? `<div class="cf-seg" role="tablist">${[['1', '① Chi thật'], ['2', `② Bảng DT-CP TĐ${k}`], ['3', '③ Dự trù nhanh']].map(([m, t]) => `<button type="button" role="tab" data-cfmode="${m}" class="${cfMode === m ? 'on' : ''}" aria-selected="${cfMode === m}">${t}</button>`).join('')}<span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
-  const card = cForm?.closest('.card');
-  if (card && el.parentElement !== card) card.insertBefore(el, cForm);
-  if (cForm) cForm.hidden = edit && cfMode !== '1';
-  el.innerHTML = seg + (cfMode === '2' ? panel2 : cfMode === '3' ? phan1 : '');
+  const seg = edit ? `<div class="cf-seg"><span class="cf-tab on">Bảng DT-CP TĐ${k}</span><button type="button" class="primary sm cf-open" data-cfopen title="Ghi số tiền đã thực trả: thầu phụ, vật tư, lương, lãi vay…">＋ Ghi khoản đã chi</button><span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
+  const card = cfAnchor()?.closest('.card');
+  if (card && el.parentElement !== card) card.insertBefore(el, cfAnchor());
+  if (cForm) cForm.hidden = edit && !cfDlgMo(); // V09.26.11.26: phần ghi khoản đã chi nằm trong hộp nhỏ
+  void phan1; el.innerHTML = seg + (edit ? panel2 : '');
+  { const tt = $('#c-form-title'); if (tt && edit) tt.hidden = true; }
   $$('input.money', el).forEach(attachMoneyInput);
   if ($('.dtcp-table', el)) dtcpTinh();
   { const tc = $('#tp-tbody')?.closest('.card'); if (tc) tc.hidden = Boolean($('.dtcp-table', el)); } // V07.26.11.26: gộp vào bảng DT-CP
@@ -2555,7 +2563,25 @@ function ptHtml(k) {
     pf.addEventListener('change', () => { goiY(); hien(); lech(); }); pf.addEventListener('input', lech); goiY(); hien(); lech();
   }
 }
-let cfMode = (() => { try { return localStorage.getItem('cf_mode') || '1'; } catch { return '1'; } })(), pk2Sel = null;
+let cfMode = '2', pk2Sel = null; // V09.26.11.26: luôn hiện bảng DT-CP; ghi khoản đã chi trong hộp nhỏ
+// Hộp "Ghi khoản đã chi": chuyển form chi phí vào hộp khi mở, trả về chỗ cũ khi đóng (giữ nguyên xử lý của form)
+let cfMoc = null;
+const cfAnchor = () => { if (!cfMoc && cForm) { cfMoc = document.createElement('span'); cfMoc.className = 'cf-moc'; cForm.before(cfMoc); } return cfMoc; };
+const cfDlgMo = () => Boolean($('#cf-dlg')?.open);
+function moFormChi(tieuDe) {
+  if (!cForm) return; cfAnchor();
+  let dlg = $('#cf-dlg');
+  if (!dlg) {
+    dlg = document.createElement('dialog'); dlg.id = 'cf-dlg'; dlg.className = 'tp-dlg cf-dlg'; document.body.appendChild(dlg);
+    dlg.addEventListener('click', (e) => { if (e.target.dataset.close !== undefined) dlg.close(); });
+    dlg.addEventListener('close', () => { cfMoc.after(cForm); const c = $('#c-msg'); if (c) c.textContent = ''; if (cForm.elements.id?.value && typeof resetCostForm === 'function') resetCostForm(); costKpiTd(); });
+  }
+  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">Tiền đã thực trả – trả thầu phụ, mua vật tư, trả lương, lãi vay… Chọn "Thuộc gói / khoản" để trừ vào dự trù.</div><h3>${esc(tieuDe || (cForm.elements.id?.value ? 'Sửa khoản đã chi' : 'Ghi khoản đã chi'))}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>`;
+  dlg.appendChild(cForm); cForm.hidden = false;
+  if (!dlg.open) dlg.showModal();
+  setTimeout(() => cForm.elements.noi_dung?.focus({ preventScroll: true }), 80);
+}
+document.addEventListener('click', (e) => { if (e.target.closest('[data-cfopen]')) { if (cForm?.elements.id?.value && typeof resetCostForm === 'function') resetCostForm(); moFormChi(); } });
 document.addEventListener('click', (e) => {
   const b = e.target.closest('#c-pt [data-cfmode]'); if (!b) return;
   cfMode = b.dataset.cfmode; try { localStorage.setItem('cf_mode', cfMode); } catch {}
@@ -2568,7 +2594,7 @@ function openKhoan(id) {
   const dlg = dlgShell('pk-dlg', async (e) => {
     const t = e.target;
     if (t.dataset.close !== undefined) return dlg.close();
-    if (t.dataset.pkgo) { dlg.close(); cfMode = t.dataset.pkgo === 'chi' ? '1' : '2'; pk2Sel = id; try { localStorage.setItem('cf_mode', cfMode); } catch {} costKpiTd();
+    if (t.dataset.pkgo) { dlg.close(); pk2Sel = id; costKpiTd(); if (t.dataset.pkgo === 'chi') moFormChi();
       if (t.dataset.pkgo === 'chi' && cForm) { cForm.elements.nhom.value = x.r.nhom; cForm.elements.nhom.dispatchEvent(new Event('change', { bubbles: true })); setTimeout(() => { const s = cForm.elements.le_goi; if (s) { s.value = String(id); s.dataset.keep = String(id); } cForm.elements.noi_dung?.focus(); }, 60); }
       return $('#c-pt')?.closest('.card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     if (t.dataset.pksua !== undefined) { dlg.close(); return openDtr(x.r.nhom); }
@@ -4674,7 +4700,7 @@ function taoHdChoGoi(goiId) {
   const g = (costData?.du_tru || []).find((r) => r.id === goiId); if (!g || !cForm) return;
   $('#tpn-dlg')?.open && $('#tpn-dlg').close();
   // V08.26.11.26: form thêm HĐ nằm ở ① Chi thật – đang ở ② Bảng DT-CP thì chuyển sang ① để form hiện ra (trước đây form bị ẩn -> như bị đá ra)
-  if (cfMode !== '1') { cfMode = '1'; try { localStorage.setItem('cf_mode', cfMode); } catch {} costKpiTd(); }
+  moFormChi('Thêm HĐ cho gói');
   const e = cForm.elements;
   if (e.id) e.id.value = '';
   e.nhom.value = g.nhom; e.nhom.dispatchEvent(new Event('change', { bubbles: true })); setCostMode(); setCostMode();
@@ -4682,6 +4708,5 @@ function taoHdChoGoi(goiId) {
   if (e.goi && [...e.goi.options].some((o) => o.value === String(goiId))) { e.goi.value = String(goiId); e.goi.dispatchEvent(new Event('change', { bubbles: true })); }
   if (e.hd_cdt && g.hd_cdt_id) e.hd_cdt.value = String(g.hd_cdt_id);
   showMsg($('#c-msg'), `Tạo HĐ cho gói "${g.noi_dung || ''}": nhập Số HĐ, nhà cung cấp, giá trị ký rồi bấm Thêm`);
-  cForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  setTimeout(() => e.so_tp?.focus({ preventScroll: true }), 350);
+  setTimeout(() => e.so_tp?.focus({ preventScroll: true }), 150);
 }

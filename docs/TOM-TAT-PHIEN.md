@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.26.11.26 – Nhập chi phí gọn: bỏ "③ Dự trù nhanh"; "① Chi thật" thành nút "＋ Ghi khoản đã chi" mở hộp nhỏ
+- Thanh trên chỉ còn "Bảng DT-CP TĐk" (luôn hiện) + nút "＋ Ghi khoản đã chi" -> hộp `#cf-dlg` chứa form chi phí (form chuyển vào hộp khi mở, trả về khi đóng; giữ nguyên xử lý lưu).
+  Sửa 1 dòng chi phí, "+ HĐ" ở gói, "Ghi chi cho khoản này", "+" ở nhóm cũng mở hộp này. Đóng hộp khi đang sửa -> form trống lại.
+- Số "Dự trù nhanh" cũ (nếu dự án đã nhập) vẫn tính, hiện dòng "Dự trù nhanh (số cũ)" trong bảng DT-CP + nút "Bỏ" (TĐ1, TĐ2) để xoá, sau đó nhập ở ô từng nhóm.
+- Kiểm tra: mở hộp, ghi 1 khoản lương 1,5 tr (lưu đúng), đóng hộp form về chỗ, sửa dòng mở hộp điền sẵn; tester 4518, kiem-tra-goi 246, td23 26 ĐẠT; máy tính + iPhone không tràn.
+
 ## V08.26.11.26 – Sửa "+ HĐ" ở gói (hộp chi tiết HĐ đầu vào) bị "đá ra": form thêm HĐ nằm ở ① Chi thật nhưng đang ở ② Bảng DT-CP nên bị ẩn. Nay tự chuyển sang ① rồi điền sẵn nhóm, gói, hình thức HĐ, cuộn tới form (`taoHdChoGoi`).
 
 ## V07.26.11.26 – Gộp "1. Hợp đồng đầu vào" vào bảng DT-CP + chặn trình khi chi phí = 0

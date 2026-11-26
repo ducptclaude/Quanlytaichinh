@@ -3964,3 +3964,8 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
 .dtcp-hdline { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between; margin: 6px 0 8px; font-size: 13px; }
 .dtcp-hd-list { display: flex; flex-direction: column; gap: 8px; padding: 6px 2px; }
 .dtcp-hd-list button { justify-content: flex-start; text-align: left; }
+/* V09.26.11.26: thanh Bảng DT-CP + nút Ghi khoản đã chi; hộp nhập nhỏ */
+.cf-seg .cf-tab { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; color: #fff; background: var(--fg-navy, #1f3b73); }
+.cf-seg .cf-open { margin-left: 8px; }
+.cf-dlg { width: min(980px, calc(100vw - 24px)); }
+.cf-dlg #c-form { margin-top: 6px; }
