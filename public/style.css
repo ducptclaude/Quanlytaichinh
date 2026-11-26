@@ -3971,3 +3971,7 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
 .cf-dlg #c-form { margin-top: 6px; }
 .tpn-them { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 4px; }
 .nhcp-dlg { width: min(640px, calc(100vw - 24px)); }
+.cpk-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.cpk-kpis .kpi.on { outline: 2px solid var(--fg-navy, #1f3b73); }
+.cpk-t td input { width: 100%; }
+@media (max-width: 640px) { .cpk-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -1517,7 +1517,7 @@ api.put('/du-tru/:id', canHd, wrap(async (req, res) => {
   // V04.17: chốt số TĐ3 của 1 khoản gián tiếp / tài chính (trống = bỏ chốt -> TĐ3 = thực chi)
   if (req.body && 'gt_chot' in req.body && !('so_tien' in req.body)) {
     const kh = NHOM_CHI_PHI.find((n) => n.code === cur.nhom)?.khoi;
-    if (cur.loai !== 'ky' || !['B2', 'B3'].includes(kh)) return bad(res, 'Chỉ khoản chi phí gián tiếp / tài chính (dòng TĐ1) mới chốt số');
+    if (cur.loai !== 'ky' || !(['B2', 'B3'].includes(kh) || cur.la_cp)) return bad(res, 'Chỉ khoản chi phí gián tiếp / tài chính hoặc CP khác mới chốt số'); // V12.26.11.26: + CP khác
     const raw = req.body.gt_chot, v = raw === '' || raw === null ? null : Number(String(raw).replace(/\./g, '').replace(',', '.'));
     if (v !== null && (!Number.isFinite(v) || v < 0 || v > 1e15)) return bad(res, 'Số chốt không hợp lệ (số ≥ 0)');
     await store.setDuTruChot(id, v === null ? null : Math.round(v));

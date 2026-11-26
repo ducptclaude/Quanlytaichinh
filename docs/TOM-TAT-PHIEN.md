@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.26.11.26 – "CP khác" đủ quy tắc phát sinh: Chi tiết · điều chỉnh TĐ2 · quyết toán / chốt TĐ3 · ghi chi · xoá
+- Dòng CP khác trong hộp nhóm có nút **Chi tiết** -> hộp `#cpk-dlg`: thẻ TĐ1 / TĐ2 / TĐ3 / Đã chi; sửa giá trị (ở tab TĐ phát sinh), đợt ± TĐ2 (dự trù `dc` gắn khoản – goi_ref),
+  quyết toán / chốt TĐ3 (`gt_chot`, trống = TĐ2), Ghi chi cho khoản (mua lẻ gắn khoản), Xoá khoản. Cột Đã thanh toán / Còn lại của dòng = đã chi / giá trị TĐ − đã chi.
+- Công thức (máy chủ `duTruNhom` + `goiV`, giao diện `cpkSv`): CP khác có số chốt -> TĐ3 khoản = số chốt (thay giá trị + điều chỉnh); máy chủ cho chốt số với khoản CP khác (trước chỉ gián tiếp / tài chính).
+  CP khác không xuất hiện trong ô chọn gói khi tạo HĐ; không có "+ HĐ" / "Đóng gói".
+- Kiểm tra `scripts/kiem-tra-them/cp-khac.js` 13 ĐẠT: A TĐ1 100 -> ±TĐ2 +20 (100/120/120) -> chốt 115 (100/120/115) -> bỏ chốt (TĐ3 120); B phát sinh TĐ2 30 −5 (TĐ1 giữ 100, TĐ2 145);
+  C phát sinh TĐ3 8 (TĐ3 153); xoá B (TĐ2 120 · TĐ3 128). nhom-ps 13, tester 4518, kiem-tra-goi 246, td23 26 ĐẠT.
+
 ## V11.26.11.26 – Hộp HĐ đầu vào: dòng PL đang khoá (có số quyết toán) có nút **Xóa** – nhập Passcode 1 lần, tự bỏ số quyết toán rồi xoá (trước phải 🔓 Mở khoá rồi mới Xóa). Dòng HĐ gốc không xoá riêng. Kiểm tra: PL phát sinh TĐ3 có QT 7,8 tr xoá được; tester, kiem-tra-goi 0 lỗi.
 
 ## V10.26.11.26 – Hộp chi tiết nhóm HĐ đầu vào: "+ HĐ" (nhiều nhà thầu) và "+ CP khác" phát sinh theo TĐ
