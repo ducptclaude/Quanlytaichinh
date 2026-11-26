@@ -4673,13 +4673,15 @@ document.addEventListener('keydown', (e) => {
 function taoHdChoGoi(goiId) {
   const g = (costData?.du_tru || []).find((r) => r.id === goiId); if (!g || !cForm) return;
   $('#tpn-dlg')?.open && $('#tpn-dlg').close();
+  // V08.26.11.26: form thêm HĐ nằm ở ① Chi thật – đang ở ② Bảng DT-CP thì chuyển sang ① để form hiện ra (trước đây form bị ẩn -> như bị đá ra)
+  if (cfMode !== '1') { cfMode = '1'; try { localStorage.setItem('cf_mode', cfMode); } catch {} costKpiTd(); }
   const e = cForm.elements;
   if (e.id) e.id.value = '';
   e.nhom.value = g.nhom; e.nhom.dispatchEvent(new Event('change', { bubbles: true })); setCostMode(); setCostMode();
   if (e.hinh_thuc) { e.hinh_thuc.value = 'hd'; e.hinh_thuc.dispatchEvent(new Event('change', { bubbles: true })); setCostMode(); setCostMode(); }
   if (e.goi && [...e.goi.options].some((o) => o.value === String(goiId))) { e.goi.value = String(goiId); e.goi.dispatchEvent(new Event('change', { bubbles: true })); }
   if (e.hd_cdt && g.hd_cdt_id) e.hd_cdt.value = String(g.hd_cdt_id);
-  showMsg($('#c-msg'), `Tạo HĐ cho gói "${(g.noi_dung || '').split(' · ')[0]}": nhập Số HĐ, nhà cung cấp, giá trị ký rồi bấm Thêm`);
+  showMsg($('#c-msg'), `Tạo HĐ cho gói "${g.noi_dung || ''}": nhập Số HĐ, nhà cung cấp, giá trị ký rồi bấm Thêm`);
   cForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
   setTimeout(() => e.so_tp?.focus({ preventScroll: true }), 350);
 }

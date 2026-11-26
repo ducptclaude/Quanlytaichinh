@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.26.11.26 – Sửa "+ HĐ" ở gói (hộp chi tiết HĐ đầu vào) bị "đá ra": form thêm HĐ nằm ở ① Chi thật nhưng đang ở ② Bảng DT-CP nên bị ẩn. Nay tự chuyển sang ① rồi điền sẵn nhóm, gói, hình thức HĐ, cuộn tới form (`taoHdChoGoi`).
+
 ## V07.26.11.26 – Gộp "1. Hợp đồng đầu vào" vào bảng DT-CP + chặn trình khi chi phí = 0
 - Bảng DT-CP (mọi TĐ): nút **HĐ ›** cạnh tên nhóm khối I (Thầu phụ, Vật tư, Nhân công, MMTB…) -> chi tiết gói / HĐ đầu vào của nhóm (1 HĐ CĐT mở ngay, nhiều thì chọn);
   mở được cả khi TĐ đã khoá. Dòng trên bảng: số HĐ đầu vào + còn lại phải trả. Đang xem bảng DT-CP thì ẩn bảng "1. Hợp đồng đầu vào" (① Chi thật, ③ vẫn hiện).
