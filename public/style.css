@@ -3953,3 +3953,4 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
 .cb-do { background: #fff1f1; border: 1px solid #fecaca; color: #991b1b; } .cb-vang { background: #fffaeb; border: 1px solid #fde68a; color: #92400e; } .cb-xanh { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
 @media (max-width: 700px) { .dtcp-table .dtcp-src, .dtcp-table th:last-child, .dtcp-table th:nth-child(3), .dtcp-table .dtcp-cach { display: none; } .dtcp-table .dtcp-in { width: 100px; } .td1-nut { margin-left: 0; } }
 .dtcp-table td { color: var(--text, #1e293b); } .dtcp-table .dtcp-k td, .dtcp-table .dtcp-a td { color: var(--navy); } .dtcp-table .dtcp-ln td { color: #fff; } .dtcp-table .dtcp-src, .dtcp-table .muted { color: var(--muted); }
+.dtcp-table .dtcp-cha td { font-weight: 700; } .dtcp-table .dtcp-ten2 { padding-left: 26px !important; }

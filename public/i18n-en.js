@@ -101,6 +101,7 @@ window.BKS_EN = {
 "Tăng / giảm": "Increase / decrease",
 "Trực tiếp chưa gắn HĐ": "Direct – not linked to a contract",
 "Trực tiếp": "Direct",
+"tổng dòng con": "sum of sub-rows",
 "② Bảng DT-CP TĐ1": "② M1 cost plan table",
 "Lưu bảng": "Save table",
 "Trình duyệt TĐ1 →": "Submit M1 for approval →",

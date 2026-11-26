@@ -136,6 +136,11 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
   const D1 = (await api('POST', `/du-an/${id}/du-tru`, { nhom: 'may_moc', loai: 'ky', dtcp: true, ct_nhap: '31tr', noi_dung: 'DT-CP · Máy móc thiết bị', so_tien: 31 * U, vat: 0, ngay: NGAY })).id;
   await doiChieu('15) Bảng DT-CP: máy móc nhập 31tr → TĐ1, TĐ2, TĐ3 +31 (dự trù TĐ1 của nhóm)', [891, 931, 921], [400, 360, 360], [320, 350, 340], [171, 221, 221]);
   check((await api('GET', `/du-an/${id}/chi-phi`)).du_tru.find((r) => r.id === D1)?.ct_nhap === '31tr', 'Lưu công thức đã gõ của dòng DT-CP');
+  // V03.26: Vật tư chính / phụ – dòng DT-CP theo hạng mục
+  const VP = await api('POST', `/du-an/${id}/du-tru`, { nhom: 'vat_tu', nhom_con: 'phu', loai: 'ky', dtcp: true, ct_nhap: '1%', noi_dung: 'DT-CP · Vật tư phụ', so_tien: 15 * U, vat: 0, ngay: NGAY }, true);
+  check(VP.status === 201 && (await api('GET', `/du-an/${id}/chi-phi`)).du_tru.find((r) => r.id === VP.j.id)?.nhom_con === 'phu', 'Dòng DT-CP Vật tư phụ lưu đúng hạng mục');
+  check((await api('POST', `/du-an/${id}/du-tru`, { nhom: 'vat_tu', nhom_con: 'luong', loai: 'ky', dtcp: true, so_tien: 1 * U, vat: 0, noi_dung: 'sai', ngay: NGAY }, true)).status === 400, 'Chặn hạng mục không thuộc nhóm');
+  await doiChieu('15b) + Vật tư phụ 15 → TĐ1 906', [906, 946, 936], [400, 360, 360], [320, 350, 340], [186, 236, 236]);
   check((await api('POST', `/du-an/${id}/td1`, { viec: 'trinh' }, true)).status === 200, 'Trình duyệt TĐ1');
   check((await api('POST', `/du-an/${id}/du-tru`, { nhom: 'khac', loai: 'ky', so_tien: 5 * U, vat: 0, noi_dung: 'gói mới', ngay: NGAY }, true)).status === 423, 'Đã trình: chặn thêm dự trù TĐ1');
   check((await api('PUT', `/du-tru/${D1}`, { so_tien: 40 * U, noi_dung: 'x', vat: 0, ngay: NGAY }, true)).status === 423, 'Đã trình: chặn sửa số dự trù TĐ1');
@@ -151,7 +156,7 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
     check((await api('POST', `/du-an/${id}/td1`, { viec: 'duyet' }, true)).status === 200, 'Lãnh đạo khác duyệt TĐ1 → khoá');
     cookie = c0;
     const da = (await api('GET', `/du-an/${id}/chi-phi`)).du_an;
-    check(da.td1_tt === 'duyet' && JSON.parse(da.td1_so || '{}').cp === 891 * U, 'Lưu giá cơ sở TĐ1 (CP 891)', `${da.td1_tt} ${da.td1_so}`);
+    check(da.td1_tt === 'duyet' && JSON.parse(da.td1_so || '{}').cp === 906 * U, 'Lưu giá cơ sở TĐ1 (CP 906)', `${da.td1_tt} ${da.td1_so}`);
     check((await api('PUT', `/du-tru/${D1}`, { so_tien: 40 * U, noi_dung: 'x', vat: 0, ngay: NGAY }, true)).status === 423, 'Đã duyệt: khoá sửa dự trù TĐ1');
   } else check(false, 'Tạo tài khoản duyệt thử', `mã ${tao.status} ${JSON.stringify(tao.j)}`);
   console.log(`\nKẾT QUẢ: ${pass} kiểm tra ĐẠT, ${fail} LỖI`);

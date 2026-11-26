@@ -2209,10 +2209,11 @@ function td1Bar() {
   const soTxt = so && tt === 'duyet' ? `<span class="muted small">Giá cơ sở: DT ${dvT(so.dt)} · CP ${dvT(so.cp)} · LN ${dvT(so.ln)} (${so.dt ? ((so.ln / so.dt) * 100).toFixed(1).replace('.', ',') : 0}%)</span>` : '';
   return `<div class="td1-bar">${chip}<span class="td1-steps">${buoc}</span>${soTxt}<span class="td1-nut">${nut}</span></div>`;
 }
+const DTCP_TACH = { vat_tu: ['chinh', 'phu'] }; // V03.26: nhóm tách hạng mục trong bảng DT-CP TĐ1
 function dtcpHtml() {
   const dt = Number(costData.dt_td_gt?.[0]) || 0, edit = can('hd') && !costAll, { khoa } = td1Info();
   const cpN = new Map((costData.cp_nhom || []).map((n) => [n.code, n]));
-  const dong = (code) => (costData.du_tru || []).find((r) => r.loai === 'ky' && r.dtcp && r.nhom === code);
+  const dong = (code, con = '') => (costData.du_tru || []).find((r) => r.loai === 'ky' && r.dtcp && r.nhom === code && (r.nhom_con || (DTCP_TACH[code] ? DTCP_TACH[code][0] : '')) === con);
   const pdt = (x) => (dt ? `${((x / dt) * 100).toFixed(1).replace('.', ',')}%` : '—');
   const TEN_K = { B1: 'CHI PHÍ TRỰC TIẾP', B2: 'CHI PHÍ GIÁN TIẾP', B3: 'CHI PHÍ TÀI CHÍNH' }, SO_K = { B1: 'I', B2: 'II', B3: 'III' };
   let body = '', stt = 0;
@@ -2221,6 +2222,18 @@ function dtcpHtml() {
     body += `<tr class="dtcp-k dtcp-${kh}" data-khoi="${kh}"><td>${SO_K[kh]}</td><td colspan="2"><b>${TEN_K[kh]}</b></td><td></td><td class="num" data-tk="${kh}"></td><td class="num" data-pk="${kh}"></td><td class="dtcp-src"></td></tr>`;
     for (const n of ns) {
       stt++;
+      if (DTCP_TACH[n.code]) { // V03.26: tách hạng mục (Vật tư chính / phụ): phần tự động của mua lẻ "phụ" vào dòng phụ, còn lại (HĐ, gói, mua lẻ chính) vào dòng chính
+        const cons = DTCP_TACH[n.code], tien = Number(cpN.get(n.code)?.gt?.[0]) || 0, nhapAll = cons.reduce((a, c) => a + (Number(dong(n.code, c)?.so_tien) || 0), 0), autoAll = tien - nhapAll;
+        const autoPhu = (costData.items || []).filter((x) => x.nhom === n.code && x.nhom_con === cons[1] && !x.goi_id).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0);
+        body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b></td><td></td><td></td><td class="num dtcp-tt"></td><td class="num muted dtcp-pdt"></td><td class="dtcp-src">tổng dòng con</td></tr>`;
+        cons.forEach((c, i) => { const r = dong(n.code, c), auto = i === 0 ? autoAll - autoPhu : autoPhu, goc = r ? (r.ct_nhap || money(Number(r.so_tien) || 0)) : '';
+          const ten = n.sub.find((x) => x.code === c)?.ten || c;
+          body += `<tr class="dtcp-n dtcp-con" data-nhom="${n.code}" data-con="${c}" data-cha-of="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-id="${r ? r.id : ''}">
+            <td class="muted">${stt}.${i + 1}</td><td class="dtcp-ten2">${esc(ten)}</td><td class="dtcp-cach"></td>
+            <td class="num"><input class="dtcp-in" value="${esc(goc)}" data-goc="${esc(goc)}" ${edit && !khoa ? '' : 'disabled'} autocomplete="off" aria-label="${esc(ten)}"></td>
+            <td class="num dtcp-tt"></td><td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${i === 0 ? 'HĐ, gói, mua lẻ vật tư chính' : 'mua lẻ vật tư phụ'})</small>` : ''}</td></tr>`; });
+        continue;
+      }
       const r = dong(n.code), tien = Number(cpN.get(n.code)?.gt?.[0]) || 0, nhap = Number(r?.so_tien) || 0, auto = tien - nhap;
       const goc = r ? (r.ct_nhap || money(nhap)) : '';
       body += `<tr class="dtcp-n" data-nhom="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-id="${r ? r.id : ''}">
@@ -2253,6 +2266,10 @@ function dtcpTinh() { // tính lại cả bảng khi gõ (xem trước, chưa l�
       c.innerHTML = r.trong ? (Math.abs(auto) >= 1 ? '<span class="tag-c c-auto">Tự động</span>' : '<span class="muted">—</span>') : r.loi ? '' : r.pt !== undefined ? '<span class="tag-c c-pt">% DT</span>' : /[+\-*/()×÷x]/i.test(raw.replace(/^=/, '').replace(/[.,]/g, '')) ? '<span class="tag-c c-ct">Công thức</span>' : '<span class="tag-c c-nhap">Nhập</span>';
       if (!r.trong && Math.abs(auto) >= 1 && !r.loi) c.innerHTML = '<span class="tag-c c-auto">Tự động</span> + ' + c.innerHTML; }
   }
+  for (const tr of t.querySelectorAll('tr.dtcp-cha')) { // dòng cha = tổng dòng con
+    let v = 0; for (const c of t.querySelectorAll(`tr[data-cha-of="${tr.dataset.cha}"]`)) { const ip = c.querySelector('.dtcp-in'), r = magicSo(ip.value), a = Number(c.dataset.auto) || 0;
+      v += a + (r.trong || r.loi ? 0 : r.pt !== undefined ? Math.round((r.pt / 100) * dt) : r.tien); }
+    tr.querySelector('.dtcp-tt').textContent = dvT(v); tr.querySelector('.dtcp-pdt').textContent = pdt(v); }
   const B = K.B1 + K.B2 + K.B3;
   for (const kh of ['B1', 'B2', 'B3']) { const a = t.querySelector(`[data-tk="${kh}"]`), b = t.querySelector(`[data-pk="${kh}"]`); if (a) a.textContent = dvT(K[kh]); if (b) b.textContent = pdt(K[kh]); }
   t.querySelector('[data-tb]').textContent = dvT(B); t.querySelector('[data-pb]').textContent = pdt(B);
@@ -2268,11 +2285,11 @@ document.addEventListener('click', async (e) => {
     try {
       for (const tr of t.querySelectorAll('tr.dtcp-n[data-nhom]')) {
         const ip = tr.querySelector('.dtcp-in'), raw = ip.value.trim(); if (raw === (ip.dataset.goc || '')) continue;
-        const r = magicSo(raw), so = r.trong ? 0 : r.pt !== undefined ? Math.round((r.pt / 100) * dt) : r.tien, nhom = tr.dataset.nhom, id = Number(tr.dataset.id) || 0;
-        const ten = NHOM().find((x) => x.code === nhom)?.ten || nhom, vat = NHOM().find((x) => x.code === nhom)?.khong_vat ? 0 : 10;
+        const r = magicSo(raw), so = r.trong ? 0 : r.pt !== undefined ? Math.round((r.pt / 100) * dt) : r.tien, nhom = tr.dataset.nhom, con = tr.dataset.con || '', id = Number(tr.dataset.id) || 0;
+        const nN = NHOM().find((x) => x.code === nhom), ten = con ? nN?.sub.find((x) => x.code === con)?.ten || con : nN?.ten || nhom, vat = nN?.khong_vat ? 0 : 10;
         if (!so && id) await api(`/api/du-tru/${id}`, { method: 'DELETE' });
         else if (so && id) await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ so_tien: so, noi_dung: `DT-CP · ${ten}`, ngay, vat, ct_nhap: raw }) });
-        else if (so) await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom, loai: 'ky', dtcp: true, ct_nhap: raw, noi_dung: `DT-CP · ${ten}`, so_tien: so, vat, ngay }) });
+        else if (so) await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom, nhom_con: con, loai: 'ky', dtcp: true, ct_nhap: raw, noi_dung: `DT-CP · ${ten}`, so_tien: so, vat, ngay }) });
         n++;
       }
       await loadCost(); showMsg($('#dtcp-msg'), n ? `Đã lưu ${n} dòng` : 'Không có gì thay đổi');

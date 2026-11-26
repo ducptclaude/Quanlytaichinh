@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.26.11.26 – Bảng DT-CP TĐ1: tách Vật tư chính / Vật tư phụ
+- Dòng "Vật tư" = tổng 2 dòng con: Vật tư chính (tự động: HĐ, gói, mua lẻ vật tư chính + ô nhập) · Vật tư phụ (tự động: mua lẻ vật tư phụ + ô nhập). Kho: du_tru.nhom_con (chỉ THÊM); máy chủ chặn hạng mục không thuộc nhóm.
+- kiem-tra-goi 247, tester 4565 ĐẠT; thử: chính 300tr + phụ 1% → bảng +1.471,68 tr, thẻ (sau VAT) +1.618,85 tr; không tràn.
+- Ghi nhận: khoá giá trị HĐ CĐT / HĐ đầu vào khi TĐ1 đã duyệt – làm sau.
+
 ## V02.26.11.26 – ① Bảng DT-CP TĐ1 · ② Trình / duyệt / khoá TĐ1 · ③ Kiểm tra khi ghi chi (người dùng duyệt mẫu)
 - Điểm khôi phục trước khi sửa: `phien-26.11.26-13h28` (V01.26.11.26, bản đang chạy).
 - ① Nhập chi phí › ② Bảng DT-CP TĐ1: khung khối I/II/III → nhóm; mỗi nhóm = phần TỰ ĐỘNG (gói, HĐ, khoản, chi đã ghi) + ô NHẬP (số / % doanh thu / công thức) → lưu 1 dòng dự trù `du_tru.dtcp` (kèm `ct_nhap`). Dòng cha tự cộng, % DT, Lợi nhuận dự kiến; xem trước khi gõ, ô sai báo đỏ, không lưu.

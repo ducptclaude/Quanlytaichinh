@@ -1429,7 +1429,8 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   const { data, errors } = validateDuTru(req.body || {});
   if (errors.length) return bad(res, errors);
   if (data.loai !== 'ky') data.hd_cdt_id = null; // chỉ gói (dòng TĐ1) mới gắn HĐ CĐT
-  if (data.loai === 'ky' && req.body?.dtcp) { data.dtcp = true; data.ct_nhap = String(req.body.ct_nhap ?? '').trim().slice(0, 200) || null; } // V01.26: dòng nhập ở bảng DT-CP TĐ1
+  if (data.loai === 'ky' && req.body?.dtcp) { data.dtcp = true; data.ct_nhap = String(req.body.ct_nhap ?? '').trim().slice(0, 200) || null; // V01.26: dòng nhập ở bảng DT-CP TĐ1
+    const con = String(req.body.nhom_con || ''); if (con) { if (!NHOM_CHI_PHI.find((n) => n.code === data.nhom)?.sub.some((x) => x.code === con)) return bad(res, 'Hạng mục không thuộc nhóm'); data.nhom_con = con; } } // V03.26: Vật tư chính / phụ
   if (data.hd_cdt_id) { const e = await checkHeadRef(data.hd_cdt_id, id); if (e) return bad(res, 'HĐ chủ đầu tư: ' + e); }
   // V04.17: đợt điều chỉnh TĐ2 của riêng 1 khoản (gián tiếp / tài chính): khoản TĐ1 cùng dự án, cùng nhóm, chưa đóng
   const gr = req.body?.goi_ref === '' || req.body?.goi_ref == null ? null : Number(req.body.goi_ref);
