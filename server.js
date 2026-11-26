@@ -1431,6 +1431,7 @@ async function tdDuyetHandler(req, res, k) {
     if (k > 1 && d[`td${k - 1}_tt`] !== 'duyet') return bad(res, `Chưa trình được ${T}: TĐ${k - 1} chưa được duyệt`);
     const so = soTd((await bcCua(id)).moc, k);
     if (!(so.dt > 0)) return bad(res, `Chưa có doanh thu ${T} (HĐ chủ đầu tư) – chưa trình được`);
+    if (!(so.cp > 0)) return bad(res, `Chi phí ${T} đang = 0 – chưa trình được. Nhập chi phí (gói, HĐ, khoản hoặc bảng DT-CP) trước.`); // V07.26.11.26
     await store.setProjectTd(id, k, { tt: 'trinh', trinh_by: req.user.id, trinh_ten: ten, so: JSON.stringify(so) });
     audit.log(req, 'Trình', 'Dự án', `Trình duyệt ${T}: doanh thu ${fmtD(so.dt)} · chi phí ${fmtD(so.cp)} · lợi nhuận ${fmtD(so.ln)}`, { du_an: d.ma_du_an });
     return res.json({ ok: true });

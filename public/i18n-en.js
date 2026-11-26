@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"HĐ ›": "Contracts ›",
+"Chưa gắn HĐ CĐT ›": "Not linked to employer contract ›",
+"HĐ đầu vào · chọn HĐ chủ đầu tư": "Procurement contracts · choose employer contract",
 "± điều chỉnh": "± adjustment",
 "Điều chỉnh ± (số · % · công thức)": "Adjustment ± (amount · % · formula)",
 "± Điều chỉnh / đóng từng khoản (gián tiếp, tài chính)": "± Adjust / close individual items (indirect, financial)",

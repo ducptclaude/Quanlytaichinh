@@ -2236,7 +2236,7 @@ function dtcpHtml(k = 1) {
         const cons = DTCP_TACH[n.code], tien = Number(gtN[k - 1]) || 0, nhapAll = k === 3 ? 0 : cons.reduce((a, c) => a + (Number(dong(n.code, c)?.so_tien) || 0), 0), autoAll = tien - nhapAll;
         const autoPhu = (costData.items || []).filter((x) => x.nhom === n.code && x.nhom_con === cons[1] && !x.goi_id).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0);
         const prevAll = Number(gtN[k - 2]) || 0;
-        body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}" data-prev="${prevAll}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b></td><td></td>${cTruoc(prevAll)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">tổng dòng con</td></tr>`;
+        body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}" data-prev="${prevAll}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b>${!costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm">HĐ ›</button>` : ''}</td><td></td>${cTruoc(prevAll)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">tổng dòng con</td></tr>`;
         cons.forEach((c, i) => { const r = k === 3 ? null : dong(n.code, c), auto = i === 0 ? autoAll - autoPhu : autoPhu, goc = r ? (r.ct_nhap || money(Number(r.so_tien) || 0)) : '';
           const ten = n.sub.find((x) => x.code === c)?.ten || c;
           body += `<tr class="dtcp-n dtcp-con" data-nhom="${n.code}" data-con="${c}" data-cha-of="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-id="${r ? r.id : ''}">
@@ -2248,7 +2248,7 @@ function dtcpHtml(k = 1) {
       const r = k === 3 ? null : dong(n.code), tien = Number(gtN[k - 1]) || 0, nhap = Number(r?.so_tien) || 0, auto = tien - nhap, prev = Number(gtN[k - 2]) || 0;
       const goc = r ? (r.ct_nhap || money(nhap)) : '';
       body += `<tr class="dtcp-n" data-nhom="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-prev="${prev}" data-id="${r ? r.id : ''}">
-        <td class="muted">${stt}</td><td>${esc(n.code === 'tc_tra_no' ? 'Lãi vay' : n.ten)}</td><td class="dtcp-cach"></td>${cTruoc(prev)}
+        <td class="muted">${stt}</td><td>${esc(n.code === 'tc_tra_no' ? 'Lãi vay' : n.ten)}${kh === 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm: phụ lục, điều chỉnh, quyết toán, thanh toán, còn lại">HĐ ›</button>` : ''}</td><td class="dtcp-cach"></td>${cTruoc(prev)}
         <td class="num">${oNhap(goc, n.ten)}</td>
         <td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${SRC})</small>` : ''}</td></tr>`;
     }
@@ -2258,7 +2258,9 @@ function dtcpHtml(k = 1) {
   const dtP = Number(costData.dt_td_gt?.[k - 2]) || 0, cP = k > 1 ? `<td class="num muted">${dvT(dtP)}</td>` : '', lP = k > 1 ? `<td class="num">${dtcpLech(dt - dtP, true)}</td>` : '';
   const HDR = `<th>STT</th><th>Nội dung</th><th>Cách điền</th>${k > 1 ? `<th class="num">${TP}</th>` : ''}<th class="num">${k === 1 ? 'Nhập (số · % · công thức)' : k === 2 ? 'Điều chỉnh ± (số · % · công thức)' : ''}</th><th class="num">Thành tiền ${T}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th>Nguồn</th>`;
   const goiY = { 1: 'Gõ 150tr · 1,2 tỷ · 6% (× doanh thu) · 150tr+20tr. Để trống = chỉ lấy phần tự động.', 2: 'Gõ +50tr (tăng) · -30tr (giảm) · 2% (× doanh thu TĐ2). Để trống = không điều chỉnh thêm.' }[k];
-  return `${tdBar(k)}
+  const tg = costData.tong_tp || {}, soHd = (costData.thau_phu || []).length;
+  const hdLine = costAll ? '' : `<div class="dtcp-hdline"><span>HĐ đầu vào: <b>${soHd}</b> HĐ · còn lại phải trả <b>${dvT(tg.con_lai || 0)}</b> <small class="muted">(sau VAT)</small></span><span class="muted small">Bấm <b>HĐ ›</b> ở dòng nhóm (khối I) để mở gói / HĐ: phụ lục, điều chỉnh, quyết toán, thanh toán.</span></div>`;
+  return `${tdBar(k)}${hdLine}
     <div class="table-wrap"><table class="dtcp-table" data-dt="${dt}" data-k="${k}"><thead><tr>${HDR}</tr></thead>
     <tbody><tr class="dtcp-a"><td>A</td><td colspan="2"><b>DOANH THU ${T}</b> <small class="muted">(trước VAT, theo HĐ chủ đầu tư${k === 2 ? ' + đợt điều chỉnh' : k === 3 ? ' – quyết toán, chưa QT lấy TĐ2' : ''})</small></td>${cP}<td></td><td class="num">${dvT(dt)}</td>${lP}<td class="num">100%</td><td></td></tr>
       <tr class="dtcp-a"><td>B</td><td colspan="2"><b>CHI PHÍ ${T}</b></td>${k > 1 ? '<td class="num muted" data-tbp></td>' : ''}<td></td><td class="num" data-tb></td>${k > 1 ? '<td class="num" data-lb></td>' : ''}<td class="num" data-pb></td><td></td></tr>${body}
@@ -2299,6 +2301,19 @@ function dtcpTinh() { // tính lại cả bảng khi gõ (xem trước, chưa l�
   return !loi;
 }
 document.addEventListener('input', (e) => { if (e.target.closest('.dtcp-table .dtcp-in')) dtcpTinh(); });
+// V07.26.11.26: "HĐ ›" ở bảng DT-CP -> chi tiết gói / HĐ đầu vào của nhóm (1 HĐ CĐT: mở ngay; nhiều: chọn)
+document.addEventListener('click', (e) => {
+  const bt = e.target.closest('[data-dtcphd]'); if (!bt) return;
+  const code = bt.dataset.dtcphd, bs = TPV?.bsCua ? TPV.bsCua(code) : [], ten = NHOM().find((x) => x.code === code)?.ten || code;
+  if (!bs.length) return alert(`Nhóm "${ten}" chưa có gói / HĐ đầu vào.\nThêm ở ① Chi thật › Cách nhập: Gói hoặc HĐ đã có nhà cung cấp.`);
+  if (bs.length === 1) return openTpNhom(bs[0], code);
+  let dlg = $('#dtcp-hd-dlg');
+  if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'dtcp-hd-dlg'; dlg.className = 'tp-dlg dtcp-hd-dlg'; document.body.appendChild(dlg);
+    dlg.addEventListener('click', (ev) => { const x = ev.target.closest('[data-hdb]'); if (ev.target.dataset.close !== undefined) return dlg.close(); if (x) { dlg.close(); openTpNhom(Number(x.dataset.hdb), x.dataset.code); } }); }
+  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">HĐ đầu vào · chọn HĐ chủ đầu tư</div><h3>${esc(ten)}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
+    <div class="dtcp-hd-list">${bs.map((b) => `<button type="button" class="sm" data-hdb="${b}" data-code="${code}">${b ? esc(hdCdtName(b)) : 'Chưa gắn HĐ CĐT'} ›</button>`).join('')}</div>`;
+  dlg.showModal();
+});
 document.addEventListener('click', async (e) => {
   const luu = e.target.closest('[data-dtcpluu]'), td = e.target.closest('[data-td1]');
   if (luu) {
@@ -2321,6 +2336,7 @@ document.addEventListener('click', async (e) => {
   }
   if (td) {
     const viec = td.dataset.td1, k = Number(td.dataset.tdk) || 1, T = 'TĐ' + k, body = { viec };
+    if (viec === 'trinh' && $('.dtcp-table [data-tb]') && Number(($('.dtcp-table').dataset.k)) === k && !/[1-9]/.test($('.dtcp-table [data-tb]').textContent)) return alert(`Chi phí ${T} đang = 0 – chưa trình được. Nhập chi phí (gói, HĐ, khoản hoặc ô nhập ở bảng) trước.`);
     if (viec === 'trinh' && !confirm(`Trình duyệt ${T}? Khi đã trình, số ${T} khoá lại chờ người duyệt.`)) return;
     if (viec === 'tra') { const ly = prompt(`Lý do trả lại ${T}:`); if (!ly) return; body.ly_do = ly; }
     if (viec === 'duyet' && !confirm(`Duyệt và KHOÁ ${T}?`)) return;
@@ -2524,6 +2540,7 @@ function ptHtml(k) {
   el.innerHTML = seg + (cfMode === '2' ? panel2 : cfMode === '3' ? phan1 : '');
   $$('input.money', el).forEach(attachMoneyInput);
   if ($('.dtcp-table', el)) dtcpTinh();
+  { const tc = $('#tp-tbody')?.closest('.card'); if (tc) tc.hidden = Boolean($('.dtcp-table', el)); } // V07.26.11.26: gộp vào bảng DT-CP
   setTimeout(veCanhBao, 0);
   const pf = $('#pk-f', el);
   if (pf) {
@@ -3062,7 +3079,8 @@ function renderTpCard() {
   $('#tp-tfoot').innerHTML = `<tr class="tp-grand"><td class="tp-c-ten" title="HĐ đầu vào ngoài gói ${dvT(tdSum(listHd, kTd), 'trieu')} · ${kTd === 1 ? 'dự trù (gói)' : 'gói chi phí'} ${dvT(gT(kTd), 'trieu')}${leTot ? ` · mua lẻ ${dvT(leTot, 'trieu')}` : ''}">${filtered ? `TỔNG ĐANG LỌC` : coKhoi ? `TỔNG CHI PHÍ TĐ${kTd} (I + II + III)` : `TỔNG CHI PHÍ TĐ${kTd}`}</td>
     <td class="num strong">${mtr(totAll(kTd))}</td>${ss2(totAll(kTd), kTd > 1 ? totAll(kTd - 1) : 0, 'strong')}${tienCl(clAll, 'strong')}</tr>`;
   // Hộp chi tiết dùng lại các hàm dựng dòng đầy đủ
-  TPV = { kTd, loaiCodes, loaiData, loaiBlock, so3, tt2, nhTen, edit };
+  const bList = [...new Set([...groups.map((g) => g.k), ...dtrAll.filter((r) => r.loai === 'ky').map(cdtOf), 0])];
+  TPV = { kTd, loaiCodes, loaiData, loaiBlock, so3, tt2, nhTen, edit, bsCua: (code) => bList.filter((b) => loaiCodes(b).includes(code)) }; // V07.26.11.26: mở HĐ đầu vào từ bảng DT-CP
   if ($('#tpn-dlg')?.open) renderTpNhom();
   const btn = $('#tp-toggle-all');
   btn.hidden = autoOpen || bks.length < 2;

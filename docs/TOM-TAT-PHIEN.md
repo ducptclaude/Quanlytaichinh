@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.26.11.26 – Gộp "1. Hợp đồng đầu vào" vào bảng DT-CP + chặn trình khi chi phí = 0
+- Bảng DT-CP (mọi TĐ): nút **HĐ ›** cạnh tên nhóm khối I (Thầu phụ, Vật tư, Nhân công, MMTB…) -> chi tiết gói / HĐ đầu vào của nhóm (1 HĐ CĐT mở ngay, nhiều thì chọn);
+  mở được cả khi TĐ đã khoá. Dòng trên bảng: số HĐ đầu vào + còn lại phải trả. Đang xem bảng DT-CP thì ẩn bảng "1. Hợp đồng đầu vào" (① Chi thật, ③ vẫn hiện).
+  Lý do: người dùng báo "khoá nhưng mục dưới HĐ đầu vào không mở ra" (dự án chưa có HĐ đầu vào -> nhóm trống). Nay bấm HĐ › ở nhóm trống thì báo cách thêm.
+- Trình TĐk khi chi phí TĐk = 0 -> chặn (máy chủ + giao diện), giống quy tắc doanh thu = 0.
+- Kiểm tra: tester 4518, kiem-tra-goi 246, td23 26 ĐẠT; máy tính + iPhone 13 mở HĐ › được khi TĐ1 khoá, không tràn.
+
 ## V06.26.11.26 – TĐ2, TĐ3 theo logic TĐ1: bảng DT-CP + Trình → Duyệt / Trả lại → Khoá
 - Bảng DT-CP (Nhập liệu › Chi phí › ② ở tab TĐ2 / TĐ3): cột TĐ trước · ô nhập · Thành tiền TĐk · ± so TĐ trước · % DT.
   TĐ2: ô nhập = điều chỉnh ± cả nhóm (số / % doanh thu TĐ2 / công thức) -> 1 dòng dự trù `dc` có `dtcp` mỗi nhóm (hạng mục). TĐ3: chỉ xem (quyết toán HĐ, số chốt khoản, thực chi).

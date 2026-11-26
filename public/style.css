@@ -3959,3 +3959,8 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
 .dy-td1-t td { padding: 7px 8px; border-bottom: 1px solid var(--border); } .dy-td1-t .num { text-align: right; } .dy-td1-t .row-actions { white-space: nowrap; text-align: right; } .dy-td1-t .row-actions .sm + .sm { margin-left: 4px; }
 .dy-td1-da { margin-top: 10px; } .dy-td1-da > summary { cursor: pointer; font-weight: 700; color: var(--navy); }
 .dtcp-table .pos { color: #0f7a4f; font-weight: 600; } .dtcp-table .dtcp-lech .neg, .dtcp-table [data-lk] .neg, .dtcp-table [data-lb] .neg, .dtcp-table [data-lln] .neg { font-weight: 600; }
+/* V07.26.11.26: bảng DT-CP – mở HĐ đầu vào */
+.dtcp-table .dtcp-hd { padding: 1px 8px; min-height: 0; font-size: 11px; margin-left: 8px; white-space: nowrap; vertical-align: middle; }
+.dtcp-hdline { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between; margin: 6px 0 8px; font-size: 13px; }
+.dtcp-hd-list { display: flex; flex-direction: column; gap: 8px; padding: 6px 2px; }
+.dtcp-hd-list button { justify-content: flex-start; text-align: left; }
