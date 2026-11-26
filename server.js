@@ -380,9 +380,11 @@ api.use(wrap(async (req, res, next) => {
     if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/dieu-chinh\/(\d+)$/))) { const x = await store.getDieuChinh(Number(m[1])); if (x) { k = 2; da = (await vanBanOf(x.loai, Number(x.vb_id)))?.du_an_id || null; } }
     if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'dc') { k = 2; da = Number(m[1]); }
     if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'qt') { k = 3; da = Number(m[1]); }
+    if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'ky' && [2, 3].includes(Number(b.td_ps))) { k = Number(b.td_ps); da = Number(m[1]); }
     if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/du-tru\/(\d+)$/))) { const x = await store.getDuTru(Number(m[1]));
       if (x?.loai === 'dc') { k = 2; da = x.du_an_id; }
       else if (x?.loai === 'qt') { k = 3; da = x.du_an_id; }
+      else if (x?.loai === 'ky' && Number(x.td_ps) > 1 && (req.method === 'DELETE' || 'so_tien' in b)) { k = Number(x.td_ps); da = x.du_an_id; }
       else if (x?.loai === 'ky' && req.method === 'PUT' && 'tinh_trang' in b && !('so_tien' in b)) { k = 2; da = x.du_an_id; } // đóng / mở gói -> đổi TĐ2
       else if (x?.loai === 'ky' && req.method === 'PUT' && 'gt_chot' in b && !('so_tien' in b)) { k = 3; da = x.du_an_id; } } // số chốt khoản -> TĐ3
     if (req.method === 'PUT' && (m = p.match(/^\/du-an\/(\d+)\/ty-le$/)) && ['pt_gt2', 'pt_tc2', 'tien_gt2', 'tien_tc2', 'ct_gt2', 'ct_tc2'].some((x) => x in b)) { k = 2; da = Number(m[1]); }
@@ -427,9 +429,9 @@ api.use(wrap(async (req, res, next) => {
     const KHOA1 = (tt) => (tt === 'duyet' ? 'TĐ1 đã duyệt – đang khoá (giá cơ sở). Muốn sửa: Mở khoá TĐ1 (Quản trị / Lãnh đạo, cần Passcode).' : 'TĐ1 đang chờ duyệt – không sửa dự trù TĐ1. Người duyệt trả lại thì sửa được.');
     const ttCua = async (duAnId) => { const d = duAnId && (await store.getProject(Number(duAnId))); return d && ['trinh', 'duyet'].includes(d.td1_tt) ? d.td1_tt : null; };
     let tt = null;
-    if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'ky' && Number(String(b.so_tien ?? 0).replace(/[.,\s]/g, '')) !== 0) tt = await ttCua(m[1]);
+    if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'ky' && !(Number(b.td_ps) > 1) && Number(String(b.so_tien ?? 0).replace(/[.,\s]/g, '')) !== 0) tt = await ttCua(m[1]);
     if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/du-tru\/(\d+)$/))) { const x = await store.getDuTru(Number(m[1]));
-      if (x && x.loai === 'ky' && (req.method === 'DELETE' ? Number(x.so_tien) !== 0 : 'so_tien' in b)) tt = await ttCua(x.du_an_id); }
+      if (x && x.loai === 'ky' && !(Number(x.td_ps) > 1) && (req.method === 'DELETE' ? Number(x.so_tien) !== 0 : 'so_tien' in b)) tt = await ttCua(x.du_an_id); }
     if (req.method === 'PUT' && (m = p.match(/^\/du-an\/(\d+)\/ty-le$/)) && ['pt_gt1', 'pt_tc1', 'tien_gt1', 'tien_tc1', 'ct_gt1', 'ct_tc1'].some((k) => k in b)) tt = await ttCua(m[1]);
     if (tt) return bad(res, KHOA1(tt), 423);
   }
@@ -1468,6 +1470,7 @@ api.post('/du-an/:id/du-tru', canHd, wrap(async (req, res) => {
   const { data, errors } = validateDuTru(req.body || {});
   if (errors.length) return bad(res, errors);
   if (data.loai !== 'ky') data.hd_cdt_id = null; // chỉ gói (dòng TĐ1) mới gắn HĐ CĐT
+  if (data.loai === 'ky') { const ps = Number(req.body?.td_ps); data.td_ps = [2, 3].includes(ps) ? ps : null; data.la_cp = req.body?.la_cp === true || null; } // V10.26.11.26: + HĐ / + CP khác phát sinh tại TĐ2 / TĐ3
   if (['ky', 'dc'].includes(data.loai) && req.body?.dtcp) { data.dtcp = true; // V06.26.11.26: cả dòng điều chỉnh TĐ2 nhập ở bảng DT-CP TĐ2
     data.ct_nhap = String(req.body.ct_nhap ?? '').trim().slice(0, 200) || null; // V01.26: dòng nhập ở bảng DT-CP TĐ1
     const con = String(req.body.nhom_con || ''); if (con) { if (!NHOM_CHI_PHI.find((n) => n.code === data.nhom)?.sub.some((x) => x.code === con)) return bad(res, 'Hạng mục không thuộc nhóm'); data.nhom_con = con; } } // V03.26: Vật tư chính / phụ

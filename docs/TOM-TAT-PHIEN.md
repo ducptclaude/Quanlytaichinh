@@ -2,6 +2,17 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.26.11.26 – Hộp chi tiết nhóm HĐ đầu vào: "+ HĐ" (nhiều nhà thầu) và "+ CP khác" phát sinh theo TĐ
+- Cuối hộp chi tiết nhóm (Thầu phụ / Vật tư / MMTB / Nhân công…, theo từng HĐ CĐT): **+ HĐ** -> hộp "Ghi khoản đã chi" điền sẵn nhóm, HĐ CĐT, cách nhập HĐ;
+  ở TĐ2 HĐ ghi phát sinh (`phat_sinh`, TĐ1 = 0), ở TĐ3 dòng HĐ gốc `td_ps = 3` (TĐ1 = TĐ2 = 0). **+ CP khác** -> khoản dự trù `ky` của nhóm gắn HĐ CĐT,
+  `la_cp`, `td_ps` = TĐ đang xem (không thuộc HĐ thầu phụ nào). Bỏ "+ Chi phí khác" trong hộp HĐ thầu phụ (dòng cũ vẫn giữ, người dùng tự xoá).
+- Gói đã có HĐ vẫn có "+ HĐ" (1 gói nhiều nhà thầu; HĐ thay giá trị tạm tính của gói).
+- Kho dữ liệu (chỉ thêm): `du_tru.td_ps`, `du_tru.la_cp`; dòng HĐ gốc của HĐ đầu vào mới lưu `td_ps`. Công thức: khoản `ky` có `td_ps` > k -> TĐk = 0
+  (`lib/report.js` duTruNhom / goiV, giao diện goiSv / nhomSv / nhomSvB). Khoá: khoản phát sinh TĐ2 / TĐ3 khoá theo TĐ đó (không theo TĐ1).
+- Sửa lỗi có sẵn: lệnh thêm cột `du_tru` (dtcp, nhom_con…) đứng trước lệnh tạo bảng -> kho dữ liệu MỚI không khởi động được (kho đang chạy không ảnh hưởng). Đã chuyển xuống sau.
+- Kiểm tra: `scripts/kiem-tra-them/nhom-ps.js` 13 ĐẠT (CP khác TĐ2 +10tr: TĐ1 giữ, TĐ2 / TĐ3 +10tr; HĐ TĐ2 +20tr; CP khác / HĐ TĐ3 chỉ TĐ3 tăng), cả PostgreSQL mới;
+  gói 300tr + 2 HĐ 100tr + 150tr -> TĐ1 300 / TĐ2 250; tester 4518, kiem-tra-goi 246, td23 26, tdk 31, dcA 22 ĐẠT.
+
 ## V09.26.11.26 – Nhập chi phí gọn: bỏ "③ Dự trù nhanh"; "① Chi thật" thành nút "＋ Ghi khoản đã chi" mở hộp nhỏ
 - Thanh trên chỉ còn "Bảng DT-CP TĐk" (luôn hiện) + nút "＋ Ghi khoản đã chi" -> hộp `#cf-dlg` chứa form chi phí (form chuyển vào hộp khi mở, trả về khi đóng; giữ nguyên xử lý lưu).
   Sửa 1 dòng chi phí, "+ HĐ" ở gói, "Ghi chi cho khoản này", "+" ở nhóm cũng mở hộp này. Đóng hộp khi đang sửa -> form trống lại.

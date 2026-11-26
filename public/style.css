@@ -3969,3 +3969,5 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
 .cf-seg .cf-open { margin-left: 8px; }
 .cf-dlg { width: min(980px, calc(100vw - 24px)); }
 .cf-dlg #c-form { margin-top: 6px; }
+.tpn-them { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 4px; }
+.nhcp-dlg { width: min(640px, calc(100vw - 24px)); }
