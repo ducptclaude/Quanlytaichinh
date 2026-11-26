@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.26.11.26 – Sửa lỗi "Xoá khoản" báo "Không tìm thấy dòng dự trù"
+- Nguyên nhân: hộp chi tiết dùng chung (`dlgShell`) chỉ gắn xử lý bấm ở LẦN MỞ ĐẦU -> mở khoản thứ 2 rồi bấm Xoá / Ghi chi / Sửa lại chạy theo khoản đầu
+  (đã xoá -> báo không tìm thấy; nếu khoản đầu còn -> xoá nhầm khoản đó). Nay luôn chạy theo lần mở hiện tại (`dlg._onClick`). Áp dụng cho cả 5 hộp dùng chung.
+- Kiểm tra: mở khoản A, đóng, mở khoản B, Xoá -> B bị xoá, A còn; tester 0 lỗi.
+
 ## V02.23.11.26 – Dấu chìm chỉ áp dụng cho vai Chỉ xem và tài khoản khách (nhánh `bao-mat-cap-cao`, chờ duyệt)
 - `public/bao-ve.js`: dấu chìm màn hình + bản in chỉ hiện với Chỉ xem / khách (cùng lớp chặn sao chép). Các vai khác không còn dấu chìm. Dòng "Xuất bởi … lúc …" trong file Excel / PowerPoint giữ nguyên.
 - Kiểm tra: đăng nhập 5 vai (Quản trị, Lãnh đạo, Nhập liệu, Chỉ xem, khách) – chỉ Chỉ xem và khách có dấu chìm + chặn sao chép, không lỗi trang.

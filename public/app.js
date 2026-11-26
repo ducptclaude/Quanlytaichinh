@@ -4013,11 +4013,13 @@ function dlgShell(id, onClick) {
   if (!dlg) {
     dlg = document.createElement('dialog'); dlg.id = id; dlg.className = 'tp-dlg dc-dlg';
     document.body.appendChild(dlg);
-    dlg.addEventListener('click', onClick);
+    // V01.26.11.26: luôn chạy xử lý của LẦN MỞ HIỆN TẠI (trước đây giữ xử lý lần mở đầu -> bấm Xoá ở khoản thứ 2 lại xoá theo khoản đầu)
+    dlg.addEventListener('click', (e) => dlg._onClick?.(e));
     dlg.addEventListener('input', (e) => { const tr = e.target.closest('tr[data-k]'); if (tr) { const b = $('[data-save]', tr); if (b) { b.hidden = false; b.classList.add('primary'); } } });
     dlg.addEventListener('change', (e) => { if (e.target.dataset.f === 'kieu') { const i = $('[data-f="so_tien"]', e.target.closest('tr')); if (i) i.placeholder = e.target.value === 'chot' ? 'Giá trị mới (VD 1.050tr)' : '+ tăng · − giảm (số âm)'; } });
     dlg.addEventListener('keydown', (e) => { const tr = e.target.closest('tr[data-k]'); if (e.key === 'Enter' && tr) { e.preventDefault(); $('[data-save]', tr)?.click(); } });
   }
+  dlg._onClick = onClick;
   return dlg;
 }
 function openDc(loai, id) {
