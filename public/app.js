@@ -4025,7 +4025,36 @@ function dyGanNhan(lai = false) {
     });
   }
 }
+// ===== V04.26: TĐ1 chờ duyệt ở trang Duyệt (Lãnh đạo không vào trang Nhập liệu) =====
+async function veTd1Duyet() {
+  const tab = $('#tab-duyet'); if (!tab) return;
+  let box = $('#dy-td1');
+  if (!can('duyet')) { if (box) box.remove(); return; }
+  if (!box) { box = document.createElement('div'); box.id = 'dy-td1'; box.className = 'card dy-td1'; tab.prepend(box); }
+  const ds = (await api('/api/du-an').catch(() => [])) || [];
+  const cho = ds.filter((d) => d.td1_tt === 'trinh'), da = ds.filter((d) => d.td1_tt === 'duyet');
+  const so = (d) => { try { return JSON.parse(d.td1_so || 'null'); } catch { return null; } };
+  const pc = (x, y) => (y ? `${((x / y) * 100).toFixed(1).replace('.', ',')}%` : '—');
+  const dong = (d, cho1) => { const s = so(d) || {}; const tuMinh = d.td1_trinh_by === ME.id;
+    return `<tr><td><b>${esc(d.ma_du_an)}</b> <span class="muted">${esc(d.ten_du_an || '')}</span></td>
+      <td class="muted small">${cho1 ? `${esc(d.td1_trinh_ten || '')} trình ${esc(d.td1_trinh_at || '')}` : `${esc(d.td1_duyet_ten || '')} duyệt ${esc(d.td1_duyet_at || '')}`}</td>
+      <td class="num">${dvT(s.dt || 0)}</td><td class="num">${dvT(s.cp || 0)}</td><td class="num"><b>${dvT(s.ln || 0)}</b> <small class="muted">${pc(s.ln || 0, s.dt || 0)}</small></td>
+      <td class="row-actions">${cho1 ? (tuMinh ? '<span class="muted small">Bạn là người trình</span>' : `<button type="button" class="primary sm" data-td1dy="${d.id}|duyet">✓ Duyệt & khoá</button><button type="button" class="sm" data-td1dy="${d.id}|tra">↩ Trả lại</button>`) : `<button type="button" class="sm" data-td1dy="${d.id}|mo">Mở khoá</button>`}</td></tr>`; };
+  const bang = (rows, cho1) => `<div class="table-wrap"><table class="dy-td1-t"><thead><tr><th>Dự án</th><th>${cho1 ? 'Người trình' : 'Người duyệt'}</th><th class="num">Doanh thu TĐ1</th><th class="num">Chi phí TĐ1</th><th class="num">Lợi nhuận</th><th></th></tr></thead><tbody>${rows.map((d) => dong(d, cho1)).join('')}</tbody></table></div>`;
+  box.innerHTML = `<div class="dy-head"><h2>TĐ1 (giá cơ sở) chờ duyệt <b class="dy-td1-n">${cho.length}</b></h2><span class="muted small">QS lập bảng DT-CP TĐ1 ở Nhập liệu › Chi phí rồi trình. Duyệt = khoá TĐ1 làm giá cơ sở (TĐ2, TĐ3 so với số này). Số trước VAT.</span></div>
+    ${cho.length ? bang(cho, true) : '<p class="muted">Không có TĐ1 nào chờ duyệt.</p>'}
+    ${da.length ? `<details class="dy-td1-da"><summary>TĐ1 đã duyệt (${da.length})</summary>${bang(da, false)}</details>` : ''}`;
+}
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-td1dy]'); if (!b) return;
+  const [id, viec] = b.dataset.td1dy.split('|'), body = { viec };
+  if (viec === 'duyet' && !confirm('Duyệt và KHOÁ TĐ1 của dự án này làm giá cơ sở?')) return;
+  if (viec === 'tra') { const ly = prompt('Lý do trả lại TĐ1:'); if (!ly) return; body.ly_do = ly; }
+  if (viec === 'mo') { const pc = await askPasscode('Mở khoá TĐ1 đã duyệt?', 'TĐ1 về trạng thái đang lập (có ghi nhật ký).', '🔓 Mở khoá'); if (pc === null) return; body.passcode = pc; }
+  try { await api(`/api/du-an/${id}/td1`, { method: 'POST', body: JSON.stringify(body) }); await veTd1Duyet(); } catch (err) { alert(err.message); }
+});
 async function loadDuyet(giu = false) {
+  veTd1Duyet().catch(() => {}); // V04.26
   if (!giu) DY.trang = DY.trang || 0;
   const qs = new URLSearchParams({ tt: DY.tt, q: DY.q, trang: DY.trang, ...(DY.mine ? { cua_toi: '1' } : {}) });
   const r = await api('/api/duyet?' + qs, giu ? AUTO : {});

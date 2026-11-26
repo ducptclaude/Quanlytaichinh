@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.26.11.26 – Lãnh đạo duyệt TĐ1 ngay ở trang Duyệt
+- Lãnh đạo không có trang Nhập liệu nên trước đây không thấy nút Duyệt TĐ1 → thêm khung "TĐ1 (giá cơ sở) chờ duyệt" đầu trang Duyệt:
+  danh sách dự án đang trình (người trình, DT / CP / LN TĐ1), nút ✓ Duyệt & khoá / ↩ Trả lại (ghi lý do); mục "TĐ1 đã duyệt" có nút Mở khoá (cần mã xác nhận).
+- Người trình không tự duyệt được. Kiểm tra: 4518 + 247 ĐẠT, điện thoại không tràn.
+- Chụp bộ ảnh hướng dẫn nhập liệu 9 bước (TĐ1 → duyệt → TĐ2 → chi thật → TĐ3 → xem).
+
 ## V03.26.11.26 – Bảng DT-CP TĐ1: tách Vật tư chính / Vật tư phụ
 - Dòng "Vật tư" = tổng 2 dòng con: Vật tư chính (tự động: HĐ, gói, mua lẻ vật tư chính + ô nhập) · Vật tư phụ (tự động: mua lẻ vật tư phụ + ô nhập). Kho: du_tru.nhom_con (chỉ THÊM); máy chủ chặn hạng mục không thuộc nhóm.
 - kiem-tra-goi 247, tester 4565 ĐẠT; thử: chính 300tr + phụ 1% → bảng +1.471,68 tr, thẻ (sau VAT) +1.618,85 tr; không tràn.

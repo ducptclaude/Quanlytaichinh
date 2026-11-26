@@ -3954,3 +3954,7 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
 @media (max-width: 700px) { .dtcp-table .dtcp-src, .dtcp-table th:last-child, .dtcp-table th:nth-child(3), .dtcp-table .dtcp-cach { display: none; } .dtcp-table .dtcp-in { width: 100px; } .td1-nut { margin-left: 0; } }
 .dtcp-table td { color: var(--text, #1e293b); } .dtcp-table .dtcp-k td, .dtcp-table .dtcp-a td { color: var(--navy); } .dtcp-table .dtcp-ln td { color: #fff; } .dtcp-table .dtcp-src, .dtcp-table .muted { color: var(--muted); }
 .dtcp-table .dtcp-cha td { font-weight: 700; } .dtcp-table .dtcp-ten2 { padding-left: 26px !important; }
+.dy-td1 { margin-bottom: 16px; border-left: 4px solid var(--teal); } .dy-td1-n { display: inline-grid; place-items: center; min-width: 24px; height: 24px; border-radius: 999px; background: #e11d48; color: #fff; font-size: 13px; margin-left: 6px; padding: 0 6px; }
+.dy-td1-t { width: 100%; border-collapse: collapse; font-size: 13px; } .dy-td1-t th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--muted); padding: 7px 8px; border-bottom: 2px solid var(--border); }
+.dy-td1-t td { padding: 7px 8px; border-bottom: 1px solid var(--border); } .dy-td1-t .num { text-align: right; } .dy-td1-t .row-actions { white-space: nowrap; text-align: right; } .dy-td1-t .row-actions .sm + .sm { margin-left: 4px; }
+.dy-td1-da { margin-top: 10px; } .dy-td1-da > summary { cursor: pointer; font-weight: 700; color: var(--navy); }
