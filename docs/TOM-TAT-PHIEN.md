@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V10.27.11.26 – Sửa công thức: chi phí gián tiếp / tài chính TĐ3 = TĐ2 khi chưa chốt
+- Lỗi: TĐ3 gián tiếp / tài chính chỉ cộng số đã chốt + đã chi → khoản chưa chốt bị tính 0 (DA-05: −160 triệu).
+- Nay (người dùng chọn A): khoản đã chốt TĐ3 = số chốt; chưa chốt = TĐ2 (đã chi nhiều hơn thì lấy đã chi). Áp cả cách nhập số / % doanh thu.
+- Sửa ở máy chủ (lib/report.js duTruNhom, khối %/số nhập) và giao diện (dtrRem, ptKhoan, dtcpCon, dtrTd). Cập nhật số mong đợi kiem-tra-goi (mục 5, 6, 8–10, 13).
+- Kiểm tra: tester 4518, kiem-tra-goi 246, doi-chieu-cp 73, chi-tiet-khoan 16, luong 17, cp-khac 13, du-tru-chung 9, td23 26, td2-socuoi 17, nhom-ps 13 – 0 lỗi.
+
 ## V09.27.11.26 – Hộp "Chi tiết ›": trình bày rõ dự trù chung và khoản chia từ dự trù
 - Dòng dự trù nhập ở bảng DT-CP đổi tên **"Dự trù chung (chưa chia khoản)"**, luôn đứng đầu, ghi "còn chưa chia / đã chia hết".
 - Khoản xác định sau (VD Lương tháng 10 ở TĐ2) hiện **↳ … [Chia từ dự trù]**, ô TĐ1 ghi "trong dự trù" (không phải "—").

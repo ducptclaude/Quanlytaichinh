@@ -2607,7 +2607,7 @@ function ptKhoan() {
     const dcs = ds.filter((x) => x.loai === 'dc' && x.goi_ref === r.id), dc = dcs.reduce((a, x) => a + (Number(x.so_tien) || 0), 0);
     const le = leGoi(r.id, 'gia_tri'), g = Number(r.so_tien) || 0, dong = r.tinh_trang === 'dong';
     const chot = r.gt_chot === null || r.gt_chot === undefined ? null : Number(r.gt_chot);
-    const t = [dtrRem(r, 1, 'gt') + le, dong ? le : le + dtrRem(r, 2, 'gt'), chot ?? le]; // V07.27.11.26: dự trù chung = phần còn lại sau khoản chi tiết
+    const t = [dtrRem(r, 1, 'gt') + le, dong ? le : le + dtrRem(r, 2, 'gt'), chot ?? le + dtrRem(r, 3, 'gt')]; // V10.27.11.26: chưa chốt TĐ3 = TĐ2 · V07.27.11.26: dự trù chung = phần còn lại sau khoản chi tiết
     return { r, khoi: kh(r.nhom), dcs, dc, le, dong, chot, t, khoa: ds.some((x) => x.loai === 'qt' && x.nhom === r.nhom) };
   });
 }
@@ -2682,7 +2682,7 @@ function ptHtml(k) {
       <button type="submit" class="primary sm">Thêm</button><span class="msg" id="pk-add-msg"></span></form>` : '';
   const bang = KS.length ? `<div class="table-wrap"><table class="pk-table"><thead><tr><th>Khoản</th><th class="${c(0)}">TĐ1 dự trù</th><th class="${c(1)}">TĐ2 điều chỉnh</th><th class="${c(2)}">TĐ3 quyết toán</th><th class="num">Đã chi</th><th class="num">Còn</th><th class="no-print"></th></tr></thead>
     <tbody>${tong('B2')}${tong('B3')}</tbody></table></div>` : '';
-  const huongDan = `<small class="pt-note">Ghi tiền chi thật (trả lương, lãi…) ở form chi phí, chọn <b>Gắn vào gói</b> = khoản → vào cột Đã chi. TĐ2 khoản chưa có số giữ dự trù; TĐ3 = đã chi (hoặc số chốt).</small>`;
+  const huongDan = `<small class="pt-note">Ghi tiền chi thật (trả lương, lãi…) ở form chi phí, chọn <b>Gắn vào gói</b> = khoản → vào cột Đã chi. TĐ2 khoản chưa có số giữ dự trù; TĐ3 = số chốt, chưa chốt thì = TĐ2.</small>`;
   // V05.17: nút mở / thu gọn bảng khoản (mặc định gọn, nhớ theo máy); đang nhập điều chỉnh / chốt thì luôn mở
   const mo = false;
   const tomTat = KS.length ? ['B2', 'B3'].map((kh) => { const ks = KS.filter((x) => x.khoi === kh); return ks.length ? `${kh === 'B2' ? 'Gián tiếp' : 'Tài chính'} <b>${dvT(k < 3 && pt[kh]?.gt && !pt[kh]?.bo_qua ? pt[kh].gt[k - 1] : ks.reduce((a, x) => a + x.t[k - 1], 0) + ngoai(kh))}</b> (${ks.length} khoản${k < 3 && pt[kh]?.gt && !pt[kh]?.bo_qua ? ', đang theo số nhập' : ''})` : ''; }).filter(Boolean).join(' · ') : '<span class="muted">chưa có khoản</span>';
@@ -2981,6 +2981,8 @@ function dtrRem(r, k, f = 'sv', boChung = false) {
   const D = !laChung ? 0 : ds.filter((d) => d.loai === 'ky' && !d.dtcp && !d.la_cp && d.nhom === r.nhom && dtcpConOf(d) === conR && !(Number(d.td_ps) > k))
     .reduce((a, d) => a + (k === 1 ? V(d.so_tien, d.vat) : leGoi(d.id, f === 'sv' ? 'sau_vat' : 'gia_tri') + dtrHd(d, k, f) + dtrRem(d, k, f, true)), 0);
   if (k === 1) return Math.max(0, V(r.so_tien, r.vat) - D) - le;
+  // V10.27.11.26: gián tiếp / tài chính đã chốt TĐ3 -> đúng số chốt (khớp máy chủ); chưa chốt -> như TĐ2
+  if (k === 3 && !r.la_cp && !dtrB1(r) && r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '') return V(r.gt_chot, r.vat) - le - dtrHd(r, k, f);
   if (r.tinh_trang === 'dong') return 0;
   const dc = ds.filter((x) => x.loai === 'dc' && x.goi_ref === r.id).reduce((a, x) => a + V(x.so_tien, x.vat), 0);
   const chot = k === 3 && r.la_cp && r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? V(r.gt_chot, r.vat) : null;
@@ -2989,13 +2991,12 @@ function dtrRem(r, k, f = 'sv', boChung = false) {
 const dtrHd = (r, k, f) => (costData?.thau_phu || []).filter((c) => c.goi_id === r.id).reduce((a, c) => a + (f === 'sv' ? tpTdSv(c, k) : (c.lines || []).reduce((b, l) => b + tpLV(c, l)[k - 1], 0)), 0);
 // Giá trị (trước VAT) 1 hạng mục con của nhóm tách (VD Vật tư phụ) tại TĐ k: gói / khoản của hạng mục (gồm HĐ, mua lẻ gắn) + mua lẻ hạng mục không gắn gói + điều chỉnh cả nhóm ghi cho hạng mục
 function dtcpCon(code, con, k) {
-  const cua = (x) => dtcpConOf(x, code) === con, ttChi = ['B2', 'B3'].includes(NHOM().find((n) => n.code === code)?.khoi);
+  const cua = (x) => dtcpConOf(x, code) === con;
   const ky = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === code && cua(r) && !(Number(r.td_ps) > k));
   const hdGt = (r) => (costData?.thau_phu || []).filter((c) => c.goi_id === r.id).reduce((a, c) => a + (c.lines || []).reduce((b, l) => b + tpLV(c, l)[k - 1], 0), 0);
-  const chotOf = (r) => (r.gt_chot === null || r.gt_chot === undefined || r.gt_chot === '' ? null : Number(r.gt_chot) || 0);
-  const goi = ky.reduce((a, r) => a + (k === 1 ? dtrRem(r, 1, 'gt') + leGoi(r.id, 'gia_tri') : k === 3 && ttChi ? chotOf(r) ?? leGoi(r.id, 'gia_tri') : hdGt(r) + leGoi(r.id, 'gia_tri') + dtrRem(r, k, 'gt')), 0); // gián tiếp / tài chính TĐ3: số chốt, chưa chốt = đã chi
+  const goi = ky.reduce((a, r) => a + (k === 1 ? dtrRem(r, 1, 'gt') + leGoi(r.id, 'gia_tri') : hdGt(r) + leGoi(r.id, 'gia_tri') + dtrRem(r, k, 'gt')), 0); // V10.27.11.26: gián tiếp / tài chính TĐ3: số chốt, chưa chốt = TĐ2 (dtrRem)
   const le = (costData?.items || []).filter((x) => x.nhom === code && cua(x) && !x.goi_id && (Number(x.td_ps) || 1) <= k).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0);
-  const dcN = k === 1 || (k === 3 && ttChi) ? 0 : (costData?.du_tru || []).filter((x) => x.loai === 'dc' && x.nhom === code && !x.goi_ref && cua(x)).reduce((a, x) => a + (Number(x.so_tien) || 0), 0);
+  const dcN = k === 1 ? 0 : (costData?.du_tru || []).filter((x) => x.loai === 'dc' && x.nhom === code && !x.goi_ref && cua(x)).reduce((a, x) => a + (Number(x.so_tien) || 0), 0);
   return goi + le + dcN;
 }
 function tpTdSv(c, k) {
@@ -4662,8 +4663,7 @@ function dtrTd(rows) {
   const t1 = kyR.reduce((a, r) => a + (ps(r, 1) ? 0 : dtrRem(r, 1, 'gt') + lv(r)), 0);
   const tk = (k) => kyR.reduce((a, r) => a + (ps(r, k) ? 0 : lv(r) + dtrHd(r, k, 'gt') + dtrRem(r, k, 'gt')), 0) + S('dc', (r) => !kyId.has(r.goi_ref));
   const t2 = tk(2);
-  const ttChi = rows.length && !dtrB1(rows[0]); // gián tiếp / tài chính: TĐ3 = thực chi (hoặc số chốt)
-  const t3 = coQt ? S('qt') : ttChi ? kyR.reduce((a, r) => a + (ps(r, 3) ? 0 : r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? Number(r.gt_chot) : lv(r)), 0) : tk(3);
+  const t3 = coQt ? S('qt') : tk(3); // V10.27.11.26: gián tiếp / tài chính TĐ3 = TĐ2 trừ khi đã chốt (dtrRem)
   return { t1, t2, t3, coQt, ngoai: t1 === 0 && t2 !== 0 };
 }
 // Chi tiết đã có của nhóm (trước VAT): HĐ đầu vào theo TĐ2 + chi phí đã ghi (không gồm vay / trả gốc)
