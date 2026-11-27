@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V12.27.11.26 – Chống thêm trùng khi bấm Enter 2 lần
+- Lỗi: bấm Enter / Thêm 2 lần khi máy chủ chưa trả lời → thêm 2 khoản giống nhau; Enter lần nữa sau khi lưu → thêm khoản trống (TĐ3 không bắt buộc số).
+- Sửa: public/common.js chặn gửi lần 2 cùng biểu mẫu khi đang lưu / < 1 giây (áp mọi biểu mẫu); hộp Chi tiết TĐ3 bắt buộc nhập số chốt.
+- Kiểm tra: Enter 3 lần → 1 khoản; tester 4518, chi-tiet-khoan 16, luong 17, du-tru-chung 9, cp-khac 13, td23 25, nhom-ps 13 – 0 lỗi; dò giao diện máy tính + điện thoại 0 lỗi, không tràn.
+
 ## V11.27.11.26 – Bảng DT-CP TĐ2 bỏ cột "Số cuối TĐ2"
 - Người dùng: chi tiết từng mục đã nhập điều chỉnh (hoặc không) → giá trị cuối đã có, cột nhập TĐ2 thừa.
 - TĐ2 / TĐ3: bảng chỉ xem, tự cộng từ chi tiết (HĐ › khối I, Chi tiết › gián tiếp / tài chính); bỏ nút Lưu bảng TĐ2, bỏ hàm dtcpLuuTd2. Số đã nhập trước đây vẫn giữ và vẫn tính.

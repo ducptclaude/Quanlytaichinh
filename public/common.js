@@ -4,12 +4,24 @@ const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+// V12.27.11.26: chống bấm Enter / Lưu 2 lần khi máy chủ chưa trả lời (trước đây thêm trùng 2 khoản)
+//  – đang có lệnh ghi chạy hoặc vừa gửi < 1 giây thì bỏ qua lần gửi thứ hai của CÙNG biểu mẫu
+let GHI_DANG_CHAY = 0;
+document.addEventListener('submit', (e) => {
+  const f = e.target; if (!(f instanceof HTMLFormElement) || (f.method || 'get').toLowerCase() === 'post') return; // biểu mẫu gửi thẳng (đăng nhập) giữ nguyên
+  if (f._khoaGui && (Date.now() < f._khoaGui || GHI_DANG_CHAY > 0)) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+  f._khoaGui = Date.now() + 1000;
+}, true);
 async function api(url, opts = {}) {
-  const res = await fetch(url, {
-    ...opts,
-    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch', ...(opts.headers || {}) },
-    credentials: 'same-origin',
-  });
+  const ghi = opts.method && opts.method !== 'GET'; if (ghi) GHI_DANG_CHAY++;
+  let res;
+  try {
+    res = await fetch(url, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch', ...(opts.headers || {}) },
+      credentials: 'same-origin',
+    });
+  } finally { if (ghi) GHI_DANG_CHAY--; }
   if (res.status === 401 && !url.startsWith('/api/auth/login') && location.pathname === '/') {
     location.href = '/login';
     throw new Error('Phiên đăng nhập hết hạn');

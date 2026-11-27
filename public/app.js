@@ -2328,16 +2328,16 @@ function openKhoanDs(code, con) {
     </tbody><tfoot><tr><td><b>Cộng</b></td>${T.map((v, i) => `<td class="num ${i + 1 === k ? 'strong' : ''}">${dvT(v)}</td>`).join('')}<td class="num">${dvT(L)}</td></tr></tfoot></table></div>
     ${chung && k > 1 && ds.some(laCT) ? (() => { const c = ctK(k), g = k === 3 ? goc1 : gocK, d = c - g; return `<p class="khds-tom ${d > 0 ? 'vuot' : ''}">Dự trù chung TĐ1 <b>${dvT(goc1)}</b>${g !== goc1 ? ` (sau điều chỉnh ${dvT(g)})` : ''} · đã chia cho các khoản <b>${dvT(c)}</b> · ${d > 0 ? `<b>vượt dự trù ${dvT(d)}</b> – phần vượt làm tăng chi phí TĐ${k}` : d < 0 ? `còn chưa chia <b>${dvT(-d)}</b> – vẫn tính trong TĐ${k} tới khi chia hết hoặc giảm dự trù` : 'đã chia hết dự trù'}</p>`; })() : ''}
     ${edit ? `<form class="grid-form khds-f"><label>Tên khoản *<input name="ten" maxlength="300" value="${esc(goiY)}" placeholder="VD: Lương tháng 10"></label>
-      <label>${k === 1 ? 'Dự trù TĐ1' : k === 2 ? 'Số TĐ2' : 'Số chốt TĐ3 (trống = theo đã chi)'} (trước VAT)${k < 3 ? ' *' : ''}<input name="so" class="money num" placeholder="0"></label>
+      <label>${k === 1 ? 'Dự trù TĐ1' : k === 2 ? 'Số TĐ2' : 'Số chốt TĐ3'} (trước VAT) *<input name="so" class="money num" placeholder="0"></label>
       <div class="actions"><button type="submit" class="primary">+ Thêm khoản${k > 1 ? ` (phát sinh TĐ${k})` : ''}</button><span class="msg" id="khds-msg"></span></div></form>
-      <p class="muted small">${{ 1: 'TĐ1: dự trù từng khoản (VD lương tháng 10, thưởng đợt).', 2: 'TĐ2: thêm khoản đã xác định (VD Lương tháng 10, 11). Nếu có dự trù chung TĐ1 thì khoản được CHIA TỪ dự trù (không cộng thêm); chỉ phần vượt dự trù mới làm tăng chi phí. Sửa số khoản đã có: bấm tên khoản.', 3: 'TĐ3 = tiền đã trả từng khoản (Ghi chi cho khoản) hoặc số chốt. Thêm khoản mới phát sinh TĐ3 (TĐ1, TĐ2 = 0).' }[k]}</p>` : ''}`;
+      <p class="muted small">${{ 1: 'TĐ1: dự trù từng khoản (VD lương tháng 10, thưởng đợt).', 2: 'TĐ2: thêm khoản đã xác định (VD Lương tháng 10, 11). Nếu có dự trù chung TĐ1 thì khoản được CHIA TỪ dự trù (không cộng thêm); chỉ phần vượt dự trù mới làm tăng chi phí. Sửa số khoản đã có: bấm tên khoản.', 3: 'TĐ3 từng khoản = số chốt; chưa chốt = TĐ2. Thêm khoản mới phát sinh TĐ3 (TĐ1, TĐ2 = 0): nhập tên + số chốt.' }[k]}</p>` : ''}`;
   const f = $('.khds-f', dlg);
   if (f) {
     $$('input.money', f).forEach(attachMoneyInput);
     f.addEventListener('submit', async (ev) => {
       ev.preventDefault(); const E = f.elements, ten = E.ten.value.trim(), raw = E.so.value.trim(), so = raw === '' ? 0 : parseMoney(raw), ngay = new Date().toISOString().slice(0, 10), vat = nN?.khong_vat ? 0 : 10;
       if (!ten) return showMsg($('#khds-msg'), 'Nhập tên khoản', 'err');
-      if (k < 3 && !(so > 0)) return showMsg($('#khds-msg'), 'Nhập số tiền', 'err');
+      if (k < 3 ? !(so > 0) : raw === '') return showMsg($('#khds-msg'), 'Nhập số tiền', 'err'); // V12.27.11.26: TĐ3 cũng bắt buộc số (tránh Enter lần 2 thêm khoản trống)
       try {
         const g = await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: code, nhom_con: con, loai: 'ky', noi_dung: ten, so_tien: k === 3 ? 0 : so, vat, ngay, ...(k > 1 ? { td_ps: k } : {}) }) });
         if (k === 3 && raw !== '' && g?.id) await api(`/api/du-tru/${g.id}`, { method: 'PUT', body: JSON.stringify({ gt_chot: so }) });
