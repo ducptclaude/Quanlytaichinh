@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"– vẫn tính vào chi phí (từ TĐ ghi chi). Ghi trùng / sai thì bấm Xoá.": "– still counted as cost (from the milestone recorded). Duplicate / wrong: click Delete.",
 "↳ Đã chi:": "↳ Paid:",
 "+ Chi": "+ Expenditure",
 "＋ Khoản mới": "＋ New item",

@@ -33,6 +33,16 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   // xoá khoản
   await p.click('#khds-dlg [data-khxoa]'); await p.waitForTimeout(1800);
   chk('xoá khoản: không còn khoản', /Chưa có khoản nào/.test(await p.evaluate(() => document.querySelector('#khds-dlg tbody').innerText)));
+  // V19.27.11.26: lần chi còn lại sau khi xoá khoản (ghi lúc mở tab TĐ3) -> hiện ở "Chi chưa gắn khoản", tổng hộp = bảng DT-CP
+  await p.evaluate(async (i) => { const k = await api(`/api/du-an/${i}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: 'gt_luong', nhom_con: 'luong', loai: 'ky', so_tien: 50000000, vat: 0, noi_dung: 'Lương tháng 10' }) });
+    for (const so of [50000000, 45000000]) await api(`/api/du-an/${i}/chi-phi`, { method: 'POST', body: JSON.stringify({ nhom: 'gt_luong', nhom_con: 'luong', noi_dung: 'Lương T', gia_tri: so, vat: 0, ngay: '2026-11-05', goi_id: k.id, td_ps: 3 }) });
+    await api(`/api/du-tru/${k.id}`, { method: 'DELETE' }); }, id);
+  await p.evaluate(async () => { document.querySelectorAll('dialog[open]').forEach((d) => d.close()); await loadCost(); }); await p.click('#tab-cost [data-tdpick="3"]'); await p.waitForTimeout(800); await mo();
+  const r3 = await p.evaluate(() => ({ moc: document.querySelectorAll('#khds-dlg tr.khds-moc').length, cong: Number(document.querySelector('#khds-dlg tfoot td:nth-child(4)').innerText.replace(/\D/g, '')), bang: Number(document.querySelector('.dtcp-table tr.dtcp-con[data-nhom="gt_luong"][data-con="luong"] .dtcp-tt').innerText.replace(/\D/g, '')) }));
+  chk('chi chưa gắn khoản hiện trong hộp; Cộng TĐ3 hộp = bảng DT-CP = 95', r3.moc === 1 && r3.cong === 95e6 && r3.bang === 95e6, JSON.stringify(r3));
+  if (SP) await (await p.$('#khds-dlg')).screenshot({ path: `${SP}/mot-bang-moc.png` });
+  await p.evaluate(() => [...document.querySelectorAll('#khds-dlg tr.khds-chi [data-chixoa]')].forEach((b, i) => i === 0 && b.click())); await p.waitForTimeout(1800);
+  chk('xoá 1 lần chi chưa gắn khoản: còn 45', Number(await p.evaluate(() => document.querySelector('#khds-dlg tfoot td:nth-child(4)').innerText.replace(/\D/g, ''))) === 45e6);
   chk('không lỗi trang', !errs.length, errs[0]);
   console.log(`KẾT QUẢ: ${ok} ĐẠT, ${loi} LỖI`);
   await br.close();

@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V19.27.11.26 – Hộp Chi tiết hiện "Chi chưa gắn khoản" (nguyên nhân lương TĐ3 330 ≠ 140)
+- Nguyên nhân: xoá khoản thì các lần chi của khoản giữ lại thành "chi chưa gắn khoản" (tính theo TĐ lúc ghi, VD TĐ3) – không hiện trong hộp Chi tiết nhưng vẫn cộng vào bảng DT-CP → bảng TĐ3 330, hộp 140.
+- Sửa: hộp Chi tiết có mục "Chi chưa gắn khoản" (từng lần chi, TĐ1/2/3, Xoá); dòng Cộng cộng cả phần này → khớp bảng DT-CP. Xoá khoản: hỏi "xoá luôn n lần chi?" (OK = xoá, Huỷ = giữ).
+- Kiểm tra: mot-bang 8, chi-tiet-khoan 16, luong 17, du-tru-chung 9, tester 4518 – 0 lỗi; điện thoại không tràn.
+
 ## V18.27.11.26 – Hộp "Chi tiết ›" gộp 1 bảng: khoản + các lần chi, ghi chi / xoá ngay tại chỗ
 - Mỗi khoản có các dòng "↳ Đã chi" (ngày, số tiền) bên dưới; nút "+ Chi" mở dòng nhập ngay trong bảng (nội dung tự theo tên khoản, ngày hôm nay, số tiền, Enter = Lưu); "Xoá" ở từng lần chi và từng khoản.
 - Hộp khoản (bấm tên khoản) cũng có nút Xoá ở từng lần chi. Nút thêm khoản đổi tên "＋ Khoản mới"; hướng dẫn rút gọn.
