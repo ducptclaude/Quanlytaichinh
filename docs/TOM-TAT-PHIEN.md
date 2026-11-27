@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V17.27.11.26 – Gặp khoá TĐ đã duyệt: hỏi mở khoá luôn rồi làm tiếp
+- Lỗi khoá TĐ đã duyệt trả kèm `mo_td` {da, k} → trang hỏi Passcode "Mở khoá TĐk để sửa?" → API mới POST /api/du-an/:id/mo-td/:k mở TĐk và các TĐ sau đã trình / duyệt (về "Lập", ghi nhật ký) → làm tiếp thao tác.
+- Kiểm tra: mo-khoa-1-lan 9 + khoá TĐ 6, td23 25, tdk 31, duyet 28, tester 4518 – 0 lỗi.
+
 ## V16.27.11.26 – Mở khoá dự án 1 lần = mở mọi khoá số (người dùng chọn A)
 - Trước: 4 loại khoá riêng; khoá dự án (còn lại = 0) chỉ mở tạm 60 phút, lưu trong bộ nhớ → mỗi lần cập nhật bản mới tự khoá lại.
 - Nay: Passcode 1 lần mở mọi khoá số của dự án: thu đủ chi đủ, HĐ / PL CĐT đã quyết toán, HĐ đầu vào đã QT / trả đủ, nhóm dự trù đã QT. Giữ mở tới khi bấm 🔒 Khoá lại; lưu ở cài đặt `mo_khoa_du_an` (không mất khi khởi động lại). Khoá TĐ đã trình / duyệt giữ riêng.

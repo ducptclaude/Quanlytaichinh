@@ -26,3 +26,20 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   chk('sau khoá lại: chặn lại 423', (await call('POST', `/api/du-an/${pid}/du-tru`, { nhom: 'gt_luong', loai: 'ky', so_tien: 1000000, vat: 0, noi_dung: 'Lương thử 2' })).s === 423);
   console.log(`KẾT QUẢ: ${ok} ĐẠT, ${loi} LỖI`);
 })();
+// ---- V17.27.11.26: khoá TĐ đã duyệt -> lỗi kèm mo_td; mở khoá TĐk mở luôn TĐ sau (đã trình / duyệt) ----
+(async () => {
+  await new Promise((r) => setTimeout(r, 4000));
+  let ok2 = 0, loi2 = 0; const c2 = (t, c, x = '') => { if (c) ok2++; else { loi2++; console.log('  LỖI:', t, x); } };
+  await call('POST', '/api/auth/login', { username: 'admin', password: process.env.BKS_PASS });
+  const pid = (await call('POST', '/api/du-an', { ma_du_an: 'DA-MT' + Date.now().toString().slice(-4), ten_du_an: 'Thử mở khoá TĐ', trang_thai: 'Đang thi công' })).j.id;
+  await call('POST', `/api/du-an/${pid}/doanh-thu`, { loai: 'hd', vat: 0, ma_loai: 'HĐ', so_ma: 'C', ngay: '2026-01-01', gia_tri: '500000000' });
+  const k1 = (await call('POST', `/api/du-an/${pid}/du-tru`, { nhom: 'gt_luong', nhom_con: 'luong', loai: 'ky', so_tien: 50000000, vat: 0, noi_dung: 'Lương' })).j.id;
+  for (const k of [1, 2]) { await call('POST', `/api/du-an/${pid}/td/${k}`, { viec: 'trinh' }); c2(`duyệt TĐ${k}`, (await call('POST', `/api/du-an/${pid}/td/${k}`, { viec: 'duyet' })).s === 200); }
+  const x = await call('DELETE', `/api/du-tru/${k1}`);
+  c2('xoá khoản TĐ1 khi TĐ1 đã duyệt: 423 kèm mo_td k=1', x.s === 423 && x.j?.mo_td?.k === 1 && x.j?.mo_td?.da === pid, JSON.stringify(x.j));
+  c2('mở khoá TĐ1 sai passcode bị chặn', (await call('POST', `/api/du-an/${pid}/mo-td/1`, { passcode: '00000000' })).s !== 200);
+  const m = await call('POST', `/api/du-an/${pid}/mo-td/1`, { passcode: process.env.BKS_PC });
+  c2('mở khoá TĐ1 -> mở luôn TĐ2', m.s === 200 && JSON.stringify(m.j?.mo) === '["TĐ1","TĐ2"]', JSON.stringify(m.j));
+  c2('sau mở: xoá được', (await call('DELETE', `/api/du-tru/${k1}`)).s < 300);
+  console.log(`KẾT QUẢ (khoá TĐ): ${ok2} ĐẠT, ${loi2} LỖI`);
+})();

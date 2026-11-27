@@ -28,6 +28,12 @@ async function api(url, opts = {}) {
   }
   if (res.status === 204) return null;
   const body = await res.json().catch(() => ({}));
+  // V17.27.11.26: TĐ đã duyệt đang khoá -> hỏi Passcode mở khoá TĐ đó (và TĐ sau) 1 lần rồi làm tiếp; TĐ mở về "Lập", trình duyệt lại sau
+  if (res.status === 423 && body.mo_td?.da && !opts._moTd && typeof askPasscode === 'function') {
+    const { da, k } = body.mo_td;
+    const pc = await askPasscode(`Mở khoá TĐ${k} để sửa?`, `${(body.errors || []).join(' ')}\n\nMở khoá TĐ${k}${k < 3 ? ' (và TĐ sau nếu đã trình / duyệt)' : ''} để sửa rồi làm tiếp. Sửa xong cần trình duyệt lại.`, `Mở khoá TĐ${k}`);
+    if (pc !== null) { await api(`/api/du-an/${da}/mo-td/${k}`, { method: 'POST', body: JSON.stringify({ passcode: pc }), _moTd: true }); return api(url, { ...opts, _moTd: true }); }
+  }
   // V16.27.11.26: bị khoá số (HĐ / nhóm đã quyết toán, dự án thu đủ chi đủ…) -> hỏi Passcode mở khoá CẢ DỰ ÁN 1 lần rồi làm tiếp
   if (res.status === 423 && body.mo_khoa_da && !opts._moKhoa && typeof askPasscode === 'function') {
     const pc = await askPasscode('Mở khoá dự án?', `${(body.errors || []).join(' ')}\n\nMở 1 lần cho CẢ dự án (mọi khoá số: thu đủ chi đủ, HĐ / PL / nhóm đã quyết toán). Giữ mở tới khi bấm 🔒 Khoá lại. Khoá TĐ đã trình / duyệt vẫn giữ riêng.`, 'Mở khoá dự án');

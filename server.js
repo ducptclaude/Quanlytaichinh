@@ -395,7 +395,7 @@ api.use(wrap(async (req, res, next) => {
     // ---- TĐ3 ----
     if ((m = p.match(/^\/doanh-thu\/(\d+)\/(qt|quyet-toan)$/)) && (req.method === 'PUT' || req.method === 'DELETE')) { k = 3; da = await daRev(m[1]); }
     if ((m = p.match(/^\/tp-hd-pl\/(\d+)\/qt$/)) && (req.method === 'PUT' || req.method === 'DELETE')) { k = 3; da = await daTpLine(m[1]); }
-    if (k && da) { const t = await ttK(da, k); if (t) return bad(res, KHOA(k, t), 423); }
+    if (k && da) { const t = await ttK(da, k); if (t) return res.status(423).json({ errors: [KHOA(k, t)], mo_td: t === 'duyet' ? { da: Number(da), k } : null }); } // V17: trang hỏi mở khoá TĐ luôn
   }
   if ((m = p.match(/^\/doanh-thu\/(\d+)\/qt$/))) {
     const v = await vbDt(m[1]); if (!v) return bad(res, 'Không tìm thấy HĐ / PL', 404);
@@ -431,13 +431,13 @@ api.use(wrap(async (req, res, next) => {
   // V01.26: TĐ1 đã trình / đã duyệt -> khoá dự trù TĐ1 (gói, khoản, bảng DT-CP, dự trù nhanh TĐ1). Khoản phát sinh TĐ2 (TĐ1 = 0), điều chỉnh, đóng, chốt vẫn làm được.
   {
     const KHOA1 = (tt) => (tt === 'duyet' ? 'TĐ1 đã duyệt – đang khoá (giá cơ sở). Muốn sửa: Mở khoá TĐ1 (Quản trị / Lãnh đạo, cần Passcode).' : 'TĐ1 đang chờ duyệt – không sửa dự trù TĐ1. Người duyệt trả lại thì sửa được.');
-    const ttCua = async (duAnId) => { const d = duAnId && (await store.getProject(Number(duAnId))); return d && ['trinh', 'duyet'].includes(d.td1_tt) ? d.td1_tt : null; };
-    let tt = null;
+    let tt = null, da1 = null;
+    const ttCua = async (duAnId) => { da1 = Number(duAnId) || null; const d = duAnId && (await store.getProject(Number(duAnId))); return d && ['trinh', 'duyet'].includes(d.td1_tt) ? d.td1_tt : null; };
     if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && b.loai === 'ky' && !(Number(b.td_ps) > 1) && Number(String(b.so_tien ?? 0).replace(/[.,\s]/g, '')) !== 0) tt = await ttCua(m[1]);
     if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/du-tru\/(\d+)$/))) { const x = await store.getDuTru(Number(m[1]));
       if (x && x.loai === 'ky' && !(Number(x.td_ps) > 1) && (req.method === 'DELETE' ? Number(x.so_tien) !== 0 : 'so_tien' in b)) tt = await ttCua(x.du_an_id); }
     if (req.method === 'PUT' && (m = p.match(/^\/du-an\/(\d+)\/ty-le$/)) && ['pt_gt1', 'pt_tc1', 'tien_gt1', 'tien_tc1', 'ct_gt1', 'ct_tc1'].some((k) => k in b)) tt = await ttCua(m[1]);
-    if (tt) return bad(res, KHOA1(tt), 423);
+    if (tt) return res.status(423).json({ errors: [KHOA1(tt)], mo_td: tt === 'duyet' ? { da: da1, k: 1 } : null });
   }
   // Dự trù: nhóm đã có quyết toán (TĐ3) -> khoá nhóm; mở khoá = xóa dòng quyết toán (cần Passcode)
   if ((m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && req.method === 'POST') {
@@ -1466,6 +1466,17 @@ async function tdDuyetHandler(req, res, k) {
   return bad(res, 'Việc không hợp lệ');
 }
 api.post('/du-an/:id/td1', wrap((req, res) => tdDuyetHandler(req, res, 1)));
+// V17.27.11.26: gặp khoá TĐ đã duyệt khi đang sửa -> mở khoá TĐk và các TĐ sau (đã trình / đã duyệt) bằng 1 lần Passcode; các TĐ đó về "Lập", cần trình duyệt lại
+api.post('/du-an/:id/mo-td/:k([123])', wrap(async (req, res) => {
+  const id = parseId(req.params.id), k = Number(req.params.k), d = id && (await store.getProject(id));
+  if (!d) return bad(res, 'Không tìm thấy dự án', 404);
+  if (!laDuyet(req)) return bad(res, `Chỉ Quản trị / Lãnh đạo được mở khoá TĐ${k}`, 403);
+  if (!(await requirePasscode(req, res))) return;
+  const mo = [];
+  for (let j = 3; j >= k; j--) if (['trinh', 'duyet'].includes(d[`td${j}_tt`])) { await store.setProjectTd(id, j, { tt: '', ly_do: `Mở khoá để sửa (từ TĐ${k})` }); mo.push('TĐ' + j); }
+  if (mo.length) audit.log(req, 'Mở khoá', 'Dự án', `Mở khoá ${mo.reverse().join(', ')} để sửa số liệu – cần trình duyệt lại`, { du_an: d.ma_du_an });
+  res.json({ ok: true, mo });
+}));
 api.post('/du-an/:id/td/:k([123])', wrap((req, res) => tdDuyetHandler(req, res, Number(req.params.k))));
 const fmtD = (x) => new Intl.NumberFormat('vi-VN').format(Math.round(Number(x) || 0)) + ' đ';
 
