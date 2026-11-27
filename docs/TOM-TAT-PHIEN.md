@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.27.11.26 – Bảng DT-CP: nút "Chi tiết ›" ở dòng gián tiếp / tài chính (Lương, Thưởng tết-lễ, Thưởng đợt, Lãi vay…) -> hộp danh sách khoản của hạng mục theo TĐ1 · TĐ2 · TĐ3 · Đã chi + thêm khoản ngay tại TĐ đang xem (TĐ1 dự trù · TĐ2 phát sinh, TĐ1 = 0 · TĐ3 phát sinh, số chốt tuỳ chọn), gợi ý tên tháng kế tiếp; bấm tên khoản mở hộp khoản (điều chỉnh, chốt, ghi chi, xoá). Kiểm tra `chi-tiet-khoan.js` 16 ĐẠT (máy tính + iPhone); tester, luong, td2-socuoi ĐẠT.
+
 ## V05.27.11.26 – Bảng DT-CP tách Lương / Thưởng tết-lễ / Thưởng đợt (cả 3 TĐ) + sửa 2 lỗi
 - `DTCP_TACH.gt_luong = ['luong','thuong_le','thuong_dot']`; bảng tách N hạng mục (dòng đầu = tổng − các dòng sau, `dtcpCon`); gián tiếp / tài chính TĐ3 theo số chốt, chưa chốt = đã chi.
   Thêm khoản (TĐ1 / khoản mới TĐ2 / TĐ3) có ô "Hạng mục" (tự chọn theo tên: "thưởng tết/lễ…" / "thưởng đợt…" / còn lại Lương); máy chủ lưu `nhom_con` cho mọi khoản.

@@ -3998,3 +3998,6 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 .dtcp-table[data-k="3"] :is(th, td):nth-child(4) { display: none; } /* TĐ3 chỉ xem: không có cột nhập */
 .dtcp-table .dtcp-in::placeholder { color: var(--muted); font-weight: 400; opacity: .55; }
 .dtcp-table .dtcp-ls { font-size: 11px; margin-right: 6px; white-space: nowrap; }
+.khds-t td.strong { font-weight: 700; }
+.khds-f { margin-top: 10px; }
+#khds-dlg { width: min(900px, calc(100vw - 16px)); }
