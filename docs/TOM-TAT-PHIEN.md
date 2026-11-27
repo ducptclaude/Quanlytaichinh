@@ -2,6 +2,15 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.27.11.26 – Bảng DT-CP tách Lương / Thưởng tết-lễ / Thưởng đợt (cả 3 TĐ) + sửa 2 lỗi
+- `DTCP_TACH.gt_luong = ['luong','thuong_le','thuong_dot']`; bảng tách N hạng mục (dòng đầu = tổng − các dòng sau, `dtcpCon`); gián tiếp / tài chính TĐ3 theo số chốt, chưa chốt = đã chi.
+  Thêm khoản (TĐ1 / khoản mới TĐ2 / TĐ3) có ô "Hạng mục" (tự chọn theo tên: "thưởng tết/lễ…" / "thưởng đợt…" / còn lại Lương); máy chủ lưu `nhom_con` cho mọi khoản.
+  Khoản cũ chưa có hạng mục: đoán theo tên (`DTCP_DOAN`).
+- Sửa lỗi tiền: tiền đã chi gắn khoản phát sinh TĐ2 / TĐ3 bị cộng lùi vào TĐ1 / TĐ2 (VD trả lương T12 phát sinh TĐ3) -> nay chỉ tính từ TĐ của khoản
+  (`projectReport0` gán td_ps hiệu lực cho dòng chi gắn khoản; `cp_td_nhom` lọc chi phí theo TĐ; thẻ tổng giao diện tương tự).
+- Sửa lỗi có thể làm hỏng trang: bước làm rối mã (`lib/bao-ve-ma.js`) đặt tên nội bộ ngẫu nhiên, 2 tệp có thể trùng -> lỗi trang (đã gặp khi thử). Nay mỗi tệp có tiền tố riêng (`identifiersPrefix`).
+- Kiểm tra: luong.js 17 ĐẠT (TĐ1 Lương 50 / Thưởng đợt 25 · TĐ2 95 / 25 · TĐ3 140 / 30; nhóm 75 / 120 / 170); tester 4518, kiem-tra-goi 246, td2-socuoi 17, td23 26, cp-khac 13, nhom-ps 13, tdk 31 ĐẠT.
+
 ## V04.27.11.26 – Lương phát sinh liên tục + Lịch sử trên bảng DT-CP + Gộp "Điều chỉnh cả nhóm" vào gói
 - Khoản gián tiếp / tài chính: TĐ3 có "＋ Khoản mới (phát sinh TĐ3)" (`du_tru ky`, so_tien 0, `td_ps = 3`, số chốt tuỳ chọn; trống = TĐ3 theo tiền đã chi gắn khoản).
   Thêm khoản (TĐ1 / TĐ2 / TĐ3) tự gợi ý tên tháng kế tiếp theo khoản cùng nhóm ("Lương tháng 11" -> "Lương tháng 12"), vẫn sửa được.

@@ -19,7 +19,8 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   const so = async (v) => { await p.fill('#pk-f [name=so_tien]', ''); await p.click('#pk-f [name=so_tien]'); await p.keyboard.type(String(v)); };
   // ---- TĐ1 ----
   await td(1); await sel('nhom', 'gt_luong'); await p.fill('#pk-f [name=noi_dung]', 'Lương tháng 10'); await so(50000000); await p.click('#pk-f button[type=submit]'); await p.waitForTimeout(1500);
-  await td(1); await sel('nhom', 'gt_luong'); await p.fill('#pk-f [name=noi_dung]', 'Thưởng đợt'); await so(25000000); await p.click('#pk-f button[type=submit]'); await p.waitForTimeout(1500);
+  await td(1); await sel('nhom', 'gt_luong'); await p.fill('#pk-f [name=noi_dung]', 'Thưởng đợt'); await so(25000000);
+  chk('TĐ1 thêm "Thưởng đợt": ô Hạng mục tự chọn Thưởng đợt', (await p.inputValue('#pk-f [name=nhom_con]')) === 'thuong_dot', await p.inputValue('#pk-f [name=nhom_con]')); await p.click('#pk-f button[type=submit]'); await p.waitForTimeout(1500);
   chk('TĐ1 lương + thưởng = 75', (await L())[0] === 75e6, String(await L()));
   // ---- TĐ2: khoản mới, tên gợi ý "Lương tháng 11" ----
   await td(2); await sel('khoan', 'moi'); await sel('nhom', 'gt_luong'); await p.waitForTimeout(200);
@@ -40,6 +41,12 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
     await api(`/api/du-tru/${id('Thưởng đợt')}`, { method: 'PUT', body: JSON.stringify({ gt_chot: 30000000 }) }); }, da);
   await p.evaluate(() => loadCost()); await p.waitForTimeout(1500);
   v = await L(); chk('TĐ3 = 50 + 45 + 45 đã trả + thưởng chốt 30 = 170 (như file Giả định 2)', v[2] === 170e6, String(v));
+  // ---- V05.27.11.26: bảng DT-CP tách Lương / Thưởng tết-lễ / Thưởng đợt ở cả 3 TĐ ----
+  const hm = (c) => p.evaluate((c) => Number(document.querySelector(`.dtcp-table tr.dtcp-con[data-nhom="gt_luong"][data-con="${c}"] .dtcp-tt`)?.innerText.replace(/\D/g, '') || -1), c);
+  for (const [k, l, tdot] of [[1, 50e6, 25e6], [2, 95e6, 25e6], [3, 140e6, 30e6]]) {
+    await td(k); const a = await hm('luong'), b = await hm('thuong_dot'), c0 = await hm('thuong_le');
+    chk(`TĐ${k} tách: Lương ${l / 1e6} · Thưởng đợt ${tdot / 1e6} · Thưởng tết/lễ 0`, a === l && b === tdot && c0 === 0, `${a} / ${b} / ${c0}`);
+  }
   // ---- Lịch sử trên bảng DT-CP ----
   await td(2);
   chk('bảng DT-CP: dòng lương có "Lịch sử (n) ›"', await p.evaluate(() => /Lịch sử \(\d+\)/.test(document.querySelector('.dtcp-table [data-dtcpls="gt_luong"]')?.innerText || '')));
