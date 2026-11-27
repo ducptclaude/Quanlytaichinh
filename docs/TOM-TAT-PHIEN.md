@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.27.11.26 – Hộp chi tiết nhóm HĐ đầu vào gọn, hết cuộn ngang: hộp rộng tới 1440px, chữ / ô gọn, cột Đối tác cắt ngắn, nút nhỏ xuống dòng; điện thoại chỉ giữ Hạng mục · TĐ đang xem · Còn lại · nút (đối tác hiện dưới số HĐ). Đo: 1290px, 1366px, iPhone 13 đều không cuộn.
+
 ## V12.26.11.26 – "CP khác" đủ quy tắc phát sinh: Chi tiết · điều chỉnh TĐ2 · quyết toán / chốt TĐ3 · ghi chi · xoá
 - Dòng CP khác trong hộp nhóm có nút **Chi tiết** -> hộp `#cpk-dlg`: thẻ TĐ1 / TĐ2 / TĐ3 / Đã chi; sửa giá trị (ở tab TĐ phát sinh), đợt ± TĐ2 (dự trù `dc` gắn khoản – goi_ref),
   quyết toán / chốt TĐ3 (`gt_chot`, trống = TĐ2), Ghi chi cho khoản (mua lẻ gắn khoản), Xoá khoản. Cột Đã thanh toán / Còn lại của dòng = đã chi / giá trị TĐ − đã chi.
