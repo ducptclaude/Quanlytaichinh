@@ -23,14 +23,12 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   chk('TĐ2 có bảng DT-CP', await p.evaluate(() => document.querySelector('.dtcp-table')?.dataset.k === '2'));
   chk('TĐ2 có cột TĐ1 và ± so TĐ1', await p.evaluate(() => { const h = document.querySelector('.dtcp-table thead').innerText; return /TĐ1/i.test(h) && /± so TĐ1/i.test(h); }));
   const cp2a = await p.evaluate(() => Number(costData.cp_nhom.find((n) => n.code === 'tc_chi_phi')?.gt?.[1]) || 0);
-  const ip = p.locator('.dtcp-table tr.dtcp-n[data-nhom="tc_chi_phi"] .dtcp-in');
-  chk('ô nhập TĐ2 mở', await ip.isEnabled());
-  const cur = await p.evaluate(() => Number(document.querySelector('.dtcp-table tr.dtcp-n[data-nhom="tc_chi_phi"]').dataset.auto) || 0); // V02.27.11.26: ô TĐ2 = SỐ CUỐI
-  await ip.fill(String(cur + 50000000)); await p.waitForTimeout(200);
-  chk('xem trước: ± so TĐ1 hiện', await p.evaluate(() => /▲|▼|=/.test(document.querySelector('.dtcp-table tr.dtcp-n[data-nhom="tc_chi_phi"] .dtcp-lech').innerText)));
-  await p.click('[data-dtcpluu]'); await p.waitForTimeout(2000);
+  chk('TĐ2 không còn cột nhập / nút Lưu bảng (V11.27.11.26)', await p.evaluate(() => !document.querySelector('.dtcp-table .dtcp-in') && !document.querySelector('[data-dtcpluu]')));
+  // điều chỉnh TĐ2 nhập trong chi tiết (khoản phát sinh TĐ2 +50tr) -> bảng tự cộng
+  await J(`/api/du-an/${id}/du-tru`, 'POST', { nhom: 'tc_chi_phi', loai: 'ky', td_ps: 2, dtcp: true, so_tien: '50000000', vat: 0, noi_dung: 'Phát sinh TĐ2 thử' });
+  await p.evaluate(async () => { await loadCost(); }).catch(() => {}); await p.click('#tab-cost [data-tdpick="2"]').catch(() => {}); await p.waitForTimeout(1500);
   const cp2b = await p.evaluate(() => Number(costData.cp_nhom.find((n) => n.code === 'tc_chi_phi')?.gt?.[1]) || 0);
-  chk('gõ số cuối = hiện tại + 50tr: chi phí nhóm TĐ2 tăng đúng 50.000.000', cp2b - cp2a === 50000000, `${cp2a} -> ${cp2b}`);
+  chk('khoản TĐ2 +50tr: chi phí nhóm TĐ2 tăng đúng 50.000.000', cp2b - cp2a === 50000000, `${cp2a} -> ${cp2b}`);
   const r2 = (await J(`/api/du-an/${id}/chi-phi`)).j.du_tru.find((r) => r.dtcp && r.nhom === 'tc_chi_phi' && (r.loai === 'dc' || Number(r.td_ps) === 2));
   chk('phần chênh +50tr ghi thành 1 dòng (gói của dòng hoặc khoản phát sinh TĐ2)', r2 && Number(r2.so_tien) === 50000000, JSON.stringify(r2));
   // 3) trình TĐ2 -> khoá dự trù và HĐ

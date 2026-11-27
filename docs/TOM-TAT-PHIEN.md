@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V11.27.11.26 – Bảng DT-CP TĐ2 bỏ cột "Số cuối TĐ2"
+- Người dùng: chi tiết từng mục đã nhập điều chỉnh (hoặc không) → giá trị cuối đã có, cột nhập TĐ2 thừa.
+- TĐ2 / TĐ3: bảng chỉ xem, tự cộng từ chi tiết (HĐ › khối I, Chi tiết › gián tiếp / tài chính); bỏ nút Lưu bảng TĐ2, bỏ hàm dtcpLuuTd2. Số đã nhập trước đây vẫn giữ và vẫn tính.
+- Chú thích nút "Đóng gói": TĐ2 = HĐ đã ký + mua lẻ (chưa có HĐ thì = 0).
+- Bỏ bài kiểm tra td2-socuoi (chức năng đã bỏ); sửa td23. Kiểm tra: tester 4518, td23 25, du-tru-chung 9, doi-chieu-cp 73 – 0 lỗi; máy tính + điện thoại không tràn, 0 lỗi trang.
+
 ## V10.27.11.26 – Sửa công thức: chi phí gián tiếp / tài chính TĐ3 = TĐ2 khi chưa chốt
 - Lỗi: TĐ3 gián tiếp / tài chính chỉ cộng số đã chốt + đã chi → khoản chưa chốt bị tính 0 (DA-05: −160 triệu).
 - Nay (người dùng chọn A): khoản đã chốt TĐ3 = số chốt; chưa chốt = TĐ2 (đã chi nhiều hơn thì lấy đã chi). Áp cả cách nhập số / % doanh thu.

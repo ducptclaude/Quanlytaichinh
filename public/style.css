@@ -4005,3 +4005,4 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 .khds-t tr.khds-ct td:first-child { padding-left: 18px; }
 .khds-tom { margin: 8px 2px 0; font-size: 12.5px; color: var(--fg-1e293b); }
 .khds-tom.vuot { color: #b45309; }
+.dtcp-table:not([data-k="1"]) > thead > tr > th:nth-child(4), .dtcp-table:not([data-k="1"]) > tbody > tr > td:nth-child(4) { display: none; }

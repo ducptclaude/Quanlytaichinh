@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Không ký thêm: TĐ2 = HĐ đã ký + mua lẻ (chưa có HĐ thì = 0) · TĐ1 giữ nguyên": "No further contracts: M2 = signed contracts + direct purchases (0 if none) · M1 unchanged",
+"Bảng DT-CP TĐ2 tự cộng từ chi tiết: điều chỉnh HĐ / gói ở HĐ › (khối I), khoản gián tiếp / tài chính ở Chi tiết ›. Gói còn mở giữ phần chưa ký HĐ; ký đủ thì bấm \"Đóng gói\" (HĐ ›). Xong bấm \"Trình duyệt TĐ2\".": "M2 revenue–cost table sums up automatically from details: adjust contracts / packages via Contracts › (block I), indirect / financial items via Details ›. An open package keeps its unsigned part; when fully contracted click \"Close package\" (Contracts ›). Then click \"Submit M2\".",
 "Dự trù chung (chưa chia khoản)": "General estimate (not yet itemised)",
 "Chia từ dự trù": "Allocated from estimate",
 "trong dự trù": "in estimate",
