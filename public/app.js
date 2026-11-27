@@ -644,7 +644,7 @@ function resetRevForm(f) {
   updateRevPreview(f);
 }
 
-// V02.19.11.26: KHOÁ SỐ DỰ ÁN khi còn lại = 0 (đã thu đủ, chi đủ – cùng số Báo cáo mục III). Mở khoá tạm 60 phút bằng Passcode.
+// V02.19.11.26: KHOÁ SỐ DỰ ÁN khi còn lại = 0 (đã thu đủ, chi đủ – cùng số Báo cáo mục III). V16.27.11.26: mở 1 lần cho cả dự án, giữ tới khi Khoá lại.
 async function daKhoaBar(pid, infoId) {
   const info = document.getElementById(infoId); if (!info) return;
   let el = document.getElementById(infoId + '-khoa');
@@ -652,10 +652,10 @@ async function daKhoaBar(pid, infoId) {
   el.hidden = true; el.innerHTML = '';
   if (!pid) return;
   let s; try { s = (await api('/api/du-an-tinh-trang')).find((x) => x.id === pid); } catch { return; }
-  if (!s?.khoa || pid !== (infoId === 'r-project-info' ? (revAll ? null : revProjectId) : (costAll ? null : revProjectId))) return;
+  if (!(s?.khoa || s?.mo) || pid !== (infoId === 'r-project-info' ? (revAll ? null : revProjectId) : (costAll ? null : revProjectId))) return;
   el.className = 'da-khoa' + (s.mo ? ' mo' : '');
   el.innerHTML = s.mo
-    ? `<span>🔓 <b>Đang mở khoá tạm</b> – dự án đã thu đủ, chi đủ (còn lại = 0). Sửa xong bấm Khoá lại (tự khoá sau 60 phút).</span><button type="button" class="sm" data-dakhoa="${pid}">🔒 Khoá lại</button>`
+    ? `<span>🔓 <b>Dự án đang mở khoá</b> – mọi khoá số (thu đủ chi đủ, HĐ / PL / nhóm đã quyết toán) đang mở. Sửa xong bấm Khoá lại.</span><button type="button" class="sm" data-dakhoa="${pid}">🔒 Khoá lại</button>`
     : `<span>🔒 <b>Dự án đã khoá số</b> – đã thu đủ, chi đủ (còn lại = 0), không nhập / sửa số liệu.</span><button type="button" class="sm" data-damk="${pid}">🔓 Mở khoá (Passcode)</button>`;
   el.hidden = false;
 }
@@ -671,7 +671,7 @@ document.addEventListener('click', async (e) => {
   const id = Number((mk || kl).dataset.damk || (mk || kl).dataset.dakhoa);
   try {
     if (mk) {
-      const pc = await askPasscode('Mở khoá số liệu dự án?', 'Dự án đã thu đủ, chi đủ (còn lại = 0) nên đang khoá nhập số liệu. Mở khoá tạm 60 phút để điều chỉnh – số liệu giữ nguyên.', 'Mở khoá');
+      const pc = await askPasscode('Mở khoá dự án?', 'Mở 1 lần cho CẢ dự án (mọi khoá số: thu đủ chi đủ, HĐ / PL / nhóm đã quyết toán). Giữ mở tới khi bấm 🔒 Khoá lại – số liệu giữ nguyên. Khoá TĐ đã trình / duyệt vẫn giữ riêng.', 'Mở khoá');
       if (pc === null) return;
       await api(`/api/du-an/${id}/mo-khoa-so`, { method: 'POST', body: JSON.stringify({ passcode: pc }) });
     } else await api(`/api/du-an/${id}/khoa-so`, { method: 'POST', body: '{}' });

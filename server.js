@@ -356,8 +356,11 @@ function soQt(b) {
   if (b?.ngay_qt && !/^\d{4}-\d{2}-\d{2}$/.test(String(b.ngay_qt))) errors.push('Ngày quyết toán không hợp lệ');
   return { data: { gt_qt: v, ngay_qt: b?.ngay_qt || null }, errors };
 }
-const VB_KHOA_MSG = (so) => `${so} đã có số quyết toán (TĐ3) – văn bản đang khoá (cả TĐ1, TĐ2). Muốn sửa: ở tab TĐ3 bấm 🔓 Mở khoá (cần Passcode).`;
-const KHOA_MSG = (so) => `HĐ ${so} đã chốt quyết toán – đang khoá toàn bộ hợp đồng. Muốn sửa: mở hộp Quyết toán, bỏ chốt (cần Passcode).`;
+const VB_KHOA_MSG = (so) => `${so} đã có số quyết toán (TĐ3) – văn bản đang khoá (cả TĐ1, TĐ2). Muốn sửa: bấm 🔓 Mở khoá dự án (Passcode – mở 1 lần cho cả dự án).`;
+const KHOA_MSG = (so) => `HĐ ${so} đã chốt quyết toán – đang khoá toàn bộ hợp đồng. Muốn sửa: bấm 🔓 Mở khoá dự án (Passcode – mở 1 lần cho cả dự án).`;
+// V16.27.11.26: lỗi khoá số kèm mã dự án -> trang hỏi Passcode MỞ KHOÁ CẢ DỰ ÁN 1 lần rồi làm tiếp (khoá TĐ đã trình / duyệt giữ riêng)
+const khoaDa = (res, msg, daId) => res.status(423).json({ errors: [msg], mo_khoa_da: Number(daId) || null });
+const NHOM_KHOA_MSG = 'Nhóm này đã có số quyết toán (TĐ3) – đang khoá. Muốn sửa: bấm 🔓 Mở khoá dự án (Passcode – mở 1 lần cho cả dự án).';
 api.use(wrap(async (req, res, next) => {
   if (!req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
   const p = req.path, b = req.body || {};
@@ -366,6 +369,7 @@ api.use(wrap(async (req, res, next) => {
   // Văn bản HĐ / PL doanh thu đã có số quyết toán -> khoá văn bản (TĐ1, TĐ2, TĐ3)
   const vbDt = async (id) => { const r = await store.getRevenue(Number(id)); if (!r || r.loai !== 'hd') return null; const g = await nhomHd(r.du_an_id, r.so_ma); return { r: g.ds.find((x) => x.id === r.id) || r, g }; };
   const coQt = (x) => x && x.gt_qt !== null && x.gt_qt !== undefined && x.gt_qt !== '';
+  const daL = async (l) => (l ? (await store.getTp(l.tp_id))?.du_an_id || null : null); // dự án của dòng HĐ / PL đầu vào
   // V06.26.11.26: TĐ2 / TĐ3 đã trình / đã duyệt -> khoá số liệu của thời điểm đó (dự trù VÀ HĐ / PL)
   //  TĐ2: đợt điều chỉnh HĐ / PL (doanh thu, HĐ đầu vào), điều chỉnh dự trù (cả bảng DT-CP TĐ2), đóng / mở gói, % gián tiếp / tài chính TĐ2
   //  TĐ3: số quyết toán văn bản, chốt quyết toán HĐ, quyết toán nhóm dự trù, số chốt khoản
@@ -395,34 +399,34 @@ api.use(wrap(async (req, res, next) => {
   }
   if ((m = p.match(/^\/doanh-thu\/(\d+)\/qt$/))) {
     const v = await vbDt(m[1]); if (!v) return bad(res, 'Không tìm thấy HĐ / PL', 404);
-    if (req.method === 'PUT' && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423);
+    if (req.method === 'PUT' && coQt(v.r) && !daMo(v.r.du_an_id)) return khoaDa(res, VB_KHOA_MSG(v.r.so_hieu), v.r.du_an_id);
     if (req.method === 'DELETE') { if (!coQt(v.r)) return bad(res, `${v.r.so_hieu} chưa có số quyết toán – không cần mở khoá`); if (!(await requirePasscode(req, res))) return; }
     return next();
   }
   if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/doanh-thu\/(\d+)$/))) {
-    const v = await vbDt(m[1]); if (v && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423);
+    const v = await vbDt(m[1]); if (v && coQt(v.r) && !daMo(v.r.du_an_id)) return khoaDa(res, VB_KHOA_MSG(v.r.so_hieu), v.r.du_an_id);
   }
-  if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'dt') { const v = await vbDt(b.vb_id); if (v && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423); }
+  if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'dt') { const v = await vbDt(b.vb_id); if (v && coQt(v.r) && !daMo(v.r.du_an_id)) return khoaDa(res, VB_KHOA_MSG(v.r.so_hieu), v.r.du_an_id); }
   if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/dieu-chinh\/(\d+)$/))) {
     const d = await store.getDieuChinh(Number(m[1]));
-    if (d?.loai === 'dt') { const v = await vbDt(d.vb_id); if (v && coQt(v.r)) return bad(res, VB_KHOA_MSG(v.r.so_hieu), 423); }
-    if (d?.loai === 'tp') { const l = await store.getTpLine(d.vb_id); if (l && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423); }
+    if (d?.loai === 'dt') { const v = await vbDt(d.vb_id); if (v && coQt(v.r) && !daMo(v.r.du_an_id)) return khoaDa(res, VB_KHOA_MSG(v.r.so_hieu), v.r.du_an_id); }
+    if (d?.loai === 'tp') { const l = await store.getTpLine(d.vb_id); if (l && l.gia_tri_qt !== null && !daMo(await daL(l))) return khoaDa(res, VB_KHOA_MSG(l.ma_loai), await daL(l)); }
   }
   // HĐ đầu vào: dòng HĐ / PL đã có số quyết toán -> khoá dòng; mọi dòng đã có số -> đóng HĐ (không thêm PL)
   if ((m = p.match(/^\/tp-hd-pl\/(\d+)\/qt$/))) {
     const l = await store.getTpLine(Number(m[1])); if (!l) return bad(res, 'Không tìm thấy dòng HĐ/PL', 404);
-    if (req.method === 'PUT' && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423);
+    if (req.method === 'PUT' && l.gia_tri_qt !== null && !daMo(await daL(l))) return khoaDa(res, VB_KHOA_MSG(l.ma_loai), await daL(l));
     if (req.method === 'DELETE') { if (l.gia_tri_qt === null) return bad(res, `${l.ma_loai} chưa có số quyết toán – không cần mở khoá`); if (!(await requirePasscode(req, res))) return; }
     return next();
   }
   if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/tp-hd-pl\/(\d+)$/))) {
-    const l = await store.getTpLine(Number(m[1])); if (l && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423);
+    const l = await store.getTpLine(Number(m[1])); if (l && l.gia_tri_qt !== null && !daMo(await daL(l))) return khoaDa(res, VB_KHOA_MSG(l.ma_loai), await daL(l));
   }
-  if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'tp') { const l = await store.getTpLine(Number(b.vb_id)); if (l && l.gia_tri_qt !== null) return bad(res, VB_KHOA_MSG(l.ma_loai), 423); }
+  if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'tp') { const l = await store.getTpLine(Number(b.vb_id)); if (l && l.gia_tri_qt !== null && !daMo(await daL(l))) return khoaDa(res, VB_KHOA_MSG(l.ma_loai), await daL(l)); }
   if (req.method === 'POST' && (m = p.match(/^\/thau-phu\/(\d+)\/hd-pl$/))) {
     const t = await store.getTp(Number(m[1]));
     const ls = t ? (await store.listTp(t.du_an_id)).lines.filter((l) => l.tp_id === t.id) : [];
-    if (ls.length && ls.every((l) => l.gia_tri_qt !== null && l.gia_tri_qt !== undefined)) return bad(res, `HĐ ${t.so_ma} đã quyết toán hết HĐ và PL – đã đóng, không thêm phụ lục. Muốn thêm: mở khoá 1 văn bản ở tab TĐ3 (cần Passcode).`, 423);
+    if (ls.length && ls.every((l) => l.gia_tri_qt !== null && l.gia_tri_qt !== undefined) && !daMo(t.du_an_id)) return bad(res, `HĐ ${t.so_ma} đã quyết toán hết HĐ và PL – đã đóng, không thêm phụ lục. Muốn thêm: mở khoá 1 văn bản ở tab TĐ3 (cần Passcode).`, 423);
   }
   // V01.26: TĐ1 đã trình / đã duyệt -> khoá dự trù TĐ1 (gói, khoản, bảng DT-CP, dự trù nhanh TĐ1). Khoản phát sinh TĐ2 (TĐ1 = 0), điều chỉnh, đóng, chốt vẫn làm được.
   {
@@ -438,14 +442,14 @@ api.use(wrap(async (req, res, next) => {
   // Dự trù: nhóm đã có quyết toán (TĐ3) -> khoá nhóm; mở khoá = xóa dòng quyết toán (cần Passcode)
   if ((m = p.match(/^\/du-an\/(\d+)\/du-tru$/)) && req.method === 'POST') {
     const ds = (await store.listDuTru(Number(m[1]))).filter((x) => x.nhom === b.nhom);
-    if (ds.some((x) => x.loai === 'qt')) return bad(res, 'Nhóm này đã có số quyết toán (TĐ3) – đang khoá. Muốn sửa: ở tab TĐ3 bấm 🔓 Mở khoá (cần Passcode).', 423);
+    if (ds.some((x) => x.loai === 'qt') && !daMo(Number(m[1]))) return khoaDa(res, NHOM_KHOA_MSG, m[1]);
   }
   if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/du-tru\/(\d+)$/))) {
     const x = await store.getDuTru(Number(m[1]));
     if (x) {
       const coQtNhom = (await store.listDuTru(x.du_an_id)).some((y) => y.nhom === x.nhom && y.loai === 'qt');
       if (x.loai === 'qt' && req.method === 'DELETE') { if (!(await requirePasscode(req, res))) return; return next(); }
-      if (coQtNhom) return bad(res, 'Nhóm này đã có số quyết toán (TĐ3) – đang khoá. Muốn sửa: ở tab TĐ3 bấm 🔓 Mở khoá (cần Passcode).', 423);
+      if (coQtNhom && !daMo(x.du_an_id)) return khoaDa(res, NHOM_KHOA_MSG, x.du_an_id);
     }
   }
   // Chốt / mở chốt quyết toán
@@ -454,7 +458,7 @@ api.use(wrap(async (req, res, next) => {
     if (!head || head.loai !== 'hd' || head.ma_loai !== 'HĐ') return next();
     const g = await nhomHd(head.du_an_id, head.so_ma);
     const dong = b.dong === true || b.dong === 'true', daChot = Boolean(g.head?.qt_dong);
-    if (daChot && dong) return bad(res, KHOA_MSG(head.so_ma), 423);
+    if (daChot && dong && !daMo(head.du_an_id)) return khoaDa(res, KHOA_MSG(head.so_ma), head.du_an_id);
     if (daChot && !dong) { if (!(await requirePasscode(req, res))) return; return next(); } // mở khoá
     if (dong) {
       const co = new Map((Array.isArray(b.items) ? b.items : []).map((x) => [Number(x?.id), String(x?.gt_qt ?? '').trim()]));
@@ -465,38 +469,40 @@ api.use(wrap(async (req, res, next) => {
   }
   // Sửa / xóa dòng HĐ / PL của HĐ đã chốt
   if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/doanh-thu\/(\d+)$/))) {
-    const h = await khoaCua(await store.getRevenue(Number(m[1]))); if (h) return bad(res, KHOA_MSG(h.so_ma), 423);
+    const h = await khoaCua(await store.getRevenue(Number(m[1]))); if (h && !daMo(h.du_an_id)) return khoaDa(res, KHOA_MSG(h.so_ma), h.du_an_id);
   }
   // Thêm PL mới cho HĐ đã chốt
   if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/doanh-thu$/)) && b.loai === 'hd' && b.so_ma) {
-    const g = await nhomHd(Number(m[1]), b.so_ma); if (g.head?.qt_dong) return bad(res, KHOA_MSG(g.head.so_ma), 423);
+    const g = await nhomHd(Number(m[1]), b.so_ma); if (g.head?.qt_dong && !daMo(Number(m[1]))) return khoaDa(res, KHOA_MSG(g.head.so_ma), m[1]);
   }
   // Đợt điều chỉnh của văn bản thuộc HĐ đã chốt
   if (req.method === 'POST' && p === '/dieu-chinh' && b.loai === 'dt') {
-    const h = await khoaCua(await store.getRevenue(Number(b.vb_id))); if (h) return bad(res, KHOA_MSG(h.so_ma), 423);
+    const h = await khoaCua(await store.getRevenue(Number(b.vb_id))); if (h && !daMo(h.du_an_id)) return khoaDa(res, KHOA_MSG(h.so_ma), h.du_an_id);
   }
   if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/dieu-chinh\/(\d+)$/))) {
     const d = await store.getDieuChinh(Number(m[1]));
-    if (d?.loai === 'dt') { const h = await khoaCua(await store.getRevenue(d.vb_id)); if (h) return bad(res, KHOA_MSG(h.so_ma), 423); }
+    if (d?.loai === 'dt') { const h = await khoaCua(await store.getRevenue(d.vb_id)); if (h && !daMo(h.du_an_id)) return khoaDa(res, KHOA_MSG(h.so_ma), h.du_an_id); }
   }
   next();
 }));
 // ===================== KHOÁ SỐ DỰ ÁN KHI CÒN LẠI = 0 (V02.19.11.26) =====================
 // Đã có doanh thu, còn phải thu = 0 và còn phải chi = 0 (cùng số Báo cáo mục III) -> khoá nhập số liệu của cả dự án.
-// Mở khoá tạm 60 phút bằng Passcode (khoá lại khi bấm Khoá lại hoặc hết giờ); còn lại ≠ 0 thì tự mở.
-const daMoKhoa = new Map(); // id dự án -> hết hạn mở khoá
-const DA_MO_KHOA_MS = 60 * 60 * 1000;
+// V16.27.11.26: mở khoá bằng Passcode 1 LẦN = mở mọi khoá số của dự án (còn lại = 0, HĐ / PL / nhóm đã quyết toán, HĐ đầu vào trả đủ);
+//  giữ mở tới khi bấm Khoá lại – lưu ở cài đặt "mo_khoa_du_an" (không mất khi cập nhật bản mới). Khoá TĐ đã trình / duyệt giữ riêng.
+const daMoKhoa = new Set();
+async function napMoKhoa() { try { const v = (await store.getSettings()).mo_khoa_du_an; daMoKhoa.clear(); for (const x of JSON.parse(v || '[]')) daMoKhoa.add(Number(x)); } catch { /* giữ trống */ } }
+const luuMoKhoa = () => store.saveSettings({ mo_khoa_du_an: JSON.stringify([...daMoKhoa]) });
 async function baoCaoDa(p) {
   const [rev, tienVe, cost, tp, duTru] = await Promise.all([store.listRevenue(p.id), store.listTienVe(p.id), store.listCost(p.id), store.listTp(p.id), store.listDuTru(p.id)]);
   return projectReport(p, { rev: sortRevenue(rev).map(calcLine), tienVe: sortTienVe(tienVe), cost: sortCost(cost).map(costLine), tp: buildContracts(tp), duTru });
 }
-const daMo = (id) => { const e = daMoKhoa.get(id); if (e && e > Date.now()) return true; if (e) daMoKhoa.delete(id); return false; };
+const daMo = (id) => daMoKhoa.has(Number(id));
 async function daKhoaSo(duAnId) {
   if (!duAnId || daMo(duAnId)) return false;
   const p = await store.getProject(duAnId); if (!p) return false;
   return Boolean((await baoCaoDa(p)).con_lai?.khoa);
 }
-const DA_KHOA_MSG = (ma) => `Dự án ${ma} đã thu đủ, chi đủ (còn lại = 0) – đang khoá nhập số liệu. Muốn sửa: bấm 🔓 Mở khoá dự án (cần Passcode).`;
+const DA_KHOA_MSG = (ma) => `Dự án ${ma} đã thu đủ, chi đủ (còn lại = 0) – đang khoá nhập số liệu. Muốn sửa: bấm 🔓 Mở khoá dự án (Passcode – mở 1 lần cho cả dự án).`;
 api.use(wrap(async (req, res, next) => {
   if (req.noiBo !== undefined || !req.user || !['POST', 'PUT', 'DELETE'].includes(req.method)) return next();
   const r = DUYET_TRUOC.find(([m, re]) => m === req.method && re.test(req.path));
@@ -508,7 +514,7 @@ api.use(wrap(async (req, res, next) => {
   else if (tim === 'vb') du_an_id = (await vanBanOf(body.loai, Number(body.vb_id)))?.du_an_id || null;
   else if (tim === 'r') { const before = await store.auditInfo(kind, id); du_an_id = before ? (await store.listProjects()).find((x) => x.ma_du_an === before.ma_du_an)?.id || null : null; }
   else if (kind === 'sddk') du_an_id = Number(body.du_an_id) || null;
-  if (du_an_id && (await daKhoaSo(du_an_id))) { const p = await store.getProject(du_an_id); return bad(res, DA_KHOA_MSG(p?.ma_du_an || ''), 423); }
+  if (du_an_id && (await daKhoaSo(du_an_id))) { const p = await store.getProject(du_an_id); return khoaDa(res, DA_KHOA_MSG(p?.ma_du_an || ''), du_an_id); }
   next();
 }));
 const soTien = (x) => { const n = Number(String(x ?? '').replace(/[.,\s]/g, '')); return Number.isFinite(n) && String(x ?? '').trim() !== '' ? n : null; };
@@ -1006,12 +1012,12 @@ api.get('/du-an-tinh-trang', wrap(async (_req, res) => res.json((await reportPro
 api.post('/du-an/:id/mo-khoa-so', canMoKhoa, wrap(async (req, res) => {
   const p = await store.getProject(parseId(req.params.id)); if (!p) return bad(res, 'Không tìm thấy dự án', 404);
   if (!(await requirePasscode(req, res))) return;
-  daMoKhoa.set(p.id, Date.now() + DA_MO_KHOA_MS);
+  daMoKhoa.add(p.id); await luuMoKhoa();
   console.log(`[NHẬT KÝ] ${new Date().toISOString()} ${req.user.username} đã MỞ KHOÁ SỐ dự án "${p.ma_du_an}" (#${p.id})`);
-  res.json({ ok: true, het_han: DA_MO_KHOA_MS / 60000 });
+  res.json({ ok: true });
 }));
 api.post('/du-an/:id/khoa-so', canMoKhoa, wrap(async (req, res) => {
-  const id = parseId(req.params.id); daMoKhoa.delete(id); res.json({ ok: true });
+  const id = parseId(req.params.id); daMoKhoa.delete(id); await luuMoKhoa(); res.json({ ok: true });
 }));
 
 api.post('/du-an', canHd, wrap(async (req, res) => {
@@ -1804,7 +1810,7 @@ api.delete('/chi-phi/:id', canTien, wrap(async (req, res) => {
 }));
 
 // ---------- Thầu phụ theo hợp đồng ----------
-const LOCK_MSG = 'Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) – đã khóa số. Muốn điều chỉnh, bấm Mở khóa (cần Passcode).';
+const LOCK_MSG = 'Hợp đồng đã quyết toán và thanh toán đủ (còn lại = 0) – đã khóa số. Muốn sửa: bấm 🔓 Mở khoá dự án (Passcode – mở 1 lần cho cả dự án).';
 // Mở khóa tạm (sau khi nhập đúng Passcode): tpId -> hết hạn; khóa lại khi đóng bảng chi tiết hoặc sau 60 phút
 const tpMoKhoa = new Map();
 const TP_MO_KHOA_MS = 60 * 60 * 1000;
@@ -1813,12 +1819,12 @@ async function tpIsLocked(tpId) {
   if (exp && exp > Date.now()) return false;
   if (exp) tpMoKhoa.delete(tpId);
   const tp = await store.getTp(tpId);
-  if (!tp) return false;
+  if (!tp || daMo(tp.du_an_id)) return false;
   const c = buildContracts(await store.listTp(tp.du_an_id)).find((x) => x.id === tpId);
   return Boolean(c?.khoa_so); // khóa sửa: đã quyết toán + còn lại = 0
 }
 async function lockedErr(res, tpId) {
-  if (await tpIsLocked(tpId)) { bad(res, LOCK_MSG, 423); return true; }
+  if (await tpIsLocked(tpId)) { khoaDa(res, LOCK_MSG, (await store.getTp(tpId))?.du_an_id); return true; }
   return false;
 }
 async function tpOf(req, res) {
@@ -2024,6 +2030,7 @@ app.listen(PORT, '0.0.0.0', () => console.log(`Server chạy tại cổng ${PORT
       const t = await store.migrateTienVeHd();
       if (t) console.log(`Đã gắn HĐ cho ${t} dòng tiền về cũ`);
       await migrateTpHdCdt();
+      await napMoKhoa();
       dbState.ready = true;
       dbState.error = null;
       audit.startPrune();

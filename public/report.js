@@ -723,9 +723,9 @@ function bHtSection(list, v) {
 //  DT, CP: cùng số mục I (TĐ1 = số chốt TĐ1 / hệ thống; TĐ2, TĐ3 = mục IV) · Dòng thu, dòng chi: mục II (lũy kế, theo nút VAT)
 // V02.19.11.26: biểu tượng khoá số dự án (còn lại = 0: đã thu đủ, chi đủ) – bấm để mở / khoá lại (người nhập HĐ / tiền)
 function bKhoaIc(d) {
-  if (!d.con_lai?.khoa) return '';
+  if (!d.con_lai?.khoa && !d.mo_khoa_so) return '';
   const quyen = ['admin', 'editor', 'qs', 'ke_toan'].includes(ME.role);
-  const t = d.mo_khoa_so ? 'Đang mở khoá tạm để điều chỉnh' + (quyen ? ' – bấm để khoá lại' : '') : 'Đã thu đủ, chi đủ (còn lại = 0) – khoá nhập số liệu' + (quyen ? '. Bấm để mở khoá (Passcode)' : '');
+  const t = d.mo_khoa_so ? 'Dự án đang mở khoá (mọi khoá số)' + (quyen ? ' – bấm để khoá lại' : '') : 'Đã thu đủ, chi đủ (còn lại = 0) – khoá nhập số liệu' + (quyen ? '. Bấm để mở khoá (Passcode)' : '');
   const ic = d.mo_khoa_so ? '🔓' : '🔒';
   return quyen ? `<button type="button" class="da-ic ${d.mo_khoa_so ? 'mo' : ''}" ${d.mo_khoa_so ? 'data-dakhoa' : 'data-damk'}="${d.id}" title="${t}">${ic}</button>` : `<span class="da-ic" title="${t}">${ic}</span>`;
 }
@@ -739,7 +739,7 @@ function bGhiChuNhanh(list, v, warnN) {
   if (one) it.push(`<b>${esc(one.trang_thai)}</b>${one.ht_tu_dong != null ? ` (${Math.round(one.ht_tu_dong * 100)}% hoàn thành)` : ''}`);
   else { const c = {}; for (const d of list) c[d.trang_thai] = (c[d.trang_thai] || 0) + 1; it.push(`<b>${list.length}</b> dự án: ${Object.entries(c).map(([k, n]) => `${n} ${esc(k)}`).join(' · ')}`); }
   it.push(`Còn phải thu ${ty(T.pt)}`, `Còn phải chi ${ty(T.pc)}`, `Còn lại ${ty(T.con)}`);
-  if (one && one.con_lai?.khoa) it.push(one.mo_khoa_so ? '🔓 Đang mở khoá tạm' : '🔒 Đã khoá số');
+  if (one && (one.con_lai?.khoa || one.mo_khoa_so)) it.push(one.mo_khoa_so ? '🔓 Đang mở khoá' : '🔒 Đã khoá số');
   else if (khoaN) it.push(`🔒 ${khoaN} dự án đã khoá số`);
   return `<div class="b-note" title="Tự động theo số liệu – thời điểm mới nhất (như mục III)"><em>Tình trạng</em>${it.map((x) => `<span>${x}</span>`).join('')}</div>`;
 }

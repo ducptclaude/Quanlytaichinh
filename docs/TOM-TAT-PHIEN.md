@@ -2,6 +2,13 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V16.27.11.26 – Mở khoá dự án 1 lần = mở mọi khoá số (người dùng chọn A)
+- Trước: 4 loại khoá riêng; khoá dự án (còn lại = 0) chỉ mở tạm 60 phút, lưu trong bộ nhớ → mỗi lần cập nhật bản mới tự khoá lại.
+- Nay: Passcode 1 lần mở mọi khoá số của dự án: thu đủ chi đủ, HĐ / PL CĐT đã quyết toán, HĐ đầu vào đã QT / trả đủ, nhóm dự trù đã QT. Giữ mở tới khi bấm 🔒 Khoá lại; lưu ở cài đặt `mo_khoa_du_an` (không mất khi khởi động lại). Khoá TĐ đã trình / duyệt giữ riêng.
+- Lỗi khoá trả kèm `mo_khoa_da` → trang tự hỏi Passcode "Mở khoá dự án?" rồi làm tiếp thao tác đang dở (public/common.js api).
+- Thanh trạng thái Doanh thu / Chi phí và biểu tượng ở Báo cáo hiện cả khi dự án đang mở khoá (để Khoá lại).
+- Kiểm tra: mo-khoa-1-lan 9, khoa-du-an đạt, PostgreSQL: mở → khởi động lại vẫn mở, khoá lại → khởi động lại vẫn khoá; giao diện tự hỏi Passcode rồi thêm được. tester 4518, kiem-tra-goi 246, td23 25, tdk 31, tdps 8, duyet 28, cp-khac 13, doi-chieu-cp 73 – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V15.27.11.26 – Sửa: tiền chi gắn khoản tính theo TĐ của khoản (lương bị dồn về TĐ3)
 - Lỗi: ghi chi lương tháng 10 lúc đang mở tab TĐ3 → dòng chi bị coi là phát sinh TĐ3; phần đã chi vẫn bị trừ khỏi dự trù khoản ở TĐ1 / TĐ2 → TĐ1, TĐ2 thấp, dồn hết về TĐ3.
 - Sửa: chi có gắn gói / khoản lấy TĐ của khoản (máy chủ lib/report.js projectReport0 + thẻ tổng trang Chi phí). Bài kiểm tra mới scripts/kiem-tra-them/chi-theo-khoan.js (mã cũ: TĐ2 = 47tr sai, mã mới 95tr đúng).

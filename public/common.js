@@ -28,6 +28,11 @@ async function api(url, opts = {}) {
   }
   if (res.status === 204) return null;
   const body = await res.json().catch(() => ({}));
+  // V16.27.11.26: bị khoá số (HĐ / nhóm đã quyết toán, dự án thu đủ chi đủ…) -> hỏi Passcode mở khoá CẢ DỰ ÁN 1 lần rồi làm tiếp
+  if (res.status === 423 && body.mo_khoa_da && !opts._moKhoa && typeof askPasscode === 'function') {
+    const pc = await askPasscode('Mở khoá dự án?', `${(body.errors || []).join(' ')}\n\nMở 1 lần cho CẢ dự án (mọi khoá số: thu đủ chi đủ, HĐ / PL / nhóm đã quyết toán). Giữ mở tới khi bấm 🔒 Khoá lại. Khoá TĐ đã trình / duyệt vẫn giữ riêng.`, 'Mở khoá dự án');
+    if (pc !== null) { await api(`/api/du-an/${body.mo_khoa_da}/mo-khoa-so`, { method: 'POST', body: JSON.stringify({ passcode: pc }), _moKhoa: true }); return api(url, { ...opts, _moKhoa: true }); }
+  }
   if (!res.ok) throw new Error((body.errors || ['Lỗi ' + res.status]).join('\n'));
   // Đã gửi duyệt (chưa ghi vào số liệu): báo cho trang biết để hiện thông báo + mục "Chờ duyệt"
   if (res.status === 202 && body && body.cho_duyet) { window.__choDuyetLuc = Date.now(); try { window.dispatchEvent(new CustomEvent('bks-cho-duyet', { detail: body })); } catch { /* trình duyệt cũ */ } }

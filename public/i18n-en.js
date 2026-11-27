@@ -1,6 +1,11 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"🔓 Đang mở khoá": "🔓 Unlocked",
+"Dự án đang mở khoá": "Project unlocked",
+"Mở khoá dự án?": "Unlock project?",
+"Mở khoá dự án": "Unlock project",
+"– mọi khoá số (thu đủ chi đủ, HĐ / PL / nhóm đã quyết toán) đang mở. Sửa xong bấm Khoá lại.": "– all figure locks (fully collected and spent, contracts / addenda / groups with final account) are open. Press Lock again when done.",
 "Dự trù chung đã chia cho các khoản chi tiết (VD Lương tháng 10, 11…) – ": "General estimate already allocated to detailed items (e.g. Salary Oct, Nov…) – ",
 "ghi chi và chốt số ở từng khoản": "record expenditure and final figures on each item",
 "TĐ3 từng khoản = số chốt; chưa chốt = TĐ2. Thêm khoản mới phát sinh TĐ3 (TĐ1, TĐ2 = 0): nhập tên + số chốt.": "M3 per item = final figure; if not finalised = M2. New M3 item (M1, M2 = 0): enter name + final figure.",
