@@ -3997,3 +3997,4 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 .dtcp-table small.dtcp-cach:empty { display: none; }
 .dtcp-table[data-k="3"] :is(th, td):nth-child(4) { display: none; } /* TĐ3 chỉ xem: không có cột nhập */
 .dtcp-table .dtcp-in::placeholder { color: var(--muted); font-weight: 400; opacity: .55; }
+.dtcp-table .dtcp-ls { font-size: 11px; margin-right: 6px; white-space: nowrap; }

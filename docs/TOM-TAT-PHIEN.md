@@ -2,6 +2,15 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.27.11.26 – Lương phát sinh liên tục + Lịch sử trên bảng DT-CP + Gộp "Điều chỉnh cả nhóm" vào gói
+- Khoản gián tiếp / tài chính: TĐ3 có "＋ Khoản mới (phát sinh TĐ3)" (`du_tru ky`, so_tien 0, `td_ps = 3`, số chốt tuỳ chọn; trống = TĐ3 theo tiền đã chi gắn khoản).
+  Thêm khoản (TĐ1 / TĐ2 / TĐ3) tự gợi ý tên tháng kế tiếp theo khoản cùng nhóm ("Lương tháng 11" -> "Lương tháng 12"), vẫn sửa được.
+- Quy tắc lương (người dùng xác nhận, khớp cách tính sẵn có): TĐ1 dự trù T10 + thưởng · TĐ2 + T11 (khoản mới) · TĐ3 = tổng lương đã trả + thưởng đã chốt.
+- Bảng DT-CP: cột Nguồn có "Lịch sử (n) ›" -> hộp gói / khoản / đợt điều chỉnh / chốt của nhóm (openDtr).
+- Hộp chi tiết HĐ đầu vào: dòng "Điều chỉnh cả nhóm" (đợt không gắn gói – gồm đợt gõ ± ở bảng TĐ2 trước V02.27) có nút "Gộp vào gói": chuyển đợt bảng DT-CP vào gói cùng hạng mục, tổng nhóm không đổi.
+- Kiểm tra `scripts/kiem-tra-them/luong.js` 13 ĐẠT (TĐ1 75 · TĐ2 120 · TĐ3 170 như file Giả định 2; gợi ý T11 / T12; Lịch sử; Gộp: Vật tư TĐ2 giữ 45, gói phụ 49,5 sau VAT);
+  tester 4518, kiem-tra-goi 246, td2-socuoi 17, td23 26, cp-khac 13 ĐẠT.
+
 ## V03.27.11.26 – Bảng DT-CP (cả 3 TĐ): bỏ cột "Cách điền" (trùng cột Nguồn; TĐ3 trống); gõ % / công thức thì hiện chú thích nhỏ dưới ô (VD "= 8% doanh thu"). TĐ3 ẩn cột nhập trống. Số gợi ý trong ô TĐ2 nhạt hơn. Kiểm tra: số cột khớp mọi dòng ở 3 TĐ, không tràn (1366, iPhone 13); td2-socuoi 17, td23 26, tester 0 lỗi.
 
 ## V02.27.11.26 – Sửa TĐ2 rắc rối / sai số (người dùng duyệt 3 điểm)
