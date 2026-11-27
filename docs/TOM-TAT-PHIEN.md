@@ -2,6 +2,16 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.27.11.26 – Sửa TĐ2 rắc rối / sai số (người dùng duyệt 3 điểm)
+- ① Gói còn mở: TĐ2 / TĐ3 = MAX(gói ± điều chỉnh, HĐ đã gắn + mua lẻ đã gắn) – trước đây gắn HĐ đầu tiên là cả gói bị thay bằng HĐ (Thầu phụ 165 -> 15).
+  "Đóng gói" -> chỉ còn HĐ + mua lẻ thật. Máy chủ `duTruNhom(rows, hdOf, …)` + `goiV`; giao diện `dtrRem` (dùng chung ô tổng, hộp chi tiết, bảng DT-CP).
+- ② Bảng DT-CP TĐ2: ô nhập = SỐ CUỐI TĐ2 của dòng (placeholder = số hiện tại); Vật tư chính / phụ tính đúng từng dòng (`dtcpCon`: gói + HĐ + mua lẻ của hạng mục), có cột TĐ1 cho dòng con.
+- ③ Lưu: chênh lệch ghi vào đợt điều chỉnh của GÓI của dòng (`goi_ref`, sửa lại thì cập nhật đợt đó); dòng chưa có gói: tăng -> khoản phát sinh TĐ2, giảm -> báo; không cho thấp hơn HĐ + đã mua.
+  Hộp chi tiết: đợt gắn gói nằm trong gói; dòng "Điều chỉnh cả nhóm" chỉ còn đợt không gắn gói (số cũ giữ nguyên).
+- Kiểm tra `scripts/kiem-tra-them/td2-socuoi.js` 17 ĐẠT (tình huống người dùng: Thầu phụ 165 + HĐ 15 -> TĐ2 165; gõ 150 -> 150; Vật tư phụ 50 -> 45 -> 48 (1 đợt); Thầu phụ 10 < HĐ -> chặn; MMTB phát sinh 20);
+  td23 cập nhật theo "số cuối" 26 ĐẠT; tester 4518, kiem-tra-goi 246, nhom-ps 13, cp-khac 13, tdk 31, dcA 22 ĐẠT.
+- Lưu ý dữ liệu thật: dự án có gói đã gắn HĐ nhưng chưa "Đóng gói" sẽ tăng TĐ2/TĐ3 (thêm phần gói chưa ký) – người dùng đóng gói nếu đã ký đủ.
+
 ## V01.27.11.26 – Hộp chi tiết nhóm HĐ đầu vào gọn, hết cuộn ngang: hộp rộng tới 1440px, chữ / ô gọn, cột Đối tác cắt ngắn, nút nhỏ xuống dòng; điện thoại chỉ giữ Hạng mục · TĐ đang xem · Còn lại · nút (đối tác hiện dưới số HĐ). Đo: 1290px, 1366px, iPhone 13 đều không cuộn.
 
 ## V12.26.11.26 – "CP khác" đủ quy tắc phát sinh: Chi tiết · điều chỉnh TĐ2 · quyết toán / chốt TĐ3 · ghi chi · xoá

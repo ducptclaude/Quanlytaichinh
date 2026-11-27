@@ -25,13 +25,14 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   const cp2a = await p.evaluate(() => Number(costData.cp_nhom.find((n) => n.code === 'tc_chi_phi')?.gt?.[1]) || 0);
   const ip = p.locator('.dtcp-table tr.dtcp-n[data-nhom="tc_chi_phi"] .dtcp-in');
   chk('ô nhập TĐ2 mở', await ip.isEnabled());
-  await ip.fill('+50tr'); await p.waitForTimeout(200);
+  const cur = await p.evaluate(() => Number(document.querySelector('.dtcp-table tr.dtcp-n[data-nhom="tc_chi_phi"]').dataset.auto) || 0); // V02.27.11.26: ô TĐ2 = SỐ CUỐI
+  await ip.fill(String(cur + 50000000)); await p.waitForTimeout(200);
   chk('xem trước: ± so TĐ1 hiện', await p.evaluate(() => /▲|▼|=/.test(document.querySelector('.dtcp-table tr.dtcp-n[data-nhom="tc_chi_phi"] .dtcp-lech').innerText)));
   await p.click('[data-dtcpluu]'); await p.waitForTimeout(2000);
   const cp2b = await p.evaluate(() => Number(costData.cp_nhom.find((n) => n.code === 'tc_chi_phi')?.gt?.[1]) || 0);
-  chk('lưu +50tr: chi phí nhóm TĐ2 tăng đúng 50.000.000', cp2b - cp2a === 50000000, `${cp2a} -> ${cp2b}`);
-  const r2 = (await J(`/api/du-an/${id}/chi-phi`)).j.du_tru.find((r) => r.loai === 'dc' && r.dtcp && r.nhom === 'tc_chi_phi');
-  chk('ghi thành 1 dòng điều chỉnh (dc) của nhóm', r2 && Number(r2.so_tien) === 50000000 && r2.ct_nhap === '+50tr');
+  chk('gõ số cuối = hiện tại + 50tr: chi phí nhóm TĐ2 tăng đúng 50.000.000', cp2b - cp2a === 50000000, `${cp2a} -> ${cp2b}`);
+  const r2 = (await J(`/api/du-an/${id}/chi-phi`)).j.du_tru.find((r) => r.dtcp && r.nhom === 'tc_chi_phi' && (r.loai === 'dc' || Number(r.td_ps) === 2));
+  chk('phần chênh +50tr ghi thành 1 dòng (gói của dòng hoặc khoản phát sinh TĐ2)', r2 && Number(r2.so_tien) === 50000000, JSON.stringify(r2));
   // 3) trình TĐ2 -> khoá dự trù và HĐ
   chk('trình TĐ2', (await TD(2, 'trinh')).s === 200);
   chk('TĐ2 chờ duyệt: chặn điều chỉnh dự trù', (await J(`/api/du-tru/${r2.id}`, 'PUT', { so_tien: 1 })).s === 423);

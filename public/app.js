@@ -2156,8 +2156,9 @@ function costKpiTd() {
     const dt = costData.du_tru || [];
     for (const code of new Set(dt.map((r) => r.nhom))) {
       const rs = dt.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
-      const t2 = rs.filter((r) => r.loai === 'ky' && !gan.has(r.id) && r.tinh_trang !== 'dong').reduce((t, r) => t + Math.max(0, svL(r) - leGoi(r.id)), 0) + S('dc'); // gói mở: phần chưa mua lẻ hết
-      const v = kk === 1 ? S('ky') : kk === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2;
+      const kyIds = new Set(rs.filter((r) => r.loai === 'ky').map((r) => r.id)); // V02.27.11.26: gói mở = MAX(gói ± điều chỉnh, HĐ + mua lẻ) – khớp máy chủ
+      const tK = (x) => rs.filter((r) => r.loai === 'ky').reduce((t, r) => t + dtrRem(r, x, 'sv'), 0) + S('dc', (r) => !kyIds.has(r.goi_ref));
+      const v = kk === 1 ? S('ky', (r) => !(Number(r.td_ps) > 1)) : kk === 3 && rs.some((r) => r.loai === 'qt') ? S('qt') : tK(kk);
       o[khoiOf(code)] += v; o.goi += v;
     }
     // V10.16: gián tiếp / tài chính theo % doanh thu (TĐ1, TĐ2) hoặc thực chi (TĐ3) – lấy đúng số máy chủ (như Báo cáo)
@@ -2223,7 +2224,11 @@ function dtcpHtml(k = 1) {
   const dong = (code, con = '') => (costData.du_tru || []).find((r) => r.loai === loaiN && r.dtcp && r.nhom === code && (r.nhom_con || (DTCP_TACH[code] ? DTCP_TACH[code][0] : '')) === con);
   const pdt = (x) => (dt ? `${((x / dt) * 100).toFixed(1).replace('.', ',')}%` : '—');
   const TEN_K = { B1: 'CHI PHÍ TRỰC TIẾP', B2: 'CHI PHÍ GIÁN TIẾP', B3: 'CHI PHÍ TÀI CHÍNH' }, SO_K = { B1: 'I', B2: 'II', B3: 'III' };
-  const oNhap = (goc, ten) => (k === 3 ? '' : `<input class="dtcp-in" value="${esc(goc)}" data-goc="${esc(goc)}" ${moO ? '' : 'disabled'} autocomplete="off" aria-label="${esc(ten)}"${k === 2 ? ' placeholder="± điều chỉnh"' : ''}>`);
+  const oNhap = (goc, ten, cur = 0) => (k === 3 ? '' : `<input class="dtcp-in" value="${esc(goc)}" data-goc="${esc(goc)}" ${moO ? '' : 'disabled'} autocomplete="off" aria-label="${esc(ten)}"${k === 2 ? ` placeholder="${money(cur)}" title="Gõ SỐ CUỐI TĐ2 của dòng (đang ${money(cur)}); để trống = giữ nguyên"` : ''}>`);
+  // V02.27.11.26 – TĐ2: gói dự trù của dòng (bảng TĐ1 tạo) + đợt điều chỉnh đã ghi cho gói đó; mức thấp nhất = HĐ + mua lẻ đã gắn
+  const goiDong = (code, con = '') => (costData.du_tru || []).find((r) => r.loai === 'ky' && r.dtcp && !r.la_cp && r.nhom === code && (r.nhom_con || (DTCP_TACH[code] ? DTCP_TACH[code][0] : '')) === con && r.tinh_trang !== 'dong');
+  const k2Attr = (code, con, cur) => { if (k !== 2) return ''; const g = goiDong(code, con), d = g && (costData.du_tru || []).find((x) => x.loai === 'dc' && x.dtcp && x.goi_ref === g.id);
+    return ` data-goi="${g ? g.id : ''}" data-dcid="${d ? d.id : ''}" data-dcso="${d ? Number(d.so_tien) || 0 : 0}" data-min="${g ? cur - dtrRem(g, 2, 'gt') : cur}"`; };
   const cTruoc = (v) => (k > 1 ? `<td class="num muted">${dvT(v)}</td>` : ''), cLech = () => (k > 1 ? '<td class="num dtcp-lech"></td>' : '');
   const SRC = { 1: 'gói, HĐ, khoản, chi đã ghi', 2: 'gói, HĐ, khoản, điều chỉnh, chi đã ghi', 3: 'quyết toán HĐ, số chốt, thực chi' }[k];
   let body = '', stt = 0;
@@ -2235,31 +2240,31 @@ function dtcpHtml(k = 1) {
       stt++;
       const gtN = cpN.get(n.code)?.gt || [0, 0, 0];
       if (DTCP_TACH[n.code]) { // tách hạng mục (Vật tư chính / phụ): phần tự động của mua lẻ "phụ" vào dòng phụ, còn lại vào dòng chính
-        const cons = DTCP_TACH[n.code], tien = Number(gtN[k - 1]) || 0, nhapAll = k === 3 ? 0 : cons.reduce((a, c) => a + (Number(dong(n.code, c)?.so_tien) || 0), 0), autoAll = tien - nhapAll;
-        const autoPhu = (costData.items || []).filter((x) => x.nhom === n.code && x.nhom_con === cons[1] && !x.goi_id).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0);
-        const prevAll = Number(gtN[k - 2]) || 0;
+        const cons = DTCP_TACH[n.code], tien = Number(gtN[k - 1]) || 0, nhapAll = k === 1 ? cons.reduce((a, c) => a + (Number(dong(n.code, c)?.so_tien) || 0), 0) : 0, autoAll = tien - nhapAll;
+        const autoPhu = k === 1 ? (costData.items || []).filter((x) => x.nhom === n.code && x.nhom_con === cons[1] && !x.goi_id).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0) : dtcpCon(n.code, cons[1], k); // TĐ2/3: dòng phụ = gói + HĐ + mua lẻ của hạng mục phụ
+        const prevAll = Number(gtN[k - 2]) || 0, prevPhu = k > 1 ? dtcpCon(n.code, cons[1], k - 1) : 0;
         body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}" data-prev="${prevAll}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b>${!costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm">HĐ ›</button>` : ''}</td><td></td>${cTruoc(prevAll)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">tổng dòng con</td></tr>`;
-        cons.forEach((c, i) => { const r = k === 3 ? null : dong(n.code, c), auto = i === 0 ? autoAll - autoPhu : autoPhu, goc = r ? (r.ct_nhap || money(Number(r.so_tien) || 0)) : '';
+        cons.forEach((c, i) => { const r = k === 1 ? dong(n.code, c) : null, auto = i === 0 ? autoAll - autoPhu : autoPhu, goc = r ? (r.ct_nhap || money(Number(r.so_tien) || 0)) : '', prevC = i === 0 ? prevAll - prevPhu : prevPhu;
           const ten = n.sub.find((x) => x.code === c)?.ten || c;
-          body += `<tr class="dtcp-n dtcp-con" data-nhom="${n.code}" data-con="${c}" data-cha-of="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-id="${r ? r.id : ''}">
-            <td class="muted">${stt}.${i + 1}</td><td class="dtcp-ten2">${esc(ten)}</td><td class="dtcp-cach"></td>${k > 1 ? '<td></td>' : ''}
-            <td class="num">${oNhap(goc, ten)}</td>
-            <td class="num dtcp-tt"></td>${k > 1 ? '<td></td>' : ''}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${i === 0 ? 'HĐ, gói, mua lẻ vật tư chính' : 'mua lẻ vật tư phụ'})</small>` : ''}</td></tr>`; });
+          body += `<tr class="dtcp-n dtcp-con" data-nhom="${n.code}" data-con="${c}" data-cha-of="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-prev="${prevC}" data-id="${r ? r.id : ''}"${k2Attr(n.code, c, auto)}>
+            <td class="muted">${stt}.${i + 1}</td><td class="dtcp-ten2">${esc(ten)}</td><td class="dtcp-cach"></td>${k > 1 ? `<td class="num muted">${dvT(prevC)}</td>` : ''}
+            <td class="num">${oNhap(goc, ten, auto)}</td>
+            <td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${i === 0 ? 'HĐ, gói, mua lẻ vật tư chính' : 'mua lẻ vật tư phụ'})</small>` : ''}</td></tr>`; });
         continue;
       }
-      const r = k === 3 ? null : dong(n.code), tien = Number(gtN[k - 1]) || 0, nhap = Number(r?.so_tien) || 0, auto = tien - nhap, prev = Number(gtN[k - 2]) || 0;
+      const r = k === 1 ? dong(n.code) : null, tien = Number(gtN[k - 1]) || 0, nhap = Number(r?.so_tien) || 0, auto = tien - nhap, prev = Number(gtN[k - 2]) || 0;
       const goc = r ? (r.ct_nhap || money(nhap)) : '';
-      body += `<tr class="dtcp-n" data-nhom="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-prev="${prev}" data-id="${r ? r.id : ''}">
+      body += `<tr class="dtcp-n" data-nhom="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-prev="${prev}" data-id="${r ? r.id : ''}"${k2Attr(n.code, '', auto)}>
         <td class="muted">${stt}</td><td>${esc(n.code === 'tc_tra_no' ? 'Lãi vay' : n.ten)}${kh === 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm: phụ lục, điều chỉnh, quyết toán, thanh toán, còn lại">HĐ ›</button>` : ''}</td><td class="dtcp-cach"></td>${cTruoc(prev)}
-        <td class="num">${oNhap(goc, n.ten)}</td>
+        <td class="num">${oNhap(goc, n.ten, auto)}</td>
         <td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${SRC})</small>` : ''}</td></tr>`;
     }
     const pt = (costData.cp_nhom || []).find((x) => x.code === '_pt_' + kh);
     if (pt) { const pv = Number(pt.gt[k - 2]) || 0; body += `<tr class="dtcp-n dtcp-pt" data-khoi="${kh}" data-auto="${Number(pt.gt[k - 1]) || 0}" data-prev="${pv}"><td></td><td>Dự trù nhanh (số cũ)${moO && k < 3 ? ` <button type="button" class="sm dtcp-hd" data-ptbo="${kh}" title="Bỏ số dự trù nhanh cũ – nhập trực tiếp ở ô của từng nhóm">Bỏ</button>` : ''}</td><td><span class="tag-c c-auto">Tự động</span></td>${cTruoc(pv)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">số nhập nhanh trước đây (% / số)</td></tr>`; }
   }
   const dtP = Number(costData.dt_td_gt?.[k - 2]) || 0, cP = k > 1 ? `<td class="num muted">${dvT(dtP)}</td>` : '', lP = k > 1 ? `<td class="num">${dtcpLech(dt - dtP, true)}</td>` : '';
-  const HDR = `<th>STT</th><th>Nội dung</th><th>Cách điền</th>${k > 1 ? `<th class="num">${TP}</th>` : ''}<th class="num">${k === 1 ? 'Nhập (số · % · công thức)' : k === 2 ? 'Điều chỉnh ± (số · % · công thức)' : ''}</th><th class="num">Thành tiền ${T}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th>Nguồn</th>`;
-  const goiY = { 1: 'Gõ 150tr · 1,2 tỷ · 6% (× doanh thu) · 150tr+20tr. Để trống = chỉ lấy phần tự động.', 2: 'Gõ +50tr (tăng) · -30tr (giảm) · 2% (× doanh thu TĐ2). Để trống = không điều chỉnh thêm.' }[k];
+  const HDR = `<th>STT</th><th>Nội dung</th><th>Cách điền</th>${k > 1 ? `<th class="num">${TP}</th>` : ''}<th class="num">${k === 1 ? 'Nhập (số · % · công thức)' : k === 2 ? 'Số cuối TĐ2 (số · % · công thức)' : ''}</th><th class="num">Thành tiền ${T}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th>Nguồn</th>`;
+  const goiY = { 1: 'Gõ 150tr · 1,2 tỷ · 6% (× doanh thu) · 150tr+20tr. Để trống = chỉ lấy phần tự động.', 2: 'Gõ SỐ CUỐI TĐ2 của dòng: 45tr · 1,2 tỷ · 8% (× doanh thu TĐ2) · 40tr+5tr. Hệ thống tự ghi phần chênh vào gói của dòng. Để trống = giữ nguyên.' }[k];
   const tg = costData.tong_tp || {}, soHd = (costData.thau_phu || []).length;
   const hdLine = costAll ? '' : `<div class="dtcp-hdline"><span>HĐ đầu vào: <b>${soHd}</b> HĐ · còn lại phải trả <b>${dvT(tg.con_lai || 0)}</b> <small class="muted">(sau VAT)</small></span><span class="muted small">Bấm <b>HĐ ›</b> ở dòng nhóm (khối I) để mở gói / HĐ: phụ lục, điều chỉnh, quyết toán, thanh toán.</span></div>`;
   return `${tdBar(k)}${hdLine}
@@ -2280,18 +2285,18 @@ function dtcpTinh() { // tính lại cả bảng khi gõ (xem trước, chưa l�
   let loi = false;
   for (const tr of t.querySelectorAll('tr.dtcp-n')) {
     const ip = tr.querySelector('.dtcp-in'), auto = Number(tr.dataset.auto) || 0, { r, v: nhap } = nhapCua(ip);
-    const v = auto + nhap; K[tr.dataset.khoi] += v; if (!tr.classList.contains('dtcp-con')) KP[tr.dataset.khoi] += Number(tr.dataset.prev) || 0;
+    const v = k === 2 && ip && !r.trong && !r.loi ? nhap : auto + nhap; K[tr.dataset.khoi] += v; if (!tr.classList.contains('dtcp-con')) KP[tr.dataset.khoi] += Number(tr.dataset.prev) || 0; // TĐ2: ô = số cuối
     tr.querySelector('.dtcp-tt').innerHTML = r.loi ? `<span class="neg" title="${esc(r.loi)}">lỗi</span>` : dvT(v);
     tr.querySelector('.dtcp-pdt').textContent = pdt(v);
     const lc = tr.querySelector('.dtcp-lech'); if (lc) lc.innerHTML = dtcpLech(v - (Number(tr.dataset.prev) || 0), false);
     if (ip) { ip.classList.toggle('err', Boolean(r.loi)); loi ||= Boolean(r.loi);
       const c = tr.querySelector('.dtcp-cach'), raw = ip.value.trim();
-      c.innerHTML = r.trong ? (Math.abs(auto) >= 1 ? '<span class="tag-c c-auto">Tự động</span>' : '<span class="muted">—</span>') : r.loi ? '' : r.pt !== undefined ? '<span class="tag-c c-pt">% DT</span>' : /[+\-*/()×÷x]/i.test(raw.replace(/^[=+]/, '').replace(/^-/, '').replace(/[.,]/g, '')) ? '<span class="tag-c c-ct">Công thức</span>' : `<span class="tag-c c-nhap">${k === 2 ? 'Điều chỉnh' : 'Nhập'}</span>`;
-      if (!r.trong && Math.abs(auto) >= 1 && !r.loi) c.innerHTML = '<span class="tag-c c-auto">Tự động</span> + ' + c.innerHTML; }
+      c.innerHTML = r.trong ? (Math.abs(auto) >= 1 ? '<span class="tag-c c-auto">Tự động</span>' : '<span class="muted">—</span>') : r.loi ? '' : r.pt !== undefined ? '<span class="tag-c c-pt">% DT</span>' : /[+\-*/()×÷x]/i.test(raw.replace(/^[=+]/, '').replace(/^-/, '').replace(/[.,]/g, '')) ? '<span class="tag-c c-ct">Công thức</span>' : `<span class="tag-c c-nhap">${k === 2 ? 'Số cuối' : 'Nhập'}</span>`;
+      if (k !== 2 && !r.trong && Math.abs(auto) >= 1 && !r.loi) c.innerHTML = '<span class="tag-c c-auto">Tự động</span> + ' + c.innerHTML; }
     else if (k === 3) { const c = tr.querySelector('.dtcp-cach'); if (c && !c.innerHTML) c.innerHTML = Math.abs(auto) >= 1 ? '<span class="tag-c c-auto">Tự động</span>' : '<span class="muted">—</span>'; }
   }
   for (const tr of t.querySelectorAll('tr.dtcp-cha')) { // dòng cha = tổng dòng con
-    let v = 0; for (const c of t.querySelectorAll(`tr[data-cha-of="${tr.dataset.cha}"]`)) v += (Number(c.dataset.auto) || 0) + nhapCua(c.querySelector('.dtcp-in')).v;
+    let v = 0; for (const c of t.querySelectorAll(`tr[data-cha-of="${tr.dataset.cha}"]`)) { const ip = c.querySelector('.dtcp-in'), q = nhapCua(ip); v += k === 2 && ip && !q.r.trong && !q.r.loi ? q.v : (Number(c.dataset.auto) || 0) + q.v; }
     KP[tr.dataset.khoi] += Number(tr.dataset.prev) || 0;
     tr.querySelector('.dtcp-tt').textContent = dvT(v); tr.querySelector('.dtcp-pdt').textContent = pdt(v);
     const lc = tr.querySelector('.dtcp-lech'); if (lc) lc.innerHTML = dtcpLech(v - (Number(tr.dataset.prev) || 0), false); }
@@ -2303,6 +2308,36 @@ function dtcpTinh() { // tính lại cả bảng khi gõ (xem trước, chưa l�
   return !loi;
 }
 document.addEventListener('input', (e) => { if (e.target.closest('.dtcp-table .dtcp-in')) dtcpTinh(); });
+// V02.27.11.26: lưu bảng DT-CP TĐ2 – mỗi dòng gõ SỐ CUỐI; chênh lệch (số cuối − hiện tại) ghi vào gói dự trù của dòng (đợt điều chỉnh của gói);
+//  dòng chưa có gói: tăng -> khoản phát sinh TĐ2 (TĐ1 = 0) · giảm -> báo (giảm ở HĐ / khoản cụ thể qua "HĐ ›")
+async function dtcpLuuTd2(t, dt, ngay) {
+  const msg = $('#dtcp-msg'); let n = 0;
+  const ds = [];
+  for (const tr of t.querySelectorAll('tr.dtcp-n[data-nhom]')) {
+    const ip = tr.querySelector('.dtcp-in'); if (!ip) continue; const raw = ip.value.trim(); if (!raw) continue;
+    const r = magicSo(raw); if (r.loi) return showMsg(msg, 'Có ô gõ chưa đúng (ô đỏ) – sửa lại', 'err');
+    const so = r.pt !== undefined ? Math.round((r.pt / 100) * dt) : r.tien, cur = Number(tr.dataset.auto) || 0, delta = Math.round(so - cur);
+    const nhom = tr.dataset.nhom, con = tr.dataset.con || '', nN = NHOM().find((x) => x.code === nhom), ten = con ? nN?.sub.find((x) => x.code === con)?.ten || con : nN?.ten || nhom;
+    if (!delta) continue;
+    const goi = Number(tr.dataset.goi) || 0, min = Number(tr.dataset.min) || 0;
+    if (goi && so < min - 0.5) return showMsg(msg, `${ten}: số cuối không nhỏ hơn ${money(min)} (HĐ đã ký + đã mua của dòng). Muốn giảm HĐ: bấm HĐ › rồi điều chỉnh HĐ.`, 'err');
+    if (!goi && delta < 0) return showMsg(msg, `${ten}: dòng này chưa có gói dự trù để giảm – giảm ở HĐ / khoản cụ thể (bấm HĐ ›).`, 'err');
+    ds.push({ nhom, con, ten, goi, dcid: Number(tr.dataset.dcid) || 0, dcso: Number(tr.dataset.dcso) || 0, delta, vat: nN?.khong_vat ? 0 : 10, raw });
+  }
+  try {
+    for (const x of ds) {
+      if (x.goi) {
+        const moi = x.dcso + x.delta, nd = `DT-CP TĐ2 · ${x.ten}`;
+        const gv = (costData.du_tru || []).find((r) => r.id === x.goi)?.vat ?? x.vat;
+        if (x.dcid && !moi) await api(`/api/du-tru/${x.dcid}`, { method: 'DELETE' });
+        else if (x.dcid) await api(`/api/du-tru/${x.dcid}`, { method: 'PUT', body: JSON.stringify({ so_tien: moi, noi_dung: nd, ngay, vat: gv, ct_nhap: x.raw }) });
+        else await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: x.nhom, nhom_con: x.con, loai: 'dc', goi_ref: x.goi, dtcp: true, ct_nhap: x.raw, noi_dung: nd, so_tien: x.delta, vat: gv, ngay }) });
+      } else await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: x.nhom, nhom_con: x.con, loai: 'ky', td_ps: 2, dtcp: true, ct_nhap: x.raw, noi_dung: `DT-CP TĐ2 · phát sinh · ${x.ten}`, so_tien: x.delta, vat: x.vat, ngay }) });
+      n++;
+    }
+    await loadCost(); showMsg($('#dtcp-msg'), n ? `Đã lưu ${n} dòng (ghi phần chênh vào gói của dòng)` : 'Không có gì thay đổi');
+  } catch (err) { showMsg($('#dtcp-msg'), err.message, 'err'); }
+}
 // V12.26.11.26: hộp chi tiết 1 khoản "CP khác" – theo quy tắc phát sinh: TĐ1 -> TĐ2 = TĐ1 (± điều chỉnh) -> TĐ3 = TĐ2 (quyết toán / chốt)
 //  phát sinh TĐ2: TĐ1 = 0 · phát sinh TĐ3: TĐ1 = TĐ2 = 0. Giá trị trước VAT.
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-cpkopen]'); if (b) { e.stopPropagation(); openCpk(Number(b.dataset.cpkopen)); } }, true);
@@ -2403,6 +2438,7 @@ document.addEventListener('click', async (e) => {
   if (luu) {
     const t = $('.dtcp-table'); if (!t) return; if (!dtcpTinh()) return showMsg($('#dtcp-msg'), 'Có ô gõ chưa đúng (ô đỏ) – sửa lại', 'err');
     const dt = Number(t.dataset.dt) || 0, k = Number(t.dataset.k) || 1, loai = k === 2 ? 'dc' : 'ky', ngay = new Date().toISOString().slice(0, 10); let n = 0;
+    if (k === 2) return dtcpLuuTd2(t, dt, ngay);
     try {
       for (const tr of t.querySelectorAll('tr.dtcp-n[data-nhom]')) {
         const ip = tr.querySelector('.dtcp-in'); if (!ip) continue; const raw = ip.value.trim(); if (raw === (ip.dataset.goc || '')) continue;
@@ -2614,7 +2650,7 @@ function ptHtml(k) {
       ${lab('Khoản *', `<select name="khoan">${khOpt(false)}</select>`)}${lab('Số chốt TĐ3 (trước VAT)', '<input name="so_tien" class="money num" placeholder="để trống = theo đã chi">')}
       <div class="actions"><button type="submit" class="primary">Lưu chốt số</button><span class="msg" id="pk-f-msg"></span></div></form></details>`;
   const HINT = { 1: 'Ghi tiền đã chi thật (trả thầu phụ, mua vật tư, trả lương, lãi…). Chọn "Thuộc gói / khoản" để trừ vào dự trù.',
-    2: k === 1 ? 'Bảng DT-CP TĐ1 theo khung chuẩn: mỗi nhóm = phần tự động (gói, HĐ, khoản, chi đã ghi) + ô nhập (số / % doanh thu / công thức). Xong bấm "Trình duyệt TĐ1".' : k === 2 ? 'Bảng DT-CP TĐ2: so với TĐ1, ô nhập = điều chỉnh ± cả nhóm (số / % doanh thu / công thức). Điều chỉnh từng khoản ở mục bên dưới. Xong bấm "Trình duyệt TĐ2" (TĐ1 phải đã duyệt).' : 'Bảng DT-CP TĐ3 (quyết toán) tự động – so với TĐ2. Chốt số từng khoản ở mục bên dưới. Kiểm tra xong bấm "Trình duyệt TĐ3" (TĐ2 phải đã duyệt).',
+    2: k === 1 ? 'Bảng DT-CP TĐ1 theo khung chuẩn: mỗi nhóm = phần tự động (gói, HĐ, khoản, chi đã ghi) + ô nhập (số / % doanh thu / công thức). Xong bấm "Trình duyệt TĐ1".' : k === 2 ? 'Bảng DT-CP TĐ2: gõ SỐ CUỐI TĐ2 của dòng (số / % doanh thu / công thức) – hệ thống tự ghi phần chênh vào gói của dòng. Gói còn mở giữ phần chưa ký HĐ; ký đủ thì bấm "Đóng gói" (HĐ ›). Xong bấm "Trình duyệt TĐ2".' : 'Bảng DT-CP TĐ3 (quyết toán) tự động – so với TĐ2. Chốt số từng khoản ở mục bên dưới. Kiểm tra xong bấm "Trình duyệt TĐ3" (TĐ2 phải đã duyệt).',
     3: 'Nhập nhanh tổng gián tiếp / tài chính: số (150tr), % (7% × doanh thu) hoặc công thức. Để trống = cộng theo các khoản.' };
   const seg = edit ? `<div class="cf-seg"><span class="cf-tab on">Bảng DT-CP TĐ${k}</span><button type="button" class="primary sm cf-open" data-cfopen title="Ghi số tiền đã thực trả: thầu phụ, vật tư, lương, lãi vay…">＋ Ghi khoản đã chi</button><span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
   const card = cfAnchor()?.closest('.card');
@@ -2852,6 +2888,29 @@ function tpLV(c, l) {
   const t1 = c.goi_id || c.phat_sinh || ps > 1 ? 0 : Number(l.gia_tri_ky ?? l.gia_tri) || 0, t2 = ps > 2 ? 0 : g2;
   return [t1, t2, qt ?? g2];
 }
+// V02.27.11.26: phần dự trù còn lại của 1 gói / khoản tại TĐ k (không gồm HĐ, mua lẻ đã gắn – các phần đó tính riêng) – khớp máy chủ duTruNhom
+//  TĐ1: gói − mua lẻ · TĐ2/3: gói mở = MAX(0, gói ± điều chỉnh − mua lẻ − HĐ gắn) · gói đóng = 0 · phát sinh tại TĐ sau = 0 · CP khác có số chốt (TĐ3) -> số chốt
+function dtrRem(r, k, f = 'sv') {
+  if (Number(r.td_ps) > k) return 0;
+  const V = (x, vat) => { const n = Number(x) || 0; return f === 'sv' ? n + Math.round((n * (Number(vat) || 0)) / 100) : n; };
+  const le = leGoi(r.id, f === 'sv' ? 'sau_vat' : 'gia_tri');
+  if (k === 1) return V(r.so_tien, r.vat) - le;
+  if (r.tinh_trang === 'dong') return 0;
+  const dc = (costData?.du_tru || []).filter((x) => x.loai === 'dc' && x.goi_ref === r.id).reduce((a, x) => a + V(x.so_tien, x.vat), 0);
+  const chot = k === 3 && r.la_cp && r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? V(r.gt_chot, r.vat) : null;
+  const hd = (costData?.thau_phu || []).filter((c) => c.goi_id === r.id).reduce((a, c) => a + (f === 'sv' ? tpTdSv(c, k) : (c.lines || []).reduce((b, l) => b + tpLV(c, l)[k - 1], 0)), 0);
+  return Math.max(0, (chot ?? V(r.so_tien, r.vat) + dc) - le - hd);
+}
+// Giá trị (trước VAT) 1 hạng mục con của nhóm tách (VD Vật tư phụ) tại TĐ k: gói / khoản của hạng mục (gồm HĐ, mua lẻ gắn) + mua lẻ hạng mục không gắn gói + điều chỉnh cả nhóm ghi cho hạng mục
+function dtcpCon(code, con, k) {
+  const goc = DTCP_TACH[code]?.[0] || '', cua = (x) => (x.nhom_con || goc) === con;
+  const ky = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === code && cua(r) && !(Number(r.td_ps) > k));
+  const hdGt = (r) => (costData?.thau_phu || []).filter((c) => c.goi_id === r.id).reduce((a, c) => a + (c.lines || []).reduce((b, l) => b + tpLV(c, l)[k - 1], 0), 0);
+  const goi = ky.reduce((a, r) => a + (k === 1 ? Number(r.so_tien) || 0 : hdGt(r) + leGoi(r.id, 'gia_tri') + dtrRem(r, k, 'gt')), 0);
+  const le = (costData?.items || []).filter((x) => x.nhom === code && cua(x) && !x.goi_id && (Number(x.td_ps) || 1) <= k).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0);
+  const dcN = k === 1 ? 0 : (costData?.du_tru || []).filter((x) => x.loai === 'dc' && x.nhom === code && !x.goi_ref && cua(x)).reduce((a, x) => a + (Number(x.so_tien) || 0), 0);
+  return goi + le + dcN;
+}
 function tpTdSv(c, k) {
   return (c.lines || []).reduce((a, l) => {
     const v = tpLV(c, l)[k - 1];
@@ -3034,24 +3093,23 @@ function renderTpCard() {
   const nhomIdx = (x) => { const i = NHOM().findIndex((n) => n.code === x); return i < 0 ? 99 : i; };
   const gCodes = [...new Set(dtrAll.map((r) => r.nhom))].sort((x, y) => nhomIdx(x) - nhomIdx(y));
   // V27.12: gói TĐ2/3 = HĐ gắn + mua lẻ gắn + phần gói chưa chi hết (gói còn mở)
-  const conG = (r, k = 3) => (moG(r) && okK(r, k) ? Math.max(0, svL(r) - leGoi(r.id)) : 0);
+  const conG = (r, k = 3) => (k === 1 ? 0 : dtrRem(r, k, 'sv')); // V02.27.11.26: phần gói còn lại (gói mở = MAX(gói ± đ/c, HĐ + mua lẻ))
   const svV = (r, v0) => v0 + Math.round((v0 * (Number(r.vat) || 0)) / 100);
   const dcKh = (r) => svV(r, (costData.du_tru || []).filter((x) => x.loai === 'dc' && x.goi_ref === r.id).reduce((a, x) => a + (Number(x.so_tien) || 0), 0));
   const chotCpk = (r) => (r.la_cp && r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? svV(r, Number(r.gt_chot) || 0) : null);
   const cpkSv = (r, k) => { if (!okK(r, k)) return 0; const le = leGoi(r.id); if (k === 1) return svL(r); if (r.tinh_trang === 'dong') return le; const t2 = Math.max(le, svL(r) + dcKh(r)); return k === 3 && chotCpk(r) !== null ? Math.max(le, chotCpk(r)) : t2; }; // V12.26.11.26: CP khác theo TĐ
-  const goiSv = (r, k) => { if (r.la_cp) return cpkSv(r, k); if (!okK(r, k)) return 0; const hd = hdCua(r); if (k === 1) return svL(r); return hd.reduce((t, c) => t + tpTdSv(c, k), 0) + leGoi(r.id) + conG(r); };
+  const goiSv = (r, k) => { if (!okK(r, k)) return 0; const hd = hdCua(r); if (k === 1) return svL(r); return hd.reduce((t, c) => t + tpTdSv(c, k), 0) + leGoi(r.id) + conG(r, k); };
   const nhomSv = (code, k) => { const rs = dtrAll.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
     if (k === 1) return S('ky', (r) => okK(r, 1));
-    const kyR = rs.filter((r) => r.loai === 'ky'), t2 = kyR.reduce((t, r) => t + conG(r, k), 0) + S('dc'), hdK = kyR.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0) + leGoi(r.id), 0);
-    const adj3 = kyR.filter((r) => r.la_cp && chotCpk(r) !== null && okK(r, 3)).reduce((t, r) => t + cpkSv(r, 3) - leGoi(r.id) - conG(r, 3) - dcKh(r), 0); // CP khác có số chốt TĐ3: thay (giá trị + điều chỉnh) bằng số chốt
-    return (k === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2 + adj3) + hdK; };
+    const kyR = rs.filter((r) => r.loai === 'ky'), kyI = new Set(kyR.map((r) => r.id)), t2 = kyR.reduce((t, r) => t + conG(r, k), 0) + S('dc', (x) => !kyI.has(x.goi_ref)), hdK = kyR.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0) + leGoi(r.id), 0);
+    return (k === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2) + hdK; };
   const nhomHd = (code) => dtrAll.filter((r) => r.nhom === code && r.loai === 'ky').flatMap(hdCua);
   // Theo HĐ CĐT (b): đợt điều chỉnh / quyết toán cả nhóm thuộc HĐ CĐT chung của các gói trong nhóm (khác nhau -> "chưa gắn")
   const chuNhom = (code) => { const ks = [...new Set(dtrAll.filter((r) => r.nhom === code && r.loai === 'ky').map(cdtOf))]; return ks.length === 1 ? ks[0] : 0; };
   const nhomSvB = (code, k, b) => { const rs = dtrAll.filter((r) => r.nhom === code), own = chuNhom(code) === b, kyB = rs.filter((r) => r.loai === 'ky' && cdtOf(r) === b);
     const S = (arr) => arr.reduce((t, r) => t + svL(r), 0), hdK = kyB.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0) + leGoi(r.id), 0);
     if (k === 1) return S(kyB.filter((r) => okK(r, 1)));
-    const t2 = kyB.reduce((t, r) => t + conG(r, k), 0) + (own ? S(rs.filter((r) => r.loai === 'dc')) : 0);
+    const kyI = new Set(rs.filter((r) => r.loai === 'ky').map((r) => r.id)), t2 = kyB.reduce((t, r) => t + conG(r, k), 0) + (own ? S(rs.filter((r) => r.loai === 'dc' && !kyI.has(r.goi_ref))) : 0);
     return (k === 3 && rs.some((r) => r.loai === 'qt') ? (own ? S(rs.filter((r) => r.loai === 'qt')) : 0) : t2) + hdK; };
   const bks = [...new Set([...groups.map((g) => g.k), ...kyHien.map(cdtOf), ...dtrAll.filter((r) => r.loai !== 'ky').map((r) => chuNhom(r.nhom))])]
     .sort((a, b) => (a ? cdtOrd.get(a) : 1e6) - (b ? cdtOrd.get(b) : 1e6));
@@ -3099,7 +3157,7 @@ function renderTpCard() {
   const loaiData = (b, code) => {
     const rows = (groups.find((g) => g.k === b)?.rows || []).filter((c) => (c.nhom || 'thau_phu') === code);
     const rs = dtrAll.filter((r) => r.nhom === code), own = chuNhom(code) === b;
-    const ky = rs.filter((r) => r.loai === 'ky' && cdtOf(r) === b), dc = own && kTd > 1 ? rs.filter((r) => r.loai === 'dc') : [], coQt = rs.some((r) => r.loai === 'qt');
+    const ky = rs.filter((r) => r.loai === 'ky' && cdtOf(r) === b), dc = own && kTd > 1 ? rs.filter((r) => r.loai === 'dc' && !rs.some((g) => g.loai === 'ky' && g.id === r.goi_ref)) : [], coQt = rs.some((r) => r.loai === 'qt');
     const hdG = ky.flatMap(hdCua);
     return { rows, ky, dc, coQt, own, hdG, v: (k) => nhomSvB(code, k, b) + tdSum(rows, k),
       tt: sumOf(rows, 'da_tt') + sumOf(hdG, 'da_tt'), cl: sumOf(rows, 'con_lai') + sumOf(hdG, 'con_lai') };
