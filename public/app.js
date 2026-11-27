@@ -2774,7 +2774,8 @@ function openKhoan(id) {
       ${chi.map((r) => dong(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', esc(r.doi_tac || '')].filter(Boolean).join(' · '), Number(r.gia_tri) || 0, 'pk-chi')).join('') || '<tr><td colspan="4" class="muted">Chưa có lần chi nào thuộc khoản này</td></tr>'}
       ${x.chot !== null ? dong('<b>Số chốt TĐ3</b>', '', x.chot, 'pk-chot') : ''}
     </tbody></table></div>
-    ${can('hd') && !costAll ? `<div class="tv-tools"><button class="primary sm" data-pkgo="dc">${k === 3 ? 'Chốt số khoản này' : k === 2 ? 'Điều chỉnh / đóng khoản này' : 'Sửa ở ② Dự trù / khoản'}</button><button class="sm" data-pkgo="chi">Ghi chi cho khoản này</button>${k === 1 ? '<button class="sm" data-pksua>Sửa dự trù TĐ1</button>' : ''}${sua ? '<button class="danger sm pk-xoa" data-pkxoa title="Xoá khoản ghi sai">Xoá khoản</button>' : ''}</div>` : ''}
+    ${dtrChungDaChia(x.r) ? '<p class="muted small khds-tom">Dự trù chung đã chia cho các khoản chi tiết (VD Lương tháng 10, 11…) – <b>ghi chi và chốt số ở từng khoản</b>, không ghi vào dự trù chung.</p>' : ''}
+    ${can('hd') && !costAll ? `<div class="tv-tools">${dtrChungDaChia(x.r) ? '' : `<button class="primary sm" data-pkgo="dc">${k === 3 ? 'Chốt số khoản này' : k === 2 ? 'Điều chỉnh / đóng khoản này' : 'Sửa ở ② Dự trù / khoản'}</button><button class="sm" data-pkgo="chi">Ghi chi cho khoản này</button>`}${k === 1 ? '<button class="sm" data-pksua>Sửa dự trù TĐ1</button>' : ''}${sua ? '<button class="danger sm pk-xoa" data-pkxoa title="Xoá khoản ghi sai">Xoá khoản</button>' : ''}</div>` : ''}
     ${x.khoa ? '<p class="muted small">🔒 Nhóm đã quyết toán – muốn sửa / xoá: mở khoá nhóm ở tab TĐ3 (cần Passcode).</p>' : ''}`;
   void sv;
   if (!dlg.open) dlg.showModal();
@@ -2918,8 +2919,11 @@ function goiChip(r) {
 }
 // V27.12: mua lẻ gắn gói – tổng dòng chi phí đã gắn vào gói (f: 'sau_vat' | 'gia_tri')
 function leGoi(id, f = 'sau_vat') { return (costData?.items || []).reduce((a, r) => a + (r.goi_id === id ? Number(r[f]) || 0 : 0), 0); }
+// V13.27.11.26: dự trù chung (dòng bảng DT-CP) đã chia cho các khoản chi tiết cùng hạng mục -> tiền chi ghi vào khoản chi tiết, không ghi vào dự trù chung
+const dtrChungDaChia = (r) => r.loai === 'ky' && r.dtcp && !r.la_cp && (costData?.du_tru || []).some((d) => d.loai === 'ky' && !d.dtcp && !d.la_cp && d.nhom === r.nhom && dtcpConOf(d) === dtcpConOf(r));
 function leGoiOptions(nhom, keep) {
-  const ds = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom && (r.tinh_trang !== 'dong' || r.id === keep));
+  const ds = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom && ((r.tinh_trang !== 'dong' && !dtrChungDaChia(r)) || r.id === keep))
+    .sort((a, b) => (a.dtcp ? 1 : 0) - (b.dtcp ? 1 : 0)); // khoản cụ thể (Lương tháng 10…) lên đầu
   return '<option value="">— Không gắn gói —</option>' + ds.map((r) => `<option value="${r.id}">${esc(r.noi_dung || 'Gói #' + r.id)} · gói ${money(r.so_tien)} đ${leGoi(r.id, 'gia_tri') ? ` · đã mua lẻ ${money(leGoi(r.id, 'gia_tri'))} đ` : ''}</option>`).join('');
 }
 function goiOptions(nhom) {

@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V13.27.11.26 – Lương: dự trù chung đã chia không nhận chi / chốt
+- Hộp khoản "Dự trù chung" (đã có khoản chi tiết cùng hạng mục): ẩn "Chốt số khoản này", "Ghi chi cho khoản này", ghi chú ghi chi / chốt ở từng khoản; vẫn giữ Xoá.
+- "Ghi khoản đã chi" › Thuộc gói / khoản: khoản cụ thể (Lương tháng 10…) lên đầu, bỏ dự trù chung đã chia khỏi danh sách.
+- Kiểm tra: tester 4518, chi-tiet-khoan 16, luong 17, du-tru-chung 9, cp-khac 13 – 0 lỗi.
+
 ## V12.27.11.26 – Chống thêm trùng khi bấm Enter 2 lần
 - Lỗi: bấm Enter / Thêm 2 lần khi máy chủ chưa trả lời → thêm 2 khoản giống nhau; Enter lần nữa sau khi lưu → thêm khoản trống (TĐ3 không bắt buộc số).
 - Sửa: public/common.js chặn gửi lần 2 cùng biểu mẫu khi đang lưu / < 1 giây (áp mọi biểu mẫu); hộp Chi tiết TĐ3 bắt buộc nhập số chốt.

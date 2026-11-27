@@ -1,6 +1,9 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Dự trù chung đã chia cho các khoản chi tiết (VD Lương tháng 10, 11…) – ": "General estimate already allocated to detailed items (e.g. Salary Oct, Nov…) – ",
+"ghi chi và chốt số ở từng khoản": "record expenditure and final figures on each item",
+"TĐ3 từng khoản = số chốt; chưa chốt = TĐ2. Thêm khoản mới phát sinh TĐ3 (TĐ1, TĐ2 = 0): nhập tên + số chốt.": "M3 per item = final figure; if not finalised = M2. New M3 item (M1, M2 = 0): enter name + final figure.",
 "Không ký thêm: TĐ2 = HĐ đã ký + mua lẻ (chưa có HĐ thì = 0) · TĐ1 giữ nguyên": "No further contracts: M2 = signed contracts + direct purchases (0 if none) · M1 unchanged",
 "Bảng DT-CP TĐ2 tự cộng từ chi tiết: điều chỉnh HĐ / gói ở HĐ › (khối I), khoản gián tiếp / tài chính ở Chi tiết ›. Gói còn mở giữ phần chưa ký HĐ; ký đủ thì bấm \"Đóng gói\" (HĐ ›). Xong bấm \"Trình duyệt TĐ2\".": "M2 revenue–cost table sums up automatically from details: adjust contracts / packages via Contracts › (block I), indirect / financial items via Details ›. An open package keeps its unsigned part; when fully contracted click \"Close package\" (Contracts ›). Then click \"Submit M2\".",
 "Dự trù chung (chưa chia khoản)": "General estimate (not yet itemised)",
