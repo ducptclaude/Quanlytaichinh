@@ -2306,7 +2306,8 @@ document.addEventListener('input', (e) => { if (e.target.closest('.dtcp-table .d
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-dtcpkh]'); if (!b) return; const [code, con] = b.dataset.dtcpkh.split('|'); openKhoanDs(code, con || ''); });
 function openKhoanDs(code, con) {
   const k = tdDangChon(), nN = NHOM().find((x) => x.code === code), tenHm = con ? nN?.sub.find((x) => x.code === con)?.ten || con : nN?.ten || code;
-  const cua = (r) => !con || dtcpConOf(r, code) === con, edit = can('hd') && !costAll;
+  const cua = (r) => !con || dtcpConOf(r, code) === con, edit = can('hd') && !costAll, chiOk = can('tien') && !costAll;
+  const chiCua = (id) => (costData.items || []).filter((c) => c.goi_id === id).sort((a, b) => String(a.ngay || '').localeCompare(String(b.ngay || '')) || a.id - b.id);
   const ds = ptKhoan().filter((x) => x.r.nhom === code && cua(x.r)).sort((a, b) => (b.r.dtcp && !b.r.la_cp ? 1 : 0) - (a.r.dtcp && !a.r.la_cp ? 1 : 0) || (Number(a.r.td_ps) || 1) - (Number(b.r.td_ps) || 1) || String(a.r.ngay || '').localeCompare(String(b.r.ngay || '')) || a.r.id - b.r.id);
   const o = (x, kk) => (Number(x.r.td_ps) > kk ? (laCT(x) ? '<span class="muted small" title="Đã nằm trong dự trù chung TĐ1">trong dự trù</span>' : '<span class="muted" title="Phát sinh sau – không tính ở TĐ này">—</span>')
     : x === chung && ds.some(laCT) && ctK(kk) > 0 ? `${dvT(x.t[kk - 1])}<div class="muted small">${x.t[kk - 1] > 0 ? 'còn chưa chia' : 'đã chia hết'}</div>` : dvT(x.t[kk - 1]));
@@ -2321,17 +2322,35 @@ function openKhoanDs(code, con) {
   const dlg = dlgShell('khds-dlg', async (ev) => {
     const t = ev.target; if (t.dataset.close !== undefined) return dlg.close();
     const kid = t.closest('[data-khopen]')?.dataset.khopen; if (kid) { dlg.close(); return openKhoan(Number(kid)); }
+    // V18.27.11.26: 1 bảng – ghi chi / xoá lần chi / xoá khoản ngay tại đây
+    const lai = async () => { await loadCost(); openKhoanDs(code, con); };
+    if (t.dataset.khchi) { $$('tr.khds-new', dlg).forEach((x) => x.remove()); const tr = t.closest('tr'); let sau = tr; while (sau.nextElementSibling?.classList.contains('khds-chi')) sau = sau.nextElementSibling;
+      const r = (costData.du_tru || []).find((y) => y.id === Number(t.dataset.khchi)), hom = new Date().toISOString().slice(0, 10);
+      sau.insertAdjacentHTML('afterend', `<tr class="khds-chi khds-new" data-k="new" data-goi="${r.id}"><td colspan="2"><input data-f="nd" maxlength="300" value="${esc(String(r.noi_dung || '').replace(/^DT-CP · /, ''))}" aria-label="Nội dung chi"></td><td><input data-f="ngay" type="date" value="${hom}" aria-label="Ngày chi"></td><td colspan="2"><input data-f="so" class="money num" placeholder="Số tiền đã chi" aria-label="Số tiền đã chi"></td><td class="row-actions"><button type="button" class="sm primary" data-save data-khchiluu>Lưu</button><button type="button" class="sm" data-khchihuy>Huỷ</button></td></tr>`);
+      const nr = sau.nextElementSibling; $$('input.money', nr).forEach(attachMoneyInput); $('[data-f="so"]', nr).focus(); return; }
+    if (t.dataset.khchihuy !== undefined) return t.closest('tr').remove();
+    if (t.dataset.khchiluu !== undefined) { const tr = t.closest('tr'), r = (costData.du_tru || []).find((y) => y.id === Number(tr.dataset.goi)); const nd = $('[data-f="nd"]', tr).value.trim(), so = parseMoney($('[data-f="so"]', tr).value), ngay = $('[data-f="ngay"]', tr).value;
+      if (!nd || !(so > 0)) return alert('Nhập nội dung và số tiền đã chi');
+      if (tr.dataset.dangLuu) return; tr.dataset.dangLuu = '1';
+      try { await api(`/api/du-an/${revProjectId}/chi-phi`, { method: 'POST', body: JSON.stringify({ nhom: r.nhom, nhom_con: r.nhom_con || con || nN?.sub?.[0]?.code || '', noi_dung: nd, gia_tri: so, vat: Number(r.vat) || 0, ngay, goi_id: r.id, ...(k > 1 ? { td_ps: k } : {}) }) }); await lai(); } catch (err) { delete tr.dataset.dangLuu; alert(err.message); }
+      return; }
+    if (t.dataset.chixoa) { if (!confirm('Xoá lần chi này?')) return; try { await api(`/api/chi-phi/${t.dataset.chixoa}`, { method: 'DELETE' }); await lai(); } catch (err) { alert(err.message); } return; }
+    if (t.dataset.khxoa) { const r = (costData.du_tru || []).find((y) => y.id === Number(t.dataset.khxoa)), n = (costData.items || []).filter((y) => y.goi_id === r?.id).length;
+      if (!confirm(`Xoá khoản "${r?.noi_dung || ''}"?${n ? `\n– ${n} lần chi đã ghi vẫn giữ, chuyển thành "chi chưa gắn khoản" (xoá riêng nếu ghi sai)` : ''}`)) return;
+      try { await api(`/api/du-tru/${r.id}`, { method: 'DELETE' }); await lai(); } catch (err) { alert(err.message); } return; }
   });
   dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">${esc(nN?.ten || '')} · đang xem TĐ${k} · đồng, trước VAT</div><h3>${esc(tenHm)}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
-    <div class="table-wrap"><table class="khds-t"><thead><tr><th>Khoản</th><th class="num">TĐ1 · Dự trù</th><th class="num">TĐ2 · Điều chỉnh</th><th class="num">TĐ3 · Quyết toán</th><th class="num">Đã chi</th></tr></thead><tbody>
+    <div class="table-wrap"><table class="khds-t"><thead><tr><th>Khoản</th><th class="num">TĐ1 · Dự trù</th><th class="num">TĐ2 · Điều chỉnh</th><th class="num">TĐ3 · Quyết toán</th><th class="num">Đã chi</th><th></th></tr></thead><tbody>
     ${ds.length ? ds.map((x) => `<tr class="${x === chung ? 'khds-chung' : laCT(x) ? 'khds-ct' : ''}"><td>${laCT(x) ? '<span class="muted">↳</span> ' : ''}<button type="button" class="link-btn" data-khopen="${x.r.id}" title="Mở khoản: điều chỉnh, chốt số, ghi chi, xoá">${x === chung ? 'Dự trù chung (chưa chia khoản)' : esc(x.r.noi_dung || 'Khoản')}</button>${x === chung ? ` <span class="muted small">nhập ở bảng DT-CP${ds.some(laCT) ? ' · chia dần cho các khoản bên dưới' : ''}</span>` : laCT(x) && Number(x.r.td_ps) > 1 ? ' <span class="tp-cpk-tag" title="Khoản xác định ở TĐ sau, chia từ dự trù chung TĐ1 (không cộng thêm, trừ khi vượt dự trù)">Chia từ dự trù</span>' : Number(x.r.td_ps) > 1 ? ` <span class="tp-ps">Phát sinh TĐ${x.r.td_ps}</span>` : ''}${x.dong ? ' <span class="st st-tam-dung">Đã đóng</span>' : ''}${x.chot !== null ? ' <span class="muted small">· đã chốt</span>' : ''}</td>
-      <td class="num ${k === 1 ? 'strong' : 'muted'}">${o(x, 1)}</td><td class="num ${k === 2 ? 'strong' : 'muted'}">${o(x, 2)}</td><td class="num ${k === 3 ? 'strong' : 'muted'}">${o(x, 3)}</td><td class="num">${dvT(x.le)}</td></tr>`).join('') : '<tr><td colspan="5" class="empty">Chưa có khoản nào</td></tr>'}
-    </tbody><tfoot><tr><td><b>Cộng</b></td>${T.map((v, i) => `<td class="num ${i + 1 === k ? 'strong' : ''}">${dvT(v)}</td>`).join('')}<td class="num">${dvT(L)}</td></tr></tfoot></table></div>
+      <td class="num ${k === 1 ? 'strong' : 'muted'}">${o(x, 1)}</td><td class="num ${k === 2 ? 'strong' : 'muted'}">${o(x, 2)}</td><td class="num ${k === 3 ? 'strong' : 'muted'}">${o(x, 3)}</td><td class="num">${dvT(x.le)}</td>
+      <td class="row-actions">${chiOk && !dtrChungDaChia(x.r) ? `<button type="button" class="sm" data-khchi="${x.r.id}" title="Ghi số tiền đã trả cho khoản này">+ Chi</button>` : ''}${edit && !x.khoa ? `<button type="button" class="sm danger" data-khxoa="${x.r.id}" title="Xoá khoản ghi sai">Xoá</button>` : ''}</td></tr>
+      ${chiCua(x.r.id).map((c) => `<tr class="khds-chi"><td colspan="2"><span class="muted">↳ Đã chi:</span> ${esc(c.noi_dung || '')}</td><td class="muted small">${c.ngay ? isoToDmy(c.ngay) : ''}${c.doi_tac ? ' · ' + esc(c.doi_tac) : ''}</td><td></td><td class="num">${dvT(Number(c.gia_tri) || 0)}</td><td class="row-actions">${chiOk ? `<button type="button" class="sm danger" data-chixoa="${c.id}" title="Xoá lần chi ghi sai">Xoá</button>` : ''}</td></tr>`).join('')}`).join('') : '<tr><td colspan="6" class="empty">Chưa có khoản nào</td></tr>'}
+    </tbody><tfoot><tr><td><b>Cộng</b></td>${T.map((v, i) => `<td class="num ${i + 1 === k ? 'strong' : ''}">${dvT(v)}</td>`).join('')}<td class="num">${dvT(L)}</td><td></td></tr></tfoot></table></div>
     ${chung && k > 1 && ds.some(laCT) ? (() => { const c = ctK(k), g = k === 3 ? goc1 : gocK, d = c - g; return `<p class="khds-tom ${d > 0 ? 'vuot' : ''}">Dự trù chung TĐ1 <b>${dvT(goc1)}</b>${g !== goc1 ? ` (sau điều chỉnh ${dvT(g)})` : ''} · đã chia cho các khoản <b>${dvT(c)}</b> · ${d > 0 ? `<b>vượt dự trù ${dvT(d)}</b> – phần vượt làm tăng chi phí TĐ${k}` : d < 0 ? `còn chưa chia <b>${dvT(-d)}</b> – vẫn tính trong TĐ${k} tới khi chia hết hoặc giảm dự trù` : 'đã chia hết dự trù'}</p>`; })() : ''}
     ${edit ? `<form class="grid-form khds-f"><label>Tên khoản *<input name="ten" maxlength="300" value="${esc(goiY)}" placeholder="VD: Lương tháng 10"></label>
       <label>${k === 1 ? 'Dự trù TĐ1' : k === 2 ? 'Số TĐ2' : 'Số chốt TĐ3'} (trước VAT) *<input name="so" class="money num" placeholder="0"></label>
-      <div class="actions"><button type="submit" class="primary">+ Thêm khoản${k > 1 ? ` (phát sinh TĐ${k})` : ''}</button><span class="msg" id="khds-msg"></span></div></form>
-      <p class="muted small">${{ 1: 'TĐ1: dự trù từng khoản (VD lương tháng 10, thưởng đợt).', 2: 'TĐ2: thêm khoản đã xác định (VD Lương tháng 10, 11). Nếu có dự trù chung TĐ1 thì khoản được CHIA TỪ dự trù (không cộng thêm); chỉ phần vượt dự trù mới làm tăng chi phí. Sửa số khoản đã có: bấm tên khoản.', 3: 'TĐ3 từng khoản = số chốt; chưa chốt = TĐ2. Thêm khoản mới phát sinh TĐ3 (TĐ1, TĐ2 = 0): nhập tên + số chốt.' }[k]}</p>` : ''}`;
+      <div class="actions"><button type="submit" class="primary">＋ Khoản mới${k > 1 ? ` (phát sinh TĐ${k})` : ''}</button><span class="msg" id="khds-msg"></span></div></form>
+      <p class="muted small">${{ 1: 'TĐ1: dự trù từng khoản (VD Lương BCH, thưởng đợt). Trả tiền thì bấm + Chi ở khoản.', 2: 'TĐ2 mỗi khoản = số dự kiến, đã chi nhiều hơn thì lấy đã chi. Trả tiền: bấm + Chi ở khoản. Ghi sai: bấm Xoá ở dòng đó.', 3: 'TĐ3 mỗi khoản = số chốt; chưa chốt = TĐ2. Trả tiền: bấm + Chi ở khoản. Ghi sai: bấm Xoá ở dòng đó.' }[k]}</p>` : ''}`;
   const f = $('.khds-f', dlg);
   if (f) {
     $$('input.money', f).forEach(attachMoneyInput);
@@ -2767,6 +2786,11 @@ function openKhoan(id) {
       try { await api(`/api/du-tru/${id}`, { method: 'DELETE' }); dlg.close(); await loadCost(); } catch (err) { alert(err.message); }
       return;
     }
+    if (t.dataset.pkxoachi) { // V18.27.11.26: xoá 1 lần chi ghi sai ngay trong hộp khoản
+      if (!confirm('Xoá lần chi này?')) return;
+      try { await api(`/api/chi-phi/${t.dataset.pkxoachi}`, { method: 'DELETE' }); await loadCost(); openKhoan(id); } catch (err) { alert(err.message); }
+      return;
+    }
     if (t.dataset.pkxoadc) {
       if (!confirm('Xoá đợt điều chỉnh này?')) return;
       try { await api(`/api/du-tru/${t.dataset.pkxoadc}`, { method: 'DELETE' }); await loadCost(); openKhoan(id); } catch (err) { alert(err.message); }
@@ -2780,7 +2804,7 @@ function openKhoan(id) {
     <div class="table-wrap"><table class="tp-dtl"><thead><tr><th>Nội dung</th><th>Ngày · đối tác</th><th class="num">Số tiền (trước VAT)</th><th></th></tr></thead><tbody>
       ${dong('<b>Dự trù TĐ1</b>', x.r.ngay ? isoToDmy(x.r.ngay) : '', Number(x.r.so_tien) || 0)}
       ${x.dcs.map((y, i) => dong(`Điều chỉnh TĐ2 · đợt ${i + 1}: ${esc(y.noi_dung || '')}`, y.ngay ? isoToDmy(y.ngay) : '', Number(y.so_tien) || 0, '', sua ? `<button class="danger sm" data-pkxoadc="${y.id}" title="Xoá đợt điều chỉnh ghi sai">Xoá</button>` : '')).join('')}
-      ${chi.map((r) => dong(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', esc(r.doi_tac || '')].filter(Boolean).join(' · '), Number(r.gia_tri) || 0, 'pk-chi')).join('') || '<tr><td colspan="4" class="muted">Chưa có lần chi nào thuộc khoản này</td></tr>'}
+      ${chi.map((r) => dong(`Đã chi: ${esc(r.noi_dung || '')}`, [r.ngay ? isoToDmy(r.ngay) : '', esc(r.doi_tac || '')].filter(Boolean).join(' · '), Number(r.gia_tri) || 0, 'pk-chi', can('tien') && !costAll ? `<button class="danger sm" data-pkxoachi="${r.id}" title="Xoá lần chi ghi sai">Xoá</button>` : '')).join('') || '<tr><td colspan="4" class="muted">Chưa có lần chi nào thuộc khoản này</td></tr>'}
       ${x.chot !== null ? dong('<b>Số chốt TĐ3</b>', '', x.chot, 'pk-chot') : ''}
     </tbody></table></div>
     ${dtrChungDaChia(x.r) ? '<p class="muted small khds-tom">Dự trù chung đã chia cho các khoản chi tiết (VD Lương tháng 10, 11…) – <b>ghi chi và chốt số ở từng khoản</b>, không ghi vào dự trù chung.</p>' : ''}

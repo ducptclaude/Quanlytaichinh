@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V18.27.11.26 – Hộp "Chi tiết ›" gộp 1 bảng: khoản + các lần chi, ghi chi / xoá ngay tại chỗ
+- Mỗi khoản có các dòng "↳ Đã chi" (ngày, số tiền) bên dưới; nút "+ Chi" mở dòng nhập ngay trong bảng (nội dung tự theo tên khoản, ngày hôm nay, số tiền, Enter = Lưu); "Xoá" ở từng lần chi và từng khoản.
+- Hộp khoản (bấm tên khoản) cũng có nút Xoá ở từng lần chi. Nút thêm khoản đổi tên "＋ Khoản mới"; hướng dẫn rút gọn.
+- Kiểm tra: mot-bang 6 (mới), chi-tiet-khoan 16, luong 17, du-tru-chung 9, chi-theo-khoan 7, tester 4518 – 0 lỗi; dò giao diện máy tính + điện thoại 0 lỗi, không tràn.
+
 ## V17.27.11.26 – Gặp khoá TĐ đã duyệt: hỏi mở khoá luôn rồi làm tiếp
 - Lỗi khoá TĐ đã duyệt trả kèm `mo_td` {da, k} → trang hỏi Passcode "Mở khoá TĐk để sửa?" → API mới POST /api/du-an/:id/mo-td/:k mở TĐk và các TĐ sau đã trình / duyệt (về "Lập", ghi nhật ký) → làm tiếp thao tác.
 - Kiểm tra: mo-khoa-1-lan 9 + khoá TĐ 6, td23 25, tdk 31, duyet 28, tester 4518 – 0 lỗi.

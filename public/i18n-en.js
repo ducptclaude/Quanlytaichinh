@@ -1,6 +1,11 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"↳ Đã chi:": "↳ Paid:",
+"+ Chi": "+ Expenditure",
+"＋ Khoản mới": "＋ New item",
+"Xoá lần chi này?": "Delete this expenditure?",
+"Nhập nội dung và số tiền đã chi": "Enter description and amount paid",
 "🔓 Đang mở khoá": "🔓 Unlocked",
 "Dự án đang mở khoá": "Project unlocked",
 "Mở khoá dự án?": "Unlock project?",
