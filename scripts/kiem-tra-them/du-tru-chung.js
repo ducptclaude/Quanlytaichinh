@@ -26,8 +26,8 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   await td(2); await them('Lương tháng 10', 50000000);
   v = await L(); chk('TĐ2 xác định T10 50: Lương TĐ2 = 50 (không cộng dồn thành 100)', v[1] === 50e6 && v[0] === 50e6, String(v));
   const ds = await p.evaluate(() => [...document.querySelectorAll('#khds-dlg tbody tr')].map((tr) => [...tr.querySelectorAll('td')].map((td) => td.innerText.trim())));
-  const chung = ds.find((r) => /DT-CP/.test(r[0])), t10 = ds.find((r) => /tháng 10/.test(r[0]));
-  chk('hộp Chi tiết: dự trù chung TĐ2 còn 0, T10 = 50, Cộng TĐ2 = 50', chung && /^0$/.test(chung[2]) && t10 && /50\.000\.000/.test(t10[2]) && /50\.000\.000/.test(await p.evaluate(() => document.querySelector('#khds-dlg tfoot td:nth-child(3)').innerText)), JSON.stringify(ds));
+  const chung = ds.find((r) => /Dự trù chung/.test(r[0])), t10 = ds.find((r) => /tháng 10/.test(r[0]));
+  chk('hộp Chi tiết: dự trù chung TĐ2 còn 0, T10 = 50, Cộng TĐ2 = 50', chung && /^0\b/.test(chung[2]) && t10 && /50\.000\.000/.test(t10[2]) && /50\.000\.000/.test(await p.evaluate(() => document.querySelector('#khds-dlg tfoot td:nth-child(3)').innerText)), JSON.stringify(ds));
   // + tháng 11 45 -> 95
   await td(2); await them('Lương tháng 11', 45000000);
   v = await L(); chk('TĐ2 + T11 45: Lương TĐ2 = 95', v[1] === 95e6, String(v));

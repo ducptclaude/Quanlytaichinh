@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V09.27.11.26 – Hộp "Chi tiết ›": trình bày rõ dự trù chung và khoản chia từ dự trù
+- Dòng dự trù nhập ở bảng DT-CP đổi tên **"Dự trù chung (chưa chia khoản)"**, luôn đứng đầu, ghi "còn chưa chia / đã chia hết".
+- Khoản xác định sau (VD Lương tháng 10 ở TĐ2) hiện **↳ … [Chia từ dự trù]**, ô TĐ1 ghi "trong dự trù" (không phải "—").
+- Dòng tóm tắt: Dự trù chung TĐ1 · đã chia cho các khoản · còn chưa chia / vượt dự trù (phần vượt mới làm tăng chi phí).
+- Chỉ đổi cách hiển thị, công thức giữ nguyên. Kiểm tra: du-tru-chung 9, chi-tiet-khoan 16, luong 17 – 0 lỗi; dò giao diện máy tính + điện thoại 0 lỗi, không tràn.
+
 ## V08.27.11.26 – Rà soát toàn hệ thống + sơ đồ cấu trúc code + gỡ mã thừa
 - `docs/SO-DO-CAU-TRUC-CODE.md`: toàn cảnh (sơ đồ), chuỗi kiểm tra 1 lệnh ghi, bảng dữ liệu, bản đồ công thức (nơi tính trùng máy chủ ↔ giao diện), màn hình → hàm, kiểm thử,
   kết quả rà soát + đề xuất tinh gọn, 107 đường dẫn API (kèm dòng), mục lục hàm tên:dòng (sinh bằng `scripts/tao-muc-luc.js`).

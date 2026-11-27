@@ -1,6 +1,11 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"Dự trù chung (chưa chia khoản)": "General estimate (not yet itemised)",
+"Chia từ dự trù": "Allocated from estimate",
+"trong dự trù": "in estimate",
+"còn chưa chia": "unallocated",
+"đã chia hết": "fully allocated",
 "+ CP khác": "+ Other cost",
 "CP khác": "Other cost",
 "+ Chi phí khác của nhóm": "+ Other cost of the group",

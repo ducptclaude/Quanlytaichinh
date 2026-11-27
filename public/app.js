@@ -2308,9 +2308,14 @@ document.addEventListener('click', (e) => { const b = e.target.closest('[data-dt
 function openKhoanDs(code, con) {
   const k = tdDangChon(), nN = NHOM().find((x) => x.code === code), tenHm = con ? nN?.sub.find((x) => x.code === con)?.ten || con : nN?.ten || code;
   const cua = (r) => !con || dtcpConOf(r, code) === con, edit = can('hd') && !costAll;
-  const ds = ptKhoan().filter((x) => x.r.nhom === code && cua(x.r)).sort((a, b) => (Number(a.r.td_ps) || 1) - (Number(b.r.td_ps) || 1) || String(a.r.ngay || '').localeCompare(String(b.r.ngay || '')) || a.r.id - b.r.id);
-  const o = (x, kk) => (Number(x.r.td_ps) > kk ? '<span class="muted" title="Phát sinh sau – không tính ở TĐ này">—</span>' : dvT(x.t[kk - 1]));
+  const ds = ptKhoan().filter((x) => x.r.nhom === code && cua(x.r)).sort((a, b) => (b.r.dtcp && !b.r.la_cp ? 1 : 0) - (a.r.dtcp && !a.r.la_cp ? 1 : 0) || (Number(a.r.td_ps) || 1) - (Number(b.r.td_ps) || 1) || String(a.r.ngay || '').localeCompare(String(b.r.ngay || '')) || a.r.id - b.r.id);
+  const o = (x, kk) => (Number(x.r.td_ps) > kk ? (laCT(x) ? '<span class="muted small" title="Đã nằm trong dự trù chung TĐ1">trong dự trù</span>' : '<span class="muted" title="Phát sinh sau – không tính ở TĐ này">—</span>')
+    : x === chung && ds.some(laCT) && ctK(kk) > 0 ? `${dvT(x.t[kk - 1])}<div class="muted small">${x.t[kk - 1] > 0 ? 'còn chưa chia' : 'đã chia hết'}</div>` : dvT(x.t[kk - 1]));
   const T = [1, 2, 3].map((kk) => ds.reduce((a, x) => a + (Number(x.r.td_ps) > kk ? 0 : x.t[kk - 1]), 0)), L = ds.reduce((a, x) => a + x.le, 0);
+  // V09.27.11.26: dự trù chung (dòng nhập ở bảng DT-CP) + các khoản chia từ dự trù – trình bày rõ: còn chưa chia / vượt dự trù
+  const chung = ds.find((x) => x.r.dtcp && !x.r.la_cp), laCT = (x) => chung && x !== chung && !x.r.dtcp && !x.r.la_cp;
+  const goc1 = chung ? Number(chung.r.so_tien) || 0 : 0, gocK = chung ? goc1 + (costData.du_tru || []).filter((y) => y.loai === 'dc' && y.goi_ref === chung.r.id).reduce((a, y) => a + (Number(y.so_tien) || 0), 0) : 0;
+  const ctK = (kk) => ds.filter(laCT).reduce((a, x) => a + (Number(x.r.td_ps) > kk ? 0 : x.t[kk - 1]), 0);
   // tên gợi ý: "… tháng N+1" theo khoản đã có
   let goc = '', max = 0; for (const x of ds) { const m = String(x.r.noi_dung || '').match(/^(.*?th[áa]ng)\s*(\d{1,2})\b/i); if (m && Number(m[2]) >= max) { max = Number(m[2]); goc = m[1]; } }
   const goiY = max ? `${goc} ${max % 12 + 1}` : '';
@@ -2320,13 +2325,14 @@ function openKhoanDs(code, con) {
   });
   dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">${esc(nN?.ten || '')} · đang xem TĐ${k} · đồng, trước VAT</div><h3>${esc(tenHm)}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
     <div class="table-wrap"><table class="khds-t"><thead><tr><th>Khoản</th><th class="num">TĐ1 · Dự trù</th><th class="num">TĐ2 · Điều chỉnh</th><th class="num">TĐ3 · Quyết toán</th><th class="num">Đã chi</th></tr></thead><tbody>
-    ${ds.length ? ds.map((x) => `<tr><td><button type="button" class="link-btn" data-khopen="${x.r.id}" title="Mở khoản: điều chỉnh, chốt số, ghi chi, xoá">${esc(x.r.noi_dung || 'Khoản')}</button>${Number(x.r.td_ps) > 1 ? ` <span class="tp-ps">Phát sinh TĐ${x.r.td_ps}</span>` : ''}${x.dong ? ' <span class="st st-tam-dung">Đã đóng</span>' : ''}${x.chot !== null ? ' <span class="muted small">· đã chốt</span>' : ''}</td>
+    ${ds.length ? ds.map((x) => `<tr class="${x === chung ? 'khds-chung' : laCT(x) ? 'khds-ct' : ''}"><td>${laCT(x) ? '<span class="muted">↳</span> ' : ''}<button type="button" class="link-btn" data-khopen="${x.r.id}" title="Mở khoản: điều chỉnh, chốt số, ghi chi, xoá">${x === chung ? 'Dự trù chung (chưa chia khoản)' : esc(x.r.noi_dung || 'Khoản')}</button>${x === chung ? ` <span class="muted small">nhập ở bảng DT-CP${ds.some(laCT) ? ' · chia dần cho các khoản bên dưới' : ''}</span>` : laCT(x) && Number(x.r.td_ps) > 1 ? ' <span class="tp-cpk-tag" title="Khoản xác định ở TĐ sau, chia từ dự trù chung TĐ1 (không cộng thêm, trừ khi vượt dự trù)">Chia từ dự trù</span>' : Number(x.r.td_ps) > 1 ? ` <span class="tp-ps">Phát sinh TĐ${x.r.td_ps}</span>` : ''}${x.dong ? ' <span class="st st-tam-dung">Đã đóng</span>' : ''}${x.chot !== null ? ' <span class="muted small">· đã chốt</span>' : ''}</td>
       <td class="num ${k === 1 ? 'strong' : 'muted'}">${o(x, 1)}</td><td class="num ${k === 2 ? 'strong' : 'muted'}">${o(x, 2)}</td><td class="num ${k === 3 ? 'strong' : 'muted'}">${o(x, 3)}</td><td class="num">${dvT(x.le)}</td></tr>`).join('') : '<tr><td colspan="5" class="empty">Chưa có khoản nào</td></tr>'}
     </tbody><tfoot><tr><td><b>Cộng</b></td>${T.map((v, i) => `<td class="num ${i + 1 === k ? 'strong' : ''}">${dvT(v)}</td>`).join('')}<td class="num">${dvT(L)}</td></tr></tfoot></table></div>
+    ${chung && k > 1 && ds.some(laCT) ? (() => { const c = ctK(k), g = k === 3 ? goc1 : gocK, d = c - g; return `<p class="khds-tom ${d > 0 ? 'vuot' : ''}">Dự trù chung TĐ1 <b>${dvT(goc1)}</b>${g !== goc1 ? ` (sau điều chỉnh ${dvT(g)})` : ''} · đã chia cho các khoản <b>${dvT(c)}</b> · ${d > 0 ? `<b>vượt dự trù ${dvT(d)}</b> – phần vượt làm tăng chi phí TĐ${k}` : d < 0 ? `còn chưa chia <b>${dvT(-d)}</b> – vẫn tính trong TĐ${k} tới khi chia hết hoặc giảm dự trù` : 'đã chia hết dự trù'}</p>`; })() : ''}
     ${edit ? `<form class="grid-form khds-f"><label>Tên khoản *<input name="ten" maxlength="300" value="${esc(goiY)}" placeholder="VD: Lương tháng 10"></label>
       <label>${k === 1 ? 'Dự trù TĐ1' : k === 2 ? 'Số TĐ2' : 'Số chốt TĐ3 (trống = theo đã chi)'} (trước VAT)${k < 3 ? ' *' : ''}<input name="so" class="money num" placeholder="0"></label>
       <div class="actions"><button type="submit" class="primary">+ Thêm khoản${k > 1 ? ` (phát sinh TĐ${k})` : ''}</button><span class="msg" id="khds-msg"></span></div></form>
-      <p class="muted small">${{ 1: 'TĐ1: dự trù từng khoản (VD lương tháng 10, thưởng đợt).', 2: 'TĐ2: thêm khoản mới phát sinh (VD lương tháng 11) – TĐ1 = 0. Sửa số khoản đã có: bấm tên khoản.', 3: 'TĐ3 = tiền đã trả từng khoản (Ghi chi cho khoản) hoặc số chốt. Thêm khoản mới phát sinh TĐ3 (TĐ1, TĐ2 = 0).' }[k]}</p>` : ''}`;
+      <p class="muted small">${{ 1: 'TĐ1: dự trù từng khoản (VD lương tháng 10, thưởng đợt).', 2: 'TĐ2: thêm khoản đã xác định (VD Lương tháng 10, 11). Nếu có dự trù chung TĐ1 thì khoản được CHIA TỪ dự trù (không cộng thêm); chỉ phần vượt dự trù mới làm tăng chi phí. Sửa số khoản đã có: bấm tên khoản.', 3: 'TĐ3 = tiền đã trả từng khoản (Ghi chi cho khoản) hoặc số chốt. Thêm khoản mới phát sinh TĐ3 (TĐ1, TĐ2 = 0).' }[k]}</p>` : ''}`;
   const f = $('.khds-f', dlg);
   if (f) {
     $$('input.money', f).forEach(attachMoneyInput);
