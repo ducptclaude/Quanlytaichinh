@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V21.27.11.26 – Lần chi tính từ TĐ ghi chi (lương tháng 12 nhập ở TĐ3 không vào TĐ2)
+- Lỗi: V15 gán mọi lần chi theo TĐ của khoản → chi lương tháng 12 ghi ở TĐ3 cho khoản TĐ1 bị tính vào TĐ2.
+- Sửa đúng gốc: lần chi tính từ TĐ ghi chi (không sớm hơn TĐ của khoản); phần đã chi trừ vào dự trù của khoản cũng theo TĐ (goiLeOf / leGoi có tham số TĐ) → TĐ trước không bị trừ mất (lỗi "dồn về TĐ3" cũ vẫn không tái diễn).
+- Tình huống người dùng: Lương BCH TĐ1 50 · chi T10 50, T11 45 (TĐ2), T12 45 (TĐ3) → TĐ1 50, TĐ2 95, TĐ3 140.
+- Kiểm tra: chi-theo-khoan 11, tester 4518, kiem-tra-goi 246, doi-chieu-cp 73, mot-bang 8, luong 17, chi-tiet-khoan 16, cp-khac 13, du-tru-chung 9, goi-td2 7, td23 25, tdk 31, nhom-ps 13 – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V20.27.11.26 – TĐ3 = chốt → thực chi → TĐ2; "chưa ký HĐ"; nút "± Gói" (người dùng duyệt)
 - Công thức (gián tiếp / tài chính, TĐ3 từng khoản): có số chốt = số chốt; chưa chốt mà đã có chi = THỰC CHI (bỏ phần dự trù còn lại); chưa chi đồng nào = TĐ2. Dự trù chung: hạng mục đã có chi → TĐ3 = 0 (theo thực chi các khoản). Cách nhập % / số: khối đã có thực chi → theo khoản. Máy chủ duTruNhom + giao diện dtrRem.
 - Hộp HĐ › (TĐ2/TĐ3): gói mở đã có HĐ hiện nhãn "chưa ký HĐ X" (phần dự trù chưa ký vẫn tính).

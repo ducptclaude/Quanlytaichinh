@@ -27,6 +27,21 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
     const r = await p.evaluate((k) => ({ sv: Math.round((costData.cp_nhom || []).reduce((a, n) => a + (Number(n.sv?.[k - 1]) || 0), 0)), the: Number(document.querySelector('#c-k-sau')?.innerText.replace(/\D/g, '') || 0) }), k);
     chk(`TĐ${k}: thẻ tổng trang Chi phí = máy chủ`, Math.abs(r.the - r.sv) <= 2, `${r.the} / ${r.sv}`);
   }
+  // V21.27.11.26 – tình huống người dùng: khoản "Lương BCH" TĐ1 50 · chi T10 50, T11 45 ghi ở TĐ2 · chi T12 45 ghi ở TĐ3
+  //  -> TĐ1 = 50, TĐ2 = 95 (chi T12 ghi ở TĐ3 không vào TĐ2), TĐ3 = 140 (thực chi)
+  const id2 = await p.evaluate(async () => { const P = (u, b) => api(u, { method: 'POST', body: JSON.stringify(b) });
+    const d = await P('/api/du-an', { ma_du_an: 'DA-BC' + Date.now().toString().slice(-4), ten_du_an: 'Thử lương BCH', trang_thai: 'Đang thi công' });
+    const k = await P(`/api/du-an/${d.id}/du-tru`, { nhom: 'gt_luong', nhom_con: 'luong', loai: 'ky', so_tien: 50000000, vat: 0, noi_dung: 'Lương BCH' });
+    for (const [nd, so, td] of [['Lương BCH tháng 10', 50e6, 2], ['Lương BCH tháng 11', 45e6, 2], ['Lương BCH tháng 12', 45e6, 3]]) await P(`/api/du-an/${d.id}/chi-phi`, { nhom: 'gt_luong', nhom_con: 'luong', noi_dung: nd, gia_tri: so, vat: 0, ngay: '2026-11-05', goi_id: k.id, td_ps: td });
+    return d.id; });
+  await p.evaluate((i) => { revProjectId = i; showTab('cost'); }, id2); await p.waitForTimeout(2500);
+  const L2 = await p.evaluate(() => (costData.cp_nhom.find((x) => x.code === 'gt_luong')?.gt || []).map((x) => Math.round(Number(x) || 0)));
+  chk('Lương BCH: TĐ1 50 · TĐ2 95 (chi T12 ghi ở TĐ3 không vào TĐ2) · TĐ3 140', L2[0] === 50e6 && L2[1] === 95e6 && L2[2] === 140e6, String(L2));
+  for (const k of [1, 2, 3]) {
+    await p.click(`#tab-cost [data-tdpick="${k}"]`); await p.waitForTimeout(600);
+    const r = await p.evaluate((k) => ({ sv: Math.round((costData.cp_nhom || []).reduce((a, n) => a + (Number(n.sv?.[k - 1]) || 0), 0)), the: Number(document.querySelector('#c-k-sau')?.innerText.replace(/\D/g, '') || 0) }), k);
+    chk(`Lương BCH TĐ${k}: thẻ tổng = máy chủ`, Math.abs(r.the - r.sv) <= 2, `${r.the} / ${r.sv}`);
+  }
   chk('không lỗi trang', !errs.length, errs[0]);
   console.log(`KẾT QUẢ: ${ok} ĐẠT, ${loi} LỖI`);
   await br.close();
