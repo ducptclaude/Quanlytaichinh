@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.27.11.26 – Dự trù chung không cộng dồn với khoản chi tiết
+- Người dùng báo: TĐ1 "DT-CP · Lương" 50 (chưa xác định) -> TĐ2 nhập "Lương tháng 10" 50 thì ra 100 (cộng dồn sai).
+- Nay dòng dự trù chung của 1 hạng mục (dòng bảng DT-CP) chỉ giữ PHẦN CÒN LẠI sau các khoản / gói chi tiết cùng hạng mục: TĐk = MAX(chung, tổng chi tiết), ở cả TĐ1, TĐ2 (TĐ3 gián tiếp vẫn theo đã chi / số chốt). CP khác luôn cộng thêm.
+  Máy chủ `duTruNhom` (CON_TACH / CON_DOAN / conOf); giao diện `dtrRem` (+ `dtrHd`) dùng chung cho bảng, thẻ tổng, hộp HĐ đầu vào, hộp "Gói / dự trù theo nhóm" (`dtrTd` bỏ cách tính cũ riêng), danh sách khoản (`ptKhoan`).
+- Kiểm tra `scripts/kiem-tra-them/du-tru-chung.js` 9 ĐẠT (50 -> T10 50 = 50; + T11 45 = 95; TĐ1 chung 50 + chi tiết 20 = 50; thẻ tổng khớp); tester 4518, kiem-tra-goi 246, luong 17, chi-tiet-khoan 16, td2-socuoi 17, td23 26, cp-khac 13, nhom-ps 13, tdk 31, dcA 22, duyet 28 ĐẠT.
+
 ## V06.27.11.26 – Bảng DT-CP: nút "Chi tiết ›" ở dòng gián tiếp / tài chính (Lương, Thưởng tết-lễ, Thưởng đợt, Lãi vay…) -> hộp danh sách khoản của hạng mục theo TĐ1 · TĐ2 · TĐ3 · Đã chi + thêm khoản ngay tại TĐ đang xem (TĐ1 dự trù · TĐ2 phát sinh, TĐ1 = 0 · TĐ3 phát sinh, số chốt tuỳ chọn), gợi ý tên tháng kế tiếp; bấm tên khoản mở hộp khoản (điều chỉnh, chốt, ghi chi, xoá). Kiểm tra `chi-tiet-khoan.js` 16 ĐẠT (máy tính + iPhone); tester, luong, td2-socuoi ĐẠT.
 
 ## V05.27.11.26 – Bảng DT-CP tách Lương / Thưởng tết-lễ / Thưởng đợt (cả 3 TĐ) + sửa 2 lỗi

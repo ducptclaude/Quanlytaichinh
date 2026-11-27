@@ -2159,7 +2159,7 @@ function costKpiTd() {
       const rs = dt.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
       const kyIds = new Set(rs.filter((r) => r.loai === 'ky').map((r) => r.id)); // V02.27.11.26: gói mở = MAX(gói ± điều chỉnh, HĐ + mua lẻ) – khớp máy chủ
       const tK = (x) => rs.filter((r) => r.loai === 'ky').reduce((t, r) => t + dtrRem(r, x, 'sv'), 0) + S('dc', (r) => !kyIds.has(r.goi_ref));
-      const v = kk === 1 ? S('ky', (r) => !(Number(r.td_ps) > 1)) : kk === 3 && rs.some((r) => r.loai === 'qt') ? S('qt') : tK(kk);
+      const v = kk === 1 ? rs.filter((r) => r.loai === 'ky').reduce((t, r) => t + dtrRem(r, 1, 'sv') + (Number(r.td_ps) > 1 ? 0 : leGoi(r.id)), 0) : kk === 3 && rs.some((r) => r.loai === 'qt') ? S('qt') : tK(kk);
       o[khoiOf(code)] += v; o.goi += v;
     }
     // V10.16: gián tiếp / tài chính theo % doanh thu (TĐ1, TĐ2) hoặc thực chi (TĐ3) – lấy đúng số máy chủ (như Báo cáo)
@@ -2618,7 +2618,7 @@ function ptKhoan() {
     const dcs = ds.filter((x) => x.loai === 'dc' && x.goi_ref === r.id), dc = dcs.reduce((a, x) => a + (Number(x.so_tien) || 0), 0);
     const le = leGoi(r.id, 'gia_tri'), g = Number(r.so_tien) || 0, dong = r.tinh_trang === 'dong';
     const chot = r.gt_chot === null || r.gt_chot === undefined ? null : Number(r.gt_chot);
-    const t = [g, dong ? le : Math.max(le, g + dc), chot ?? le];
+    const t = [dtrRem(r, 1, 'gt') + le, dong ? le : le + dtrRem(r, 2, 'gt'), chot ?? le]; // V07.27.11.26: dự trù chung = phần còn lại sau khoản chi tiết
     return { r, khoi: kh(r.nhom), dcs, dc, le, dong, chot, t, khoa: ds.some((x) => x.loai === 'qt' && x.nhom === r.nhom) };
   });
 }
@@ -2982,24 +2982,29 @@ function tpLV(c, l) {
 }
 // V02.27.11.26: phần dự trù còn lại của 1 gói / khoản tại TĐ k (không gồm HĐ, mua lẻ đã gắn – các phần đó tính riêng) – khớp máy chủ duTruNhom
 //  TĐ1: gói − mua lẻ · TĐ2/3: gói mở = MAX(0, gói ± điều chỉnh − mua lẻ − HĐ gắn) · gói đóng = 0 · phát sinh tại TĐ sau = 0 · CP khác có số chốt (TĐ3) -> số chốt
-function dtrRem(r, k, f = 'sv') {
+function dtrRem(r, k, f = 'sv', boChung = false) {
   if (Number(r.td_ps) > k) return 0;
   const V = (x, vat) => { const n = Number(x) || 0; return f === 'sv' ? n + Math.round((n * (Number(vat) || 0)) / 100) : n; };
   const le = leGoi(r.id, f === 'sv' ? 'sau_vat' : 'gia_tri');
-  if (k === 1) return V(r.so_tien, r.vat) - le;
+  // V07.27.11.26: dự trù chung của hạng mục (dòng bảng DT-CP) chỉ giữ PHẦN CÒN LẠI sau các khoản chi tiết đã xác định cùng hạng mục (khớp máy chủ duTruNhom)
+  const ds = costData?.du_tru || [], conR = dtcpConOf(r);
+  const laChung = !boChung && r.loai === 'ky' && r.dtcp && !r.la_cp && !ds.some((x) => x.loai === 'ky' && x.dtcp && !x.la_cp && x.nhom === r.nhom && dtcpConOf(x) === conR && x.id < r.id);
+  const D = !laChung ? 0 : ds.filter((d) => d.loai === 'ky' && !d.dtcp && !d.la_cp && d.nhom === r.nhom && dtcpConOf(d) === conR && !(Number(d.td_ps) > k))
+    .reduce((a, d) => a + (k === 1 ? V(d.so_tien, d.vat) : leGoi(d.id, f === 'sv' ? 'sau_vat' : 'gia_tri') + dtrHd(d, k, f) + dtrRem(d, k, f, true)), 0);
+  if (k === 1) return Math.max(0, V(r.so_tien, r.vat) - D) - le;
   if (r.tinh_trang === 'dong') return 0;
-  const dc = (costData?.du_tru || []).filter((x) => x.loai === 'dc' && x.goi_ref === r.id).reduce((a, x) => a + V(x.so_tien, x.vat), 0);
+  const dc = ds.filter((x) => x.loai === 'dc' && x.goi_ref === r.id).reduce((a, x) => a + V(x.so_tien, x.vat), 0);
   const chot = k === 3 && r.la_cp && r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? V(r.gt_chot, r.vat) : null;
-  const hd = (costData?.thau_phu || []).filter((c) => c.goi_id === r.id).reduce((a, c) => a + (f === 'sv' ? tpTdSv(c, k) : (c.lines || []).reduce((b, l) => b + tpLV(c, l)[k - 1], 0)), 0);
-  return Math.max(0, (chot ?? V(r.so_tien, r.vat) + dc) - le - hd);
+  return Math.max(0, (chot ?? V(r.so_tien, r.vat) + dc) - le - dtrHd(r, k, f) - D);
 }
+const dtrHd = (r, k, f) => (costData?.thau_phu || []).filter((c) => c.goi_id === r.id).reduce((a, c) => a + (f === 'sv' ? tpTdSv(c, k) : (c.lines || []).reduce((b, l) => b + tpLV(c, l)[k - 1], 0)), 0);
 // Giá trị (trước VAT) 1 hạng mục con của nhóm tách (VD Vật tư phụ) tại TĐ k: gói / khoản của hạng mục (gồm HĐ, mua lẻ gắn) + mua lẻ hạng mục không gắn gói + điều chỉnh cả nhóm ghi cho hạng mục
 function dtcpCon(code, con, k) {
   const cua = (x) => dtcpConOf(x, code) === con, ttChi = ['B2', 'B3'].includes(NHOM().find((n) => n.code === code)?.khoi);
   const ky = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === code && cua(r) && !(Number(r.td_ps) > k));
   const hdGt = (r) => (costData?.thau_phu || []).filter((c) => c.goi_id === r.id).reduce((a, c) => a + (c.lines || []).reduce((b, l) => b + tpLV(c, l)[k - 1], 0), 0);
   const chotOf = (r) => (r.gt_chot === null || r.gt_chot === undefined || r.gt_chot === '' ? null : Number(r.gt_chot) || 0);
-  const goi = ky.reduce((a, r) => a + (k === 1 ? Number(r.so_tien) || 0 : k === 3 && ttChi ? chotOf(r) ?? leGoi(r.id, 'gia_tri') : hdGt(r) + leGoi(r.id, 'gia_tri') + dtrRem(r, k, 'gt')), 0); // gián tiếp / tài chính TĐ3: số chốt, chưa chốt = đã chi
+  const goi = ky.reduce((a, r) => a + (k === 1 ? dtrRem(r, 1, 'gt') + leGoi(r.id, 'gia_tri') : k === 3 && ttChi ? chotOf(r) ?? leGoi(r.id, 'gia_tri') : hdGt(r) + leGoi(r.id, 'gia_tri') + dtrRem(r, k, 'gt')), 0); // gián tiếp / tài chính TĐ3: số chốt, chưa chốt = đã chi
   const le = (costData?.items || []).filter((x) => x.nhom === code && cua(x) && !x.goi_id && (Number(x.td_ps) || 1) <= k).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0);
   const dcN = k === 1 || (k === 3 && ttChi) ? 0 : (costData?.du_tru || []).filter((x) => x.loai === 'dc' && x.nhom === code && !x.goi_ref && cua(x)).reduce((a, x) => a + (Number(x.so_tien) || 0), 0);
   return goi + le + dcN;
@@ -3191,9 +3196,9 @@ function renderTpCard() {
   const dcKh = (r) => svV(r, (costData.du_tru || []).filter((x) => x.loai === 'dc' && x.goi_ref === r.id).reduce((a, x) => a + (Number(x.so_tien) || 0), 0));
   const chotCpk = (r) => (r.la_cp && r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? svV(r, Number(r.gt_chot) || 0) : null);
   const cpkSv = (r, k) => { if (!okK(r, k)) return 0; const le = leGoi(r.id); if (k === 1) return svL(r); if (r.tinh_trang === 'dong') return le; const t2 = Math.max(le, svL(r) + dcKh(r)); return k === 3 && chotCpk(r) !== null ? Math.max(le, chotCpk(r)) : t2; }; // V12.26.11.26: CP khác theo TĐ
-  const goiSv = (r, k) => { if (!okK(r, k)) return 0; const hd = hdCua(r); if (k === 1) return svL(r); return hd.reduce((t, c) => t + tpTdSv(c, k), 0) + leGoi(r.id) + conG(r, k); };
+  const goiSv = (r, k) => { if (!okK(r, k)) return 0; const hd = hdCua(r); if (k === 1) return dtrRem(r, 1, 'sv') + leGoi(r.id); return hd.reduce((t, c) => t + tpTdSv(c, k), 0) + leGoi(r.id) + conG(r, k); };
   const nhomSv = (code, k) => { const rs = dtrAll.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
-    if (k === 1) return S('ky', (r) => okK(r, 1));
+    if (k === 1) return rs.filter((r) => r.loai === 'ky').reduce((t, r) => t + goiSv(r, 1), 0);
     const kyR = rs.filter((r) => r.loai === 'ky'), kyI = new Set(kyR.map((r) => r.id)), t2 = kyR.reduce((t, r) => t + conG(r, k), 0) + S('dc', (x) => !kyI.has(x.goi_ref)), hdK = kyR.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0) + leGoi(r.id), 0);
     return (k === 2 ? t2 : rs.some((r) => r.loai === 'qt') ? S('qt') : t2) + hdK; };
   const nhomHd = (code) => dtrAll.filter((r) => r.nhom === code && r.loai === 'ky').flatMap(hdCua);
@@ -3201,7 +3206,7 @@ function renderTpCard() {
   const chuNhom = (code) => { const ks = [...new Set(dtrAll.filter((r) => r.nhom === code && r.loai === 'ky').map(cdtOf))]; return ks.length === 1 ? ks[0] : 0; };
   const nhomSvB = (code, k, b) => { const rs = dtrAll.filter((r) => r.nhom === code), own = chuNhom(code) === b, kyB = rs.filter((r) => r.loai === 'ky' && cdtOf(r) === b);
     const S = (arr) => arr.reduce((t, r) => t + svL(r), 0), hdK = kyB.reduce((t, r) => t + hdCua(r).reduce((u, c) => u + tpTdSv(c, k), 0) + leGoi(r.id), 0);
-    if (k === 1) return S(kyB.filter((r) => okK(r, 1)));
+    if (k === 1) return kyB.reduce((t, r) => t + goiSv(r, 1), 0);
     const kyI = new Set(rs.filter((r) => r.loai === 'ky').map((r) => r.id)), t2 = kyB.reduce((t, r) => t + conG(r, k), 0) + (own ? S(rs.filter((r) => r.loai === 'dc' && !kyI.has(r.goi_ref))) : 0);
     return (k === 3 && rs.some((r) => r.loai === 'qt') ? (own ? S(rs.filter((r) => r.loai === 'qt')) : 0) : t2) + hdK; };
   const bks = [...new Set([...groups.map((g) => g.k), ...kyHien.map(cdtOf), ...dtrAll.filter((r) => r.loai !== 'ky').map((r) => chuNhom(r.nhom))])]
@@ -4668,11 +4673,14 @@ function dtrTd(rows) {
   const gan = new Set((costData?.thau_phu || []).map((c) => c.goi_id).filter(Boolean));
   const conTinh = (r) => !gan.has(r.id) && r.tinh_trang !== 'dong';
   const S = (k, loc = () => true) => rows.filter((r) => r.loai === k && loc(r)).reduce((a, r) => a + (Number(r.so_tien) || 0), 0);
-  const t1 = S('ky'), coQt = rows.some((r) => r.loai === 'qt');
-  const kyR = rows.filter((r) => r.loai === 'ky'), kyId = new Set(kyR.map((r) => r.id)), dcG = (id) => S('dc', (r) => r.goi_ref === id); // V04.17: điều chỉnh của riêng khoản
-  const t2 = kyR.reduce((a, r) => a + (conTinh(r) ? Math.max(0, (Number(r.so_tien) || 0) + dcG(r.id) - leGoi(r.id, 'gia_tri')) : 0) + leGoi(r.id, 'gia_tri'), 0) + S('dc', (r) => !kyId.has(r.goi_ref)); // V27.12: + mua lẻ gắn gói
+  const coQt = rows.some((r) => r.loai === 'qt'), kyR = rows.filter((r) => r.loai === 'ky'), kyId = new Set(kyR.map((r) => r.id)); void conTinh;
+  // V07.27.11.26: dùng chung cách tính với bảng / máy chủ (dtrRem: gói mở = MAX(gói ± đ/c, HĐ + mua lẻ), dự trù chung trừ khoản chi tiết, phát sinh theo TĐ)
+  const lv = (r) => leGoi(r.id, 'gia_tri'), ps = (r, k) => Number(r.td_ps) > k;
+  const t1 = kyR.reduce((a, r) => a + (ps(r, 1) ? 0 : dtrRem(r, 1, 'gt') + lv(r)), 0);
+  const tk = (k) => kyR.reduce((a, r) => a + (ps(r, k) ? 0 : lv(r) + dtrHd(r, k, 'gt') + dtrRem(r, k, 'gt')), 0) + S('dc', (r) => !kyId.has(r.goi_ref));
+  const t2 = tk(2);
   const ttChi = rows.length && !dtrB1(rows[0]); // gián tiếp / tài chính: TĐ3 = thực chi (hoặc số chốt)
-  const t3 = coQt ? S('qt') : ttChi ? kyR.reduce((a, r) => a + (r.gt_chot !== null && r.gt_chot !== undefined ? Number(r.gt_chot) : leGoi(r.id, 'gia_tri')), 0) : t2;
+  const t3 = coQt ? S('qt') : ttChi ? kyR.reduce((a, r) => a + (ps(r, 3) ? 0 : r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? Number(r.gt_chot) : lv(r)), 0) : tk(3);
   return { t1, t2, t3, coQt, ngoai: t1 === 0 && t2 !== 0 };
 }
 // Chi tiết đã có của nhóm (trước VAT): HĐ đầu vào theo TĐ2 + chi phí đã ghi (không gồm vay / trả gốc)
