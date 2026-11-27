@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V14.27.11.26 – Ghi khoản đã chi: Nội dung tự theo khoản đã chọn
+- Chọn "Thuộc gói / khoản" (hoặc bấm "Ghi chi cho khoản này") → Nội dung tự điền tên khoản (VD Lương tháng 12); đã gõ nội dung riêng thì giữ nguyên.
+- Danh sách khoản gián tiếp / tài chính ghi "dự trù X đ" / "chốt X đ" thay cho "gói X đ".
+- Kiểm tra: tester 4518, luong 17, cp-khac 13, chi-tiet-khoan 16 – 0 lỗi.
+
 ## V13.27.11.26 – Lương: dự trù chung đã chia không nhận chi / chốt
 - Hộp khoản "Dự trù chung" (đã có khoản chi tiết cùng hạng mục): ẩn "Chốt số khoản này", "Ghi chi cho khoản này", ghi chú ghi chi / chốt ở từng khoản; vẫn giữ Xoá.
 - "Ghi khoản đã chi" › Thuộc gói / khoản: khoản cụ thể (Lương tháng 10…) lên đầu, bỏ dự trù chung đã chia khỏi danh sách.

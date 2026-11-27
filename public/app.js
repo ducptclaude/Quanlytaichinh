@@ -2389,7 +2389,7 @@ function openCpk(id) {
       if (tg.dataset.cpkxdc) { if (!confirm('Xoá đợt điều chỉnh này?')) return; await api(`/api/du-tru/${tg.dataset.cpkxdc}`, { method: 'DELETE' }); return xong('Đã xoá đợt điều chỉnh'); }
       if (tg.dataset.cpkchot !== undefined) { const raw = $('#cpk-chot').value.trim(); await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ gt_chot: raw === '' ? '' : String(parseMoney(raw)) }) }); return xong(raw === '' ? 'Bỏ số chốt – TĐ3 = TĐ2' : 'Đã chốt / quyết toán TĐ3'); }
       if (tg.dataset.cpkchi !== undefined) { dlg.close(); $('#tpn-dlg')?.close(); moFormChi(`Ghi chi · ${r.noi_dung || 'CP khác'}`); const el = cForm.elements; el.nhom.value = r.nhom; el.nhom.dispatchEvent(new Event('change', { bubbles: true }));
-        setTimeout(() => { const sl = cForm.elements.le_goi; if (sl) { sl.dataset.keep = String(id); sl.value = String(id); } cForm.elements.noi_dung?.focus(); }, 80); return; }
+        setTimeout(() => { const sl = cForm.elements.le_goi; if (sl) { sl.dataset.keep = String(id); sl.value = String(id); } chiTheoKhoan(); cForm.elements.noi_dung?.focus(); }, 80); return; }
       if (tg.dataset.cpkxoa !== undefined) { if (!confirm(`Xoá khoản "${r.noi_dung}"? (${dcs.length} đợt điều chỉnh xoá theo; ${le ? 'các lần chi đã ghi giữ lại, chuyển thành chi chưa gắn khoản' : 'chưa có lần chi nào'})`)) return;
         await api(`/api/du-tru/${id}`, { method: 'DELETE' }); dlg.close(); await loadCost(); return; }
     } catch (err) { loi(err); }
@@ -2532,6 +2532,14 @@ function veCanhBao() {
     + c.bao.map((t) => `<div class="cb cb-vang">⚠ <div>${t}</div></div>`).join('') + (c.ok && !c.bao.length ? `<div class="cb cb-xanh">✓ <div>${c.ok}</div></div>` : '');
 }
 if (cForm) { cForm.addEventListener('input', () => veCanhBao()); cForm.addEventListener('change', () => setTimeout(veCanhBao, 0)); }
+// V14.27.11.26: chọn "Thuộc gói / khoản" -> Nội dung tự lấy theo tên khoản (VD Lương tháng 12); người dùng đã gõ nội dung riêng thì giữ nguyên
+function chiTheoKhoan() {
+  const sel = cForm?.elements.le_goi, nd = cForm?.elements.noi_dung; if (!sel || !nd) return;
+  const r = (costData?.du_tru || []).find((x) => x.id === Number(sel.value)), ten = r ? String(r.noi_dung || '').replace(/^DT-CP · /, '') : '';
+  if (!ten || (nd.value.trim() && nd.value !== nd.dataset.tuDong)) return;
+  nd.value = ten; nd.dataset.tuDong = ten; nd.dispatchEvent(new Event('input', { bubbles: true }));
+}
+cForm?.addEventListener('change', (e) => { if (e.target.name === 'le_goi') chiTheoKhoan(); });
 // V16.17: đọc ô dự trù "thông minh": số (150tr, 1,2 tỷ, 150.000.000), % (7%) hoặc công thức (150tr+155tr, 1900tr*7%, (100+50)*2)
 //  -> { pt } (phần trăm × doanh thu) · { tien } (số tiền) · { trong } · { loi }. Không dùng eval (an toàn).
 const k1Of = (name) => /1$/.test(name); // ô TĐ1
@@ -2749,7 +2757,7 @@ function openKhoan(id) {
     const t = e.target;
     if (t.dataset.close !== undefined) return dlg.close();
     if (t.dataset.pkgo) { dlg.close(); pk2Sel = id; costKpiTd(); if (t.dataset.pkgo === 'chi') moFormChi();
-      if (t.dataset.pkgo === 'chi' && cForm) { cForm.elements.nhom.value = x.r.nhom; cForm.elements.nhom.dispatchEvent(new Event('change', { bubbles: true })); setTimeout(() => { const s = cForm.elements.le_goi; if (s) { s.value = String(id); s.dataset.keep = String(id); } cForm.elements.noi_dung?.focus(); }, 60); }
+      if (t.dataset.pkgo === 'chi' && cForm) { cForm.elements.nhom.value = x.r.nhom; cForm.elements.nhom.dispatchEvent(new Event('change', { bubbles: true })); setTimeout(() => { const s = cForm.elements.le_goi; if (s) { s.value = String(id); s.dataset.keep = String(id); } chiTheoKhoan(); cForm.elements.noi_dung?.focus(); }, 60); }
       return $('#c-pt')?.closest('.card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     if (t.dataset.pksua !== undefined) { dlg.close(); return openDtr(x.r.nhom); }
     // V22.17: xoá khoản ghi sai (kèm các đợt điều chỉnh của khoản; các lần chi giữ lại -> thành "chi chưa gắn khoản") · xoá 1 đợt điều chỉnh
@@ -2924,7 +2932,7 @@ const dtrChungDaChia = (r) => r.loai === 'ky' && r.dtcp && !r.la_cp && (costData
 function leGoiOptions(nhom, keep) {
   const ds = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom && ((r.tinh_trang !== 'dong' && !dtrChungDaChia(r)) || r.id === keep))
     .sort((a, b) => (a.dtcp ? 1 : 0) - (b.dtcp ? 1 : 0)); // khoản cụ thể (Lương tháng 10…) lên đầu
-  return '<option value="">— Không gắn gói —</option>' + ds.map((r) => `<option value="${r.id}">${esc(r.noi_dung || 'Gói #' + r.id)} · gói ${money(r.so_tien)} đ${leGoi(r.id, 'gia_tri') ? ` · đã mua lẻ ${money(leGoi(r.id, 'gia_tri'))} đ` : ''}</option>`).join('');
+  return '<option value="">— Không gắn gói —</option>' + ds.map((r) => `<option value="${r.id}">${esc(r.noi_dung || 'Gói #' + r.id)} · ${dtrB1(r) ? `gói ${money(r.so_tien)} đ` : r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? `chốt ${money(r.gt_chot)} đ` : `dự trù ${money(r.so_tien)} đ`}${leGoi(r.id, 'gia_tri') ? ` · đã mua lẻ ${money(leGoi(r.id, 'gia_tri'))} đ` : ''}</option>`).join('');
 }
 function goiOptions(nhom) {
   const ds = (costData?.du_tru || []).filter((r) => r.loai === 'ky' && r.nhom === nhom && r.tinh_trang !== 'dong' && !r.la_cp);
