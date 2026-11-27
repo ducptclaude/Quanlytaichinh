@@ -97,10 +97,10 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
   const thucChi = async () => (await api('GET', '/bao-cao')).du_an.find((x) => x.id === id).tien_thuc;
   const tc0 = JSON.stringify(await thucChi());
   await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '10', pt_gt2: '', pt_tc1: '5', pt_tc2: '' });
-  await doiChieu('5) Gián tiếp 10%, tài chính 5% DT (TĐ2 theo TĐ1): TĐ1 = 760 − lương 40 + 150 + 75 · TĐ2 = 770 − 40 + 160 + 80 · TĐ3 = TĐ2 (V10.27.11.26)', [945, 970, 960], [400, 360, 360], [320, 350, 340], [225, 260, 260]);
+  await doiChieu('5) Gián tiếp 10%, tài chính 5% DT (TĐ2 theo TĐ1): TĐ1 = 760 − lương 40 + 150 + 75 · TĐ2 = 770 − 40 + 160 + 80 · TĐ3: khối đã có thực chi → theo khoản / thực chi (V20.27.11.26)', [945, 970, 840], [400, 360, 360], [320, 350, 340], [225, 260, 140]);
   check(JSON.stringify(await thucChi()) === tc0, 'Thực chi (mục II) không đổi khi nhập %');
   await api('PUT', `/du-an/${id}/ty-le`, { pt_gt2: '12' });
-  await doiChieu('6) TĐ2 gián tiếp 12% → 192', [945, 1002, 992], [400, 360, 360], [320, 350, 340], [225, 292, 292]);
+  await doiChieu('6) TĐ2 gián tiếp 12% → 192', [945, 1002, 840], [400, 360, 360], [320, 350, 340], [225, 292, 140]);
   const sai2 = await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '120' }, true);
   check(sai2.status === 400, 'Chặn tỷ lệ > 100%', `mã ${sai2.status}`);
   await api('PUT', `/du-an/${id}/ty-le`, { pt_gt1: '', pt_gt2: '', pt_tc1: '', pt_tc2: '' });
@@ -109,9 +109,9 @@ const eq = (a, b, what) => check(Math.abs(a - b) < 1, what, `được ${a / U}, 
   const K1 = (await api('POST', `/du-an/${id}/du-tru`, { nhom: 'gt_luong', loai: 'ky', so_tien: 100 * U, vat: 0, noi_dung: 'Lương BCH', ngay: NGAY })).id;
   await doiChieu('8) Khoản Lương 100 (TĐ1): TĐ1, TĐ2 +100 · TĐ3 = TĐ2 khi chưa chốt (V10.27.11.26)', [860, 870, 860], [400, 360, 360], [320, 350, 340], [140, 160, 160]);
   check((await le(30, K1, 'gt_luong', 'luong')).status === 201, 'Ghi chi lương 30 gắn khoản Lương');
-  await doiChieu('9) Đã chi 30: TĐ1 = 100 · TĐ2 = 30 + còn 70 · TĐ3 = TĐ2 (chưa chốt)', [860, 870, 860], [400, 360, 360], [320, 350, 340], [140, 160, 160]);
+  await doiChieu('9) Đã chi 30: TĐ1 = 100 · TĐ2 = 30 + còn 70 · TĐ3 = thực chi 30 (chưa chốt, đã chi – V20.27.11.26)', [860, 870, 790], [400, 360, 360], [320, 350, 340], [140, 160, 90]);
   check((await api('POST', `/du-an/${id}/du-tru`, { nhom: 'gt_luong', loai: 'dc', so_tien: 20 * U, vat: 0, noi_dung: 'Bảng lương thật', ngay: NGAY, goi_ref: K1 }, true)).status === 201, 'Điều chỉnh +20 của riêng khoản Lương');
-  await doiChieu('10) Điều chỉnh khoản +20: TĐ2 = 30 + (120 − 30) · TĐ3 = TĐ2', [860, 890, 880], [400, 360, 360], [320, 350, 340], [140, 180, 180]);
+  await doiChieu('10) Điều chỉnh khoản +20: TĐ2 = 30 + (120 − 30) · TĐ3 = thực chi 30', [860, 890, 790], [400, 360, 360], [320, 350, 340], [140, 180, 90]);
   const sai3 = await api('POST', `/du-an/${id}/du-tru`, { nhom: 'gt_luong', loai: 'dc', so_tien: 5 * U, vat: 0, noi_dung: 'sai', ngay: NGAY, goi_ref: G2 }, true);
   check(sai3.status === 400, 'Chặn điều chỉnh gắn khoản khác nhóm', `mã ${sai3.status}`);
   await le(100, K1, 'gt_luong', 'luong');

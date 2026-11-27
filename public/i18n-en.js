@@ -1,6 +1,8 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"± Gói": "± Package",
+"chưa ký HĐ": "unsigned",
 "– vẫn tính vào chi phí (từ TĐ ghi chi). Ghi trùng / sai thì bấm Xoá.": "– still counted as cost (from the milestone recorded). Duplicate / wrong: click Delete.",
 "↳ Đã chi:": "↳ Paid:",
 "+ Chi": "+ Expenditure",
@@ -1803,6 +1805,7 @@ window.BKS_EN = {
 "Công thức không hợp lệ – VD: =1.250.000*12 hoặc 2.500.000+350.000": "Invalid formula – e.g. =1,250,000*12 or 2,500,000+350,000"
 },
 "patterns": [
+["chưa ký HĐ {}", "unsigned {}"],
 ["Phát sinh TĐ{}", "Arising M{}"],
 ["Bảng DT-CP TĐ{}", "Revenue–cost table M{}"],
 ["Trình duyệt TĐ{} →", "Submit M{} for approval →"],

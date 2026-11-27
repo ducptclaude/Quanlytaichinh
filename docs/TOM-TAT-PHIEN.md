@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V20.27.11.26 – TĐ3 = chốt → thực chi → TĐ2; "chưa ký HĐ"; nút "± Gói" (người dùng duyệt)
+- Công thức (gián tiếp / tài chính, TĐ3 từng khoản): có số chốt = số chốt; chưa chốt mà đã có chi = THỰC CHI (bỏ phần dự trù còn lại); chưa chi đồng nào = TĐ2. Dự trù chung: hạng mục đã có chi → TĐ3 = 0 (theo thực chi các khoản). Cách nhập % / số: khối đã có thực chi → theo khoản. Máy chủ duTruNhom + giao diện dtrRem.
+- Hộp HĐ › (TĐ2/TĐ3): gói mở đã có HĐ hiện nhãn "chưa ký HĐ X" (phần dự trù chưa ký vẫn tính).
+- Nút "± Gói" (TĐ2, gói mở): gõ số dự trù TĐ2 mới của riêng gói → ghi đợt điều chỉnh của gói (chênh lệch).
+- Kiểm tra: goi-td2 7 (mới), kiem-tra-goi 246 (cập nhật số TĐ3 mục 5, 6, 9, 10 theo quy tắc mới), chi-theo-khoan 7 (TĐ3 93), tester 4518, doi-chieu-cp 73, td23 25, tdk 31, luong 17, mot-bang 8, cp-khac 13 – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V19.27.11.26 – Hộp Chi tiết hiện "Chi chưa gắn khoản" (nguyên nhân lương TĐ3 330 ≠ 140)
 - Nguyên nhân: xoá khoản thì các lần chi của khoản giữ lại thành "chi chưa gắn khoản" (tính theo TĐ lúc ghi, VD TĐ3) – không hiện trong hộp Chi tiết nhưng vẫn cộng vào bảng DT-CP → bảng TĐ3 330, hộp 140.
 - Sửa: hộp Chi tiết có mục "Chi chưa gắn khoản" (từng lần chi, TĐ1/2/3, Xoá); dòng Cộng cộng cả phần này → khớp bảng DT-CP. Xoá khoản: hỏi "xoá luôn n lần chi?" (OK = xoá, Huỷ = giữ).

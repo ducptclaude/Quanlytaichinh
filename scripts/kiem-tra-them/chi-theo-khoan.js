@@ -1,6 +1,6 @@
 // V15.27.11.26 – Tiền chi gắn khoản tính theo TĐ của KHOẢN, không theo tab đang mở lúc ghi
 // Tình huống người dùng: dự trù chung Lương TĐ1 50 · TĐ2 Lương tháng 10 = 50, T11 = 45 · ghi chi T10 48 lúc đang mở tab TĐ3
-//  -> TĐ1 = 50, TĐ2 = 95 (không bị trừ mất 48), TĐ3 = 95 (chưa chốt = TĐ2); thẻ tổng trang Chi phí = máy chủ
+//  -> TĐ1 = 50, TĐ2 = 95 (không bị trừ mất 48), TĐ3 = 93 (T10 đã chi -> thực chi 48; T11 chưa chi -> TĐ2 45); thẻ tổng trang Chi phí = máy chủ
 // Chạy: BKS_PASS=... node scripts/kiem-tra-them/chi-theo-khoan.js [url]
 const { chromium } = require('playwright');
 const B = process.argv[2] || 'http://127.0.0.1:3002';
@@ -21,7 +21,7 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
     return d.id; });
   await p.evaluate((i) => { revProjectId = i; revAll = false; costAll = false; showTab('cost'); }, id); await p.waitForTimeout(2500);
   const L = await p.evaluate(() => (costData.cp_nhom.find((x) => x.code === 'gt_luong')?.gt || []).map((x) => Math.round(Number(x) || 0)));
-  chk('Lương TĐ1 = 50', L[0] === 50e6, String(L)); chk('Lương TĐ2 = 95 (chi ghi lúc mở TĐ3 không làm giảm TĐ2)', L[1] === 95e6, String(L)); chk('Lương TĐ3 = 95', L[2] === 95e6, String(L));
+  chk('Lương TĐ1 = 50', L[0] === 50e6, String(L)); chk('Lương TĐ2 = 95 (chi ghi lúc mở TĐ3 không làm giảm TĐ2)', L[1] === 95e6, String(L)); chk('Lương TĐ3 = 93 (T10 thực chi 48 + T11 chưa chi = TĐ2 45 – V20.27.11.26)', L[2] === 93e6, String(L));
   for (const k of [1, 2, 3]) {
     await p.click(`#tab-cost [data-tdpick="${k}"]`); await p.waitForTimeout(600);
     const r = await p.evaluate((k) => ({ sv: Math.round((costData.cp_nhom || []).reduce((a, n) => a + (Number(n.sv?.[k - 1]) || 0), 0)), the: Number(document.querySelector('#c-k-sau')?.innerText.replace(/\D/g, '') || 0) }), k);
