@@ -59,34 +59,6 @@ function mapData(list, v) {
       co: Number.isFinite(d.vi_do) && Number.isFinite(d.kinh_do) && d.vi_do !== null && d.kinh_do !== null }; });
 }
 
-function bMapSection(list, v) {
-  if (!list.length) return '';
-  const R = mapData(list, v), tot = R.reduce((a, x) => a + Math.max(0, x.dt), 0);
-  const g = new Map(); for (const x of R) { const o = g.get(x.kv) || { dt: 0, n: 0 }; o.dt += Math.max(0, x.dt); o.n++; g.set(x.kv, o); }
-  const kv = [...g].sort((a, b) => b[1].dt - a[1].dt), top = kv[0];
-  const mode = BST.map_mode === 'tt' ? 'tt' : 'ts', thieu = R.filter((x) => !x.co);
-  const lg = mode === 'ts'
-    ? `<span><i style="background:#0f7a4f"></i>Tỷ suất ≥ 15%</span><span><i style="background:#c9a227"></i>10–15%</span><span><i style="background:#b4471c"></i>&lt; 10% / lỗ</span>`
-    : Object.entries(MAP_ST).map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`).join('');
-  return `<section class="card b-sec map-sec no-print-break">
-    <div class="th-head"><span class="th-no">⌖</span><div class="th-ttl"><h3>Bản đồ phân bổ dự án</h3><p>Vòng tròn = doanh thu (TĐ mới nhất · thực tế) · màu = ${mode === 'ts' ? 'tỷ suất lợi nhuận' : 'trạng thái'} · bấm vòng tròn để xem chi tiết</p></div>
-      <div class="th-tags map-seg no-print"><button type="button" class="${mode === 'ts' ? 'on' : ''}" data-mapmode="ts">Tỷ suất</button><button type="button" class="${mode === 'tt' ? 'on' : ''}" data-mapmode="tt">Trạng thái</button></div></div>
-    <div class="map-w">
-      <div class="map-box"><div id="b-map" class="map-c" role="region" aria-label="Bản đồ phân bổ dự án"></div>
-        ${R.some((x) => x.co) ? '' : '<div class="map-empty">Chưa có dự án nào có vị trí. Nhập tọa độ ở tab <b>Dự án</b> (nút 📍 Chọn trên bản đồ).</div>'}</div>
-      <div class="map-p">
-        ${top && tot > 0 ? `<div class="map-hot"><div class="k">★ Trọng điểm</div><div class="v">${esc(top[0])}</div>
-          <div class="s">${top[1].n} dự án · ${bTy(top[1].dt)} ${TY()} · <b>${bpct(top[1].dt, tot)}</b> doanh thu</div></div>` : ''}
-        <div class="map-pt">Doanh thu theo khu vực <small>· bấm để phóng tới</small></div>
-        ${kv.map(([k, o]) => `<button type="button" class="map-r" data-mapkv="${esc(k)}" title="Phóng tới ${esc(k)}"><span>${esc(k)} <small>${o.n} DA</small></span><b>${bTy(o.dt)}</b><em>${bpct(o.dt, tot)}</em><span class="map-tr"><i style="width:${tot ? Math.min(100, (o.dt / tot) * 100) : 0}%"></i></span></button>`).join('')}
-        ${R.some((x) => x.co) ? `<div class="map-pt map-pt2">Đi tới dự án ${R.filter((x) => x.co).length > 1 ? '<button type="button" class="map-all" data-mapall>⤢ Xem tất cả</button>' : ''}</div>
-          <div class="map-go">${R.filter((x) => x.co).sort((a, b) => b.dt - a.dt).map((x) => `<button type="button" data-mapgo="${x.d.id}" title="${esc(x.d.ten_du_an)}"><i style="background:${mapTsCol(x.dt ? x.ln / x.dt : 0)}"></i>${esc(x.d.ma_du_an)}</button>`).join('')}</div>` : ''}
-        <div class="map-lg">${lg}<div>Vòng to = doanh thu lớn · nhãn = mã dự án · ${TYD()}, ${v === 'gt' ? 'trước' : 'sau'} VAT</div></div>
-        ${thieu.length ? `<div class="map-miss"><b>${thieu.length} dự án chưa có vị trí:</b> ${thieu.map((x) => esc(x.d.ma_du_an)).join(', ')}. Nhập ở tab Dự án.</div>` : ''}
-      </div>
-    </div>
-  </section>`;
-}
 
 async function bMapInit(list, v) {
   const el = document.getElementById('b-map');

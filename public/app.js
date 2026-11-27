@@ -180,14 +180,12 @@ $('#btn-logout').addEventListener('click', async () => {
 const pForm = $('#p-form');
 // Quyền theo nhóm thao tác – bảng QUYEN do máy chủ gửi (lib/validate.js): hd giá trị (QS) · tien tiền (Kế toán) · td/ns (Lãnh đạo) · nhat_ky (BKS)
 const can = (k) => (META?.quyen?.[k] || []).includes(ME?.role);
-const canEdit = () => can('hd') || can('tien');
 
 let dash = { du_an: [] };
 const dashById = () => new Map(dash.du_an.map((d) => [d.id, d]));
 // Danh sách dự án: số liệu Thực hiện, trước VAT (xem đủ các lớp / VAT ở tab Báo cáo)
 const DSTATE = { vat: 'gt', lop: 'th' };
 const LOP = { dk: 'du_kien', th: 'thuc_hien' };
-const lopOf = (d, lop = DSTATE.lop) => d[LOP[lop] || 'thuc_hien'];
 
 async function loadProjects() {
   let tt;
@@ -2122,13 +2120,6 @@ function tpGroups(list) {
   }
   return [...map.values()].sort((a, b) => (a.k ? order.get(a.k) : 1e6) - (b.k ? order.get(b.k) : 1e6));
 }
-// Ô loại HĐ trên từng dòng: người được sửa HĐ chọn đổi loại ngay tại bảng; người khác chỉ thấy nhãn
-function tpKindCell(c, edit) {
-  const k = c.nhom || 'thau_phu';
-  if (!edit) return `<span class="tp-kind tp-k-${k}" title="${esc(TPN()[k])}">${TP_TAG[k]}</span>`;
-  return `<select class="tp-kind tp-kind-sel tp-k-${k}" data-tpkind="${c.id}" title="Loại hợp đồng: ${esc(TPN()[k])} – chọn để chuyển loại" aria-label="Loại hợp đồng ${esc(c.so_ma)}">${HDV.map((x) =>
-    `<option value="${x}" ${x === k ? 'selected' : ''}>${TP_NGAN[x]}</option>`).join('')}</select>`;
-}
 // Bảng HĐ đầu vào: số gọn theo triệu đồng (giữ phần lẻ nghìn nếu có), rê chuột xem số đồng đầy đủ
 const mtr = (n) => `<span title="${money(n)} đồng">${dvNum(n, 'trieu', [0, 3])}</span>`;
 // 4 thẻ tổng trên cùng: khi lọc Hợp đồng đầu vào (Loại / Quyết toán) -> hiện số của nhóm đang lọc (số chạy);
@@ -2203,7 +2194,6 @@ function tdInfo(k = 1) {
   const so = (() => { try { return JSON.parse(d[`td${k}_so`] || 'null'); } catch { return null; } })();
   return { tt, khoa: tt === 'trinh' || tt === 'duyet', d, so, truoc: k === 1 || d[`td${k - 1}_tt`] === 'duyet', sau: k < 3 && ['trinh', 'duyet'].includes(d[`td${k + 1}_tt`]) };
 }
-const td1Info = () => tdInfo(1);
 function tdBar(k = 1) {
   const { tt, d, so, truoc, sau } = tdInfo(k), T = 'TĐ' + k, laDuyet = ['admin', 'lanh_dao'].includes(ME.role), tuMinh = d[`td${k}_trinh_by`] === ME.id && ME.role !== 'admin'; // Quản trị tự duyệt được
   const chip = { '': `<span class="td1-chip td1-lap">✏ Đang lập · chưa trình</span>`, trinh: `<span class="td1-chip td1-cho">⏳ Chờ duyệt · ${esc(d[`td${k}_trinh_ten`] || '')} trình ${esc(d[`td${k}_trinh_at`] || '')}</span>`,
@@ -2215,7 +2205,6 @@ function tdBar(k = 1) {
   const soTxt = so && tt === 'duyet' ? `<span class="muted small">Số đã duyệt ${T}: DT ${dvT(so.dt)} · CP ${dvT(so.cp)} · LN ${dvT(so.ln)} (${so.dt ? ((so.ln / so.dt) * 100).toFixed(1).replace('.', ',') : 0}%)</span>` : '';
   return `<div class="td1-bar">${chip}<span class="td1-steps">${buoc}</span>${soTxt}<span class="td1-nut">${nut}</span></div>`;
 }
-const td1Bar = () => tdBar(1);
 const DTCP_TACH = { vat_tu: ['chinh', 'phu'], gt_luong: ['luong', 'thuong_le', 'thuong_dot'] }; // V03.26: nhóm tách hạng mục trong bảng DT-CP · V05.27.11.26: + lương / thưởng
 // Khoản cũ chưa ghi hạng mục: đoán theo tên (chỉ khoản nhập tay, dòng bảng DT-CP cũ vào hạng mục đầu)
 const DTCP_DOAN = { gt_luong: (t) => (/thưởng|thuong/i.test(t) ? (/tết|tet|lễ|le\b|30\/4|2\/9/i.test(t) ? 'thuong_le' : 'thuong_dot') : 'luong') };
@@ -2604,12 +2593,6 @@ document.addEventListener('click', async (e) => { // chọn cách tính khối: 
  // { id, kind: 'dc' | 'chot' } – dòng đang mở ô nhập
 const PK_GOI_Y = { gt_luong: ['Lương ban chỉ huy', 'Thưởng', 'BHXH, BHYT'], gt_tien_ich: ['Lán trại, tiện ích', 'Điện nước thi công', 'Văn phòng phẩm'], gt_ngoai_giao: ['Tiếp khách', 'Ngoại giao'],
   tc_chi_phi: ['Phí bảo lãnh', 'Phí ngân hàng'], tc_tra_no: ['Lãi vay'], tc_phat: ['Phạt chậm tiến độ'] };
-function pkFormHtml(x, span) {
-  return `<tr class="pk-edit"><td colspan="${span}"><form class="pk-form" data-id="${x.r.id}" data-kind="${ptEdit.kind}"><b>${esc(x.r.noi_dung || 'Khoản')}:</b>
-      ${ptEdit.kind === 'dc' ? `<label>Tăng (+) / giảm (−) <input name="so_tien" class="money num" placeholder="VD: 15.000.000 hoặc -5.000.000" required></label><label>Nội dung <input name="noi_dung" maxlength="300" placeholder="VD: Theo bảng lương thật"></label>`
-        : `<label>Số chốt TĐ3 (trước VAT) <input name="so_tien" class="money num" value="${x.chot !== null ? money(x.chot) : ''}" placeholder="VD: thưởng chốt thực tế" required></label><small class="muted">Đã chi ${dvT(x.le)} – phần còn lại là phải trả</small>`}
-      <button type="submit" class="primary sm">Lưu</button><button type="button" class="sm" data-pk="bo">Bỏ</button><span class="msg" id="pk-msg"></span></form></td></tr>`;
-}
 function ptKhoan() {
   const kh = (code) => NHOM().find((n) => n.code === code)?.khoi;
   const ds = (costData.du_tru || []).filter((r) => ['B2', 'B3'].includes(kh(r.nhom)));
@@ -3183,8 +3166,6 @@ function renderTpCard() {
   // ---- Gói chi phí / dự trù theo nhóm (cách tính giống Báo cáo: gói gắn HĐ / đã đóng chỉ tính ở TĐ1) ----
   const nhTen = (code) => TPN()[code] || NHOM().find((x) => x.code === code)?.ten || code;
   const svL = (r) => { const v = Number(r.so_tien) || 0; return v + Math.round((v * (Number(r.vat) || 0)) / 100); };
-  const ganG = new Set(tatCa.map((c) => c.goi_id).filter(Boolean));
-  const moG = (r) => !ganG.has(r.id) && r.tinh_trang !== 'dong';
   const hdCua = (r) => tatCa.filter((c) => c.goi_id === r.id);
   const dtrAll = q || tpFilter.loc ? [] : (costData.du_tru || []).filter((r) => dtrB1(r) && (!tpFilter.nhom || r.nhom === tpFilter.nhom) && !(Number(r.td_ps) > kTd)); // V10.26.11.26: phát sinh tại TĐ sau -> ẩn
   const okK = (r, k) => !(Number(r.td_ps) > k);
@@ -3192,10 +3173,6 @@ function renderTpCard() {
   const gCodes = [...new Set(dtrAll.map((r) => r.nhom))].sort((x, y) => nhomIdx(x) - nhomIdx(y));
   // V27.12: gói TĐ2/3 = HĐ gắn + mua lẻ gắn + phần gói chưa chi hết (gói còn mở)
   const conG = (r, k = 3) => (k === 1 ? 0 : dtrRem(r, k, 'sv')); // V02.27.11.26: phần gói còn lại (gói mở = MAX(gói ± đ/c, HĐ + mua lẻ))
-  const svV = (r, v0) => v0 + Math.round((v0 * (Number(r.vat) || 0)) / 100);
-  const dcKh = (r) => svV(r, (costData.du_tru || []).filter((x) => x.loai === 'dc' && x.goi_ref === r.id).reduce((a, x) => a + (Number(x.so_tien) || 0), 0));
-  const chotCpk = (r) => (r.la_cp && r.gt_chot !== null && r.gt_chot !== undefined && r.gt_chot !== '' ? svV(r, Number(r.gt_chot) || 0) : null);
-  const cpkSv = (r, k) => { if (!okK(r, k)) return 0; const le = leGoi(r.id); if (k === 1) return svL(r); if (r.tinh_trang === 'dong') return le; const t2 = Math.max(le, svL(r) + dcKh(r)); return k === 3 && chotCpk(r) !== null ? Math.max(le, chotCpk(r)) : t2; }; // V12.26.11.26: CP khác theo TĐ
   const goiSv = (r, k) => { if (!okK(r, k)) return 0; const hd = hdCua(r); if (k === 1) return dtrRem(r, 1, 'sv') + leGoi(r.id); return hd.reduce((t, c) => t + tpTdSv(c, k), 0) + leGoi(r.id) + conG(r, k); };
   const nhomSv = (code, k) => { const rs = dtrAll.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
     if (k === 1) return rs.filter((r) => r.loai === 'ky').reduce((t, r) => t + goiSv(r, 1), 0);

@@ -2,6 +2,14 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V08.27.11.26 – Rà soát toàn hệ thống + sơ đồ cấu trúc code + gỡ mã thừa
+- `docs/SO-DO-CAU-TRUC-CODE.md`: toàn cảnh (sơ đồ), chuỗi kiểm tra 1 lệnh ghi, bảng dữ liệu, bản đồ công thức (nơi tính trùng máy chủ ↔ giao diện), màn hình → hàm, kiểm thử,
+  kết quả rà soát + đề xuất tinh gọn, 107 đường dẫn API (kèm dòng), mục lục hàm tên:dòng (sinh bằng `scripts/tao-muc-luc.js`).
+- Đường dẫn giao diện ↔ máy chủ: khớp hết. Gỡ 20 hàm + 6 biến không dùng (~310 dòng; khu Báo cáo theo công trình, bản đồ, hiệu ứng số chạy, form cũ).
+- Bài mới: `doi-chieu-cp.js` (chi phí TĐ1–3: máy chủ = thẻ tổng = báo cáo mục IV) 109/109 khớp kể cả dự án có dự trù chung / phát sinh / CP khác / gói nhiều HĐ;
+  `do-toan-bo.js` (mọi tab × TĐ, các hộp, xuất 3 loại file, máy tính + iPhone): 0 lỗi trang, không NaN / undefined, không tràn.
+- tester 4518, kiem-tra-goi 246, td23 26, luong 17, chi-tiet-khoan 16, td2-socuoi 17, du-tru-chung 9, cp-khac 13, nhom-ps 13 ĐẠT.
+
 ## V07.27.11.26 – Dự trù chung không cộng dồn với khoản chi tiết
 - Người dùng báo: TĐ1 "DT-CP · Lương" 50 (chưa xác định) -> TĐ2 nhập "Lương tháng 10" 50 thì ra 100 (cộng dồn sai).
 - Nay dòng dự trù chung của 1 hạng mục (dòng bảng DT-CP) chỉ giữ PHẦN CÒN LẠI sau các khoản / gói chi tiết cùng hạng mục: TĐk = MAX(chung, tổng chi tiết), ở cả TĐ1, TĐ2 (TĐ3 gián tiếp vẫn theo đã chi / số chốt). CP khác luôn cộng thêm.

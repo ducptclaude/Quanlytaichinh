@@ -170,15 +170,6 @@ function bSeries(list, v, P) {
   return out;
 }
 
-// So với kỳ trước: good = tăng là tốt
-function bDelta(cur, prev, good = true) {
-  if (prev === null || prev === undefined) return '';
-  if (!prev) return `<span class="f-delta">— <small>kỳ trước = 0</small></span>`;
-  const p = (cur - prev) / Math.abs(prev);
-  const up = p >= 0;
-  const ok = up === good;
-  return `<span class="f-delta ${ok ? 'ok' : 'bad'}">${up ? '▲' : '▼'} ${Math.abs(p * 100).toFixed(1).replace('.', ',')}% <small>so với kỳ trước</small></span>`;
-}
 const PROJ_COLORS = ['#2c5fa3', '#c27a3e', '#16968a', '#7e5aa6', '#9a8a2e', '#b04f5a', '#3f8fbf'];
 const KHAC_COLOR = '#b5b3ab';
 // Màu công trình theo thứ hạng doanh thu trong kỳ (khớp biểu đồ tròn): > 7 công trình -> 6 lớn nhất có màu riêng, còn lại xám "Khác"
@@ -205,45 +196,6 @@ function bThuc(d, to) {
   o.kh_tp = d.tp?.qt_sv || 0; o.kh_cp = o.kh_chi - o.kh_tp; // CP kế hoạch = HĐ đầu vào (thầu phụ, vật tư, MMTB, nhân công) HT/QT + chi phí khác
   o.phai_thu = o.kh_thu - o.thu; o.phai_chi = o.kh_chi - o.chi;
   return o;
-}
-function bThucHtml(list) {
-  const P = bPeriod(list);
-  const to = P.to < bNowYm() ? P.to : bNowYm();
-  const rows = list.map((d) => ({ d, ...bThuc(d, to) }));
-  const T = rows.reduce((a, x) => { for (const k of ['thu', 'cp', 'tp', 'goc', 'vay', 'sau_goc', 'du_no', 'chi', 'con', 'kh_thu', 'kh_chi', 'phai_thu', 'phai_chi']) a[k] = (a[k] || 0) + x[k]; return a; }, {});
-  const ty = (x) => `<span class="${x < 0 ? 'neg' : ''}">${bTy(x)}</span>`;
-  const meter = (a, b, color) => `<span class="f-meter"><i style="width:${b > 0 ? Math.max(0, Math.min(100, (a / b) * 100)) : 0}%;background:${color}"></i></span>`;
-  const card = (cls, key, title, val, lines) => `<div class="tt-k ${cls}"><div class="f-title">${title}</div>
-    <button type="button" class="tt-link f-val ${val < 0 ? 'neg' : ''}" data-ttd="${key}" title="Bấm để xem cách tính và chi tiết">${bTy(val)} <small>${TY()}</small></button>
-    <div class="f-lines">${lines.map((x) => `<div>${x}</div>`).join('')}</div></div>`;
-  const lk = (key, val, cls = '') => `<button type="button" class="tt-link tt-sm ${cls} ${val < 0 ? 'neg' : ''}" data-ttd="${key}" title="Bấm để xem chi tiết">${bTy(val)}</button>`;
-  return `<section class="card b-sec tt-sec">
-    <div class="f-head"><h2>Thực thu – Thực chi – Còn lại thực</h2>
-      <span class="f-range">Lũy kế đến hết ${ymTxt(to)} · tiền thật, sau VAT</span></div>
-    <p class="muted small tt-intro">Tiền <b>thực tế đã về tài khoản</b> và <b>thực tế đã chi ra</b> của ${list.length > 1 ? `${list.length} công trình` : 'công trình'}, đặt cạnh <b>kế hoạch theo hợp đồng</b> (HĐ + phụ lục; HĐ đã quyết toán lấy theo quyết toán).</p>
-    <div class="tt-grid">
-      ${card('tt-thu', 'thu', 'Thực thu (tiền về)', T.thu, [`${meter(T.thu, T.kh_thu, BCOL.thu)} <b>${bpct(T.thu, T.kh_thu)}</b> kế hoạch`, `Kế hoạch thu: ${lk('kh_thu', T.kh_thu)} ${TY()}`])}
-      ${card('tt-chi', 'chi', 'Thực chi (tiền ra)', T.chi, [`${meter(T.chi, T.kh_chi, BCOL.chi)} <b>${bpct(T.chi, T.kh_chi)}</b> kế hoạch`, `Chi phí ${lk('cp', T.cp)} · Trả HĐ đầu vào ${lk('tp', T.tp)} ${TY()}`])}
-      ${card('tt-con', 'con', 'Còn lại thực (thu − chi)', T.con, [`Nhận tiền vay ${lk('vay', T.vay)} · Trả nợ gốc ${lk('goc', T.goc)} ${TY()}`, `Sau vay & trả nợ: ${lk('sau_goc', T.sau_goc)} ${TY()} · dư nợ ${lk('du_no', T.du_no)}`])}
-      ${card('tt-kh', 'phai_thu', 'Còn phải thu', T.phai_thu, [`Còn phải chi: ${lk('phai_chi', T.phai_chi)} ${TY()}`, `Còn lại khi hoàn tất theo KH: ${lk('kh_con', T.kh_thu - T.kh_chi)} ${TY()}`])}
-    </div>
-    <div class="f-box tt-chart"><h3>Diễn biến tiền thật lũy kế <small class="muted">· thu, chi và còn lại theo tháng</small></h3><div id="tt-ch" class="chart"></div></div>
-    <div class="table-wrap"><table class="b-table tt-table">
-      <thead>
-        <tr><th rowspan="2">Công trình</th><th colspan="4" class="grp g-thu f-sep">THU (tiền về)</th><th colspan="4" class="grp g-chi f-sep">CHI (tiền ra)</th><th rowspan="2" class="num f-sep g-con">Còn lại thực<br><small>thu − chi</small></th></tr>
-        <tr><th class="num f-sep g-thu">Kế hoạch</th><th class="num g-thu">Thực thu</th><th class="g-thu">% KH</th><th class="num g-thu">Còn phải thu</th>
-          <th class="num f-sep g-chi">Kế hoạch</th><th class="num g-chi">Thực chi</th><th class="g-chi">% KH</th><th class="num g-chi">Còn phải chi</th></tr>
-      </thead>
-      <tbody>${rows.map((x) => `<tr><td title="${esc(x.d.ten_du_an)}"><b>${esc(x.d.ma_du_an)}</b> <span class="muted small">${esc(x.d.ten_du_an)}</span></td>
-        <td class="num f-sep">${bTy(x.kh_thu)}</td><td class="num strong">${bTy(x.thu)}</td><td class="f-pct">${meter(x.thu, x.kh_thu, BCOL.thu)}${bpct(x.thu, x.kh_thu)}</td><td class="num">${ty(x.phai_thu)}</td>
-        <td class="num f-sep">${bTy(x.kh_chi)}</td><td class="num strong">${bTy(x.chi)}</td><td class="f-pct">${meter(x.chi, x.kh_chi, BCOL.chi)}${bpct(x.chi, x.kh_chi)}</td><td class="num">${ty(x.phai_chi)}</td>
-        <td class="num strong f-sep g-con ${x.con < 0 ? 'neg' : 'pos'}">${bTy(x.con)}</td></tr>`).join('')}</tbody>
-      <tfoot><tr><td>Tổng cộng</td><td class="num f-sep">${bTy(T.kh_thu)}</td><td class="num">${bTy(T.thu)}</td><td>${bpct(T.thu, T.kh_thu)}</td><td class="num">${ty(T.phai_thu)}</td>
-        <td class="num f-sep">${bTy(T.kh_chi)}</td><td class="num">${bTy(T.chi)}</td><td>${bpct(T.chi, T.kh_chi)}</td><td class="num">${ty(T.phai_chi)}</td>
-        <td class="num f-sep g-con ${T.con < 0 ? 'neg' : ''}">${bTy(T.con)}</td></tr></tfoot>
-    </table></div>
-    <p class="muted small f-note">Đơn vị: ${TYD()}, sau VAT · Thực chi = chi phí đã chi + thanh toán HĐ đầu vào (gồm tạm ứng); không gồm tiền vay nhận về (${bTy(T.vay)} ${TY()}) và trả nợ gốc vay (${bTy(T.goc)} ${TY()}) vì đó là vay – trả nợ, không phải doanh thu / chi phí · Còn lại âm = đang bỏ tiền ra nhiều hơn tiền thu về · Kế hoạch theo hợp đồng chỉ để so sánh, không phải tiền thật.</p>
-  </section>`;
 }
 // Bấm vào số -> bảng chi tiết: công thức, số từng công trình, các dòng tiền liên quan, nút tới tab nhập liệu
 const TTD = {
@@ -1704,75 +1656,8 @@ function renderReport() {
   if (typeof bMapInit === 'function') bMapInit(list, v);
 }
 
-function bProjectDetail(d, v, open) {
-  const lnDk = d.du_kien.doanh_thu[v] - d.du_kien.chi_phi[v], lnTh = d.thuc_hien.doanh_thu[v] - d.thuc_hien.chi_phi[v];
-  const h = d.hds;
-  const S = (f) => h.reduce((s, x) => s + f(x), 0);
-  const cg = d.tp.chua_gan;
-  const tp = (x) => (v === 'gt' ? x.qt_gt : x.qt_sv);
-  const nhom = d.nhom.filter((n) => n[v]);
-  const tongCp = d.du_kien.chi_phi[v];
-  return `<details class="b-proj" ${open ? 'open' : ''}>
-    <summary><span class="b-proj-title"><b>${esc(d.ma_du_an)}</b> – ${esc(d.ten_du_an)}</span>
-      <span class="b-proj-sum">LN dự kiến ${bm(lnDk)} (${bpct(lnDk, d.du_kien.doanh_thu[v])}) · LN thực hiện ${bm(lnTh)} (${bpct(lnTh, d.thuc_hien.doanh_thu[v])})</span></summary>
-    <div class="b-proj-body">
-      <p class="b-proj-info">Chủ đầu tư: <b>${esc(d.chu_dau_tu || '—')}</b> · Trạng thái: <b>${esc(d.trang_thai)}</b> · Tiến độ: <b>${d.tien_do}%</b>
-        ${d.ngay_bat_dau ? ` · Thời gian: ${dmy(d.ngay_bat_dau)}${d.ngay_ket_thuc ? ' → ' + dmy(d.ngay_ket_thuc) : ''}` : ''}
-        <span class="no-print"> · <a href="#" data-bgo="revenue" data-id="${d.id}">Mở Doanh thu</a> · <a href="#" data-bgo="cost" data-id="${d.id}">Mở Chi phí</a></span></p>
-      <div class="b-mini">
-        <div><span>DT dự kiến</span><b>${bn(d.du_kien.doanh_thu[v])}</b></div><div><span>CP dự kiến</span><b>${bn(d.du_kien.chi_phi[v])}</b></div>
-        <div><span>DT thực hiện</span><b>${bn(d.thuc_hien.doanh_thu[v])}</b></div><div><span>CP thực hiện</span><b>${bn(d.thuc_hien.chi_phi[v])}</b></div>
-        <div><span>Tiền về</span><b>${bn(d.tien_ve)}</b></div><div><span>Còn phải thu</span><b>${bm(d.thuc_hien.con_lai)}</b></div>
-        <div><span>Còn phải trả HĐ đầu vào</span><b>${bm(d.tp.con_lai)}</b></div><div><span>Trả nợ gốc vay</span><b>${bn(d.tra_goc.sv)}</b></div>
-      </div>
-      <h4>Hợp đồng chủ đầu tư & thầu phụ</h4>
-      <div class="table-wrap"><table class="b-table">
-        <thead><tr><th rowspan="2">HĐ chủ đầu tư</th><th colspan="3" class="grp">Doanh thu</th><th colspan="2" class="grp">Thu tiền (sau VAT)</th><th colspan="4" class="grp">Thầu phụ</th><th rowspan="2" class="num">Lãi gộp dự kiến</th></tr>
-        <tr><th class="num">Giá trị HĐ + PL</th><th class="num">Nghiệm thu</th><th class="num">% HT</th><th class="num">Tiền về</th><th class="num">Còn phải thu</th>
-          <th class="num">Số HĐ</th><th class="num">Giá trị HT/QT</th><th class="num">Đã trả (sau VAT)</th><th class="num">Còn phải trả</th></tr></thead>
-        <tbody>${h.length ? h.map((x) => `<tr><td><b>${esc(x.so_ma)}</b>${x.so_pl ? ` <span class="muted small">+${x.so_pl} PL</span>` : ''} ${x.da_qt ? '<span class="st st-hoan-thanh">Đã QT</span>' : ''}${x.tam_tinh ? ' <span class="st st-tam-tinh">Tạm tính</span>' : ''}</td>
-          <td class="num">${bn(x.hd[v])}</td><td class="num">${bn(x.nt[v])}</td><td class="num">${(x.pct_ht * 100).toFixed(1).replace('.', ',')}%</td>
-          <td class="num">${bn(x.tien_ve)}</td><td class="num">${bm(x.phai_thu)}</td>
-          <td class="num">${x.tp.n}${x.tp.n ? ` (${x.tp.n_qt} QT)` : ''}</td><td class="num">${bn(tp(x.tp))}</td><td class="num">${bn(x.tp.da_tt)}</td><td class="num">${bm(x.tp.con_lai)}</td>
-          <td class="num strong">${bm(x.dk[v] - tp(x.tp))}</td></tr>`).join('') : '<tr><td colspan="11" class="empty">Chưa có HĐ chủ đầu tư</td></tr>'}
-          ${cg.n ? `<tr class="tv-sub-warn"><td>HĐ đầu vào chưa gắn HĐ CĐT</td><td colspan="5"></td><td class="num">${cg.n}</td><td class="num">${bn(tp(cg))}</td><td class="num">${bn(cg.da_tt)}</td><td class="num">${bm(cg.con_lai)}</td><td class="num">${bm(-tp(cg))}</td></tr>` : ''}</tbody>
-        <tfoot><tr><td>TỔNG</td><td class="num">${bn(S((x) => x.hd[v]))}</td><td class="num">${bn(S((x) => x.nt[v]))}</td><td class="num">${bpct(S((x) => x.nt.sv), S((x) => x.hd.sv))}</td>
-          <td class="num">${bn(d.tien_ve)}</td><td class="num">${bm(S((x) => x.phai_thu))}</td><td class="num">${d.tp.n}</td><td class="num">${bn(tp(d.tp))}</td><td class="num">${bn(d.tp.da_tt)}</td><td class="num">${bm(d.tp.con_lai)}</td>
-          <td class="num">${bm(S((x) => x.dk[v]) - tp(d.tp))}</td></tr></tfoot>
-      </table></div>
-      <p class="muted small">Lãi gộp dự kiến = Doanh thu dự kiến của HĐ − Giá trị HT/QT HĐ đầu vào thuộc HĐ (chưa trừ vật tư, nhân công, gián tiếp, tài chính).</p>
-      <h4>Cơ cấu chi phí dự kiến (${v === 'gt' ? 'trước VAT' : 'sau VAT'})</h4>
-      <div class="table-wrap"><table class="b-table b-cost">
-        <thead><tr><th>Khối / Nhóm chi phí</th><th class="num">Giá trị</th><th class="num">Tỷ trọng</th><th class="num">% doanh thu dự kiến</th></tr></thead>
-        <tbody>${d.khoi.map((k) => `<tr class="b-khoi"><td>${esc(k.ten)}</td><td class="num">${bn(k[v])}</td><td class="num">${bpct(k[v], tongCp)}</td><td class="num">${bpct(k[v], d.du_kien.doanh_thu[v])}</td></tr>` +
-          nhom.filter((n) => n.khoi === k.code).map((n) => `<tr><td class="indent-1">${esc(n.ten)}</td><td class="num">${bn(n[v])}</td><td class="num">${bpct(n[v], tongCp)}</td><td class="num">${bpct(n[v], d.du_kien.doanh_thu[v])}</td></tr>`).join('')).join('')}</tbody>
-        <tfoot><tr><td>TỔNG CHI PHÍ</td><td class="num">${bn(tongCp)}</td><td class="num">100%</td><td class="num">${bpct(tongCp, d.du_kien.doanh_thu[v])}</td></tr></tfoot>
-      </table></div>
-    </div>
-  </details>`;
-}
 
-function bWarnTable(list) {
-  const rank = { cao: 0, tb: 1, thap: 2 };
-  const rows = list.flatMap((d) => d.canh_bao.map((w) => ({ ...w, da: d.ma_du_an, id: d.id }))).sort((a, b) => rank[a.muc] - rank[b.muc] || a.da.localeCompare(b.da));
-  if (!rows.length) return '<p class="muted">Không có cảnh báo.</p>';
-  return `<p class="muted small no-print">Bấm vào một dòng để mở đúng vị trí cần kiểm tra.</p>
-    <div class="table-wrap"><table class="b-table b-warn-tbl"><thead><tr><th>#</th><th>Mức</th><th>Dự án</th><th>Nội dung</th><th class="no-print">Vị trí</th></tr></thead>
-    <tbody>${rows.map((w, i) => `<tr ${bWarnAttr(w, w.id)}><td class="num">${i + 1}</td><td><span class="b-muc m-${w.muc}">${MUC[w.muc]}</span></td><td>${esc(w.da)}</td><td class="wrap">${esc(w.noi_dung)}</td>
-      <td class="no-print b-where">${w.link ? `${bWarnPlace(w.link)} →` : ''}</td></tr>`).join('')}</tbody></table></div>`;
-}
 
-// ---------- Cảnh báo có liên kết: bấm để tới đúng tab / dòng ----------
-function bWarnAttr(w, id) {
-  return w.link ? `class="b-wlink m-${w.muc}" data-wda="${id}" data-wlink='${JSON.stringify(w.link).replace(/'/g, '&#39;')}' tabindex="0" title="Mở vị trí cần kiểm tra"` : '';
-}
-function bWarnPlace(l) {
-  if (l.go === 'card') return 'Thẻ công trình';
-  if (l.tab === 'revenue') return l.qt ? 'Doanh thu › 2. HT/QT' : l.tv ? 'Doanh thu › 3. Tiền về' : 'Doanh thu › 1. HĐ/PL';
-  if (l.tp) return 'Chi phí › Thầu phụ (chi tiết)';
-  if (l.tpgrp !== undefined) return 'Chi phí › 1. Thầu phụ';
-  return 'Chi phí › bảng chi phí';
-}
 function bFlash(sel) {
   const el = typeof sel === 'string' ? $(sel) : sel;
   const row = el?.closest('tr') || el;
@@ -1852,7 +1737,6 @@ const NHOM_NGAN = { thau_phu: 'Thầu phụ', vat_tu: 'Vật tư', nhan_cong: 'N
   gt_tien_ich: 'Tiện ích/phục vụ', gt_luong: 'Lương, thưởng', gt_ngoai_giao: 'Ngoại giao', tc_chi_phi: 'CP tài chính', tc_tra_no: 'Lãi vay', tc_phat: 'Phạt CĐT' };
 let pcScrollTo = null;       // mở báo cáo từ tab Dự án -> cuộn tới thẻ
 const BUILDING = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5l8-3v19M13 8h6v13M8 7h2M8 11h2M8 15h2M16 12h1M16 16h1"/></svg>';
-const canEditPc = () => can('hd') || can('tien'); // quyền chi tiết: can(k) – app.js
 
 function openProjectReport(id) {
   dongBoDuAn(id);
@@ -2026,80 +1910,6 @@ function bPcThucHien(d, kind, cur, prv) {
 }
 // ---------------------------------------------------------------------
 // V06.16: TỔNG QUAN 1 CÔNG TRÌNH – chỉ những gì mục I–IV chưa có: dự án đang ổn hay không, cần làm gì
-// ---------------------------------------------------------------------
-function bPcTongQuan(d) {
-  const now = new Date(), iso = now.toISOString().slice(0, 10);
-  const g = bGthtMap([d], 'sv').get(d.id) || { gtht: 0, dt3: 0 };
-  const t = bThuc(d, bNowYm()), M = bMuc4Data([d], 'sv').rows[0] || { c3: 0, t3: 0 };
-  const bd = d.ngay_bat_dau || d.ngay_ky_hd, kt = d.ngay_ket_thuc || d.ngay_qt;
-  const tg = bd && kt && kt > bd ? Math.max(0, Math.min(1, (new Date(iso) - new Date(bd)) / (new Date(kt) - new Date(bd)))) : null;
-  const ht = g.dt3 > 0 ? g.gtht / g.dt3 : null, thu = g.gtht > 0 ? t.thu / g.gtht : null, chi = M.c3 > 0 ? t.chi / M.c3 : null;
-  const P = (x) => (x === null ? '—' : `${(x * 100).toFixed(1).replace('.', ',')}%`);
-  const bar = (lab, x, sub, col, tip) => `<li title="${esc(tip)}"><span>${lab}</span><span class="pc-bar wide"><i style="width:${x === null ? 0 : Math.min(100, x * 100)}%;background:${col}"></i></span><b>${P(x)}</b><small>${sub}</small></li>`;
-  // Kết luận tự động
-  const KL = [];
-  if (tg !== null && ht !== null && ht + 0.1 < tg) KL.push(['bad', `Chậm tiến độ: đã qua ${P(tg)} thời gian nhưng mới hoàn thành ${P(ht)}`]);
-  if (thu !== null && thu < 0.8) KL.push(['bad', `Chậm thu tiền: mới thu ${P(thu)} giá trị đã hoàn thành – còn ${bTy(g.gtht - t.thu)} ${TY()} chưa thu`]);
-  if (chi !== null && ht !== null && chi > ht + 0.1) KL.push(['warn', `Chi nhanh hơn tiến độ: đã chi ${P(chi)} chi phí nhưng mới hoàn thành ${P(ht)}`]);
-  if (t.chi > t.thu) KL.push(['warn', `Đang chi nhiều hơn thu ${bTy(t.chi - t.thu)} ${TY()} – dự án đang ứng vốn`]);
-  if (!KL.length) KL.push(['ok', 'Tiến độ, thu tiền và chi tiêu đang cân đối']);
-  const suc = `<div class="pc-sub-h">1. Sức khỏe dự án <small class="muted">so trên cùng một mốc hôm nay ${dmy(iso)} · sau VAT</small></div>
-    <ul class="pc-list pc-health">
-      ${bar('Thời gian đã qua', tg, bd && kt ? `${dmy(bd)} → ${dmy(kt)}` : bd ? `từ ${dmy(bd)} · chưa có ngày kết thúc (Sửa ngày)` : 'chưa có ngày bắt đầu', '#94a3b8', 'Số ngày đã qua ÷ tổng thời gian dự án')}
-      ${bar('Giá trị hoàn thành', ht, `${bTy(g.gtht)} / ${bTy(g.dt3)} ${TY()}`, '#2f6bd8', 'GTHT ÷ Doanh thu TĐ3 (theo đợt thanh toán / quyết toán; HĐ chưa có đợt tạm tính cost to cost)')}
-      ${bar('Tiền về / giá trị hoàn thành', thu, `${bTy(t.thu)} / ${bTy(g.gtht)} ${TY()}`, '#12a58b', 'Tiền đã về ÷ giá trị đã hoàn thành')}
-      ${bar('Đã chi / chi phí TĐ3', chi, `${bTy(t.chi)} / ${bTy(M.c3)} ${TY()}`, '#e07b39', 'Tiền đã chi (chi phí + trả HĐ đầu vào) ÷ chi phí TĐ3')}
-    </ul>
-    <ul class="pc-kl">${KL.map(([c, x]) => `<li class="kl-${c}">${c === 'ok' ? '✓' : '⚠'} ${esc(x)}</li>`).join('')}</ul>`;
-  // 2. Việc cần xử lý: cảnh báo hệ thống + số liệu chưa gắn đúng chỗ + HĐ đã nghiệm thu chưa thu tiền
-  const VC = [];
-  const tpThieu = d.moc?.cp?.tp_qt_thieu || 0;
-  if (tpThieu) VC.push({ muc: 'tb', noi_dung: `${tpThieu} văn bản HĐ đầu vào đã quyết toán nhưng chưa nhập số quyết toán (tạm lấy TĐ2)`, link: { tab: 'cost' } });
-  { const b1 = (d.cp_chung || []).filter((x) => x.khoi === 'B1' && Math.abs(x.sv?.[2] || 0) >= 1e5), s = b1.reduce((a, x) => a + x.sv[2], 0);
-    if (Math.abs(s) >= 1e6) VC.push({ muc: 'tb', noi_dung: `Chi phí trực tiếp chưa gắn HĐ chủ đầu tư ${bTy(s)} ${TY()} (${b1.map((x) => `${x.ten} ${bTy(x.sv[2])}`).join(' · ')}) – gắn gói / HĐ chủ đầu tư để số về đúng HĐ`, link: { tab: 'cost' } }); }
-  if (d.tien_chung?.thu) VC.push({ muc: 'tb', noi_dung: `Tiền về chưa gắn HĐ: ${bTy(d.tien_chung.thu)} ${TY()}`, link: { tab: 'revenue' } });
-  for (const h of d.hds || []) if ((h.phai_thu || 0) >= 1e6) VC.push({ muc: 'thap', noi_dung: `HĐ ${h.so_ma}: đã nghiệm thu chưa thu tiền ${bTy(h.phai_thu)} ${TY()}`, link: { tab: 'revenue' } });
-  const vc = [...VC, ...(d.canh_bao || [])].sort((a, b) => ({ cao: 0, tb: 1, thap: 2 }[a.muc] - { cao: 0, tb: 1, thap: 2 }[b.muc]));
-  const viec = `<details class="pc-fold"><summary class="pc-sub-h">2. Việc cần xử lý <small class="muted">${vc.length ? `${vc.length} việc · bấm để xem` : 'không có'}</small></summary>
-    ${vc.length ? `<ul class="pc-todo">${vc.slice(0, 12).map((w) => `<li ${w.link ? bWarnAttr(w, d.id) : ''}><span class="b-muc m-${w.muc}">${MUC[w.muc]}</span> ${esc(w.noi_dung)}${w.link ? ` <small class="muted">${bWarnPlace(w.link)} →</small>` : ''}</li>`).join('')}${vc.length > 12 ? `<li class="muted">… và ${vc.length - 12} việc khác (xem Cảnh báo)</li>` : ''}</ul>` : '<p class="muted small">✓ Không có việc tồn đọng</p>'}</details>`;
-  // 3. Dòng tiền lũy kế theo tháng
-  const th = d.tien_thuc?.thang || {}, ks = Object.keys(th).sort();
-  let lk = { thu: 0, chi: 0 };
-  const pts = ks.map((k) => { lk = { thu: lk.thu + (th[k].thu || 0), chi: lk.chi + (th[k].cp || 0) + (th[k].tp || 0) }; return { k, ...lk }; });
-  const W = 640, Hh = 190, pad = 34, mx = Math.max(1, ...pts.flatMap((p) => [p.thu, p.chi]));
-  const X = (i) => pad + (pts.length < 2 ? (W - 2 * pad) / 2 : (i * (W - 2 * pad)) / (pts.length - 1)), Y = (val) => Hh - 24 - (val / mx) * (Hh - 44);
-  const line = (f, col) => `<polyline fill="none" stroke="${col}" stroke-width="2.5" points="${pts.map((p, i) => `${X(i)},${Y(p[f])}`).join(' ')}"/>` + pts.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p[f])}" r="3" fill="${col}"><title>${p.k}: ${f === 'thu' ? 'tiền về' : 'đã chi'} lũy kế ${bTy(p[f])} ${TY()}</title></circle>`).join('');
-  const last = pts[pts.length - 1];
-  const dong = `<div class="pc-sub-h">3. Dòng tiền lũy kế theo tháng <small class="muted">tiền thật, sau VAT · ${TY()}</small></div>
-    ${pts.length ? `<svg class="pc-cash" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Dòng tiền lũy kế">
-      <line x1="${pad}" y1="${Hh - 24}" x2="${W - pad}" y2="${Hh - 24}" stroke="#cbd5e1"/>
-      <polygon fill="#12a58b22" points="${pts.map((p, i) => `${X(i)},${Y(p.thu)}`).join(' ')} ${[...pts].reverse().map((p, i) => `${X(pts.length - 1 - i)},${Y(p.chi)}`).join(' ')}"/>
-      ${line('thu', '#1f3b73')}${line('chi', '#e0a43a')}
-      ${pts.map((p, i) => (pts.length <= 12 || i % Math.ceil(pts.length / 12) === 0 ? `<text x="${X(i)}" y="${Hh - 8}" font-size="10" text-anchor="middle" fill="#64748b">${p.k.slice(5)}/${p.k.slice(2, 4)}</text>` : '')).join('')}
-      <text x="${X(pts.length - 1)}" y="${Y(last.thu) - 8}" font-size="11" text-anchor="end" fill="#1f3b73" font-weight="700">Thu ${bTy(last.thu)}</text>
-      <text x="${X(pts.length - 1)}" y="${Y(last.chi) + 16}" font-size="11" text-anchor="end" fill="#b07338" font-weight="700">Chi ${bTy(last.chi)}</text>
-    </svg><div class="pc-legend"><span><i style="background:#1f3b73"></i>Tiền về lũy kế</span><span><i style="background:#e0a43a"></i>Đã chi lũy kế</span><span><i style="background:#12a58b55"></i>Còn lại ${bTy(last.thu - last.chi)} ${TY()}</span></div>` : '<p class="muted small">Chưa có tiền về / tiền chi có ngày</p>'}`;
-  // 4. Mốc thời gian – mỗi tháng 1 dòng (ký HĐ / PL, nghiệm thu, tiền về, điều chỉnh, quyết toán)
-  const ct = d.chi_tiet || {}, MT = {};
-  const mo = (ngay) => (MT[ngay ? ngay.slice(0, 7) : '~'] ||= { ky: [], nt: [0, 0], tv: [0, 0], dcd: [0, 0], dcc: [0, 0], qt: false });
-  for (const r of ct.doanh_thu || []) { if (r.loai === 'HĐ/PL') mo(r.ngay).ky.push(r.so_hieu); else { const o = mo(r.ngay).nt; o[0]++; o[1] += r.gia_tri || 0; } }
-  for (const x of ct.tien_ve || []) { const o = mo(x.ngay).tv; o[0]++; o[1] += x.so_tien || 0; }
-  for (const x of d.dt_dc || []) { const o = mo(x.ngay).dcd; o[0]++; o[1] += x.st; }
-  for (const x of d.cp_dc || []) { const o = mo(x.ngay).dcc; o[0]++; o[1] += x.st; }
-  if (d.ngay_qt) mo(d.ngay_qt).qt = true;
-  const sgn = (x) => `<b class="${x < 0 ? 'neg' : ''}">${x > 0 ? '+' : ''}${bTy(x)}</b>`;
-  const keys = Object.keys(MT).sort((a, b) => (a === '~') - (b === '~') || a.localeCompare(b));
-  const moc = `<details class="pc-fold"><summary class="pc-sub-h">4. Mốc thời gian dự án <small class="muted">${keys.length} tháng · bấm để xem · giá trị trước VAT, tiền về sau VAT · ${TY()}</small></summary>
-    ${keys.length ? `<ol class="pc-timeline">${keys.map((k) => { const x = MT[k], it = [];
-      if (x.ky.length) it.push(`<span class="tl-ky" title="${esc(x.ky.join(', '))}">📝 Ký ${x.ky.length > 2 ? `${x.ky.length} văn bản` : esc(x.ky.join(', '))}</span>`);
-      if (x.dcd[0]) it.push(`<span>± ĐC doanh thu ${x.dcd[0]} đợt ${sgn(x.dcd[1])}</span>`);
-      if (x.dcc[0]) it.push(`<span>± ĐC chi phí ${x.dcc[0]} đợt ${sgn(x.dcc[1])}</span>`);
-      if (x.nt[0]) it.push(`<span>✔ Nghiệm thu ${x.nt[0]} đợt <b>${bTy(x.nt[1])}</b></span>`);
-      if (x.tv[0]) it.push(`<span title="Số khoản tiền về trong tháng (đếm số lần nhận tiền, không phải số thứ tự đợt)">💰 Tiền về ${x.tv[0]} khoản <b>${bTy(x.tv[1])}</b></span>`);
-      if (x.qt) it.push('<span>🏁 Quyết toán</span>');
-      return `<li><b class="tl-m">${k === '~' ? 'Chưa ghi ngày' : `T${k.slice(5)}/${k.slice(0, 4)}`}</b><div class="tl-row">${it.join('')}</div></li>`; }).join('')}</ol>` : '<p class="muted small">Chưa có mốc</p>'}</details>`;
-  return `<div class="pc-tq">${suc}${viec}${dong}${moc}</div>`;
-}
 // V03.17: bỏ tab Tổng quan – bảng "Tiền thực tế" (nút đầu thẻ) hiện trên đầu tab đang mở
 function bPcBody(d, tab) { return (BST.td_tt === true ? bTdBlock(d) : '') + bPcBody0(d, tab); }
 function bPcBody0(d, tab) {
@@ -2199,13 +2009,6 @@ function bSysMoc(d, td, ngay) {
 }
 const bTodayIso = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
 // Tiền thật đến ngày chốt (sau VAT): thực thu = tiền về; thực chi = chi phí đã chi + đã trả HĐ đầu vào (gồm tạm ứng);
-// không gồm nhận tiền vay / trả nợ gốc – cùng cách tính mục "Thực thu – Thực chi"
-function bTienThucDen(d, ngay) {
-  const o = { thu: 0, chi: 0 };
-  for (const [k, x] of Object.entries(d.tien_thuc?.ngay || {})) if (k <= ngay) { o.thu += x.thu; o.chi += x.cp + x.tp; }
-  o.con = o.thu - o.chi;
-  return o;
-}
 // Mức thay đổi so với mốc trước: good = tăng là tốt (DT, LN, tỷ suất); chi phí tăng là xấu
 function bTdDelta(cur, base, good, isPct, vs) {
   if (cur === null || base === null) return '';
@@ -2314,25 +2117,6 @@ function bTd2Dialog(pid, key) {
   document.body.appendChild(dlg); dlg.addEventListener('close', () => dlg.remove()); dlg.showModal();
 }
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-ivtd2]'); if (!b) return; const [pid, key] = b.dataset.ivtd2.split('|'); bTd2Dialog(pid, key); });
-function bPcCpKhoi(d) {
-  // V30.12: Chi phí THỜI ĐIỂM 1 (gói + HĐ đầu vào ký + dự trù / chi phí gián tiếp, tài chính) theo khối – cùng số mục I TĐ1 trên hệ thống
-  const v = BST.vat, LM = ['I', 'II', 'III', 'IV'];
-  const ns0 = (d.cp_td_nhom || []).map((n) => ({ ...n, x: n[v]?.[0] || 0 }));
-  const K = (d.khoi || []).map((k) => ({ ...k, x: ns0.filter((n) => n.khoi === k.code).reduce((a, n) => a + n.x, 0) }));
-  const tong = K.reduce((a, k) => a + k.x, 0);
-  const pc = (x) => (tong ? `${((x / tong) * 100).toFixed(1).replace('.', ',')}%` : '—');
-  const rows = K.map((k, i) => {
-    const ns = ns0.filter((n) => n.khoi === k.code && n.x).sort((a, b) => b.x - a.x);
-    return `<tr class="cpk-k"><th>${LM[i]}. ${esc(k.ten.charAt(0) + k.ten.slice(1).toLowerCase())}</th><td class="num"><b>${bTyU(k.x)}</b></td><td class="num">${pc(k.x)}</td>
-      <td class="cpk-bar"><span class="pc-bar wide"><i style="width:${tong ? Math.max(0, (k.x / tong) * 100) : 0}%"></i></span></td></tr>`
-      + ns.map((n) => `<tr class="cpk-n"><th>${esc(n.code === 'tc_tra_no' ? 'Lãi vay ngân hàng' : n.ten)}</th><td class="num">${bTyU(n.x)}</td><td class="num muted">${pc(n.x)}</td><td></td></tr>`).join('');
-  }).join('');
-  return `<div class="table-wrap td-wrap cpk-wrap"><table class="td-mx cpk no-mcard">
-    <thead><tr><th class="td-corner">Chi phí thời điểm 1<br><small>gồm dự trù gián tiếp + tài chính · ${v === 'gt' ? 'trước VAT' : 'sau VAT'}</small></th><th class="num">Giá trị</th><th class="num">Tỷ trọng</th><th></th></tr></thead>
-    <tbody>${rows}</tbody>
-    <tfoot><tr><th>Tổng chi phí</th><td class="num"><b>${bTyU(tong)}</b></td><td class="num">100%</td><td></td></tr></tfoot>
-  </table></div>`;
-}
 function bTdDialog(d, n) {
   const t = (d.thoi_diem || []).find((x) => x.td === n);
   const last = Math.max(0, ...(d.thoi_diem || []).map((x) => x.td));
