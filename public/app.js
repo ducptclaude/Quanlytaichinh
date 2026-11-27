@@ -2235,7 +2235,7 @@ function dtcpHtml(k = 1) {
   const PT = { B1: 0, B2: 0, B3: 0 };
   for (const kh of ['B1', 'B2', 'B3']) {
     const ns = NHOM().filter((n) => n.khoi === kh);
-    body += `<tr class="dtcp-k dtcp-${kh}" data-khoi="${kh}"><td>${SO_K[kh]}</td><td colspan="2"><b>${TEN_K[kh]}</b></td>${k > 1 ? '<td class="num muted" data-tkp="' + kh + '"></td>' : ''}<td></td><td class="num" data-tk="${kh}"></td>${k > 1 ? `<td class="num" data-lk="${kh}"></td>` : ''}<td class="num" data-pk="${kh}"></td><td class="dtcp-src"></td></tr>`;
+    body += `<tr class="dtcp-k dtcp-${kh}" data-khoi="${kh}"><td>${SO_K[kh]}</td><td><b>${TEN_K[kh]}</b></td>${k > 1 ? '<td class="num muted" data-tkp="' + kh + '"></td>' : ''}<td></td><td class="num" data-tk="${kh}"></td>${k > 1 ? `<td class="num" data-lk="${kh}"></td>` : ''}<td class="num" data-pk="${kh}"></td><td class="dtcp-src"></td></tr>`;
     for (const n of ns) {
       stt++;
       const gtN = cpN.get(n.code)?.gt || [0, 0, 0];
@@ -2243,35 +2243,35 @@ function dtcpHtml(k = 1) {
         const cons = DTCP_TACH[n.code], tien = Number(gtN[k - 1]) || 0, nhapAll = k === 1 ? cons.reduce((a, c) => a + (Number(dong(n.code, c)?.so_tien) || 0), 0) : 0, autoAll = tien - nhapAll;
         const autoPhu = k === 1 ? (costData.items || []).filter((x) => x.nhom === n.code && x.nhom_con === cons[1] && !x.goi_id).reduce((a, x) => a + (Number(x.gia_tri) || 0), 0) : dtcpCon(n.code, cons[1], k); // TĐ2/3: dòng phụ = gói + HĐ + mua lẻ của hạng mục phụ
         const prevAll = Number(gtN[k - 2]) || 0, prevPhu = k > 1 ? dtcpCon(n.code, cons[1], k - 1) : 0;
-        body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}" data-prev="${prevAll}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b>${!costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm">HĐ ›</button>` : ''}</td><td></td>${cTruoc(prevAll)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">tổng dòng con</td></tr>`;
+        body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}" data-prev="${prevAll}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b>${!costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm">HĐ ›</button>` : ''}</td>${cTruoc(prevAll)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">tổng dòng con</td></tr>`;
         cons.forEach((c, i) => { const r = k === 1 ? dong(n.code, c) : null, auto = i === 0 ? autoAll - autoPhu : autoPhu, goc = r ? (r.ct_nhap || money(Number(r.so_tien) || 0)) : '', prevC = i === 0 ? prevAll - prevPhu : prevPhu;
           const ten = n.sub.find((x) => x.code === c)?.ten || c;
           body += `<tr class="dtcp-n dtcp-con" data-nhom="${n.code}" data-con="${c}" data-cha-of="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-prev="${prevC}" data-id="${r ? r.id : ''}"${k2Attr(n.code, c, auto)}>
-            <td class="muted">${stt}.${i + 1}</td><td class="dtcp-ten2">${esc(ten)}</td><td class="dtcp-cach"></td>${k > 1 ? `<td class="num muted">${dvT(prevC)}</td>` : ''}
-            <td class="num">${oNhap(goc, ten, auto)}</td>
+            <td class="muted">${stt}.${i + 1}</td><td class="dtcp-ten2">${esc(ten)}</td>${k > 1 ? `<td class="num muted">${dvT(prevC)}</td>` : ''}
+            <td class="num">${oNhap(goc, ten, auto)}<small class="dtcp-cach"></small></td>
             <td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${i === 0 ? 'HĐ, gói, mua lẻ vật tư chính' : 'mua lẻ vật tư phụ'})</small>` : ''}</td></tr>`; });
         continue;
       }
       const r = k === 1 ? dong(n.code) : null, tien = Number(gtN[k - 1]) || 0, nhap = Number(r?.so_tien) || 0, auto = tien - nhap, prev = Number(gtN[k - 2]) || 0;
       const goc = r ? (r.ct_nhap || money(nhap)) : '';
       body += `<tr class="dtcp-n" data-nhom="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-prev="${prev}" data-id="${r ? r.id : ''}"${k2Attr(n.code, '', auto)}>
-        <td class="muted">${stt}</td><td>${esc(n.code === 'tc_tra_no' ? 'Lãi vay' : n.ten)}${kh === 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm: phụ lục, điều chỉnh, quyết toán, thanh toán, còn lại">HĐ ›</button>` : ''}</td><td class="dtcp-cach"></td>${cTruoc(prev)}
-        <td class="num">${oNhap(goc, n.ten, auto)}</td>
+        <td class="muted">${stt}</td><td>${esc(n.code === 'tc_tra_no' ? 'Lãi vay' : n.ten)}${kh === 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm: phụ lục, điều chỉnh, quyết toán, thanh toán, còn lại">HĐ ›</button>` : ''}</td>${cTruoc(prev)}
+        <td class="num">${oNhap(goc, n.ten, auto)}<small class="dtcp-cach"></small></td>
         <td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${Math.abs(auto) >= 1 ? `tự động ${dvT(auto)} <small>(${SRC})</small>` : ''}</td></tr>`;
     }
     const pt = (costData.cp_nhom || []).find((x) => x.code === '_pt_' + kh);
-    if (pt) { const pv = Number(pt.gt[k - 2]) || 0; body += `<tr class="dtcp-n dtcp-pt" data-khoi="${kh}" data-auto="${Number(pt.gt[k - 1]) || 0}" data-prev="${pv}"><td></td><td>Dự trù nhanh (số cũ)${moO && k < 3 ? ` <button type="button" class="sm dtcp-hd" data-ptbo="${kh}" title="Bỏ số dự trù nhanh cũ – nhập trực tiếp ở ô của từng nhóm">Bỏ</button>` : ''}</td><td><span class="tag-c c-auto">Tự động</span></td>${cTruoc(pv)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">số nhập nhanh trước đây (% / số)</td></tr>`; }
+    if (pt) { const pv = Number(pt.gt[k - 2]) || 0; body += `<tr class="dtcp-n dtcp-pt" data-khoi="${kh}" data-auto="${Number(pt.gt[k - 1]) || 0}" data-prev="${pv}"><td></td><td>Dự trù nhanh (số cũ)${moO && k < 3 ? ` <button type="button" class="sm dtcp-hd" data-ptbo="${kh}" title="Bỏ số dự trù nhanh cũ – nhập trực tiếp ở ô của từng nhóm">Bỏ</button>` : ''}</td>${cTruoc(pv)}<td></td><td class="num dtcp-tt"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">số nhập nhanh trước đây (% / số)</td></tr>`; }
   }
   const dtP = Number(costData.dt_td_gt?.[k - 2]) || 0, cP = k > 1 ? `<td class="num muted">${dvT(dtP)}</td>` : '', lP = k > 1 ? `<td class="num">${dtcpLech(dt - dtP, true)}</td>` : '';
-  const HDR = `<th>STT</th><th>Nội dung</th><th>Cách điền</th>${k > 1 ? `<th class="num">${TP}</th>` : ''}<th class="num">${k === 1 ? 'Nhập (số · % · công thức)' : k === 2 ? 'Số cuối TĐ2 (số · % · công thức)' : ''}</th><th class="num">Thành tiền ${T}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th>Nguồn</th>`;
+  const HDR = `<th>STT</th><th>Nội dung</th>${k > 1 ? `<th class="num">${TP}</th>` : ''}<th class="num">${k === 1 ? 'Nhập (số · % · công thức)' : k === 2 ? 'Số cuối TĐ2 (số · % · công thức)' : ''}</th><th class="num">Thành tiền ${T}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th>Nguồn</th>`;
   const goiY = { 1: 'Gõ 150tr · 1,2 tỷ · 6% (× doanh thu) · 150tr+20tr. Để trống = chỉ lấy phần tự động.', 2: 'Gõ SỐ CUỐI TĐ2 của dòng: 45tr · 1,2 tỷ · 8% (× doanh thu TĐ2) · 40tr+5tr. Hệ thống tự ghi phần chênh vào gói của dòng. Để trống = giữ nguyên.' }[k];
   const tg = costData.tong_tp || {}, soHd = (costData.thau_phu || []).length;
   const hdLine = costAll ? '' : `<div class="dtcp-hdline"><span>HĐ đầu vào: <b>${soHd}</b> HĐ · còn lại phải trả <b>${dvT(tg.con_lai || 0)}</b> <small class="muted">(sau VAT)</small></span><span class="muted small">Bấm <b>HĐ ›</b> ở dòng nhóm (khối I) để mở gói / HĐ: phụ lục, điều chỉnh, quyết toán, thanh toán.</span></div>`;
   return `${tdBar(k)}${hdLine}
     <div class="table-wrap"><table class="dtcp-table" data-dt="${dt}" data-k="${k}"><thead><tr>${HDR}</tr></thead>
-    <tbody><tr class="dtcp-a"><td>A</td><td colspan="2"><b>DOANH THU ${T}</b> <small class="muted">(trước VAT, theo HĐ chủ đầu tư${k === 2 ? ' + đợt điều chỉnh' : k === 3 ? ' – quyết toán, chưa QT lấy TĐ2' : ''})</small></td>${cP}<td></td><td class="num">${dvT(dt)}</td>${lP}<td class="num">100%</td><td></td></tr>
-      <tr class="dtcp-a"><td>B</td><td colspan="2"><b>CHI PHÍ ${T}</b></td>${k > 1 ? '<td class="num muted" data-tbp></td>' : ''}<td></td><td class="num" data-tb></td>${k > 1 ? '<td class="num" data-lb></td>' : ''}<td class="num" data-pb></td><td></td></tr>${body}
-      <tr class="dtcp-ln"><td></td><td colspan="2"><b>LỢI NHUẬN DỰ KIẾN (A − B)</b></td>${k > 1 ? '<td class="num muted" data-tlnp></td>' : ''}<td></td><td class="num" data-tln></td>${k > 1 ? '<td class="num" data-lln></td>' : ''}<td class="num" data-pln></td><td></td></tr></tbody></table></div>
+    <tbody><tr class="dtcp-a"><td>A</td><td><b>DOANH THU ${T}</b> <small class="muted">(trước VAT, theo HĐ chủ đầu tư${k === 2 ? ' + đợt điều chỉnh' : k === 3 ? ' – quyết toán, chưa QT lấy TĐ2' : ''})</small></td>${cP}<td></td><td class="num">${dvT(dt)}</td>${lP}<td class="num">100%</td><td></td></tr>
+      <tr class="dtcp-a"><td>B</td><td><b>CHI PHÍ ${T}</b></td>${k > 1 ? '<td class="num muted" data-tbp></td>' : ''}<td></td><td class="num" data-tb></td>${k > 1 ? '<td class="num" data-lb></td>' : ''}<td class="num" data-pb></td><td></td></tr>${body}
+      <tr class="dtcp-ln"><td></td><td><b>LỢI NHUẬN DỰ KIẾN (A − B)</b></td>${k > 1 ? '<td class="num muted" data-tlnp></td>' : ''}<td></td><td class="num" data-tln></td>${k > 1 ? '<td class="num" data-lln></td>' : ''}<td class="num" data-pln></td><td></td></tr></tbody></table></div>
     ${moO ? `<div class="dtcp-act"><button type="button" class="primary" data-dtcpluu>Lưu bảng</button><span class="msg" id="dtcp-msg"></span><span class="muted small">${goiY}</span></div>`
     : khoa ? `<p class="muted small">🔒 ${T} đang khoá – xem số, không sửa.${k < 3 ? ` Thay đổi sau đó nhập ở tab TĐ${k + 1}.` : ''}</p>`
     : k === 3 ? '<p class="muted small">TĐ3 tự động: HĐ / PL đã quyết toán lấy số quyết toán (chưa QT lấy TĐ2), khoản gián tiếp / tài chính lấy số chốt hoặc thực chi. Kiểm tra xong bấm "Trình duyệt TĐ3".</p>' : ''}`;
@@ -2290,10 +2290,8 @@ function dtcpTinh() { // tính lại cả bảng khi gõ (xem trước, chưa l�
     tr.querySelector('.dtcp-pdt').textContent = pdt(v);
     const lc = tr.querySelector('.dtcp-lech'); if (lc) lc.innerHTML = dtcpLech(v - (Number(tr.dataset.prev) || 0), false);
     if (ip) { ip.classList.toggle('err', Boolean(r.loi)); loi ||= Boolean(r.loi);
-      const c = tr.querySelector('.dtcp-cach'), raw = ip.value.trim();
-      c.innerHTML = r.trong ? (Math.abs(auto) >= 1 ? '<span class="tag-c c-auto">Tự động</span>' : '<span class="muted">—</span>') : r.loi ? '' : r.pt !== undefined ? '<span class="tag-c c-pt">% DT</span>' : /[+\-*/()×÷x]/i.test(raw.replace(/^[=+]/, '').replace(/^-/, '').replace(/[.,]/g, '')) ? '<span class="tag-c c-ct">Công thức</span>' : `<span class="tag-c c-nhap">${k === 2 ? 'Số cuối' : 'Nhập'}</span>`;
-      if (k !== 2 && !r.trong && Math.abs(auto) >= 1 && !r.loi) c.innerHTML = '<span class="tag-c c-auto">Tự động</span> + ' + c.innerHTML; }
-    else if (k === 3) { const c = tr.querySelector('.dtcp-cach'); if (c && !c.innerHTML) c.innerHTML = Math.abs(auto) >= 1 ? '<span class="tag-c c-auto">Tự động</span>' : '<span class="muted">—</span>'; }
+      const c = tr.querySelector('.dtcp-cach'), raw = ip.value.trim(); // V03.27.11.26: bỏ cột "Cách điền" – chỉ ghi chú nhỏ dưới ô khi gõ % / công thức
+      if (c) c.textContent = r.trong || r.loi ? '' : r.pt !== undefined ? `= ${String(r.pt).replace('.', ',')}% doanh thu` : /[+\-*/()×÷x]/i.test(raw.replace(/^[=+]/, '').replace(/^-/, '').replace(/[.,]/g, '')) ? `= ${money(nhap)}` : ''; }
   }
   for (const tr of t.querySelectorAll('tr.dtcp-cha')) { // dòng cha = tổng dòng con
     let v = 0; for (const c of t.querySelectorAll(`tr[data-cha-of="${tr.dataset.cha}"]`)) { const ip = c.querySelector('.dtcp-in'), q = nhapCua(ip); v += k === 2 && ip && !q.r.trong && !q.r.loi ? q.v : (Number(c.dataset.auto) || 0) + q.v; }

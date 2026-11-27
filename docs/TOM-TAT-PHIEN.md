@@ -2,6 +2,8 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.27.11.26 – Bảng DT-CP (cả 3 TĐ): bỏ cột "Cách điền" (trùng cột Nguồn; TĐ3 trống); gõ % / công thức thì hiện chú thích nhỏ dưới ô (VD "= 8% doanh thu"). TĐ3 ẩn cột nhập trống. Số gợi ý trong ô TĐ2 nhạt hơn. Kiểm tra: số cột khớp mọi dòng ở 3 TĐ, không tràn (1366, iPhone 13); td2-socuoi 17, td23 26, tester 0 lỗi.
+
 ## V02.27.11.26 – Sửa TĐ2 rắc rối / sai số (người dùng duyệt 3 điểm)
 - ① Gói còn mở: TĐ2 / TĐ3 = MAX(gói ± điều chỉnh, HĐ đã gắn + mua lẻ đã gắn) – trước đây gắn HĐ đầu tiên là cả gói bị thay bằng HĐ (Thầu phụ 165 -> 15).
   "Đóng gói" -> chỉ còn HĐ + mua lẻ thật. Máy chủ `duTruNhom(rows, hdOf, …)` + `goiV`; giao diện `dtrRem` (dùng chung ô tổng, hộp chi tiết, bảng DT-CP).
