@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V15.27.11.26 – Sửa: tiền chi gắn khoản tính theo TĐ của khoản (lương bị dồn về TĐ3)
+- Lỗi: ghi chi lương tháng 10 lúc đang mở tab TĐ3 → dòng chi bị coi là phát sinh TĐ3; phần đã chi vẫn bị trừ khỏi dự trù khoản ở TĐ1 / TĐ2 → TĐ1, TĐ2 thấp, dồn hết về TĐ3.
+- Sửa: chi có gắn gói / khoản lấy TĐ của khoản (máy chủ lib/report.js projectReport0 + thẻ tổng trang Chi phí). Bài kiểm tra mới scripts/kiem-tra-them/chi-theo-khoan.js (mã cũ: TĐ2 = 47tr sai, mã mới 95tr đúng).
+- Kiểm tra: tester 4518, kiem-tra-goi 246, doi-chieu-cp 73, chi-theo-khoan 7, luong 17, chi-tiet-khoan 16, cp-khac 13, du-tru-chung 9, nhom-ps 13 – 0 lỗi.
+
 ## V14.27.11.26 – Ghi khoản đã chi: Nội dung tự theo khoản đã chọn
 - Chọn "Thuộc gói / khoản" (hoặc bấm "Ghi chi cho khoản này") → Nội dung tự điền tên khoản (VD Lương tháng 12); đã gõ nội dung riêng thì giữ nguyên.
 - Danh sách khoản gián tiếp / tài chính ghi "dự trù X đ" / "chốt X đ" thay cho "gói X đ".

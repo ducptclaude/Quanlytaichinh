@@ -2143,8 +2143,9 @@ function costKpiTd() {
   const tai = (kk) => {
     const o = { B1: 0, B2: 0, B3: 0, hd: 0, ghi: 0, goi: 0 };
     for (const c of costData.thau_phu || []) { const v = tpTdSv(c, kk); o[khoiOf(c.nhom || 'thau_phu')] += v; o.hd += v; }
-    const psG = new Map((costData.du_tru || []).filter((g) => Number(g.td_ps) > 1).map((g) => [g.id, Number(g.td_ps)])); // V05.27.11.26: chi gắn khoản phát sinh TĐ sau
-    for (const r of costData.items || []) if (!ngoai(r) && !(kk === 1 && r.goi_id) && (Number(r.td_ps) || 1) <= kk && !(psG.get(r.goi_id) > kk)) { const v = Number(r.sau_vat) || 0; o[khoiOf(r.nhom)] += v; o.ghi += v; } // mua lẻ gắn gói: TĐ1 lấy giá trị gói
+    // V15.27.11.26: chi gắn gói / khoản tính theo TĐ của khoản (khớp máy chủ projectReport0), không theo tab lúc ghi
+    const tdG = new Map((costData.du_tru || []).filter((g) => g.loai === 'ky').map((g) => [g.id, Number(g.td_ps) || 1])), tdChi = (r) => (r.goi_id && tdG.has(r.goi_id) ? tdG.get(r.goi_id) : Number(r.td_ps) || 1);
+    for (const r of costData.items || []) if (!ngoai(r) && !(kk === 1 && r.goi_id) && tdChi(r) <= kk) { const v = Number(r.sau_vat) || 0; o[khoiOf(r.nhom)] += v; o.ghi += v; } // mua lẻ gắn gói: TĐ1 lấy giá trị gói
     const dt = costData.du_tru || [];
     for (const code of new Set(dt.map((r) => r.nhom))) {
       const rs = dt.filter((r) => r.nhom === code), S = (l, f = () => true) => rs.filter((r) => r.loai === l && f(r)).reduce((t, r) => t + svL(r), 0);
