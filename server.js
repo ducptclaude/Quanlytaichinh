@@ -403,6 +403,8 @@ api.use(wrap(async (req, res, next) => {
     if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/chi-phi\/(\d+)$/))) { const c = await store.getCostRef(Number(m[1]));
       if (c) { dac = c.du_an_id; kc = Number(c.td_ps) || 1; if (c.goi_id) kc = Math.max(kc, Number((await store.getDuTru(c.goi_id))?.td_ps) || 1); } }
     if (kc && dac) { const d = await store.getProject(Number(dac));
+      // V04.28.11.26 (người dùng chọn "tự chuyển"): THÊM chi mà TĐ đó đã trình / duyệt -> tự ghi vào TĐ kế tiếp còn mở (TĐ sau vẫn kiểm khoá)
+      if (req.method === 'POST') { let j = kc; while (j <= 3 && ['trinh', 'duyet'].includes(d?.[`td${j}_tt`])) j++; if (j > kc && j <= 3) { req.body.td_ps = j; kc = j; } }
       for (let j = kc; j <= 3; j++) { const t = d?.[`td${j}_tt`]; if (['trinh', 'duyet'].includes(t)) return res.status(423).json({ errors: [`${KHOA(j, t)} (Tiền chi này tính vào TĐ${j}${j > kc ? '' : ''}.)`], mo_td: t === 'duyet' ? { da: Number(dac), k: j } : null }); } }
   }
   if ((m = p.match(/^\/doanh-thu\/(\d+)\/qt$/))) {

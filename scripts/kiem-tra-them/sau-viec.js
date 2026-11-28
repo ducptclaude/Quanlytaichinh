@@ -19,7 +19,8 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   // (1) TĐ1 duyệt -> ghi chi TĐ1 bị khoá (423 + mo_td k=1); ghi ở TĐ2 vẫn được
   await J(`/api/du-an/${id}/td/1`, 'POST', { viec: 'trinh' }); chk('duyệt TĐ1', (await J(`/api/du-an/${id}/td/1`, 'POST', { viec: 'duyet' })).s === 200);
   const c1 = await J(`/api/du-an/${id}/chi-phi`, 'POST', { nhom: 'gt_luong', nhom_con: 'luong', noi_dung: 'Lương T9', gia_tri: 10000000, vat: 0, ngay: '2026-11-01', goi_id: kh });
-  chk('(1) ghi chi tính vào TĐ1 đã duyệt -> 423 kèm mo_td k=1', c1.s === 423 && c1.j?.mo_td?.k === 1, JSON.stringify(c1));
+  chk('(1) V04: ghi chi vào TĐ1 đã duyệt -> tự chuyển sang TĐ2', c1.s === 201 && Number((await J(`/api/du-an/${id}/chi-phi`)).j.items.find((x) => x.id === c1.j.id)?.td_ps) === 2, JSON.stringify(c1));
+  await J(`/api/chi-phi/${c1.j.id}`, 'DELETE');
   const c2 = await J(`/api/du-an/${id}/chi-phi`, 'POST', { nhom: 'gt_luong', nhom_con: 'luong', noi_dung: 'Lương T10', gia_tri: 30000000, vat: 0, ngay: '2026-11-01', goi_id: kh, td_ps: 2 });
   chk('(1) ghi chi ở TĐ2 (chưa duyệt) vẫn được', c2.s === 201, JSON.stringify(c2));
   await J(`/api/du-an/${id}/chi-phi`, 'POST', { nhom: 'thau_phu', noi_dung: 'TT vệ sinh', gia_tri: 5000000, vat: 0, ngay: '2026-11-02', goi_id: cpk, td_ps: 2 });

@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V04.28.11.26 – Thêm chi vào TĐ đã trình / duyệt: tự chuyển sang TĐ kế tiếp còn mở
+- Người dùng chọn "tự chuyển": THÊM lần chi mà TĐ của nó đã trình / duyệt → máy chủ tự ghi td_ps = TĐ kế tiếp còn mở (TĐ sau vẫn kiểm khoá; hết TĐ mở thì vẫn hỏi Passcode). Sửa / xoá lần chi cũ vẫn khoá như V03.
+- Hộp Chi tiết: lần chi ghi rõ "tính từ TĐk".
+- Kiểm tra: sau-viec 13 (cập nhật mục 1), tdk 31, duyet 28, mo-khoa-1-lan 9+6, chi-theo-khoan 11, tester 4518 – 0 lỗi.
+
 ## V03.28.11.26 – Bảng DT-CP gọn, 3 TĐ cùng khung; 6 việc theo rà soát
 - Bảng DT-CP: cột "Nguồn" thu thành "Lịch sử" (chỉ nút Lịch sử ›); phần tự động đưa vào rê chuột trên số; 1 dòng ghi chú nguồn dưới bảng. Bỏ ô trống ẩn ở TĐ2/TĐ3 (cột nhập chỉ TĐ1) → mọi dòng đúng số cột; khung cột cố định: Nội dung 34% cùng độ rộng ở 3 TĐ, số căn phải, không xuống dòng. Điện thoại: ẩn cột TĐ trước + Lịch sử (trước đây ẩn tiêu đề nhưng còn ô → lệch cột).
 - (1) Ghi / sửa / xoá tiền đã chi: TĐ của lần chi (không sớm hơn TĐ khoản) hoặc TĐ sau đã trình / duyệt → khoá 423 + hỏi Passcode mở TĐ (server.js; db.getCostRef thêm td_ps).
