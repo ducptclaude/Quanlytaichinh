@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V07.28.11.26 – Nút "HĐ ›" ở từng dòng con (Vật tư chính / phụ), mở thẳng phần của hạng mục
+- Bảng DT-CP: dòng cha "Vật tư" bỏ nút; dòng Vật tư chính / Vật tư phụ có "HĐ ›" (như "Chi tiết ›" ở dòng lương).
+- Hộp HĐ › lọc theo hạng mục (tpnCon khi vẽ hộp): chỉ gói / HĐ của hạng mục; dòng con đầu (Vật tư chính) gồm cả HĐ không gắn gói và điều chỉnh cả nhóm; tiêu đề ghi tên hạng mục.
+- Kiểm tra: hd-hang-muc 5 (mới), goi-td2 7, sau-viec 13, cpk-thanh-toan 6 – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V06.28.11.26 – Nút "＋ Ghi khoản đã chi" đổi tên "＋ Chi tiền", bỏ ở TĐ3
 - TĐ3 không còn nút (quyết toán, chốt số làm trong HĐ › / Chi tiết ›); TĐ1, TĐ2: "＋ Chi tiền" (tiêu đề hộp "Chi tiền" / "Sửa khoản chi tiền"); Hướng dẫn + i18n cập nhật; bài dò giao diện bỏ qua nút khi không có.
 - Kiểm tra: sau-viec 13, mot-bang 8 – 0 lỗi; dò giao diện 0 lỗi, không tràn.

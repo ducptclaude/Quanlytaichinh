@@ -2239,11 +2239,11 @@ function dtcpHtml(k = 1) {
         const autoC = cons.map((c, i) => (i === 0 ? 0 : k === 1 ? dtcpCon(n.code, c, 1) - (Number(dong(n.code, c)?.so_tien) || 0) : dtcpCon(n.code, c, k)));
         const prevAll = Number(gtN[k - 2]) || 0, prevC0 = cons.map((c, i) => (i === 0 || k === 1 ? 0 : dtcpCon(n.code, c, k - 1)));
         autoC[0] = autoAll - autoC.reduce((a, x) => a + x, 0); prevC0[0] = prevAll - prevC0.reduce((a, x) => a + x, 0);
-        body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}" data-prev="${prevAll}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b>${kh === 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" title="Mở chi tiết gói / HĐ đầu vào của nhóm">HĐ ›</button>` : ''}</td>${cTruoc(prevAll)}${cIn()}<td class="num dtcp-tt" title="Tổng các dòng con"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${lsBtn(n.code)}</td></tr>`;
+        body += `<tr class="dtcp-cha" data-cha="${n.code}" data-khoi="${kh}" data-prev="${prevAll}"><td class="muted">${stt}</td><td><b>${esc(n.ten)}</b></td>${cTruoc(prevAll)}${cIn()}<td class="num dtcp-tt" title="Tổng các dòng con"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src">${lsBtn(n.code)}</td></tr>`;
         cons.forEach((c, i) => { const r = k === 1 ? dong(n.code, c) : null, auto = autoC[i], goc = r ? (r.ct_nhap || money(Number(r.so_tien) || 0)) : '', prevC = prevC0[i];
           const ten = n.sub.find((x) => x.code === c)?.ten || c;
           body += `<tr class="dtcp-n dtcp-con" data-nhom="${n.code}" data-con="${c}" data-cha-of="${n.code}" data-khoi="${kh}" data-auto="${auto}" data-prev="${prevC}" data-id="${r ? r.id : ''}">
-            <td class="muted">${stt}.${i + 1}</td><td class="dtcp-ten2">${esc(ten)}${kh !== 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcpkh="${n.code}|${c}" title="Nhập / xem từng khoản của hạng mục (VD Lương tháng 10, 11…) theo TĐ1 · TĐ2 · TĐ3">Chi tiết ›</button>` : ''}</td>${cTruoc(prevC)}
+            <td class="muted">${stt}.${i + 1}</td><td class="dtcp-ten2">${esc(ten)}${kh === 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcphd="${n.code}" data-con="${c}" title="Mở gói / HĐ đầu vào của ${esc(ten.toLowerCase())}: phụ lục, điều chỉnh, quyết toán, thanh toán">HĐ ›</button>` : ''}${kh !== 'B1' && !costAll ? `<button type="button" class="sm dtcp-hd" data-dtcpkh="${n.code}|${c}" title="Nhập / xem từng khoản của hạng mục (VD Lương tháng 10, 11…) theo TĐ1 · TĐ2 · TĐ3">Chi tiết ›</button>` : ''}</td>${cTruoc(prevC)}
             ${cIn(`${oNhap(goc, ten)}<small class="dtcp-cach"></small>`)}
             <td class="num dtcp-tt"${src(auto, kh === 'B1' ? (i === 0 ? 'HĐ, gói, mua lẻ ' + esc(ten.toLowerCase()) : 'gói, HĐ, mua lẻ ' + esc(ten.toLowerCase())) : k === 3 ? 'số chốt / thực chi' : 'khoản, điều chỉnh, đã chi')}></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src"></td></tr>`; });
         continue;
@@ -2499,12 +2499,13 @@ document.addEventListener('click', (e) => {
   const bt = e.target.closest('[data-dtcphd]'); if (!bt) return;
   const code = bt.dataset.dtcphd, bs = TPV?.bsCua ? TPV.bsCua(code) : [], ten = NHOM().find((x) => x.code === code)?.ten || code;
   if (!bs.length) return alert(`Nhóm "${ten}" chưa có gói / HĐ đầu vào.\nThêm ở ① Chi thật › Cách nhập: Gói hoặc HĐ đã có nhà cung cấp.`);
-  if (bs.length === 1) return openTpNhom(bs[0], code);
+  const con = bt.dataset.con || '';
+  if (bs.length === 1) return openTpNhom(bs[0], code, con);
   let dlg = $('#dtcp-hd-dlg');
   if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'dtcp-hd-dlg'; dlg.className = 'tp-dlg dtcp-hd-dlg'; document.body.appendChild(dlg);
-    dlg.addEventListener('click', (ev) => { const x = ev.target.closest('[data-hdb]'); if (ev.target.dataset.close !== undefined) return dlg.close(); if (x) { dlg.close(); openTpNhom(Number(x.dataset.hdb), x.dataset.code); } }); }
+    dlg.addEventListener('click', (ev) => { const x = ev.target.closest('[data-hdb]'); if (ev.target.dataset.close !== undefined) return dlg.close(); if (x) { dlg.close(); openTpNhom(Number(x.dataset.hdb), x.dataset.code, x.dataset.con || ''); } }); }
   dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">HĐ đầu vào · chọn HĐ chủ đầu tư</div><h3>${esc(ten)}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
-    <div class="dtcp-hd-list">${bs.map((b) => `<button type="button" class="sm" data-hdb="${b}" data-code="${code}">${b ? esc(hdCdtName(b)) : 'Chưa gắn HĐ CĐT'} ›</button>`).join('')}</div>`;
+    <div class="dtcp-hd-list">${bs.map((b) => `<button type="button" class="sm" data-hdb="${b}" data-code="${code}" data-con="${con}">${b ? esc(hdCdtName(b)) : 'Chưa gắn HĐ CĐT'} ›</button>`).join('')}</div>`;
   dlg.showModal();
 });
 document.addEventListener('click', async (e) => {
@@ -3116,8 +3117,9 @@ async function saveTpDc() {
 }
 // ---------- V33: hộp chi tiết đầy đủ của 1 nhóm chính (HĐ CĐT, hoặc 1 loại trong HĐ CĐT) ----------
 let TPV = null, tpFullOpen = false, tpnCur = null;
-function openTpNhom(b, code) {
-  tpnCur = { b: Number(b) || 0, code: code || '' };
+let tpnCon = ''; // V07.28.11.26: hạng mục con đang lọc khi vẽ hộp nhóm
+function openTpNhom(b, code, con = '') {
+  tpnCur = { b: Number(b) || 0, code: code || '', con: con || '' };
   let dlg = $('#tpn-dlg');
   if (!dlg) {
     dlg = document.createElement('dialog'); dlg.id = 'tpn-dlg'; dlg.className = 'tp-dlg tpn-dlg';
@@ -3132,11 +3134,11 @@ function renderTpNhom() {
   const dlg = $('#tpn-dlg'); if (!dlg || !TPV || !tpnCur) return;
   const { kTd, loaiCodes, loaiData, loaiBlock, so3, tt2, nhTen } = TPV, { b, code } = tpnCur;
   const codes = code ? [code] : loaiCodes(b);
-  tpFullOpen = true;
-  let rows = '';
-  try { rows = codes.map((cd, i) => loaiBlock(b, cd, `${i + 1}`)).join(''); } finally { tpFullOpen = false; }
-  const ds = codes.map((cd) => loaiData(b, cd)), v = (k) => ds.reduce((t, d) => t + d.v(k), 0);
-  const ten = `${b ? esc(hdCdtName(b)) : 'Chưa gắn HĐ CĐT'}${code ? ' · ' + esc(nhTen(code)) : ''}`;
+  tpFullOpen = true; tpnCon = (code && tpnCur.con) || '';
+  let rows = '', ds = [];
+  try { rows = codes.map((cd, i) => loaiBlock(b, cd, `${i + 1}`)).join(''); ds = codes.map((cd) => loaiData(b, cd)); } finally { tpFullOpen = false; tpnCon = ''; }
+  const v = (k) => ds.reduce((t, d) => t + d.v(k), 0), conTen = code && tpnCur.con ? NHOM().find((n) => n.code === code)?.sub.find((x) => x.code === tpnCur.con)?.ten || '' : '';
+  const ten = `${b ? esc(hdCdtName(b)) : 'Chưa gắn HĐ CĐT'}${code ? ' · ' + esc(conTen || nhTen(code)) : ''}`;
   dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">Chi tiết HĐ đầu vào · TĐ${kTd} · ${esc(dvU('trieu').ten)}, sau VAT</div><h3>${ten}</h3></div>
       <button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
     <div class="table-wrap"><table class="tp-table tp-full ${kTd === 1 ? 'tp-k1' : ''}"><thead><tr><th class="num">#</th><th>Hạng mục / Hợp đồng</th><th>Đối tác</th>
@@ -3272,11 +3274,15 @@ function renderTpCard() {
   };
   // Số liệu 1 loại (nhóm) trong 1 HĐ CĐT: gói + đợt điều chỉnh nhóm + HĐ ngoài gói
   const loaiData = (b, code) => {
-    const rows = (groups.find((g) => g.k === b)?.rows || []).filter((c) => (c.nhom || 'thau_phu') === code);
+    let rows = (groups.find((g) => g.k === b)?.rows || []).filter((c) => (c.nhom || 'thau_phu') === code);
     const rs = dtrAll.filter((r) => r.nhom === code), own = chuNhom(code) === b;
-    const ky = rs.filter((r) => r.loai === 'ky' && cdtOf(r) === b), dc = own && kTd > 1 ? rs.filter((r) => r.loai === 'dc' && !rs.some((g) => g.loai === 'ky' && g.id === r.goi_ref)) : [], coQt = rs.some((r) => r.loai === 'qt');
+    let ky = rs.filter((r) => r.loai === 'ky' && cdtOf(r) === b), dc = own && kTd > 1 ? rs.filter((r) => r.loai === 'dc' && !rs.some((g) => g.loai === 'ky' && g.id === r.goi_ref)) : [];
+    const coQt = rs.some((r) => r.loai === 'qt');
+    // V07.28.11.26: hộp mở từ dòng con (VD Vật tư phụ) -> chỉ gói / HĐ của hạng mục đó; dòng con đầu (Vật tư chính) gồm cả HĐ không gắn gói và điều chỉnh cả nhóm
+    const con = tpnCon && DTCP_TACH[code] ? tpnCon : '', dau = con && con === DTCP_TACH[code][0];
+    if (con) { ky = ky.filter((r) => dtcpConOf(r, code) === con); if (!dau) { rows = []; dc = []; } }
     const hdG = ky.flatMap(hdCua);
-    return { rows, ky, dc, coQt, own, hdG, v: (k) => nhomSvB(code, k, b) + tdSum(rows, k),
+    return { rows, ky, dc, coQt, own, hdG, v: (k) => (con ? ky.reduce((a, r) => a + goiSv(r, k), 0) + dc.reduce((a, r) => a + svL(r), 0) : nhomSvB(code, k, b)) + tdSum(rows, k),
       // V03.28.11.26: cộng cả CP khác (đã trả = lần thanh toán, còn lại = giá trị TĐ − đã trả) – khớp dòng CP khác
       tt: sumOf(rows, 'da_tt') + sumOf(hdG, 'da_tt') + ky.filter((r) => r.la_cp).reduce((a, r) => a + leGoi(r.id), 0),
       cl: sumOf(rows, 'con_lai') + sumOf(hdG, 'con_lai') + ky.filter((r) => r.la_cp).reduce((a, r) => a + goiSv(r, kTd) - leGoi(r.id), 0) };
