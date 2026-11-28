@@ -2415,6 +2415,14 @@ function openCpk(id) {
         await api(`/api/du-an/${revProjectId}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: r.nhom, loai: 'dc', goi_ref: id, so_tien: v, vat: r.vat, noi_dung: $('#cpk-dcnd').value.trim() || 'Điều chỉnh TĐ2', ngay: new Date().toISOString().slice(0, 10) }) }); return xong('Đã ghi đợt điều chỉnh'); }
       if (tg.dataset.cpkxdc) { if (!confirm('Xoá đợt điều chỉnh này?')) return; await api(`/api/du-tru/${tg.dataset.cpkxdc}`, { method: 'DELETE' }); return xong('Đã xoá đợt điều chỉnh'); }
       if (tg.dataset.cpkchot !== undefined) { const raw = $('#cpk-chot').value.trim(); await api(`/api/du-tru/${id}`, { method: 'PUT', body: JSON.stringify({ gt_chot: raw === '' ? '' : String(parseMoney(raw)) }) }); return xong(raw === '' ? 'Bỏ số chốt – TĐ3 = TĐ2' : 'Đã chốt / quyết toán TĐ3'); }
+      if (tg.dataset.cpkttluu !== undefined) { // V22.28.11.26: thanh toán CP khác ngay trong hộp
+        const nd = $('#cpk-ttnd').value.trim(), so = parseMoney($('#cpk-ttso').value), ngay = $('#cpk-ttngay').value;
+        if (!nd || !(so > 0)) return showMsg($('#cpk-msg'), 'Nhập nội dung và số tiền thanh toán', 'err');
+        if (tg.dataset.dangLuu) return; tg.dataset.dangLuu = '1';
+        try { await api(`/api/du-an/${revProjectId}/chi-phi`, { method: 'POST', body: JSON.stringify({ nhom: r.nhom, nhom_con: r.nhom_con || NHOM().find((x) => x.code === r.nhom)?.sub?.[0]?.code || '', noi_dung: nd, gia_tri: so, vat: Number(r.vat) || 0, ngay, goi_id: id, ...(k > 1 ? { td_ps: k } : {}) }) }); }
+        finally { delete tg.dataset.dangLuu; }
+        return xong('Đã ghi thanh toán'); }
+      if (tg.dataset.cpkxtt) { if (!confirm('Xoá lần thanh toán này?')) return; await api(`/api/chi-phi/${tg.dataset.cpkxtt}`, { method: 'DELETE' }); return xong('Đã xoá lần thanh toán'); }
       if (tg.dataset.cpkchi !== undefined) { dlg.close(); $('#tpn-dlg')?.close(); moFormChi(`Ghi chi · ${r.noi_dung || 'CP khác'}`); const el = cForm.elements; el.nhom.value = r.nhom; el.nhom.dispatchEvent(new Event('change', { bubbles: true }));
         setTimeout(() => { const sl = cForm.elements.le_goi; if (sl) { sl.dataset.keep = String(id); sl.value = String(id); } chiTheoKhoan(); cForm.elements.noi_dung?.focus(); }, 80); return; }
       if (tg.dataset.cpkxoa !== undefined) { if (!confirm(`Xoá khoản "${r.noi_dung}"? (${dcs.length} đợt điều chỉnh xoá theo; ${le ? 'các lần chi đã ghi giữ lại, chuyển thành chi chưa gắn khoản' : 'chưa có lần chi nào'})`)) return;
@@ -2432,7 +2440,14 @@ function openCpk(id) {
       ${moDc ? '<tr><td><input id="cpk-dcnd" maxlength="200" placeholder="Nội dung điều chỉnh TĐ2"></td><td class="num"><input id="cpk-dc" class="money num" placeholder="+ tăng / − giảm"></td><td class="row-actions"><button class="primary sm" data-cpkdc>+ Đợt</button></td></tr>' : ''}
       <tr><td><b>Quyết toán / chốt TĐ3</b> <span class="muted small">(trống = TĐ2)</span></td><td class="num">${moChot ? `<input id="cpk-chot" class="money num" value="${chot === null ? '' : money(chot)}" placeholder="= TĐ2 ${money(g + dc)}">` : chot === null ? '<span class="muted">= TĐ2</span>' : dvT(chot)}</td><td class="row-actions">${moChot ? '<button class="primary sm" data-cpkchot>Lưu</button>' : `<span class="muted small">${edit ? 'nhập ở tab TĐ3' : ''}</span>`}</td></tr>
     </tbody></table></div>
-    <div class="tv-tools">${edit ? '<button class="sm" data-cpkchi>Ghi chi cho khoản này</button><button class="danger sm" data-cpkxoa>Xoá khoản</button>' : ''}<span class="msg" id="cpk-msg"></span></div>`;
+    ${(() => { const tt = (costData.items || []).filter((c) => c.goi_id === id).sort((a, b) => String(a.ngay || '').localeCompare(String(b.ngay || '')) || a.id - b.id), mo = can('tien') && !costAll;
+      const tong = tt.reduce((a, c) => a + (Number(c.gia_tri) || 0), 0), conLai = (t[k - 1] ?? 0) - tong;
+      return `<h4 class="cpk-h">Thanh toán <span class="muted small">(trước VAT) · đã trả ${dvT(tong)} · còn lại ${dvT(conLai)}</span></h4>
+      <div class="table-wrap"><table class="cpk-t cpk-tt"><thead><tr><th>Đợt · nội dung</th><th>Ngày</th><th class="num">Số tiền</th><th></th></tr></thead><tbody>
+      ${tt.map((c, i) => `<tr><td>Đợt ${i + 1} · ${esc(c.noi_dung || '')}</td><td class="muted small">${c.ngay ? isoToDmy(c.ngay) : ''}${(Number(c.td_ps) || 1) > 1 ? ` · TĐ${c.td_ps}` : ''}</td><td class="num">${dvT(Number(c.gia_tri) || 0)}</td><td class="row-actions">${mo ? `<button class="danger sm" data-cpkxtt="${c.id}" title="Xoá lần thanh toán ghi sai">Xoá</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Chưa thanh toán lần nào</td></tr>'}
+      ${mo ? `<tr data-k="new"><td><input id="cpk-ttnd" maxlength="300" value="${esc('Thanh toán ' + ((r.noi_dung || '').replace(/^CP khác · /, '') || 'CP khác'))}" aria-label="Nội dung thanh toán"></td><td><input id="cpk-ttngay" type="date" value="${new Date().toISOString().slice(0, 10)}" aria-label="Ngày"></td><td class="num"><input id="cpk-ttso" class="money num" placeholder="Số tiền" aria-label="Số tiền thanh toán"></td><td class="row-actions"><button class="primary sm" data-save data-cpkttluu>+ Thanh toán</button></td></tr>` : ''}
+      </tbody></table></div>`; })()}
+    <div class="tv-tools">${edit ? '<button class="danger sm" data-cpkxoa>Xoá khoản</button>' : ''}<span class="msg" id="cpk-msg"></span></div>`;
   $$('input.money', dlg).forEach(attachMoneyInput);
   if (!dlg.open) dlg.showModal();
 }
@@ -3246,7 +3261,7 @@ function renderTpCard() {
     const dt = coCon ? (hd.length === 1 ? esc(hd[0].doi_tac || hd[0].so_ma) : `<button type="button" class="link-btn" data-tpgr="${r.id}" title="${esc([...new Set(hd.map((c) => c.doi_tac || c.so_ma))].join(', '))}">${hd.length} HĐ ${mo ? '▾' : '▸'}</button>`)
       : `<span class="muted">${kTd === 1 ? '' : 'Chưa có HĐ'}</span>`;
     return `<tr class="tv-child tp-r-goi ${tam && kTd > 1 ? 'tp-r-tam' : ''}"><td class="num muted">${stt}</td>
-      <td class="tp-hd"><div class="tp-l1">${coCon ? `<button class="grp-toggle" data-tpgr="${r.id}" title="${mo ? 'Thu gọn các HĐ của gói' : 'Mở các HĐ của gói'}">${mo ? '▾' : '▸'}</button>` : '<span class="grp-sp"></span>'}<b title="Gói chi phí · tạm tính trước VAT ${money(r.so_tien)} đ · VAT ${Number(r.vat) || 0}%">${esc(r.noi_dung || 'Gói #' + r.id)}</b>${chip}${chuaKy > 0 ? ` <span class="tp-ps tp-chuaky" title="Gói còn mở: phần dự trù chưa ký HĐ vẫn tính vào chi phí TĐ${kTd}. Ký đủ rồi thì bấm Đóng gói (TĐ = HĐ đã ký + mua lẻ)">chưa ký HĐ ${mtr(chuaKy)}</span>` : ''}</div><div class="tp-m-dt">${dt}</div></td>
+      <td class="tp-hd"><div class="tp-l1">${coCon ? `<button class="grp-toggle" data-tpgr="${r.id}" title="${mo ? 'Thu gọn các HĐ của gói' : 'Mở các HĐ của gói'}">${mo ? '▾' : '▸'}</button>` : '<span class="grp-sp"></span>'}${r.la_cp ? `<button type="button" class="link-btn tp-cpk-ten" data-cpkopen="${r.id}" title="Mở CP khác: giá trị, điều chỉnh, quyết toán, thanh toán"><b>${esc(r.noi_dung || 'CP khác')}</b></button>` : `<b title="Gói chi phí · tạm tính trước VAT ${money(r.so_tien)} đ · VAT ${Number(r.vat) || 0}%">${esc(r.noi_dung || 'Gói #' + r.id)}</b>`}${chip}${chuaKy > 0 ? ` <span class="tp-ps tp-chuaky" title="Gói còn mở: phần dự trù chưa ký HĐ vẫn tính vào chi phí TĐ${kTd}. Ký đủ rồi thì bấm Đóng gói (TĐ = HĐ đã ký + mua lẻ)">chưa ký HĐ ${mtr(chuaKy)}</span>` : ''}</div><div class="tp-m-dt">${dt}</div></td>
       <td class="c-dt tp-dt">${dt}</td>
       ${qtNhom ? `<td class="num muted c-prev">${mtr(goiSv(r, 2))}</td><td class="num muted" title="Nhóm đã quyết toán – TĐ3 theo số quyết toán của nhóm">theo QT nhóm</td><td class="num muted">—</td>` : so3(goiSv(r, kTd), kTd > 1 ? goiSv(r, kTd - 1) : 0)}
       ${r.la_cp ? tt2(leGoi(r.id), goiSv(r, kTd) - leGoi(r.id)) : hd.length ? tt2(sumOf(hd, 'da_tt'), sumOf(hd, 'con_lai')) : ttNone}

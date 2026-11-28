@@ -1798,6 +1798,8 @@ api.post('/du-an/:id/chi-phi', canTien, wrap(async (req, res) => {
   const { data, errors } = validateCost({ ...(req.body || {}), _new: true });
   if (errors.length) return bad(res, errors);
   if (data.goi_id) { const e = await checkGoiLe(data.goi_id, id, data.nhom); if (e) return bad(res, e); }
+  // V22.28.11.26: nhóm Thầu phụ chỉ ghi chi trực tiếp khi gắn khoản CP khác (thanh toán CP khác); còn lại nhập theo HĐ
+  if (data.nhom === 'thau_phu' && !data.tp_ref && !(await store.getDuTru(data.goi_id))?.la_cp) return bad(res, 'Thầu phụ nhập theo hợp đồng (bảng 1. Thầu phụ) – chi phí khác ngoài HĐ: bấm "+ CP khác" trong hộp HĐ ›');
   res.status(201).json(await store.createCost(id, data, req.user.id));
 }));
 

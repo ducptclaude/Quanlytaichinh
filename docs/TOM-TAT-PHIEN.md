@@ -2,6 +2,11 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V01.28.11.26 – CP khác: bấm tên mở hộp, thanh toán ngay trong hộp (như HĐ thầu phụ)
+- Hộp HĐ › của nhóm: tên CP khác bấm được (mở hộp CP khác). Hộp CP khác có bảng "Thanh toán": các đợt (ngày, TĐ, số tiền, Xoá) + dòng "+ Thanh toán" (Enter = lưu); tiêu đề ghi đã trả / còn lại. Bỏ nút "Ghi chi cho khoản này" (chuyển sang form ngoài).
+- Máy chủ: nhóm Thầu phụ cho ghi chi trực tiếp khi gắn khoản CP khác (la_cp); còn lại vẫn nhập theo HĐ (lib/validate.js, server.js POST chi-phi).
+- Kiểm tra: cpk-thanh-toan 6 (mới), cp-khac 13, cpk 7, tester 4518, kiem-tra-goi 246, doi-chieu-cp 73 – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V21.27.11.26 – Lần chi tính từ TĐ ghi chi (lương tháng 12 nhập ở TĐ3 không vào TĐ2)
 - Lỗi: V15 gán mọi lần chi theo TĐ của khoản → chi lương tháng 12 ghi ở TĐ3 cho khoản TĐ1 bị tính vào TĐ2.
 - Sửa đúng gốc: lần chi tính từ TĐ ghi chi (không sớm hơn TĐ của khoản); phần đã chi trừ vào dự trù của khoản cũng theo TĐ (goiLeOf / leGoi có tham số TĐ) → TĐ trước không bị trừ mất (lỗi "dồn về TĐ3" cũ vẫn không tái diễn).

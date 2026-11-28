@@ -4011,3 +4011,6 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 .khds-t tr.khds-new input { width: 100%; min-width: 0; }
 .khds-t td.row-actions { white-space: nowrap; }
 .khds-t tr.khds-moc td { background: color-mix(in srgb, #f59e0b 8%, var(--bg-ffffff)); font-size: 12.5px; }
+.cpk-h { margin: 12px 2px 6px; font-size: 13.5px; }
+.cpk-tt input { width: 100%; min-width: 0; }
+.cpk-tt td.row-actions { white-space: nowrap; }

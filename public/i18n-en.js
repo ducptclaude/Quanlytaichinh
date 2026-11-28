@@ -1,6 +1,12 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+"+ Thanh toán": "+ Payment",
+"Chưa thanh toán lần nào": "No payments yet",
+"Xoá lần thanh toán này?": "Delete this payment?",
+"Đã ghi thanh toán": "Payment recorded",
+"Đã xoá lần thanh toán": "Payment deleted",
+"Nhập nội dung và số tiền thanh toán": "Enter description and payment amount",
 "± Gói": "± Package",
 "chưa ký HĐ": "unsigned",
 "– vẫn tính vào chi phí (từ TĐ ghi chi). Ghi trùng / sai thì bấm Xoá.": "– still counted as cost (from the milestone recorded). Duplicate / wrong: click Delete.",
