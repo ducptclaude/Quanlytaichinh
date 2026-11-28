@@ -2259,21 +2259,19 @@ function dtcpHtml(k = 1) {
     if (pt) { const pv = Number(pt.gt[k - 2]) || 0; body += `<tr class="dtcp-n dtcp-pt" data-khoi="${kh}" data-auto="${Number(pt.gt[k - 1]) || 0}" data-prev="${pv}"><td></td><td>Dự trù nhanh (số cũ)${moO && k < 3 ? ` <button type="button" class="sm dtcp-hd" data-ptbo="${kh}" title="Bỏ số dự trù nhanh cũ – nhập trực tiếp ở ô của từng nhóm">Bỏ</button>` : ''}</td>${cTruoc(pv)}${cIn()}<td class="num dtcp-tt" title="Số nhập nhanh trước đây (% / số)"></td>${cLech()}<td class="num muted dtcp-pdt"></td><td class="dtcp-src"></td></tr>`; }
   }
   const dtP = Number(costData.dt_td_gt?.[k - 2]) || 0, cP = k > 1 ? `<td class="num muted c-truoc">${dvT(dtP)}</td>` : '', lP = k > 1 ? `<td class="num">${dtcpLech(dt - dtP, true)}</td>` : '';
-  const HDR = `<th>STT</th><th>Nội dung</th>${k > 1 ? `<th class="num c-truoc">${TP}</th>` : '<th class="num">Nhập (số · % · công thức)</th>'}<th class="num">Thành tiền ${T}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th class="dtcp-src">Lịch sử</th>`;
+  const HDR = `<th>STT</th><th>Nội dung</th>${k > 1 ? `<th class="num c-truoc">${TP}</th>` : '<th class="num">Nhập (số · % · công thức)</th>'}<th class="num">Thành tiền ${T}${hintI(`Nguồn số ${T}: ${SRC}${k === 1 ? ' + ô nhập' : ''}. Rê chuột vào số để xem phần tự động. Lịch sử ›: các lần nhập / điều chỉnh / chốt của nhóm. ${{ 1: 'Gõ 150tr · 1,2 tỷ · 6% (× doanh thu) · 150tr+20tr; để trống = chỉ lấy phần tự động. Xong bấm Lưu bảng rồi Trình duyệt TĐ1.', 2: 'TĐ2 tự cộng từ chi tiết: điều chỉnh HĐ / gói ở HĐ › (khối I), khoản gián tiếp / tài chính ở Chi tiết ›. Xong bấm Trình duyệt TĐ2.', 3: 'TĐ3: HĐ / PL đã quyết toán lấy số quyết toán (chưa QT lấy TĐ2); khoản gián tiếp / tài chính lấy số chốt → thực chi → (chưa chi) TĐ2. Xong bấm Trình duyệt TĐ3.' }[k]}`)}</th>${k > 1 ? `<th class="num">± so ${TP}</th>` : ''}<th class="num">% DT</th><th class="dtcp-src">Lịch sử</th>`;
   const COLS = `<colgroup><col class="cw-stt"><col class="cw-nd">${k > 1 ? '<col class="cw-so3 c-truoc"><col class="cw-so3"><col class="cw-so3">' : '<col class="cw-so2"><col class="cw-so2">'}<col class="cw-pdt"><col class="cw-ls"></colgroup>`;
   const goiY = 'Gõ 150tr · 1,2 tỷ · 6% (× doanh thu) · 150tr+20tr. Để trống = chỉ lấy phần tự động.';
   const tg = costData.tong_tp || {}, soHd = (costData.thau_phu || []).length;
-  const hdLine = costAll ? '' : `<div class="dtcp-hdline"><span>HĐ đầu vào: <b>${soHd}</b> HĐ · còn lại phải trả <b>${dvT(tg.con_lai || 0)}</b> <small class="muted">(sau VAT)</small></span><span class="muted small">Bấm <b>HĐ ›</b> ở dòng nhóm (khối I) để mở gói / HĐ: phụ lục, điều chỉnh, quyết toán, thanh toán.</span></div>`;
+  const hdLine = costAll ? '' : `<div class="dtcp-hdline"><span>HĐ đầu vào: <b>${soHd}</b> HĐ · còn lại phải trả <b>${dvT(tg.con_lai || 0)}</b> <small class="muted">(sau VAT)</small></span>${hintI('Bấm HĐ › ở dòng nhóm (khối I) để mở gói / HĐ: phụ lục, điều chỉnh, quyết toán, thanh toán.')}</div>`;
   return `${tdBar(k)}${hdLine}
     <div class="table-wrap"><table class="dtcp-table" data-dt="${dt}" data-k="${k}">${COLS}<thead><tr>${HDR}</tr></thead>
     <tbody><tr class="dtcp-a"><td>A</td><td><b>DOANH THU ${T}</b> <small class="muted">(trước VAT, theo HĐ chủ đầu tư${k === 2 ? ' + đợt điều chỉnh' : k === 3 ? ' – quyết toán, chưa QT lấy TĐ2' : ''})</small></td>${cP}${cIn()}<td class="num">${dvT(dt)}</td>${lP}<td class="num">100%</td><td class="dtcp-src"></td></tr>
       <tr class="dtcp-a"><td>B</td><td><b>CHI PHÍ ${T}</b></td>${k > 1 ? '<td class="num muted c-truoc" data-tbp></td>' : ''}${cIn()}<td class="num" data-tb></td>${k > 1 ? '<td class="num" data-lb></td>' : ''}<td class="num" data-pb></td><td class="dtcp-src"></td></tr>${body}
       <tr class="dtcp-ln"><td></td><td><b>LỢI NHUẬN DỰ KIẾN (A − B)</b></td>${k > 1 ? '<td class="num muted c-truoc" data-tlnp></td>' : ''}${cIn()}<td class="num" data-tln></td>${k > 1 ? '<td class="num" data-lln></td>' : ''}<td class="num" data-pln></td><td class="dtcp-src"></td></tr></tbody></table></div>
-    <p class="muted small dtcp-nguon">Nguồn số ${T}: ${SRC}${k === 1 ? ' + ô nhập' : ''} · rê chuột (chạm) vào số để xem phần tự động · <b>Lịch sử ›</b>: các lần nhập / điều chỉnh / chốt của nhóm.</p>
-    ${moO && k === 1 ? `<div class="dtcp-act"><button type="button" class="primary" data-dtcpluu>Lưu bảng</button><span class="msg" id="dtcp-msg"></span><span class="muted small">${goiY}</span></div>`
+    ${moO && k === 1 ? `<div class="dtcp-act"><button type="button" class="primary" data-dtcpluu title="${esc(goiY)}">Lưu bảng</button><span class="msg" id="dtcp-msg"></span></div>`
     : khoa ? `<p class="muted small">🔒 ${T} đang khoá – xem số, không sửa.${k < 3 ? ` Thay đổi sau đó nhập ở tab TĐ${k + 1}.` : ''}</p>`
-    : k === 2 ? '<p class="muted small">TĐ2 tự cộng từ chi tiết từng mục: điều chỉnh HĐ / gói ở <b>HĐ ›</b> (khối I), khoản gián tiếp / tài chính ở <b>Chi tiết ›</b>. Xong bấm "Trình duyệt TĐ2".</p>'
-    : k === 3 ? '<p class="muted small">TĐ3 tự động: HĐ / PL đã quyết toán lấy số quyết toán (chưa QT lấy TĐ2), khoản gián tiếp / tài chính lấy số chốt → thực chi → (chưa chi) TĐ2. Kiểm tra xong bấm "Trình duyệt TĐ3".</p>' : ''}`;
+    : ''}`;
 }
 // ± so TĐ trước: tốt = xanh (DT tăng / CP giảm), xấu = đỏ
 const dtcpLech = (x, dtTang) => (Math.abs(x) < 1 ? '<span class="muted">=</span>' : `<span class="${(x > 0) === dtTang ? 'pos' : 'neg'}">${x > 0 ? '▲ +' : '▼ −'}${dvT(Math.abs(x))}</span>`);
@@ -2349,7 +2347,7 @@ function openKhoanDs(code, con) {
       try { if (v === 'xoa') await xoaChiCua(r.id);
         await api(`/api/du-tru/${r.id}`, { method: 'DELETE' }); await lai(); } catch (err) { alert(err.message); } return; }
   });
-  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">${esc(nN?.ten || '')} · đang xem TĐ${k} · đồng, trước VAT</div><h3>${esc(tenHm)}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
+  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">${esc(nN?.ten || '')} · đang xem TĐ${k} · đồng, trước VAT</div><h3>${esc(tenHm)} ${hintI({ 1: 'TĐ1: dự trù từng khoản (VD Lương BCH, thưởng đợt). Trả tiền thì bấm + Chi ở khoản.', 2: 'TĐ2 mỗi khoản = số dự kiến, đã chi nhiều hơn thì lấy đã chi. Trả tiền: bấm + Chi ở khoản. Ghi sai: bấm Xoá ở dòng đó.', 3: 'TĐ3 mỗi khoản = số chốt → chưa chốt = tổng thực chi → chưa chi đồng nào = TĐ2. Trả tiền: bấm + Chi ở khoản. Ghi sai: bấm Xoá ở dòng đó.' }[k])}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>
     <div class="table-wrap"><table class="khds-t"><thead><tr><th>Khoản</th><th class="num">TĐ1 · Dự trù</th><th class="num">TĐ2 · Điều chỉnh</th><th class="num">TĐ3 · Quyết toán</th><th class="num">Đã chi</th><th></th></tr></thead><tbody>
     ${ds.length ? ds.map((x) => `<tr class="${x === chung ? 'khds-chung' : laCT(x) ? 'khds-ct' : ''}"><td>${laCT(x) ? '<span class="muted">↳</span> ' : ''}<button type="button" class="link-btn" data-khopen="${x.r.id}" title="Mở khoản: điều chỉnh, chốt số, ghi chi, xoá">${x === chung ? 'Dự trù chung (chưa chia khoản)' : esc(x.r.noi_dung || 'Khoản')}</button>${x === chung ? ` <span class="muted small">nhập ở bảng DT-CP${ds.some(laCT) ? ' · chia dần cho các khoản bên dưới' : ''}</span>` : laCT(x) && Number(x.r.td_ps) > 1 ? ' <span class="tp-cpk-tag" title="Khoản xác định ở TĐ sau, chia từ dự trù chung TĐ1 (không cộng thêm, trừ khi vượt dự trù)">Chia từ dự trù</span>' : Number(x.r.td_ps) > 1 ? ` <span class="tp-ps">Phát sinh TĐ${x.r.td_ps}</span>` : ''}${x.dong ? ' <span class="st st-tam-dung">Đã đóng</span>' : ''}${x.chot !== null ? ' <span class="muted small">· đã chốt</span>' : ''}</td>
       <td class="num ${k === 1 ? 'strong' : 'muted'}">${o(x, 1)}</td><td class="num ${k === 2 ? 'strong' : 'muted'}">${o(x, 2)}</td><td class="num ${k === 3 ? 'strong' : 'muted'}">${o(x, 3)}</td><td class="num">${dvT(x.le)}</td>
@@ -2361,7 +2359,7 @@ function openKhoanDs(code, con) {
     ${edit ? `<form class="grid-form khds-f"><label>Tên khoản *<input name="ten" maxlength="300" value="${esc(goiY)}" placeholder="VD: Lương tháng 10"></label>
       <label>${k === 1 ? 'Dự trù TĐ1' : k === 2 ? 'Số TĐ2' : 'Số chốt TĐ3'} (trước VAT) *<input name="so" class="money num" placeholder="0"></label>
       <div class="actions"><button type="submit" class="primary">＋ Khoản mới${chung ? ' (chia từ dự trù chung)' : k > 1 ? ` (phát sinh TĐ${k})` : ''}</button><span class="msg" id="khds-msg"></span></div></form>
-      <p class="muted small">${{ 1: 'TĐ1: dự trù từng khoản (VD Lương BCH, thưởng đợt). Trả tiền thì bấm + Chi ở khoản.', 2: 'TĐ2 mỗi khoản = số dự kiến, đã chi nhiều hơn thì lấy đã chi. Trả tiền: bấm + Chi ở khoản. Ghi sai: bấm Xoá ở dòng đó.', 3: 'TĐ3 mỗi khoản = số chốt → chưa chốt = tổng thực chi → chưa chi đồng nào = TĐ2. Trả tiền: bấm + Chi ở khoản. Ghi sai: bấm Xoá ở dòng đó.' }[k]}</p>` : ''}`;
+` : ''}`;
   const f = $('.khds-f', dlg);
   if (f) {
     $$('input.money', f).forEach(attachMoneyInput);
@@ -2731,7 +2729,7 @@ function ptHtml(k) {
   const HINT = { 1: 'Ghi tiền đã chi thật (trả thầu phụ, mua vật tư, trả lương, lãi…). Chọn "Thuộc gói / khoản" để trừ vào dự trù.',
     2: k === 1 ? 'Bảng DT-CP TĐ1 theo khung chuẩn: mỗi nhóm = phần tự động (gói, HĐ, khoản, chi đã ghi) + ô nhập (số / % doanh thu / công thức). Xong bấm "Trình duyệt TĐ1".' : k === 2 ? 'Bảng DT-CP TĐ2 tự cộng từ chi tiết: điều chỉnh HĐ / gói ở HĐ › (khối I), khoản gián tiếp / tài chính ở Chi tiết ›. Gói còn mở giữ phần chưa ký HĐ; ký đủ thì bấm "Đóng gói" (HĐ ›). Xong bấm "Trình duyệt TĐ2".' : 'Bảng DT-CP TĐ3 (quyết toán) tự động – so với TĐ2. Chốt số từng khoản ở mục bên dưới. Kiểm tra xong bấm "Trình duyệt TĐ3" (TĐ2 phải đã duyệt).',
     3: 'Nhập nhanh tổng gián tiếp / tài chính: số (150tr), % (7% × doanh thu) hoặc công thức. Để trống = cộng theo các khoản.' };
-  const seg = edit ? `<div class="cf-seg"><span class="cf-tab on">Bảng DT-CP TĐ${k}</span><button type="button" class="primary sm cf-open" data-cfopen title="Ghi số tiền đã thực trả: thầu phụ, vật tư, lương, lãi vay…">＋ Ghi khoản đã chi</button><span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div><p class="cf-hint">${HINT[cfMode]}</p>` : '';
+  const seg = edit ? `<div class="cf-seg"><span class="cf-tab on">Bảng DT-CP TĐ${k}</span>${hintI(HINT[cfMode])}<button type="button" class="primary sm cf-open" data-cfopen title="Ghi số tiền đã thực trả: thầu phụ, vật tư, lương, lãi vay…">＋ Ghi khoản đã chi</button><span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div>` : '';
   const card = cfAnchor()?.closest('.card');
   if (card && el.parentElement !== card) card.insertBefore(el, cfAnchor());
   if (cForm) cForm.hidden = edit && !cfDlgMo(); // V09.26.11.26: phần ghi khoản đã chi nằm trong hộp nhỏ
@@ -3146,8 +3144,8 @@ function renderTpNhom() {
       <th class="num">${kTd === 1 ? 'Tỷ trọng' : `± so TĐ${kTd - 1}`}</th><th class="num">Đã thanh toán</th><th class="num">Còn lại</th><th></th></tr></thead>
       <tbody>${rows || '<tr><td colspan="9" class="empty">Chưa có gói / HĐ</td></tr>'}</tbody>
       <tfoot><tr class="tp-grand"><td></td><td class="tp-hd tp-hd0">TỔNG</td><td></td>${so3(v(kTd), kTd > 1 ? v(kTd - 1) : 0, 'strong')}${tt2(ds.reduce((t, d) => t + d.tt, 0), ds.reduce((t, d) => t + d.cl, 0), 'strong')}<td></td></tr></tfoot></table></div>
-    ${TPV.edit && code ? `<div class="tpn-them"><button type="button" class="sm primary" data-nhhd="${esc(code)}|${b}">+ HĐ</button><button type="button" class="sm" data-nhcp="${esc(code)}|${b}">+ CP khác</button><span class="muted small">${kTd === 1 ? 'Thêm vào TĐ1 (ký HĐ)' : `Phát sinh tại TĐ${kTd}: ${kTd === 2 ? 'TĐ1' : 'TĐ1, TĐ2'} = 0`} · CP khác: chi phí của nhóm không thuộc HĐ thầu phụ nào</span></div>` : ''}
-    <p class="muted small">Bấm vào <b>số HĐ</b> (hoặc nút Chi tiết) để mở bảng nhập HĐ/PL, điều chỉnh, thanh toán · ▸ ở gói: thu gọn / mở các HĐ của gói · nút ở dòng nhóm: sửa gói / điều chỉnh / quyết toán cả nhóm.</p>`;
+    ${TPV.edit && code ? `<div class="tpn-them"><button type="button" class="sm primary" data-nhhd="${esc(code)}|${b}">+ HĐ</button><button type="button" class="sm" data-nhcp="${esc(code)}|${b}">+ CP khác</button>${hintI(`${kTd === 1 ? 'Thêm vào TĐ1 (ký HĐ)' : `Phát sinh tại TĐ${kTd}: ${kTd === 2 ? 'TĐ1' : 'TĐ1, TĐ2'} = 0`}. CP khác: chi phí của nhóm không thuộc HĐ thầu phụ nào. Bấm số HĐ (hoặc Chi tiết) để mở bảng nhập HĐ/PL, điều chỉnh, thanh toán; ▸ ở gói: thu gọn / mở các HĐ; nút ở dòng nhóm: sửa gói / điều chỉnh / quyết toán cả nhóm.`)}</div>` : ''}
+`;
   if (kTd === 1) $$('td.c-tt', dlg).forEach((td) => { td.innerHTML = '<span class="muted">—</span>'; });
 }
 function renderTpCard() {
@@ -4569,6 +4567,11 @@ async function suaChiXuLy(t, lai) { // true = đã xử lý
     catch (err) { delete tr.dataset.dangLuu; alert(err.message); }
     return true; }
   return false; }
+// V05.28.11.26: hướng dẫn không hiện sẵn – nút ⓘ cạnh tiêu đề: rê chuột xem, bấm (điện thoại) hiện khung nhỏ
+const hintI = (txt) => (txt ? `<span class="hint-i" tabindex="0" role="button" title="${esc(String(txt).replace(/<[^>]+>/g, ''))}" aria-label="Hướng dẫn">ⓘ</span>` : '');
+document.addEventListener('click', (e) => { document.querySelectorAll('.hint-pop').forEach((x) => x.remove()); const h = e.target.closest('.hint-i'); if (!h) return; e.preventDefault(); e.stopPropagation();
+  const d = document.createElement('div'); d.className = 'hint-pop'; d.textContent = h.getAttribute('title') || ''; (h.closest('dialog') || document.body).appendChild(d);
+  const r = h.getBoundingClientRect(), w = Math.min(340, innerWidth - 24); d.style.width = w + 'px'; d.style.left = Math.max(12, Math.min(r.left, innerWidth - w - 12)) + 'px'; d.style.top = (r.bottom + 6) + 'px'; }, true);
 function dlgShell(id, onClick) {
   let dlg = $('#' + id);
   if (!dlg) {
