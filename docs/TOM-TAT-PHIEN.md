@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V05.28.11.26 – Bỏ ghi chú hiện sẵn: hướng dẫn vào nút ⓘ (người dùng duyệt theo ảnh)
+- Trang Chi phí: bỏ dòng hướng dẫn dưới thanh TĐ, ghi chú dưới bảng DT-CP, chữ bên phải dòng HĐ đầu vào, ghi chú hộp HĐ › và hộp Chi tiết → nút ⓘ (cạnh Bảng DT-CP, dòng HĐ đầu vào, tiêu đề Thành tiền, hộp HĐ ›, tiêu đề hộp Chi tiết); gợi ý gõ số vào nút Lưu bảng.
+- Các trang khác: ghi chú hướng dẫn gắn class "to-hint" → tự ẩn, nội dung vào ⓘ cạnh tiêu đề gần nhất (hintHoa, chỉ xử lý khi đang hiện): Báo cáo (mũi tên), Duyệt (2), Dự án, Tài khoản (3), Cài đặt (Passcode, dữ liệu mẫu, sao lưu), Tài khoản của tôi (2), Doanh thu (giá trị hoàn thành), hộp Ghi khoản đã chi (2; sửa chữ lỗi thời "bảng 1. Hợp đồng đầu vào"), hộp HĐ đầu vào. Giữ dòng trạng thái / thông tin.
+- ⓘ: máy tính rê chuột, điện thoại bấm hiện khung nhỏ.
+- Kiểm tra: td23 25, mot-bang 8, sau-viec 13, goi-td2 7, cpk-thanh-toan 6, duyet 28, tester 4518 – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V04.28.11.26 – Thêm chi vào TĐ đã trình / duyệt: tự chuyển sang TĐ kế tiếp còn mở
 - Người dùng chọn "tự chuyển": THÊM lần chi mà TĐ của nó đã trình / duyệt → máy chủ tự ghi td_ps = TĐ kế tiếp còn mở (TĐ sau vẫn kiểm khoá; hết TĐ mở thì vẫn hỏi Passcode). Sửa / xoá lần chi cũ vẫn khoá như V03.
 - Hộp Chi tiết: lần chi ghi rõ "tính từ TĐk".

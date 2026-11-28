@@ -4026,3 +4026,4 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 .hint-i { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; margin-left: 6px; border-radius: 50%; font-size: 12px; font-weight: 700; color: var(--muted); cursor: help; vertical-align: middle; text-transform: none; }
 .hint-i:hover, .hint-i:focus { color: var(--navy); background: var(--bg-soft, #eef2f8); outline: none; }
 .hint-pop { position: fixed; z-index: 9999; background: #1e293b; color: #fff; font-size: 12.5px; line-height: 1.45; padding: 8px 10px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.2); text-transform: none; font-weight: 400; }
+.hint-pop { white-space: pre-line; }

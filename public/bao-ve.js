@@ -57,7 +57,7 @@
   async function khung2Lop(hop, batBuoc) {
     const st = await api('/api/auth/2fa');
     hop.innerHTML = `<h2>Xác thực 2 lớp</h2>
-      <p class="small">Đăng nhập cần thêm <b>mã 6 số</b> trên điện thoại (Google Authenticator, Microsoft Authenticator…). Lộ mật khẩu vẫn không ai vào được.</p>
+      <p class="small to-hint">Đăng nhập cần thêm <b>mã 6 số</b> trên điện thoại (Google Authenticator, Microsoft Authenticator…). Lộ mật khẩu vẫn không ai vào được.</p>
       <p class="small">Trạng thái: <b class="${st.bat ? 'ok' : 'warn'}">${st.bat ? 'ĐANG BẬT ✓' : 'CHƯA BẬT'}</b>${st.bat_buoc ? ' · <b>bắt buộc với vai trò của bạn</b>' : ''}</p>
       <div id="tf-body"></div><div id="tf-msg" class="msg" role="alert"></div>`;
     const body = hop.querySelector('#tf-body'), msg = hop.querySelector('#tf-msg');
@@ -159,7 +159,7 @@
   async function quanTriSaoLuu(hop) {
     const { items } = await api('/api/sao-luu');
     hop.innerHTML = `<h2>Sao lưu dữ liệu</h2>
-      <p class="small">Tự động sao lưu <b>toàn bộ dữ liệu</b> lúc <b>02:00</b> mỗi ngày, giữ 7 bản mới nhất (chống xóa nhầm / nhập sai).
+      <p class="small to-hint">Tự động sao lưu <b>toàn bộ dữ liệu</b> lúc <b>02:00</b> mỗi ngày, giữ 7 bản mới nhất (chống xóa nhầm / nhập sai).
       Bản sao lưu nằm cùng máy chủ dữ liệu – <b>nên tải 1 bản về máy mỗi tuần</b>. Tải về cần Passcode xóa và được ghi nhật ký.</p>
       <div class="actions"><button type="button" class="primary" id="sl-ngay">Sao lưu ngay</button></div>
       <div class="table-wrap"><table><thead><tr><th>Thời điểm</th><th>Loại</th><th class="num">Dung lượng</th><th></th></tr></thead>

@@ -481,7 +481,7 @@ function buildRevenueSections() {
         <button type="button" data-qtq="dot" title="Thêm đợt kế tiếp, tên theo hồ sơ đã có (VD Hoàn thành đợt 2 -> Hoàn thành đợt 3)">+ Đợt tiếp theo</button>
         <button type="button" data-qtq="qt">+ Quyết toán</button>
         <span id="qt-nhap-msg" class="msg" role="alert"></span>
-        <span class="muted small">Đã có đợt thanh toán / quyết toán: Giá trị hoàn thành = tổng lũy kế các đợt; chưa có: tính theo chi phí (cost to cost)</span>
+        <span class="muted small to-hint">Đã có đợt thanh toán / quyết toán: Giá trị hoàn thành = tổng lũy kế các đợt; chưa có: tính theo chi phí (cost to cost)</span>
       </div>` : ''}
     </div>`).join('');
 
@@ -2782,7 +2782,7 @@ function moFormChi(tieuDe) {
     dlg.addEventListener('click', (e) => { if (e.target.dataset.close !== undefined) dlg.close(); });
     dlg.addEventListener('close', () => { delete cForm.dataset.ps; cfMoc.after(cForm); const c = $('#c-msg'); if (c) c.textContent = ''; if (cForm.elements.id?.value && typeof resetCostForm === 'function') resetCostForm(); costKpiTd(); });
   }
-  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small">Tiền đã thực trả – trả thầu phụ, mua vật tư, trả lương, lãi vay… Chọn "Thuộc gói / khoản" để trừ vào dự trù.</div><h3>${esc(tieuDe || (cForm.elements.id?.value ? 'Sửa khoản đã chi' : 'Ghi khoản đã chi'))}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>`;
+  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small to-hint">Tiền đã thực trả – trả thầu phụ, mua vật tư, trả lương, lãi vay… Chọn "Thuộc gói / khoản" để trừ vào dự trù.</div><h3>${esc(tieuDe || (cForm.elements.id?.value ? 'Sửa khoản đã chi' : 'Ghi khoản đã chi'))}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>`;
   dlg.appendChild(cForm); cForm.hidden = false;
   if (!dlg.open) dlg.showModal();
   setTimeout(() => cForm.elements.noi_dung?.focus({ preventScroll: true }), 80);
@@ -3635,7 +3635,7 @@ function renderTpDlg() {
       if (!coPl && !coCp) return '';
       const ps = md > 1 ? ` (phát sinh TĐ${md})` : '';
       return `<div class="tv-tools">${coPl ? `<button class="sm" data-addpl="${nextPl}" title="Phụ lục của hợp đồng: cộng vào giá trị HĐ, thanh toán theo HĐ">+ Thêm ${nextPl}${ps}</button>` : ''}${coCp ? `<button class="sm" data-addcpk="${nextPl}" title="Chi phí khác ghi như một phụ lục phát sinh của HĐ (giá trị dự kiến, không phải dòng chi thực)">+ Chi phí khác${ps}</button>` : ''}
-      <span class="muted small">${{ 1: 'Thêm ở TĐ1: tính từ TĐ1 · TĐ2 = TĐ1 (điều chỉnh ở TĐ2) · TĐ3 = TĐ2 (quyết toán ở TĐ3)',
+      <span class="muted small to-hint">${{ 1: 'Thêm ở TĐ1: tính từ TĐ1 · TĐ2 = TĐ1 (điều chỉnh ở TĐ2) · TĐ3 = TĐ2 (quyết toán ở TĐ3)',
         2: 'Thêm ở TĐ2: không tính TĐ1 · tăng / giảm thêm ở TĐ2 · TĐ3 = TĐ2 (quyết toán ở TĐ3)',
         3: 'Thêm ở TĐ3: không tính TĐ1, TĐ2 – chỉ tính ở TĐ3' }[md]}</span></div>`; })()}
 
@@ -4386,7 +4386,7 @@ async function veTd1Duyet() {
       <td class="num">${dvT(s.dt || 0)}</td><td class="num">${dvT(s.cp || 0)}</td><td class="num"><b>${dvT(s.ln || 0)}</b> <small class="muted">${pc(s.ln || 0, s.dt || 0)}</small></td>
       <td class="row-actions">${cho1 ? (tuMinh ? '<span class="muted small">Bạn là người trình</span>' : `<button type="button" class="primary sm" data-td1dy="${d.id}|duyet|${k}">✓ Duyệt & khoá</button><button type="button" class="sm" data-td1dy="${d.id}|tra|${k}">↩ Trả lại</button>`) : sau ? `<span class="muted small">TĐ${k + 1} đã trình</span>` : `<button type="button" class="sm" data-td1dy="${d.id}|mo|${k}">Mở khoá</button>`}</td></tr>`; };
   const bang = (rows, cho1) => `<div class="table-wrap"><table class="dy-td1-t"><thead><tr><th>Dự án</th><th>Thời điểm</th><th>${cho1 ? 'Người trình' : 'Người duyệt'}</th><th class="num">Doanh thu</th><th class="num">Chi phí</th><th class="num">Lợi nhuận</th><th></th></tr></thead><tbody>${rows.map((x) => dong(x, cho1)).join('')}</tbody></table></div>`;
-  box.innerHTML = `<div class="dy-head"><h2>Thời điểm (TĐ1 · TĐ2 · TĐ3) chờ duyệt <b class="dy-td1-n">${cho.length}</b></h2><span class="muted small">QS lập bảng DT-CP ở Nhập liệu › Chi phí (tab TĐ tương ứng) rồi trình. Duyệt = khoá số của thời điểm đó; TĐ sau chỉ trình khi TĐ trước đã duyệt. Số trước VAT.</span></div>
+  box.innerHTML = `<div class="dy-head"><h2>Thời điểm (TĐ1 · TĐ2 · TĐ3) chờ duyệt <b class="dy-td1-n">${cho.length}</b></h2><span class="muted small to-hint">QS lập bảng DT-CP ở Nhập liệu › Chi phí (tab TĐ tương ứng) rồi trình. Duyệt = khoá số của thời điểm đó; TĐ sau chỉ trình khi TĐ trước đã duyệt. Số trước VAT.</span></div>
     ${cho.length ? bang(cho, true) : '<p class="muted">Không có thời điểm nào chờ duyệt.</p>'}
     ${da.length ? `<details class="dy-td1-da"><summary>Đã duyệt (${da.length})</summary>${bang(da, false)}</details>` : ''}`;
 }
@@ -4572,6 +4572,20 @@ const hintI = (txt) => (txt ? `<span class="hint-i" tabindex="0" role="button" t
 document.addEventListener('click', (e) => { document.querySelectorAll('.hint-pop').forEach((x) => x.remove()); const h = e.target.closest('.hint-i'); if (!h) return; e.preventDefault(); e.stopPropagation();
   const d = document.createElement('div'); d.className = 'hint-pop'; d.textContent = h.getAttribute('title') || ''; (h.closest('dialog') || document.body).appendChild(d);
   const r = h.getBoundingClientRect(), w = Math.min(340, innerWidth - 24); d.style.width = w + 'px'; d.style.left = Math.max(12, Math.min(r.left, innerWidth - w - 12)) + 'px'; d.style.top = (r.bottom + 6) + 'px'; }, true);
+// V05.28.11.26: ghi chú hướng dẫn có class "to-hint" -> tự ẩn, nội dung vào nút ⓘ cạnh tiêu đề gần nhất (rê chuột / bấm để xem)
+function hintHoa() {
+  for (const el of document.querySelectorAll('.to-hint:not([data-hh])')) {
+    if (el.offsetParent === null) continue; // đang ẩn (tab / hộp chưa mở) -> xử lý khi hiện ra
+    el.setAttribute('data-hh', '1'); const txt = el.innerText.trim().replace(/\s+/g, ' '); if (!txt) continue;
+    let h = null, box = el; // tìm tiêu đề đứng TRƯỚC ghi chú, lần ra các lớp bao ngoài (form / thẻ / hộp)
+    while (!h && (box = box.parentElement?.closest('dialog, .card, section, form, .tab-panel'))) {
+      const hs = [...box.querySelectorAll('h2, h3')].filter((x) => !x.closest('.to-hint') && x.offsetParent !== null);
+      h = hs.filter((x) => x.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING).pop() || (box.matches('dialog') ? hs[0] : null) || null; // hộp: ghi chú đứng trước tiêu đề -> tiêu đề đầu
+      if (box.matches('dialog, .tab-panel')) break; }
+    const i = document.createElement('span'); i.className = 'hint-i'; i.tabIndex = 0; i.setAttribute('role', 'button'); i.setAttribute('aria-label', 'Hướng dẫn'); i.title = txt; i.textContent = 'ⓘ';
+    if (h) { const cu = h.querySelector(':scope > .hint-i[data-tu]'); if (cu) cu.title += '\n' + txt; else { i.dataset.tu = '1'; h.appendChild(i); } el.style.display = 'none'; }
+    else { el.replaceWith(i); } } }
+{ let hen = 0; new MutationObserver(() => { if (!hen) hen = requestAnimationFrame(() => { hen = 0; hintHoa(); }); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'open'] }); setTimeout(hintHoa, 0); }
 function dlgShell(id, onClick) {
   let dlg = $('#' + id);
   if (!dlg) {
