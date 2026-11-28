@@ -2,6 +2,16 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V03.28.11.26 – Bảng DT-CP gọn, 3 TĐ cùng khung; 6 việc theo rà soát
+- Bảng DT-CP: cột "Nguồn" thu thành "Lịch sử" (chỉ nút Lịch sử ›); phần tự động đưa vào rê chuột trên số; 1 dòng ghi chú nguồn dưới bảng. Bỏ ô trống ẩn ở TĐ2/TĐ3 (cột nhập chỉ TĐ1) → mọi dòng đúng số cột; khung cột cố định: Nội dung 34% cùng độ rộng ở 3 TĐ, số căn phải, không xuống dòng. Điện thoại: ẩn cột TĐ trước + Lịch sử (trước đây ẩn tiêu đề nhưng còn ô → lệch cột).
+- (1) Ghi / sửa / xoá tiền đã chi: TĐ của lần chi (không sớm hơn TĐ khoản) hoặc TĐ sau đã trình / duyệt → khoá 423 + hỏi Passcode mở TĐ (server.js; db.getCostRef thêm td_ps).
+- (2) Form ghi chi: gián tiếp / tài chính đã có khoản mà không chọn "Thuộc gói / khoản" → cảnh báo vàng (số cộng thêm).
+- (3) Bỏ form thêm khoản trùng dưới bảng DT-CP (TĐ1) và lựa chọn "Khoản mới" (TĐ2/TĐ3) → thêm khoản chỉ ở hộp Chi tiết ›.
+- (4) Xoá khoản: hộp 3 nút "Xoá khoản + n lần chi / Xoá khoản, giữ lần chi / Không xoá" (hộp Chi tiết, hộp khoản, hộp CP khác).
+- (5) Nút "Sửa" lần chi / lần thanh toán (nội dung, ngày, số tiền) ở hộp Chi tiết, hộp khoản, hộp CP khác.
+- (6) Hộp HĐ ›: dòng nhóm / TỔNG cộng cả đã trả, còn lại của CP khác.
+- Kiểm tra: sau-viec 13 (mới), luong 17 (chuyển sang hộp Chi tiết), mot-bang 8, tester 4518, kiem-tra-goi 246, tdk 31, duyet 28, td23 25, doi-chieu-cp 73, chi-theo-khoan 11, chi-tiet-khoan 16, cp-khac 13, cpk-thanh-toan 6, goi-td2 7, du-tru-chung 9, mo-khoa-1-lan 9+6, khoa-du-an đạt – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V02.28.11.26 – Cập nhật Hướng dẫn + Trợ lý "Cách nhập"; sửa nhỏ theo rà soát (revi)
 - Trang Hướng dẫn mục 3 viết lại theo cách nhập hiện tại: A. khối I (HĐ ›, + HĐ, ± Gói, Đóng gói, chưa ký HĐ, QT, thanh toán) · B. lương / gián tiếp / tài chính (dự trù chung, Chi tiết ›, + Chi, chốt, chi chưa gắn khoản) · C. CP khác (Thanh toán) · D. trình duyệt, khoá, mở khoá; ví dụ Lương BCH 50 / 95 / 140. Mục 1: sửa quy tắc "đúng TĐ", khoá số (mở 1 lần cho cả dự án), khoá TĐ đã duyệt, công thức gói và khoản gián tiếp TĐ3.
 - Trợ lý: nhóm mới "⑧ Cách nhập" (5 câu: thầu phụ/vật tư, lương/gián tiếp, CP khác, khoá – trình duyệt, ghi sai/ghi trùng).

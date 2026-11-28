@@ -31,7 +31,7 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   ds = await dong(); v = await L();
   chk('xoá chi tháng 12: còn 2 lần chi, TĐ2 = 95', ds.filter((x) => /Đã chi:/.test(x)).length === 2 && v[1] === 95e6, `${v} ${JSON.stringify(ds)}`);
   // xoá khoản
-  await p.click('#khds-dlg [data-khxoa]'); await p.waitForTimeout(1800);
+  await p.click('#khds-dlg [data-khxoa]'); await p.waitForTimeout(400); if (await p.$('dialog.hoi-chon[open]')) await p.click('dialog.hoi-chon[open] [data-i="0"]'); await p.waitForTimeout(2200); // V03.28.11.26: hộp 3 nút – xoá khoản + lần chi
   chk('xoá khoản: không còn khoản', /Chưa có khoản nào/.test(await p.evaluate(() => document.querySelector('#khds-dlg tbody').innerText)));
   // V19.27.11.26: lần chi còn lại sau khi xoá khoản (ghi lúc mở tab TĐ3) -> hiện ở "Chi chưa gắn khoản", tổng hộp = bảng DT-CP
   await p.evaluate(async (i) => { const k = await api(`/api/du-an/${i}/du-tru`, { method: 'POST', body: JSON.stringify({ nhom: 'gt_luong', nhom_con: 'luong', loai: 'ky', so_tien: 50000000, vat: 0, noi_dung: 'Lương tháng 10' }) });

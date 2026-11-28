@@ -396,6 +396,14 @@ api.use(wrap(async (req, res, next) => {
     if ((m = p.match(/^\/doanh-thu\/(\d+)\/(qt|quyet-toan)$/)) && (req.method === 'PUT' || req.method === 'DELETE')) { k = 3; da = await daRev(m[1]); }
     if ((m = p.match(/^\/tp-hd-pl\/(\d+)\/qt$/)) && (req.method === 'PUT' || req.method === 'DELETE')) { k = 3; da = await daTpLine(m[1]); }
     if (k && da) { const t = await ttK(da, k); if (t) return res.status(423).json({ errors: [KHOA(k, t)], mo_td: t === 'duyet' ? { da: Number(da), k } : null }); } // V17: trang hỏi mở khoá TĐ luôn
+    // V03.28.11.26: ghi / sửa / xoá tiền đã chi -> tính vào TĐ của lần chi (không sớm hơn TĐ của khoản) và các TĐ sau: TĐ nào đã trình / duyệt thì khoá
+    let kc = 0, dac = null;
+    if (req.method === 'POST' && (m = p.match(/^\/du-an\/(\d+)\/chi-phi$/))) { dac = Number(m[1]); kc = Number(b.td_ps) > 1 ? Number(b.td_ps) : 1;
+      if (b.goi_id) kc = Math.max(kc, Number((await store.getDuTru(Number(b.goi_id)))?.td_ps) || 1); }
+    if ((req.method === 'PUT' || req.method === 'DELETE') && (m = p.match(/^\/chi-phi\/(\d+)$/))) { const c = await store.getCostRef(Number(m[1]));
+      if (c) { dac = c.du_an_id; kc = Number(c.td_ps) || 1; if (c.goi_id) kc = Math.max(kc, Number((await store.getDuTru(c.goi_id))?.td_ps) || 1); } }
+    if (kc && dac) { const d = await store.getProject(Number(dac));
+      for (let j = kc; j <= 3; j++) { const t = d?.[`td${j}_tt`]; if (['trinh', 'duyet'].includes(t)) return res.status(423).json({ errors: [`${KHOA(j, t)} (Tiền chi này tính vào TĐ${j}${j > kc ? '' : ''}.)`], mo_td: t === 'duyet' ? { da: Number(dac), k: j } : null }); } }
   }
   if ((m = p.match(/^\/doanh-thu\/(\d+)\/qt$/))) {
     const v = await vbDt(m[1]); if (!v) return bad(res, 'Không tìm thấy HĐ / PL', 404);

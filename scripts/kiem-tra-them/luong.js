@@ -17,23 +17,25 @@ let ok = 0, loi = 0; const chk = (t, c, x = '') => { if (c) ok++; else { loi++; 
   const L = () => p.evaluate(() => (costData.cp_nhom.find((n) => n.code === 'gt_luong')?.gt || [0, 0, 0]).map((x) => Math.round(Number(x) || 0)));
   const sel = (n, v) => p.evaluate(([n, v]) => { const e = document.querySelector(`#pk-f [name=${n}]`); e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })); }, [n, v]);
   const so = async (v) => { await p.fill('#pk-f [name=so_tien]', ''); await p.click('#pk-f [name=so_tien]'); await p.keyboard.type(String(v)); };
+  // V03.28.11.26: thêm khoản chỉ ở hộp "Chi tiết ›" (form dưới bảng DT-CP đã bỏ)
+  const ct = async (con) => { await p.evaluate(() => document.querySelectorAll('dialog[open]').forEach((d) => d.close())); await p.click(`.dtcp-table [data-dtcpkh="gt_luong|${con}"]`); await p.waitForTimeout(500); };
+  const them = async (ten, so) => { if (ten !== null) await p.fill('#khds-dlg [name=ten]', ten); await p.fill('#khds-dlg [name=so]', ''); await p.click('#khds-dlg [name=so]'); await p.keyboard.type(String(so)); await p.click('#khds-dlg button[type=submit]'); await p.waitForTimeout(1600); };
   // ---- TĐ1 ----
-  await td(1); await sel('nhom', 'gt_luong'); await p.fill('#pk-f [name=noi_dung]', 'Lương tháng 10'); await so(50000000); await p.click('#pk-f button[type=submit]'); await p.waitForTimeout(1500);
-  await td(1); await sel('nhom', 'gt_luong'); await p.fill('#pk-f [name=noi_dung]', 'Thưởng đợt'); await so(25000000);
-  chk('TĐ1 thêm "Thưởng đợt": ô Hạng mục tự chọn Thưởng đợt', (await p.inputValue('#pk-f [name=nhom_con]')) === 'thuong_dot', await p.inputValue('#pk-f [name=nhom_con]')); await p.click('#pk-f button[type=submit]'); await p.waitForTimeout(1500);
+  await td(1); await ct('luong'); await them('Lương tháng 10', 50000000);
+  await td(1); await ct('thuong_dot'); await them('Thưởng đợt', 25000000);
+  chk('TĐ1 "Thưởng đợt" nằm ở hạng mục Thưởng đợt', await p.evaluate(() => (costData.du_tru || []).some((r) => r.noi_dung === 'Thưởng đợt' && dtcpConOf(r) === 'thuong_dot')));
   chk('TĐ1 lương + thưởng = 75', (await L())[0] === 75e6, String(await L()));
   // ---- TĐ2: khoản mới, tên gợi ý "Lương tháng 11" ----
-  await td(2); await sel('khoan', 'moi'); await sel('nhom', 'gt_luong'); await p.waitForTimeout(200);
-  chk('TĐ2 khoản mới: gợi ý tên "Lương tháng 11"', (await p.inputValue('#pk-f [name=ten]')) === 'Lương tháng 11', await p.inputValue('#pk-f [name=ten]'));
-  await so(45000000); await p.click('#pk-f button[type=submit]'); await p.waitForTimeout(1500);
+  await td(2); await ct('luong');
+  chk('TĐ2 khoản mới: gợi ý tên "Lương tháng 11"', (await p.inputValue('#khds-dlg [name=ten]')) === 'Lương tháng 11', await p.inputValue('#khds-dlg [name=ten]'));
+  await them(null, 45000000);
   let v = await L(); chk('TĐ2 = 120 (TĐ1 vẫn 75)', v[0] === 75e6 && v[1] === 120e6, String(v));
-  // ---- TĐ3: khoản mới "Lương tháng 12" (TĐ3 có lựa chọn Khoản mới) ----
-  await td(3);
-  chk('TĐ3 có "＋ Khoản mới (phát sinh TĐ3)"', await p.evaluate(() => [...document.querySelectorAll('#pk-f [name=khoan] option')].some((o) => o.value === 'moi' && /TĐ3/.test(o.textContent))));
-  await sel('khoan', 'moi'); await sel('nhom', 'gt_luong'); await p.waitForTimeout(200);
-  chk('TĐ3 khoản mới: gợi ý tên "Lương tháng 12"', (await p.inputValue('#pk-f [name=ten]')) === 'Lương tháng 12', await p.inputValue('#pk-f [name=ten]'));
-  await p.click('#pk-f button[type=submit]'); await p.waitForTimeout(1500);
-  v = await L(); chk('thêm khoản T12 chưa trả: TĐ1 75, TĐ2 120 không đổi', v[0] === 75e6 && v[1] === 120e6, String(v));
+  // ---- TĐ3: khoản mới "Lương tháng 12" (bắt buộc số chốt) ----
+  await td(3); await ct('luong');
+  chk('TĐ3 có "＋ Khoản mới (phát sinh TĐ3)"', /Khoản mới \(phát sinh TĐ3\)/.test(await p.evaluate(() => document.querySelector('#khds-dlg button[type=submit]')?.innerText || '')));
+  chk('TĐ3 khoản mới: gợi ý tên "Lương tháng 12"', (await p.inputValue('#khds-dlg [name=ten]')) === 'Lương tháng 12', await p.inputValue('#khds-dlg [name=ten]'));
+  await them(null, 45000000);
+  v = await L(); chk('thêm khoản T12 (chốt 45): TĐ1 75, TĐ2 120 không đổi', v[0] === 75e6 && v[1] === 120e6, String(v));
   // trả lương 3 tháng (gắn khoản) + chốt thưởng 30
   await p.evaluate(async (i) => { const ds = (await api(`/api/du-an/${i}/chi-phi`)).du_tru.filter((r) => r.loai === 'ky' && r.nhom === 'gt_luong'), id = (t) => ds.find((r) => r.noi_dung === t).id;
     const chi = (t, gt, ngay) => api(`/api/du-an/${i}/chi-phi`, { method: 'POST', body: JSON.stringify({ nhom: 'gt_luong', nhom_con: 'luong', noi_dung: 'Trả ' + t, ngay, gia_tri: gt, vat: 0, goi_id: id(t) }) });

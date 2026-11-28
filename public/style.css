@@ -3951,7 +3951,7 @@ html.bv-khoa input, html.bv-khoa textarea, html.bv-khoa select { -webkit-user-se
 .c-canh-bao { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; } .c-canh-bao:empty { display: none; }
 .c-canh-bao .cb { display: flex; gap: 10px; border-radius: 12px; padding: 10px 14px; font-size: 13px; line-height: 1.5; }
 .cb-do { background: #fff1f1; border: 1px solid #fecaca; color: #991b1b; } .cb-vang { background: #fffaeb; border: 1px solid #fde68a; color: #92400e; } .cb-xanh { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
-@media (max-width: 700px) { .dtcp-table .dtcp-src, .dtcp-table th:last-child, .dtcp-table th:nth-child(3), .dtcp-table .dtcp-cach { display: none; } .dtcp-table .dtcp-in { width: 100px; } .td1-nut { margin-left: 0; } }
+@media (max-width: 700px) { .dtcp-table .dtcp-src, .dtcp-table .c-truoc, .dtcp-table .dtcp-cach { display: none; } .dtcp-table .dtcp-in { width: 100px; } .td1-nut { margin-left: 0; } }
 .dtcp-table td { color: var(--text, #1e293b); } .dtcp-table .dtcp-k td, .dtcp-table .dtcp-a td { color: var(--navy); } .dtcp-table .dtcp-ln td { color: #fff; } .dtcp-table .dtcp-src, .dtcp-table .muted { color: var(--muted); }
 .dtcp-table .dtcp-cha td { font-weight: 700; } .dtcp-table .dtcp-ten2 { padding-left: 26px !important; }
 .dy-td1 { margin-bottom: 16px; border-left: 4px solid var(--teal); } .dy-td1-n { display: inline-grid; place-items: center; min-width: 24px; height: 24px; border-radius: 999px; background: #e11d48; color: #fff; font-size: 13px; margin-left: 6px; padding: 0 6px; }
@@ -3995,7 +3995,6 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 }
 .dtcp-table small.dtcp-cach { display: block; font-size: 10.5px; color: var(--muted); line-height: 1.2; }
 .dtcp-table small.dtcp-cach:empty { display: none; }
-.dtcp-table[data-k="3"] :is(th, td):nth-child(4) { display: none; } /* TĐ3 chỉ xem: không có cột nhập */
 .dtcp-table .dtcp-in::placeholder { color: var(--muted); font-weight: 400; opacity: .55; }
 .dtcp-table .dtcp-ls { font-size: 11px; margin-right: 6px; white-space: nowrap; }
 .khds-t td.strong { font-weight: 700; }
@@ -4005,7 +4004,6 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 .khds-t tr.khds-ct td:first-child { padding-left: 18px; }
 .khds-tom { margin: 8px 2px 0; font-size: 12.5px; color: var(--fg-1e293b); }
 .khds-tom.vuot { color: #b45309; }
-.dtcp-table:not([data-k="1"]) > thead > tr > th:nth-child(4), .dtcp-table:not([data-k="1"]) > tbody > tr > td:nth-child(4) { display: none; }
 .khds-t tr.khds-chi td { font-size: 12.5px; padding-top: 3px; padding-bottom: 3px; background: var(--bg-f8fafc, #f8fafc); }
 .khds-t tr.khds-chi td:first-child { padding-left: 22px; }
 .khds-t tr.khds-new input { width: 100%; min-width: 0; }
@@ -4016,3 +4014,12 @@ dialog.tpn-dlg { width: min(1440px, calc(100vw - 16px)); padding: 16px 18px; }
 .cpk-tt td.row-actions { white-space: nowrap; }
 .as-ol { margin: 4px 0 6px 18px; padding: 0; font-size: 13px; line-height: 1.5; }
 .as-ol li { margin: 3px 0; }
+.dtcp-table td, .dtcp-table th { vertical-align: middle; } .dtcp-table td.num, .dtcp-table th.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dtcp-table .dtcp-src { white-space: nowrap; } .dtcp-nguon { margin: 6px 2px 0; }
+@media (min-width: 701px) { /* V03.28.11.26: 3 bảng TĐ cùng khung – Nội dung cùng độ rộng, cột số chia đều */
+  .dtcp-table { table-layout: fixed; }
+  .dtcp-table col.cw-stt { width: 46px; } .dtcp-table col.cw-nd { width: 34%; } .dtcp-table col.cw-pdt { width: 70px; } .dtcp-table col.cw-ls { width: 96px; }
+  .dtcp-table td:nth-child(2) { overflow-wrap: anywhere; } .dtcp-table .dtcp-in { width: 100%; max-width: 180px; } }
+@media (max-width: 700px) { .dtcp-table col { width: auto !important; } }
+.chi-sua-f { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; } .chi-sua-f input[data-f="nd"] { flex: 2 1 160px; } .chi-sua-f input[data-f="so"] { flex: 1 1 110px; }
+.hoi-chon .actions { display: flex; gap: 8px; flex-wrap: wrap; }
