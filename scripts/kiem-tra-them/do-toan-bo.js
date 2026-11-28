@@ -25,7 +25,7 @@ const { chromium, devices } = require('playwright'); const B = 'http://127.0.0.1
         await p.evaluate(() => document.querySelectorAll('dialog[open]').forEach((d) => d.close()));
         await p.click('.dtcp-table [data-dtcpls]').catch(() => {}); await p.waitForTimeout(500); await xau(`Lịch sử TĐ${k}`);
         await p.evaluate(() => document.querySelectorAll('dialog[open]').forEach((d) => d.close()));
-        await p.click('[data-cfopen]'); await p.waitForTimeout(400); await xau(`Ghi khoản đã chi TĐ${k}`); await p.keyboard.press('Escape');
+        if (await p.$('[data-cfopen]')) await p.click('[data-cfopen]'); await p.waitForTimeout(400); await xau(`Ghi khoản đã chi TĐ${k}`); await p.keyboard.press('Escape');
       }
     }
   }

@@ -2,6 +2,10 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V06.28.11.26 – Nút "＋ Ghi khoản đã chi" đổi tên "＋ Chi tiền", bỏ ở TĐ3
+- TĐ3 không còn nút (quyết toán, chốt số làm trong HĐ › / Chi tiết ›); TĐ1, TĐ2: "＋ Chi tiền" (tiêu đề hộp "Chi tiền" / "Sửa khoản chi tiền"); Hướng dẫn + i18n cập nhật; bài dò giao diện bỏ qua nút khi không có.
+- Kiểm tra: sau-viec 13, mot-bang 8 – 0 lỗi; dò giao diện 0 lỗi, không tràn.
+
 ## V05.28.11.26 – Bỏ ghi chú hiện sẵn: hướng dẫn vào nút ⓘ (người dùng duyệt theo ảnh)
 - Trang Chi phí: bỏ dòng hướng dẫn dưới thanh TĐ, ghi chú dưới bảng DT-CP, chữ bên phải dòng HĐ đầu vào, ghi chú hộp HĐ › và hộp Chi tiết → nút ⓘ (cạnh Bảng DT-CP, dòng HĐ đầu vào, tiêu đề Thành tiền, hộp HĐ ›, tiêu đề hộp Chi tiết); gợi ý gõ số vào nút Lưu bảng.
 - Các trang khác: ghi chú hướng dẫn gắn class "to-hint" → tự ẩn, nội dung vào ⓘ cạnh tiêu đề gần nhất (hintHoa, chỉ xử lý khi đang hiện): Báo cáo (mũi tên), Duyệt (2), Dự án, Tài khoản (3), Cài đặt (Passcode, dữ liệu mẫu, sao lưu), Tài khoản của tôi (2), Doanh thu (giá trị hoàn thành), hộp Ghi khoản đã chi (2; sửa chữ lỗi thời "bảng 1. Hợp đồng đầu vào"), hộp HĐ đầu vào. Giữ dòng trạng thái / thông tin.

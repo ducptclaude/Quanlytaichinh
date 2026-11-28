@@ -2729,7 +2729,7 @@ function ptHtml(k) {
   const HINT = { 1: 'Ghi tiền đã chi thật (trả thầu phụ, mua vật tư, trả lương, lãi…). Chọn "Thuộc gói / khoản" để trừ vào dự trù.',
     2: k === 1 ? 'Bảng DT-CP TĐ1 theo khung chuẩn: mỗi nhóm = phần tự động (gói, HĐ, khoản, chi đã ghi) + ô nhập (số / % doanh thu / công thức). Xong bấm "Trình duyệt TĐ1".' : k === 2 ? 'Bảng DT-CP TĐ2 tự cộng từ chi tiết: điều chỉnh HĐ / gói ở HĐ › (khối I), khoản gián tiếp / tài chính ở Chi tiết ›. Gói còn mở giữ phần chưa ký HĐ; ký đủ thì bấm "Đóng gói" (HĐ ›). Xong bấm "Trình duyệt TĐ2".' : 'Bảng DT-CP TĐ3 (quyết toán) tự động – so với TĐ2. Chốt số từng khoản ở mục bên dưới. Kiểm tra xong bấm "Trình duyệt TĐ3" (TĐ2 phải đã duyệt).',
     3: 'Nhập nhanh tổng gián tiếp / tài chính: số (150tr), % (7% × doanh thu) hoặc công thức. Để trống = cộng theo các khoản.' };
-  const seg = edit ? `<div class="cf-seg"><span class="cf-tab on">Bảng DT-CP TĐ${k}</span>${hintI(HINT[cfMode])}<button type="button" class="primary sm cf-open" data-cfopen title="Ghi số tiền đã thực trả: thầu phụ, vật tư, lương, lãi vay…">＋ Ghi khoản đã chi</button><span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div>` : '';
+  const seg = edit ? `<div class="cf-seg"><span class="cf-tab on">Bảng DT-CP TĐ${k}</span>${hintI(HINT[cfMode])}${k < 3 ? '<button type="button" class="primary sm cf-open" data-cfopen title="Ghi số tiền đã trả thật: mua lẻ vật tư, trả lương, lãi vay… (trả theo HĐ thì vào HĐ ›)">＋ Chi tiền</button>' : ''}<span class="cf-td">Đang nhập cho <b>TĐ${k}</b></span></div>` : '';
   const card = cfAnchor()?.closest('.card');
   if (card && el.parentElement !== card) card.insertBefore(el, cfAnchor());
   if (cForm) cForm.hidden = edit && !cfDlgMo(); // V09.26.11.26: phần ghi khoản đã chi nằm trong hộp nhỏ
@@ -2770,7 +2770,7 @@ function ptHtml(k) {
   }
 }
 let cfMode = '2', pk2Sel = null; // V09.26.11.26: luôn hiện bảng DT-CP; ghi khoản đã chi trong hộp nhỏ
-// Hộp "Ghi khoản đã chi": chuyển form chi phí vào hộp khi mở, trả về chỗ cũ khi đóng (giữ nguyên xử lý của form)
+// Hộp "Chi tiền" (trước: "Ghi khoản đã chi"): chuyển form chi phí vào hộp khi mở, trả về chỗ cũ khi đóng (giữ nguyên xử lý của form)
 let cfMoc = null;
 const cfAnchor = () => { if (!cfMoc && cForm) { cfMoc = document.createElement('span'); cfMoc.className = 'cf-moc'; cForm.before(cfMoc); } return cfMoc; };
 const cfDlgMo = () => Boolean($('#cf-dlg')?.open);
@@ -2782,7 +2782,7 @@ function moFormChi(tieuDe) {
     dlg.addEventListener('click', (e) => { if (e.target.dataset.close !== undefined) dlg.close(); });
     dlg.addEventListener('close', () => { delete cForm.dataset.ps; cfMoc.after(cForm); const c = $('#c-msg'); if (c) c.textContent = ''; if (cForm.elements.id?.value && typeof resetCostForm === 'function') resetCostForm(); costKpiTd(); });
   }
-  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small to-hint">Tiền đã thực trả – trả thầu phụ, mua vật tư, trả lương, lãi vay… Chọn "Thuộc gói / khoản" để trừ vào dự trù.</div><h3>${esc(tieuDe || (cForm.elements.id?.value ? 'Sửa khoản đã chi' : 'Ghi khoản đã chi'))}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>`;
+  dlg.innerHTML = `<div class="tp-dlg-head"><div><div class="muted small to-hint">Tiền đã thực trả – trả thầu phụ, mua vật tư, trả lương, lãi vay… Chọn "Thuộc gói / khoản" để trừ vào dự trù.</div><h3>${esc(tieuDe || (cForm.elements.id?.value ? 'Sửa khoản chi tiền' : 'Chi tiền'))}</h3></div><button class="ghost-dark" data-close title="Đóng (Esc)">✕</button></div>`;
   dlg.appendChild(cForm); cForm.hidden = false;
   if (!dlg.open) dlg.showModal();
   setTimeout(() => cForm.elements.noi_dung?.focus({ preventScroll: true }), 80);
