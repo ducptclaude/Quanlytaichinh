@@ -42,6 +42,7 @@ const AS_GRP = [
   { k: 'cp', ten: 'Chi phí', ic: '⑤' },
   { k: 'tra', ten: 'Tra cứu', ic: '⑥' },
   { k: 'xh', ten: 'Xếp hạng & so sánh', ic: '⑦' },
+  { k: 'hd', ten: 'Cách nhập', ic: '⑧' }, // V02.28.11.26: hướng dẫn nhập theo TĐ
 ];
 // ---- Dữ liệu dùng chung cho đợt 2 ----
 const AS_TPN = { thau_phu: 'Thầu phụ', vat_tu: 'Vật tư', may_moc: 'Máy móc TB', nhan_cong: 'Nhân công' };
@@ -299,6 +300,12 @@ const AS_Q = [
     return `${asTbl(['Năm', 'Số DA', 'Doanh thu', 'Lợi nhuận', 'Tỷ suất', 'LN kế hoạch lúc ký'], r.map((o) => [`<b>${esc(o.y)}</b>`, String(o.n), asTy(o.t), `<b>${asTy(o.l)}</b>`, bpct(o.l, o.t), asTy(o.l1)]), ['Tổng', String(M.rows.length), asTy(M.S('t3')), `<b>${asTy(M.S('l3'))}</b>`, bpct(M.S('l3'), M.S('t3')), asTy(M.S('ln1'))])}
       ${asNote(`Năm khởi công = năm ký HĐ CĐT đầu tiên · số theo TĐ mới nhất · ${asVt()}.`)}`;
   } },
+  // ---- V02.28.11.26: Cách nhập (hướng dẫn ngắn, khớp trang Hướng dẫn mục 3) ----
+  { id: 101, g: 'hd', q: 'Cách nhập thầu phụ / vật tư (gói, HĐ)', f: () => `<ol class="as-ol"><li><b>TĐ1</b>: bảng DT-CP gõ dự trù nhóm → <b>Lưu bảng</b>. Có nhà thầu: <b>HĐ ›</b> → <b>+ HĐ</b>.</li><li><b>TĐ2</b>: ký HĐ cho gói (<b>+ HĐ</b>); đổi số gói: <b>± Gói</b>; không ký thêm: <b>Đóng gói</b>; tăng / giảm HĐ, PL: bấm số HĐ. Nhãn <b>chưa ký HĐ</b> = phần dự trù chưa ký vẫn tính.</li><li><b>TĐ3</b>: bấm số HĐ → nhập số quyết toán → <b>Lưu QT</b> (chưa nhập = TĐ2). Thanh toán: <b>+ Đợt thanh toán</b> trong HĐ.</li></ol>${asNote('Nhập số trước VAT · thêm ở tab TĐ nào thì tính từ TĐ đó.')}` },
+  { id: 102, g: 'hd', q: 'Cách nhập lương / gián tiếp / tài chính', f: () => `<ol class="as-ol"><li><b>TĐ1</b>: chưa rõ tháng → gõ <b>dự trù chung</b> ở bảng DT-CP; rõ rồi → <b>Chi tiết ›</b> → <b>＋ Khoản mới</b> (chia từ dự trù chung, không cộng thêm).</li><li><b>TĐ2</b>: trả lương → ở dòng khoản bấm <b>+ Chi</b>, gõ số, <b>Enter</b>. Tháng mới → <b>＋ Khoản mới</b>.</li><li><b>TĐ3</b> mỗi khoản = <b>số chốt</b> → chưa chốt mà đã chi = <b>thực chi</b> → chưa chi = TĐ2. Còn phải trả thêm: bấm tên khoản → <b>Chốt số</b>.</li></ol>${asNote('Ví dụ Lương BCH dự trù 50: chi T10 50, T11 45 ở TĐ2; T12 45 ở TĐ3 → TĐ1 50 · TĐ2 95 · TĐ3 140.')}` },
+  { id: 103, g: 'hd', q: 'Cách nhập CP khác và thanh toán', f: () => `<ol class="as-ol"><li><b>HĐ ›</b> của nhóm → <b>+ CP khác</b>: nội dung, giá trị, VAT (tính từ TĐ đang chọn).</li><li>Bấm <b>tên CP khác</b> → sửa giá trị, điều chỉnh (TĐ2), chốt (TĐ3, trống = TĐ2).</li><li>Bảng <b>Thanh toán</b> trong hộp: gõ số → <b>+ Thanh toán</b>; ghi sai bấm <b>Xoá</b>.</li></ol>` },
+  { id: 104, g: 'hd', q: 'Khoá, mở khoá và trình duyệt', f: () => `<ol class="as-ol"><li>Mỗi TĐ xong bấm <b>Trình duyệt</b>; Quản trị / Lãnh đạo <b>Duyệt</b> (khoá) hoặc Trả lại.</li><li>Sửa số TĐ đã duyệt: trang hỏi <b>Passcode</b>, mở TĐ đó và TĐ sau về <b>Lập</b> → sửa xong trình lại.</li><li>Khoá số (HĐ / nhóm đã quyết toán, dự án thu đủ chi đủ): nhập Passcode <b>1 lần</b> mở cả dự án, giữ tới khi bấm <b>🔒 Khoá lại</b>.</li></ol>` },
+  { id: 105, g: 'hd', q: 'Ghi sai / ghi trùng thì sửa thế nào', f: () => `<ol class="as-ol"><li>Lần chi lương / gián tiếp: <b>Chi tiết ›</b> → bấm <b>Xoá</b> ở dòng "↳ Đã chi" rồi nhập lại.</li><li>Chi không chọn khoản nằm ở <b>Chi chưa gắn khoản</b> (cộng thêm vào chi phí) – trùng thì Xoá.</li><li>Xoá khoản: hệ thống hỏi xoá luôn các lần chi (OK) hay giữ lại (Huỷ).</li><li>Chi nhập nhầm tab TĐ: xoá rồi chọn đúng tab, nhập lại.</li></ol>` },
 ];
 // ---- Trả lời đợt 2: tra 1 đối tác, chi phí 1 dự án, so sánh 2 dự án ----
 function asTpAnswer(name) {

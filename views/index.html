@@ -462,10 +462,10 @@
           <div class="gd-rule"><span class="gd-ico">💰</span><b>Nhập bằng đồng, trước VAT</b><p>Hệ thống tự tính tiền VAT và giá trị sau VAT. Nút <b>Đơn vị</b> góc phải trên (VND / USD / EUR · Đồng / Triệu / Tỷ) chỉ đổi cách hiện, không đổi số.</p></div>
           <div class="gd-rule"><span class="gd-ico">⌨️</span><b>Gõ nhanh</b><p><code>180tr</code> · <code>1,5 tỷ</code> · <code>500k</code> · <code>+50tr</code> (tăng) · <code>-30.000.000</code> (giảm) · <code>=120*2,5tr</code>. Dán thẳng số từ Excel / Word.</p></div>
           <div class="gd-rule"><span class="gd-ico">📅</span><b>Ngày dd/mm/yyyy</b><p>VD <code>15/11/2026</code>. Ngày dùng để xếp đợt và tính dòng tiền theo kỳ.</p></div>
-          <div class="gd-rule"><span class="gd-ico">🧩</span><b>Đúng chỗ – đúng TĐ</b><p>TĐ1: thêm HĐ / PL / gói. TĐ2: chỉ ghi <b>đợt điều chỉnh</b>, không sửa số ký. TĐ3: nhập <b>số quyết toán</b>.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🧩</span><b>Mỗi việc nhập 1 chỗ – đúng TĐ</b><p>Chọn tab <b>TĐ1 / TĐ2 / TĐ3</b> trước khi nhập: thêm ở tab nào thì tính từ TĐ đó. TĐ1: dự trù, HĐ ký. TĐ2: điều chỉnh, khoản mới. TĐ3: quyết toán, chốt số. <b>Tiền đã trả</b> nhập ở <b>+ Chi</b> / <b>Thanh toán</b>, không nhập vào dự trù.</p></div>
           <div class="gd-rule"><span class="gd-ico">⏳</span><b>Tạm tính</b><p>HĐ chưa quyết toán là <span class="st st-tam-tinh">Tạm tính</span>: lấy giá trị HĐ + PL mới nhất. Trả đủ tiền mà chưa QT vẫn là tạm tính.</p></div>
-          <div class="gd-rule"><span class="gd-ico">🔒</span><b>Khoá &amp; mở khoá</b><p>Có số QT → khoá văn bản. HĐ đầu vào đã QT và còn lại = 0 → khoá. Mở bằng nút <b>🔓 Mở khoá</b> + Passcode (có ghi nhật ký).</p></div>
-          <div class="gd-rule"><span class="gd-ico">🏁</span><b>Khoá số dự án</b><p>Dự án đã thu đủ, chi đủ (<b>còn phải thu = 0</b> và <b>còn phải chi = 0</b>, theo mục III) → tự khoá nhập mọi số liệu, hiện 🔒 cạnh Tình trạng. Bấm <b>🔓 Mở khoá (Passcode)</b> → mở tạm 60 phút; sửa xong bấm <b>🔒 Khoá lại</b>. Còn số → không khoá.</p></div>
+          <div class="gd-rule"><span class="gd-ico">🔒</span><b>Khoá số &amp; mở khoá</b><p>HĐ / PL / nhóm đã quyết toán, HĐ đầu vào trả đủ, dự án thu đủ chi đủ → khoá số. Gặp khoá, trang hỏi <b>Passcode</b>: mở <b>1 lần cho cả dự án</b>, giữ mở tới khi bấm <b>🔒 Khoá lại</b> (có ghi nhật ký).</p></div>
+          <div class="gd-rule"><span class="gd-ico">🏁</span><b>Khoá TĐ đã duyệt</b><p>Trình duyệt xong và được <b>Duyệt</b> → số TĐ đó khoá. Cần sửa: hệ thống hỏi Passcode, mở TĐ đó và các TĐ sau về <b>Lập</b> (Quản trị / Lãnh đạo) → sửa xong <b>Trình duyệt lại</b>.</p></div>
           <div class="gd-rule"><span class="gd-ico">✅</span><b>Phê duyệt</b><p>Thêm / sửa / xóa của người nhập liệu hiện ở tab <b>Duyệt</b>; Quản trị, Lãnh đạo nhập thì tự duyệt.</p></div>
           <div class="gd-rule"><span class="gd-ico">📌</span><b>Lưu xong giữ nguyên chỗ</b><p>Lưu tiền về, đợt HT/QT, chi phí… trang chỉ cập nhật số, không nhảy lên đầu. Nhập dở trong bảng thì nhấn <b>Enter</b> để lưu.</p></div>
           <div class="gd-rule"><span class="gd-ico">🏦</span><b>Không phải doanh thu / chi phí</b><p><b>Nhận tiền vay</b> và <b>trả nợ gốc</b> được tách riêng, không cộng vào doanh thu, chi phí.</p></div>
@@ -477,7 +477,9 @@
           <tbody>
             <tr><td><b>Doanh thu TĐk</b></td><td>Tổng HĐ + PL với Chủ đầu tư tại TĐk (TĐ2 = TĐ1 + các đợt điều chỉnh; TĐ3 = số quyết toán, chưa có = TĐ2)</td></tr>
             <tr><td><b>Chi phí TĐk</b></td><td>HĐ đầu vào tại TĐk + gói / dự trù tại TĐk + chi phí đã ghi (chứng từ, mua lẻ)</td></tr>
-            <tr><td><b>Gói chi phí</b></td><td>TĐ1 = giá trị tạm tính · TĐ2, TĐ3 = tổng các HĐ đã gắn vào gói (chưa gắn: tạm tính; đã đóng: 0)</td></tr>
+            <tr><td><b>Gói chi phí</b></td><td>TĐ1 = giá trị tạm tính · TĐ2, TĐ3: gói còn mở = số lớn hơn giữa (gói ± điều chỉnh) và (HĐ đã ký + mua lẻ) – phần <b>chưa ký HĐ</b> vẫn tính; gói <b>đã đóng</b> = HĐ đã ký + mua lẻ</td></tr>
+            <tr><td><b>Khoản gián tiếp / tài chính (lương…)</b></td><td>TĐ1 = dự trù · TĐ2 = số dự kiến (đã chi nhiều hơn thì lấy đã chi) · TĐ3 = <b>số chốt</b> → chưa chốt mà đã có chi = <b>tổng thực chi</b> → chưa chi đồng nào = TĐ2. Lần chi tính từ TĐ ghi chi.</td></tr>
+            <tr><td><b>Dự trù chung (dòng bảng DT-CP)</b></td><td>Chia dần cho các khoản chi tiết cùng hạng mục (không cộng thêm) – chỉ phần vượt mới làm tăng chi phí; TĐ3 khi hạng mục đã có chi: theo thực chi các khoản</td></tr>
             <tr><td><b>PL / Chi phí khác phát sinh tại TĐ2, TĐ3</b></td><td>Không tính ở TĐ trước (phát sinh TĐ2: TĐ1 = 0 · phát sinh TĐ3: TĐ1 = TĐ2 = 0)</td></tr>
             <tr><td><b>Lợi nhuận</b></td><td>Doanh thu − Chi phí (cùng TĐ)</td></tr>
             <tr><td><b>Thực thu</b> (dòng thu)</td><td>Tiền về: tạm ứng + các đợt thanh toán + quyết toán</td></tr>
@@ -552,58 +554,52 @@
       <!-- ================= 3. CHI PHÍ ================= -->
       <div class="card gd-sec" id="gd-cp">
         <h2 class="gd-h2"><span class="gd-no">3</span>Nhập Chi phí theo thời điểm <a class="gd-go" href="#" data-tab-go="cost">Mở trang Chi phí ›</a></h2>
-        <p class="muted">Lúc ký HĐ với Chủ đầu tư thường chưa rõ nhà thầu → nhập theo <b>gói</b> (tạm tính). Có HĐ thật thì gắn HĐ vào gói, giá trị gói tự thay bằng HĐ.</p>
+        <p class="muted">Màn hình chính của trang Chi phí là <b>Bảng DT-CP</b> theo tab TĐ. Khối I (thầu phụ, vật tư, máy móc, nhân công…) mở bằng nút <b>HĐ ›</b>; khối II, III (lương, gián tiếp, tài chính) mở bằng nút <b>Chi tiết ›</b>. Nhập số <b>trước VAT</b>; mỗi việc chỉ nhập ở <b>một chỗ</b>.</p>
+        <h3 class="gd-h3">A. Thầu phụ / Vật tư / Máy móc / Nhân công – nút <b>HĐ ›</b></h3>
         <div class="gd-steps">
-          <div class="gd-step td1">
-            <div class="gd-step-h"><span class="gd-pill td1">TĐ1</span>Dự kiến chi phí</div>
-            <ol>
-              <li>Tab <b>TĐ1</b> → form <b>Thêm chi phí</b>: chọn <b>Nhóm</b> (Thầu phụ, Vật tư, Nhân công, MMTB…) và <b>Thuộc HĐ chủ đầu tư</b>.</li>
-              <li><b>Cách nhập</b>:
-                <div class="gd-chips"><span>📦 Gói – chưa rõ nhà thầu (tạm tính)</span><span>🤝 HĐ đã có nhà cung cấp</span><span>🧾 Dòng mua lẻ (chứng từ)</span></div></li>
-              <li>Gói: đặt tên (VD "Thầu phụ 1 – Kết cấu"), giá trị tạm tính → <b>Tạo gói</b>.</li>
-            </ol>
-          </div>
-          <div class="gd-step td2">
-            <div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>HĐ thật &amp; điều chỉnh</div>
-            <ol>
-              <li>Nhanh nhất: nhấp đúp nhóm → ở gói chưa có HĐ bấm <b>+ HĐ</b> → form Thêm chi phí điền sẵn nhóm, gói, HĐ CĐT → nhập Số HĐ, nhà cung cấp, giá trị ký. (Hoặc tự chọn Hình thức <b>Hợp đồng</b> + <b>Gói</b>.)</li>
-              <li>Phát sinh ngoài TĐ1: mở HĐ đã có (bấm số HĐ) → <b>+ Thêm PL</b> (phụ lục) hoặc <b>+ Chi phí khác</b> (ghi như phụ lục phát sinh, không phải dòng chi thực). Thêm ở tab TĐ nào thì tính từ TĐ đó.</li>
-              <li><b>Chi phí gián tiếp, tài chính theo %</b>: ở trang Chi phí, tab <b>TĐ1</b> (và <b>TĐ2</b> nếu khác) nhập % dự trù × doanh thu cùng TĐ → <b>Lưu</b>. TĐ1, TĐ2 lấy số dự trù; <b>TĐ3 (quyết toán) = thực chi</b>. Tiền lương, lãi vay… chi thật vẫn ghi ở bảng chi phí → vào <b>thực chi</b> (mục II). Để trống % = tính như cũ.</li>
-              <li><b>Mua lẻ thuộc 1 gói</b> (VD gói vật tư 200, mua lẻ dần): thêm dòng chi phí, chọn ô <b>Gắn vào gói</b>. TĐ1 vẫn = giá trị gói (không cộng thêm); TĐ2 / TĐ3 = mua lẻ thực + phần gói chưa mua hết (gói đã đóng: chỉ còn mua lẻ thực).</li>
-              <li>HĐ gắn gói / phát sinh được ký ở TĐ2 → <b>giá trị ký, ngày ký, VAT</b> sửa ngay ở tab <b>TĐ2</b> (cột "Giá trị ký").</li>
-              <li>Tăng / giảm HĐ: khung <b>"TĐ2 – Điều chỉnh HĐ đầu vào"</b> (nhiều đợt, như Doanh thu).</li>
-              <li>Điều chỉnh cả nhóm: nút <b>± Nhóm</b> trong bảng chi tiết. Gói không dùng nữa: <b>Đóng gói</b> (TĐ2 = 0).</li>
-            </ol>
-          </div>
-          <div class="gd-step td3">
-            <div class="gd-step-h"><span class="gd-pill td3">TĐ3</span>Quyết toán &amp; thanh toán</div>
-            <ol>
-              <li>Mở HĐ (bấm <b>số HĐ</b>) → ô <b>TĐ3</b> từng HĐ / PL: nhập số quyết toán → <b>Lưu QT</b>.</li>
-              <li>Quyết toán cả nhóm: nút <b>QT nhóm</b>. Ở TĐ3 chỉ thêm được <b>dòng mua lẻ</b>.</li>
-              <li>Thanh toán (mọi TĐ): trong HĐ bấm <b>+ Tạm ứng</b> · <b>+ Đợt thanh toán</b> · <b>+ Quyết toán</b>. Đã QT và còn lại = 0 → khoá.</li>
-            </ol>
-          </div>
+          <div class="gd-step td1"><div class="gd-step-h"><span class="gd-pill td1">TĐ1</span>Dự trù khi ký HĐ CĐT</div><ol>
+            <li>Bảng DT-CP: gõ dự trù từng nhóm (<code>150tr</code>, <code>1,2 tỷ</code>, <code>6%</code> doanh thu, <code>40tr+5tr</code>) → <b>Lưu bảng</b>.</li>
+            <li>Đã có nhà thầu: <b>HĐ ›</b> → <b>+ HĐ</b> (số HĐ, đối tác, giá trị ký). Chưa có: để số dự trù làm <b>gói tạm tính</b>.</li>
+            <li>Xong bấm <b>Trình duyệt TĐ1</b>.</li></ol></div>
+          <div class="gd-step td2"><div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>Ký HĐ thật &amp; điều chỉnh</div><ol>
+            <li>Ký HĐ cho gói: <b>HĐ ›</b> → dòng gói → <b>+ HĐ</b> (nhiều nhà thầu: thêm nhiều HĐ). Gói hiện nhãn <b>chưa ký HĐ X</b> = phần dự trù chưa ký, vẫn tính vào chi phí.</li>
+            <li>Đổi số dự trù của riêng 1 gói: <b>± Gói</b> (gõ số mới). Không ký thêm nữa: <b>Đóng gói</b> → TĐ2 = HĐ đã ký + mua lẻ.</li>
+            <li>Tăng / giảm HĐ, thêm PL: bấm <b>số HĐ</b> → đợt điều chỉnh / <b>+ Thêm PL</b>. Điều chỉnh chung cả nhóm: <b>± Nhóm</b>.</li>
+            <li>Phát sinh mới: <b>+ HĐ</b> (nhà thầu mới) hoặc <b>+ CP khác</b> (chi phí của nhóm không thuộc HĐ thầu phụ) – TĐ1 = 0.</li>
+            <li>Bảng DT-CP ở TĐ2 <b>chỉ xem</b>, tự cộng từ chi tiết. Xong bấm <b>Trình duyệt TĐ2</b>.</li></ol></div>
+          <div class="gd-step td3"><div class="gd-step-h"><span class="gd-pill td3">TĐ3</span>Quyết toán &amp; thanh toán</div><ol>
+            <li>Bấm <b>số HĐ</b> → ô <b>TĐ3</b> từng HĐ / PL: nhập số quyết toán → <b>Lưu QT</b> (chưa nhập = lấy TĐ2). Cả nhóm: <b>QT nhóm</b>.</li>
+            <li>Thanh toán (mọi TĐ): trong HĐ bấm <b>+ Tạm ứng</b> · <b>+ Đợt thanh toán</b> · <b>+ Quyết toán</b>.</li>
+            <li>Mua lẻ của gói: <b>＋ Ghi khoản đã chi</b>, chọn ô <b>Thuộc gói / khoản</b>.</li></ol></div>
         </div>
-        <h3 class="gd-h3">Xem bảng HĐ đầu vào – 3 lớp</h3>
-        <ol class="gd-flow gd-flow3">
-          <li><span class="gd-ico">🗂️</span><b>Nhóm chính</b><small>HĐ CĐT › Thầu phụ / Vật tư… · TĐ · ± · Còn lại</small></li>
-          <li><span class="gd-ico">🖱️</span><b>Nhấp đúp nhóm</b><small>Bảng chi tiết: gói, HĐ, đã trả, còn lại (điện thoại: chạm)</small></li>
-          <li><span class="gd-ico">✍️</span><b>Bấm số HĐ</b><small>Bảng nhập: HĐ / PL, đợt điều chỉnh, thanh toán</small></li>
-        </ol>
+        <h3 class="gd-h3">B. Lương / Gián tiếp / Tài chính – nút <b>Chi tiết ›</b></h3>
+        <div class="gd-steps">
+          <div class="gd-step td1"><div class="gd-step-h"><span class="gd-pill td1">TĐ1</span>Dự trù</div><ol>
+            <li>Chưa rõ từng tháng: gõ <b>dự trù chung</b> ở bảng DT-CP (VD Lương 50tr) → <b>Lưu bảng</b>.</li>
+            <li>Đã rõ: <b>Chi tiết ›</b> → <b>＋ Khoản mới</b> (VD Lương BCH, Lương tháng 10). Khoản <b>chia từ dự trù chung</b>, không cộng thêm – chỉ phần vượt mới tăng chi phí.</li></ol></div>
+          <div class="gd-step td2"><div class="gd-step-h"><span class="gd-pill td2">TĐ2</span>Chi dần từng tháng</div><ol>
+            <li>Trả lương: ở dòng khoản bấm <b>+ Chi</b> → gõ số tiền → <b>Enter</b> (nội dung, ngày điền sẵn). Các lần chi hiện ngay dưới khoản; ghi sai bấm <b>Xoá</b>.</li>
+            <li>Tháng mới chưa có khoản: <b>＋ Khoản mới</b> (VD Lương tháng 11). TĐ2 mỗi khoản = số dự kiến, đã chi nhiều hơn thì lấy đã chi.</li></ol></div>
+          <div class="gd-step td3"><div class="gd-step-h"><span class="gd-pill td3">TĐ3</span>Quyết toán</div><ol>
+            <li>TĐ3 mỗi khoản = <b>số chốt</b> → chưa chốt mà đã có chi = <b>tổng thực chi</b> → chưa chi đồng nào = TĐ2.</li>
+            <li>Còn phải trả thêm: bấm tên khoản → <b>Chốt số khoản này</b> (VD chốt 45tr khi mới trả 20tr).</li>
+            <li>Chi ghi ở tab TĐ3 chỉ tính vào TĐ3. Mục <b>Chi chưa gắn khoản</b> = chi không chọn khoản (cộng thêm vào chi phí) – ghi trùng thì Xoá.</li></ol></div>
+        </div>
+        <h3 class="gd-h3">C. CP khác &amp; D. Khoá – mở khoá</h3>
+        <div class="gd-grid gd-grid2">
+          <div class="gd-rule"><span class="gd-ico">🧾</span><b>CP khác</b><p><b>HĐ ›</b> → <b>+ CP khác</b>: nội dung, giá trị, VAT (tính từ TĐ đang chọn). Bấm <b>tên CP khác</b> để mở: sửa giá trị, điều chỉnh (TĐ2), chốt (TĐ3, trống = TĐ2) và bảng <b>Thanh toán</b> (<b>+ Thanh toán</b>, Xoá).</p></div>
+          <div class="gd-rule"><span class="gd-ico">🔐</span><b>Trình duyệt &amp; khoá</b><p>Mỗi TĐ xong bấm <b>Trình duyệt</b> → người duyệt <b>Duyệt</b> (khoá) hoặc Trả lại. Gặp khoá khi sửa: nhập <b>Passcode</b> 1 lần là mở rồi làm tiếp (TĐ mở cần trình lại; khoá số mở cho cả dự án tới khi <b>Khoá lại</b>).</p></div>
+        </div>
         <div class="gd-ex">
-          <div class="gd-ex-h">Ví dụ – Gói "Kết cấu" (triệu đồng, sau VAT)</div>
+          <div class="gd-ex-h">Ví dụ – Lương BCH (triệu đồng, trước VAT)</div>
           <div class="table-wrap"><table class="gd-tbl gd-num">
-            <thead><tr><th>Bước</th><th>Nội dung</th><th>Giá trị</th><th>± so TĐ1</th></tr></thead>
+            <thead><tr><th>Bước</th><th>Nhập</th><th>TĐ1</th><th>TĐ2</th><th>TĐ3</th></tr></thead>
             <tbody>
-              <tr><td><span class="gd-pill td1">TĐ1</span></td><td>Gói Kết cấu – tạm tính</td><td>300</td><td>—</td></tr>
-              <tr><td><span class="gd-pill td2">TĐ2</span></td><td>Ký 3 HĐ thật gắn vào gói: 75 + 100 + 200 = 375 (trong đó điều chỉnh +25)</td><td>375</td><td class="gd-r">▲ 75 <small>(ký +50 · điều chỉnh +25)</small></td></tr>
-              <tr><td><span class="gd-pill td3">TĐ3</span></td><td>Quyết toán từng HĐ (chưa nhập = lấy TĐ2)</td><td>375</td><td>=</td></tr>
+              <tr><td><span class="gd-pill td1">TĐ1</span></td><td>Khoản Lương BCH dự trù 50</td><td>50</td><td>50</td><td>50</td></tr>
+              <tr><td><span class="gd-pill td2">TĐ2</span></td><td>+ Chi tháng 10: 50 · tháng 11: 45</td><td>50</td><td>95</td><td>95</td></tr>
+              <tr><td><span class="gd-pill td3">TĐ3</span></td><td>+ Chi tháng 12: 45 (ghi ở tab TĐ3)</td><td>50</td><td>95</td><td>140</td></tr>
             </tbody>
           </table></div>
-        </div>
-        <div class="gd-grid gd-grid2">
-          <div class="gd-rule"><span class="gd-ico">📒</span><b>Sổ chi phí (bảng chi tiết chi phí)</b><p>Ghi từng chứng từ theo khối Trực tiếp / Gián tiếp / Tài chính. Cột <b>% DT</b> = tỷ trọng so với doanh thu TĐ đang chọn; rê chuột thấy cả TĐ1 · TĐ2 · TĐ3.</p></div>
-          <div class="gd-rule"><span class="gd-ico">🏷️</span><b>Gắn HĐ chủ đầu tư</b><p>Mỗi gói và HĐ đầu vào nên gắn <b>HĐ CĐT</b> để bảng xếp đúng nhóm và báo cáo theo HĐ. Đổi ở hộp gói (nút Sửa gói / ± Nhóm).</p></div>
         </div>
       </div>
 

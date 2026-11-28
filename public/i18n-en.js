@@ -1,6 +1,7 @@
 /* Từ điển Tiếng Việt → English (thuật ngữ ngành xây dựng). Tự sinh – sửa câu dịch tại đây. {} = chỗ số liệu. */
 window.BKS_EN = {
 "exact": {
+" (chia từ dự trù chung)": " (allocated from general estimate)",
 "+ Thanh toán": "+ Payment",
 "Chưa thanh toán lần nào": "No payments yet",
 "Xoá lần thanh toán này?": "Delete this payment?",

@@ -2,6 +2,12 @@
 
 > Mục mới nhất ở trên cùng. Phần "PROJECT PROFIT" bên dưới là tóm tắt gốc đi kèm gói bàn giao (repo cũ `TuLee116/...`), giữ để tham khảo.
 
+## V02.28.11.26 – Cập nhật Hướng dẫn + Trợ lý "Cách nhập"; sửa nhỏ theo rà soát (revi)
+- Trang Hướng dẫn mục 3 viết lại theo cách nhập hiện tại: A. khối I (HĐ ›, + HĐ, ± Gói, Đóng gói, chưa ký HĐ, QT, thanh toán) · B. lương / gián tiếp / tài chính (dự trù chung, Chi tiết ›, + Chi, chốt, chi chưa gắn khoản) · C. CP khác (Thanh toán) · D. trình duyệt, khoá, mở khoá; ví dụ Lương BCH 50 / 95 / 140. Mục 1: sửa quy tắc "đúng TĐ", khoá số (mở 1 lần cho cả dự án), khoá TĐ đã duyệt, công thức gói và khoản gián tiếp TĐ3.
+- Trợ lý: nhóm mới "⑧ Cách nhập" (5 câu: thầu phụ/vật tư, lương/gián tiếp, CP khác, khoá – trình duyệt, ghi sai/ghi trùng).
+- Sửa nhỏ theo rà soát: "Đóng gói" hiện cả khi gói đã có HĐ; bỏ nút Xoá ở dòng dự trù chung trong hộp Chi tiết; nút "＋ Khoản mới (chia từ dự trù chung)"; ô ngày "+ Chi" / "Thanh toán" không chọn ngày tương lai; câu tổng kết TĐ3 nói đúng (theo chốt / thực chi); chữ hộp "+ CP khác" chỉ đúng chỗ thanh toán; bỏ mã thừa ghi chi CP khác.
+- Kiểm tra: mot-bang 8, goi-td2 7, cpk-thanh-toan 6, cp-khac 13, du-tru-chung 9, chi-tiet-khoan 16, tester 4518 – 0 lỗi; Hướng dẫn + Trợ lý máy tính / điện thoại không tràn, 0 lỗi trang.
+
 ## V01.28.11.26 – CP khác: bấm tên mở hộp, thanh toán ngay trong hộp (như HĐ thầu phụ)
 - Hộp HĐ › của nhóm: tên CP khác bấm được (mở hộp CP khác). Hộp CP khác có bảng "Thanh toán": các đợt (ngày, TĐ, số tiền, Xoá) + dòng "+ Thanh toán" (Enter = lưu); tiêu đề ghi đã trả / còn lại. Bỏ nút "Ghi chi cho khoản này" (chuyển sang form ngoài).
 - Máy chủ: nhóm Thầu phụ cho ghi chi trực tiếp khi gắn khoản CP khác (la_cp); còn lại vẫn nhập theo HĐ (lib/validate.js, server.js POST chi-phi).
